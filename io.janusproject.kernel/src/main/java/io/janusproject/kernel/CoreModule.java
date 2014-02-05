@@ -74,6 +74,7 @@ public class CoreModule extends AbstractModule {
 
 	private Context janusContext = null;
 	private ExecutorService executorService;
+	private ExecutorService kernelExecutorService;
 	private ScheduledExecutorService scheduledExecutorService;
 
 	/**
@@ -156,10 +157,10 @@ public class CoreModule extends AbstractModule {
 	@Provides
 	@Kernel
 	private ExecutorService createKernelDeamonThreadPoolService() {
-		if (this.executorService == null) {
-			this.executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).build());
+		if (this.kernelExecutorService == null) {
+			this.kernelExecutorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).build());
 		}
-		return this.executorService;
+		return this.kernelExecutorService;
 	}
 
 	@Provides
