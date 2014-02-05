@@ -189,8 +189,7 @@ public class KernelRepositoryService extends AbstractService {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void terminated(State from) {
-			System.out.println("Syso Hazelcast Shutdown");
+		public void terminated(State from) {			
 			this.kernelRepositoryService.log.info("Hazelcast Shutdown");
 			this.kernelRepositoryService.instance.shutdown();
 		}
@@ -199,8 +198,7 @@ public class KernelRepositoryService extends AbstractService {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void stopping(State from) {
-			System.out.println("Syso Hazelcast stopping");
+		public void stopping(State from) {			
 			this.kernelRepositoryService.log.info("Hazelcast stopping");
 		}
 
