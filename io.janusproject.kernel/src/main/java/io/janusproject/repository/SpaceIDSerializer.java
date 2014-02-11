@@ -69,13 +69,14 @@ public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 			UUID cid = in.readObject();
 			UUID id = in.readObject();
 			String specCls = in.readUTF();
-			if (cid == null || id == null || specCls == null) {
-				throw new IOException(String.format(
-						"Cannot build SpaceID object with contextID=%s, ID=%s, SpecClass=%s", cid, id, specCls));
+			if (cid != null && id != null && specCls != null) {
+				Class<?> type = Class.forName(specCls);
+				if (SpaceSpecification.class.isAssignableFrom(type)) {
+					SpaceID s = new SpaceID(cid, id, type.asSubclass(SpaceSpecification.class));
+					return s;
+				}
 			}
-			Class<? extends SpaceSpecification> spec = (Class<? extends SpaceSpecification>) Class.forName(specCls);
-			SpaceID s = new SpaceID(cid, id, spec);
-			return s;
+			throw new IOException(Locale.getString("BUILD_ERROR", cid, id, specCls)); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
 			throw new IOException(Locale.getString("SPECIFICATION_CLASS_NOT_FOUND"), e); //$NON-NLS-1$
 		}
