@@ -25,6 +25,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
@@ -59,7 +61,8 @@ class SpawnService {
 			notifyListenersAgentCreation(agent.getID(), params);
 			return agent.getID();
 		} catch (Exception e) {
-			throw new RuntimeException("Cannot instanciate Agent of type " + agentClazz.getName(), e);
+			throw new RuntimeException(
+					Locale.getString("CANNOT_INSTANCIATE_AGENT", agentClazz.getName()), e); //$NON-NLS-1$
 		}
 	}
 
@@ -67,7 +70,7 @@ class SpawnService {
 		this.agents.remove(agentID);
 		notifyListenersAgentDestruction(agentID);
 		if (this.agents.isEmpty()) {
-			this.log.severe("Requesting Kernel Stop");
+			this.log.severe(Locale.getString("KERNEL_AGENT_STOPPED")); //$NON-NLS-1$
 			this.injector.getInstance(Kernel.class).stop();
 		}
 	}
@@ -84,14 +87,14 @@ class SpawnService {
 
 	private void notifyListenersAgentCreation(UUID agentID, Object[] params) {
 		for (AgentLifecycleListener l : this.lifecycleListeners.get(agentID)) {
-			this.log.finer("Notifing of agent creation to" + l.toString());
+			this.log.finer(Locale.getString("NOTIFY_AGENT_CREATION_TO", l)); //$NON-NLS-1$
 			l.agentSpawned(params);
 		}
 	}
 	
 	private void notifyListenersAgentDestruction(UUID agentID) {
 		for (AgentLifecycleListener l : this.lifecycleListeners.get(agentID)) {
-			this.log.finer("Notifing of agent destruction to" + l.toString());
+			this.log.finer(Locale.getString("NOTIFY_AGENT_DESTRUCTION_TO", l)); //$NON-NLS-1$
 			l.agentDestroy();
 		}
 	}

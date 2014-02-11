@@ -31,6 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import org.arakhne.afc.vmutil.locale.Locale;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
@@ -84,7 +86,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	 */
 	@Override
 	public AgentTask in(long delay, Procedure1<? super Agent> procedure) {
-		return in(this.task("task-" + UUID.randomUUID()), delay, procedure);
+		return in(this.task("task-" + UUID.randomUUID()), delay, procedure); //$NON-NLS-1$
 	}
 
 	/**
@@ -125,7 +127,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	 */
 	@Override
 	public AgentTask every(long period, Procedure1<? super Agent> procedure) {
-		return every(this.task("task-" + UUID.randomUUID()), period, procedure);
+		return every(this.task("task-" + UUID.randomUUID()), period, procedure); //$NON-NLS-1$
 	}
 
 	/**
@@ -155,7 +157,7 @@ class SchedulesSkill extends Skill implements Schedules {
 		public void run() {
 
 			if (this.agentTaskRef.get() == null) {
-				System.out.println("Agent Task is null");
+				System.out.println(Locale.getString("NULL_AGENT_TASK")); //$NON-NLS-1$
 			} else {
 				AgentTask task = this.agentTaskRef.get();
 				if (task.getGuard().apply(this.agentRef.get())) {
@@ -170,8 +172,9 @@ class SchedulesSkill extends Skill implements Schedules {
 		 */
 		@Override
 		public String toString() {
-			return Objects.toStringHelper(this).add("name", this.agentTaskRef.get().getName())
-					.add("agent", this.agentRef.get().getID()).toString();
+			return Objects.toStringHelper(this).add(
+					"name", this.agentTaskRef.get().getName()) //$NON-NLS-1$
+					.add("agent", this.agentRef.get().getID()).toString(); //$NON-NLS-1$
 		}
 
 	}

@@ -31,6 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
@@ -66,8 +68,7 @@ public class KernelRepositoryService extends AbstractService {
 	@Inject
 	void KernelRepository(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID,
 			RepositoryImplFactory repositoryImplFactory, @Named(ZeroMQConfig.PUB_URI) String myuri) {
-		this.kernels = repositoryImplFactory.getSet(janusID.toString() + "-kernels");
-
+		this.kernels = repositoryImplFactory.getSet(janusID.toString() + "-kernels"); //$NON-NLS-1$
 		this.localURI = myuri;
 
 	}
@@ -81,7 +82,7 @@ public class KernelRepositoryService extends AbstractService {
 	void connectExiting() {
 
 		for (String peerURI : this.kernels) {
-			this.log.finer("Connecting to existing Peer " + peerURI);
+			this.log.finer(Locale.getString("CONNECTING_TO_PEER", peerURI)); //$NON-NLS-1$
 			if (!this.localURI.equals(peerURI)) {
 				connect(peerURI);
 			}
@@ -92,7 +93,7 @@ public class KernelRepositoryService extends AbstractService {
 		try {
 			this.network.connectPeer(peer);
 		} catch (Exception e) {
-			throw new RuntimeException("Error while connecting to peer " + peer + " to Network");
+			throw new RuntimeException(Locale.getString("CONNECTION_ERROR", peer)); //$NON-NLS-1$
 		}
 	}
 
@@ -100,8 +101,7 @@ public class KernelRepositoryService extends AbstractService {
 		try {
 			this.network.disconnectPeer(peer);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("Error while disconnecting to peer " + peer + " to Network");
+			throw new RuntimeException(Locale.getString("DISCONNECTION_ERROR", peer)); //$NON-NLS-1$
 		}
 	}
 
@@ -155,7 +155,7 @@ public class KernelRepositoryService extends AbstractService {
 		this.kernels.remove(this.localURI);
 
 		notifyStopped();
-		this.log.info("KernelRespositoryService Shutdown");
+		this.log.info(Locale.getString("SHUTDOWN")); //$NON-NLS-1$
 	}
 
 	private static class NetworkListener extends Listener {
@@ -174,8 +174,8 @@ public class KernelRepositoryService extends AbstractService {
 		 */
 		@Override
 		public void starting() {
-			this.kernelRepositoryService.log.info("Hazelcast starting");
-
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_STARTING")); //$NON-NLS-1$
 		}
 
 		/**
@@ -204,18 +204,20 @@ public class KernelRepositoryService extends AbstractService {
 		 */
 		@Override
 		public void stopping(State from) {			
-			this.kernelRepositoryService.log.info("Hazelcast stopping");
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_ENDING")); //$NON-NLS-1$
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void failed(State from, Throwable failure) {
-			System.out.println("Syso Hazelcast Failure");
-
 			super.failed(from, failure);
-			this.kernelRepositoryService.log.log(Level.SEVERE, "Failure on Network Service ", failure);
+			KernelRepositoryService.this.log.log(Level.SEVERE, 
+					Locale.getString(KernelRepositoryService.class, "NETWORK_FAILURE"), //$NON-NLS-1$
+					failure);
 		}
 	}
 }

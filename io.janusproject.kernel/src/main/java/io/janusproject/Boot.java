@@ -19,7 +19,6 @@
  */
 package io.janusproject;
 
-import java.util.Arrays;
 
 import io.janusproject.kernel.Janus;
 import io.janusproject.kernel.JanusDefaultConfigModule;
@@ -32,6 +31,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.arakhne.afc.vmutil.locale.Locale;
 
 /**
  * 
@@ -79,43 +79,21 @@ public class Boot {
 	static Options getOptions() {
 		Options options = new Options();
 
-		options.addOption("h", "help", false, "Display help");
+		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		return options;
 	}
 
 	static void showHelp() {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("io.janusproject.Boot [OPTIONS] AGENT_FQN", getOptions());
+		formatter.printHelp("io.janusproject.Boot [OPTIONS] AGENT_FQN", getOptions()); //$NON-NLS-1$
 		System.exit(0);
 	}
 
-	static void showHeader() {
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMM$77777777777777777777777777NMMMMMM");
-		System.out.println("MMMM$77777$ZO8OO7777$77777777777777OMMMM");
-		System.out.println("MM77MMMMMMMMMMMM7777MMMZ777$MMMMN7777MMM");
-		System.out.println("MMMMMMMMMMMMMMMM777NMMN77778MMMMMM777ZMM");
-		System.out.println("MMMMMMMMMMMMMMMO77OMMM$7777MMMMMMMD777MM");
-		System.out.println("MMMMMMMMMMMMMMN777MMMM7777NMMMMMMMN777MM");
-		System.out.println("MMMMMMMMMMMMMMO777MMMM7777MMMMMMMMO777MM");
-		System.out.println("MMMMMMMMMMMMMM$77$MMMD7777MMMMMMMM7777MM");
-		System.out.println("MMMMMMMMMMMMMM777DMMM$777$MMMMMMZ7777MMM");
-		System.out.println("MMMMMMMMMMNDO$777ZZZZ7777$$777777777MMMM");
-		System.out.println("MMMMMD777777777777777777777777777$MMMMMM");
-		System.out.println("MMMM77777777777777777777777777$8MMMMMMMM");
-		System.out.println("MM77777$NMMMM777NMMMO7778MMMMMMMMMMMMMMM");
-		System.out.println("M$77ZMMMMMMMM777MMMMZ777MMMMMMMMMMMMMMMM");
-		System.out.println("M77ZMMMMMMMM8777MMMM777ZMMMMMMMMMMMMMMMM");
-		System.out.println("877NMMMMMMMM7778MMMM77DMMMMMMMMMMMMMMMMM");
-		System.out.println("877DMMMMMMMN77ZMMMMO7$MMMMMMMMMMMMMMMMMM");
-		System.out.println("M777NMMMMN7777MMMMZ7DMMMM777MMMMMMMMMMMM");
-		System.out.println("MM777777777$MMMMMZMMMMMM$777MMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		  
+	
+	/** Show the heading logo of the Janus platform.
+	 */
+	public static void showHeader() {
+		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
 	}
 
 	static void startJanus(Class<? extends Agent> agentCls, String... params) {

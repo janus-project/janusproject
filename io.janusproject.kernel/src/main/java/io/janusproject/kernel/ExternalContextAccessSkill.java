@@ -30,6 +30,8 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
@@ -86,7 +88,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 	public AgentContext getContext(UUID contextID) {
 		Preconditions.checkNotNull(contextID);
 		if(!this.contexts.contains(contextID)){
-			throw new IllegalArgumentException("The specified context ID is known by the agent");
+			throw new IllegalArgumentException(Locale.getString("UNKNOWN_CONTEXT_ID", contextID)); //$NON-NLS-1$
 		}
 		return this.contextRepository.getContext(contextID);
 	}
@@ -100,7 +102,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		
 		AgentContext ac = this.contextRepository.getContext(futureContext);
 		
-		Preconditions.checkNotNull(ac, "Unknown Context");
+		Preconditions.checkNotNull(ac, "Unknown Context"); //$NON-NLS-1$
 		
 		if(this.contexts.contains(futureContext)){			
 			return;
@@ -108,7 +110,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		
 		
 		if(ac.getDefaultSpace().getID().getID() != futureContextDefaultSpaceID){
-			throw new IllegalArgumentException("The specified default Space ID does not match the specified context ID");
+			throw new IllegalArgumentException(Locale.getString("INVALID_DEFAULT_SPACE_MATCHING", futureContextDefaultSpaceID)); //$NON-NLS-1$
 		}
 		
 		this.contexts.add(futureContext);
@@ -122,7 +124,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 	public void leave(UUID contextID) {
 		Preconditions.checkNotNull(contextID);
 		AgentContext ac = this.contextRepository.getContext(contextID);
-		Preconditions.checkNotNull(ac, "Unknown Context");
+		Preconditions.checkNotNull(ac, "Unknown Context"); //$NON-NLS-1$
 		if(!this.contexts.contains(contextID)){
 			return;
 		}

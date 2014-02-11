@@ -28,6 +28,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -92,10 +94,10 @@ public class Kernel {
 
 
 	void stop() {
-		this.log.info("Stopping Kernel Services");
+		this.log.info(Locale.getString("STOP_KERNEL_SERVICES")); //$NON-NLS-1$
 		this.serviceManager.stopAsync().awaitStopped();
 		this.executorService.shutdown();
-		this.log.info("All Kernel Services stopped");
+		this.log.info(Locale.getString("KERNEL_SERVICES_STOPPED")); //$NON-NLS-1$
 	}
 
 	// ----- Injections

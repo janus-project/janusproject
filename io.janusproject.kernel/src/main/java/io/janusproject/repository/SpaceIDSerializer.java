@@ -25,6 +25,8 @@ import io.sarl.lang.core.SpaceSpecification;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.StreamSerializer;
@@ -83,7 +85,7 @@ public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 			SpaceID s = new SpaceID(cid, id, spec);
 			return s;
 		} catch (ClassNotFoundException e) {
-			throw new IOException("Specification Class not found.", e);
+			throw new IOException(Locale.getString("SPECIFICATION_CLASS_NOT_FOUND"), e); //$NON-NLS-1$
 		}
 
 	}

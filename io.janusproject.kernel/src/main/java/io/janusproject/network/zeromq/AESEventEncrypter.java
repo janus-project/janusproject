@@ -28,6 +28,8 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.base.Charsets;
 
 /**
@@ -44,7 +46,7 @@ import com.google.common.base.Charsets;
 public class AESEventEncrypter implements EventEncrypter {
 
 	private SecretKeySpec skeySpec;
-	private final static String ALGORITHM = "AES/CBC/PKCS5Padding";
+	private final static String ALGORITHM = "AES/CBC/PKCS5Padding"; //$NON-NLS-1$
 
 	//private Cipher cipher;
 
@@ -54,11 +56,10 @@ public class AESEventEncrypter implements EventEncrypter {
 		byte[] raw = key.getBytes(Charsets.UTF_8);
 		int keySize = raw.length;
 		if ((keySize % 16) == 0 || (keySize % 24) == 0 || (keySize % 32) == 0) {
-			this.skeySpec = new SecretKeySpec(raw, "AES");
+			this.skeySpec = new SecretKeySpec(raw, "AES"); //$NON-NLS-1$
 			//this.cipher = Cipher.getInstance(ALGORITHM);
 		} else {
-			throw new IllegalArgumentException(
-					"Wrong keysize: must be equal to 128, 192 or 256. If you want to use keys higher of 128 bit (16 chars), you must install the Unlimited Strength Jurisdiction Policy (See http://docs.oracle.com/javase/7/docs/technotes/guides/security/SunProviders.html)");
+			throw new IllegalArgumentException(Locale.getString("INVALID_KEY_SIZE")); //$NON-NLS-1$
 		}
 
 	}

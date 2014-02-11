@@ -23,6 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 
@@ -58,8 +60,8 @@ class JanusExecutorsService extends AbstractService {
 			this.schedules.shutdownNow();
 			this.exec.shutdownNow();
 		} catch (InterruptedException e) {
-			throw new RuntimeException("Error while stopping Executors",e);
-		}finally{
+			throw new RuntimeException(Locale.getString("STOP_ERROR"),e); //$NON-NLS-1$
+		} finally{
 			notifyStopped();					
 		}
 		

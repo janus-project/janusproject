@@ -22,6 +22,8 @@ package io.janusproject.kernel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.inject.Inject;
@@ -41,7 +43,9 @@ class AgentEventBusSubscriberExceptionHandler implements SubscriberExceptionHand
 	 */
 	@Override
 	public void handleException(Throwable exception, SubscriberExceptionContext context) {
-		this.log.log(Level.SEVERE, "SubscriberException "+context.toString(),exception);
+		this.log.log(Level.SEVERE, 
+				Locale.getString("SUBSCRIBER_ERROR", context), //$NON-NLS-1$
+				exception);
 		exception.printStackTrace();
 
 	}

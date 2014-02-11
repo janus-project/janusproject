@@ -33,6 +33,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
@@ -65,7 +67,7 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 
 	@Inject
 	void setInjector(Injector injector) {
-		this.participants = new UniqueAddressParticipantRepository<>(getID().getID().toString() + "-participants");
+		this.participants = new UniqueAddressParticipantRepository<>(getID().getID().toString() + "-participants"); //$NON-NLS-1$
 		injector.injectMembers(this.participants);
 	}
 
@@ -106,9 +108,9 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	@Override
 	public void emit(Event event, final Scope scope) {
 		Preconditions.checkNotNull(event);
-		Preconditions.checkNotNull(event.getSource(), "Every event must have a source");
+		Preconditions.checkNotNull(event.getSource(), "Every event must have a source"); //$NON-NLS-1$
 		Preconditions.checkArgument(this.getID().equals(event.getSource().getSpaceId()),
-				"The source address must belong to this space");
+				"The source address must belong to this space"); //$NON-NLS-1$
 
 		try {
 			this.network.publish(this.getID(), scope, event);
@@ -143,9 +145,10 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 
 	@Subscribe
 	public void unhandledEvent(DeadEvent e) {
-		System.out.println("----- DeadEvent : My SpaceID : " + getID());
-		System.out.println("----- DeadEvent Source : " + ((Event) e.getEvent()).getSource());
-		System.out.println("----- DeadEvent : " + e.getEvent());
+		this.log.finer(Locale.getString("UNHANDLED_EVENT", //$NON-NLS-1$
+				getID(),
+				((Event) e.getEvent()).getSource(),
+				e.getEvent()));
 	}
 
 	private static class DistributedProxy implements DistributedSpace {

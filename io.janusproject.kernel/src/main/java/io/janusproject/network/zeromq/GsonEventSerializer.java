@@ -30,6 +30,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -57,13 +59,11 @@ public class GsonEventSerializer implements EventSerializer {
 		Scope<?> scope = dispatch.getScope();
 		SpaceID spaceID = dispatch.getSpaceID();
 
-
-
-		dispatch.getHeaders().put("x-java-event-class",
+		dispatch.getHeaders().put("x-java-event-class", //$NON-NLS-1$
 				event.getClass().getName());
-		dispatch.getHeaders().put("x-java-scope-class",
+		dispatch.getHeaders().put("x-java-scope-class", //$NON-NLS-1$
 				scope.getClass().getName());
-		dispatch.getHeaders().put("x-java-spacespec-class",
+		dispatch.getHeaders().put("x-java-spacespec-class", //$NON-NLS-1$
 				spaceID.getSpaceSpecification().getName());
 		
 		EventPack pack = new EventPack();
@@ -100,9 +100,9 @@ public class GsonEventSerializer implements EventSerializer {
 		Map<String, String> headers = getHeadersFromString(pack.getHeaders());
 
 		Class<?> spaceSpec = Class.forName(headers
-				.get("x-java-spacespec-class"));
-		Class<?> eventClazz = Class.forName(headers.get("x-java-event-class"));
-		Class<?> scopeClazz = Class.forName(headers.get("x-java-scope-class"));
+				.get("x-java-spacespec-class")); //$NON-NLS-1$
+		Class<?> eventClazz = Class.forName(headers.get("x-java-event-class")); //$NON-NLS-1$
+		Class<?> scopeClazz = Class.forName(headers.get("x-java-scope-class")); //$NON-NLS-1$
 
 		SpaceID spaceID = new SpaceID(contextId, spaceId,
 				(Class<? extends SpaceSpecification>) spaceSpec);

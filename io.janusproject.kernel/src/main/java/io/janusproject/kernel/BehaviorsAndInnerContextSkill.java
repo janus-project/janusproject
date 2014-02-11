@@ -39,6 +39,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.collect.Queues;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.inject.Inject;
@@ -84,7 +86,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		this.eventBus = bus;
 		this.eventBus.register(this.getOwner());
 		if (this.log != null)
-			this.log.severe("[" + this.getOwner().getID() + "] Agent registered in internal Event Bus");
+			this.log.finest(Locale.getString("EVENT_BUS_CHANGE", this.getOwner().getID())); //$NON-NLS-1$
 	}
 
 	@Inject
@@ -177,7 +179,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		EventSpace defSpace = getSkill(InnerContextAccess.class).getInnerContext().getDefaultSpace();
 		event.setSource(defSpace.getAddress(getOwner().getID()));
 		internalReceiveEvent(event);
-		this.log.finer("selfEvent: " + event);
+		this.log.finer(Locale.getString("SELF_EVENT", event)); //$NON-NLS-1$
 		if (event instanceof Initialize) {
 			this.running.set(true);
 			this.agentAsEventListener.agentInitialized();
@@ -229,7 +231,9 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 				this.skill.get().internalReceiveEvent(event);
 			} else if (!this.skill.get().running.get() && this.skill.get().stoping.get()) {
 				// Dropping messages since agent is dying
-				this.skill.get().log.log(Level.WARNING, "Dropping event since agent is dying: " + event.toString());
+				this.skill.get().log.log(Level.WARNING, 
+						Locale.getString(BehaviorsAndInnerContextSkill.class,
+								"EVENT_DROP_WARNING", event)); //$NON-NLS-1$
 			} else {
 				this.buffer.add(event);
 			}
