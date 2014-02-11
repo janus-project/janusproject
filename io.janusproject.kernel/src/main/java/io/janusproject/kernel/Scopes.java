@@ -41,25 +41,29 @@ public class Scopes {
 	public final static <T> Scope<T> nullScope() {
 		return (Scope<T>) AlwaysTrueScope.INSTANCE;
 	}
-}
 
-
-enum AlwaysTrueScope implements Scope<Object> {
-	INSTANCE;
-
-	public boolean matches(Object o) {
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "AlwaysTRUE";
-	}
-
-	/**
-	 * {@inheritDoc}
+	/** It is coded with an enumeration to have only one instance
+	 * of this scope in the JVM, ie. it is a way to code the singleton
+	 * design pattern in a private scope.
+	 * 
+	 * @author $Author: srodriguez$
+	 * @version $Name$ $Revision$ $Date$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
 	 */
-	public String getRepresentation() {
-		return "AlwaysTrueScope";
+	private static enum AlwaysTrueScope implements Scope<Object> {
+		INSTANCE;
+
+		@Override
+		public boolean matches(Object o) {
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "AlwaysTRUE"; //$NON-NLS-1$
+		}
+
 	}
+
 }
