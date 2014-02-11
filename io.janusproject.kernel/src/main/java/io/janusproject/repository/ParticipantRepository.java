@@ -51,7 +51,7 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	/** Construct a <code>ParticipantRepository</code>.
 	 */
 	protected ParticipantRepository() {
-		this.listeners = new ConcurrentHashMap<ADDRESS, EventListener>();
+		this.listeners = new ConcurrentHashMap<>();
 	}
 
 	/** Replies the numbers of participants registered in this repository.

@@ -35,9 +35,10 @@ import com.google.common.collect.Sets;
  */
 public class AddressScope implements Scope<Address> {
 
-	private final String SCOPE_ID = "aid://";
+	//TODO: URI?
+	private final String SCOPE_ID = "aid://"; //$NON-NLS-1$
 
-	private Collection<Address> addresses = null;
+	private final Collection<Address> addresses;
 
 	/** Construct a scope.
 	 * 
@@ -56,7 +57,6 @@ public class AddressScope implements Scope<Address> {
 	public boolean matches(Address address) {
 		return this.addresses.contains(address);
 	}
-	
 
 	/** Create a scope that is restricted to the given list of addresses.
 	 * 

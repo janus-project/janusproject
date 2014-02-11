@@ -19,10 +19,6 @@
  */
 package io.janusproject.kernel;
 
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -35,7 +31,6 @@ import com.google.inject.Module;
  * @mavenartifactid $ArtifactId$
  */
 public class Janus {
-	private static Map<UUID, Kernel> kernels = new TreeMap<>();
 	
 	/** Create an instance of {@link Kernel}.
 	 * 
@@ -45,7 +40,6 @@ public class Janus {
 	public static final Kernel create(Module... modules){
 		Injector injector = Guice.createInjector(modules);
 		Kernel k = injector.getInstance(Kernel.class);
-
 		return k;
 	}
 	

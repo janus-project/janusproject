@@ -79,6 +79,7 @@ public class GsonEventSerializer implements EventSerializer {
 	private static Map<String, String> getHeadersFromString(String src) {
 		Gson gson = new Gson();
 		Type headersType = new TypeToken<Map<String, String>>() {
+			//
 		}.getType();
 		return gson.fromJson(src, headersType);
 

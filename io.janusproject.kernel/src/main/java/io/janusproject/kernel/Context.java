@@ -44,11 +44,11 @@ class Context implements AgentContext{
 	private final UUID id;
 
 	
-	private SpaceRepository spaceRepository;
+	private final SpaceRepository spaceRepository;
 	
 	private final EventSpaceImpl defaultSpace;
 
-	private Injector injector;
+	private final Injector injector;
 
 	/** Constructs a <code>Context</code>.
 	 * 
@@ -59,7 +59,7 @@ class Context implements AgentContext{
 	protected Context(Injector injector, UUID id, UUID defaultSpaceID) {
 		this.id = id;
 		this.injector = injector;
-		this.spaceRepository = new SpaceRepository(id.toString()+"-spaces");
+		this.spaceRepository = new SpaceRepository(id.toString()+"-spaces"); //$NON-NLS-1$
 		this.injector.injectMembers(this.spaceRepository);
 		this.defaultSpace = createSpace(EventSpaceSpecification.class, defaultSpaceID);
 

@@ -154,6 +154,7 @@ public class KernelRepositoryService extends AbstractService {
 		/**
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemRemoved(ItemEvent<String> item) {
 			if (!this.kernelRepositoryService.localURI.equals(item.getItem())) {
@@ -222,6 +223,7 @@ public class KernelRepositoryService extends AbstractService {
 		/**
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void stopping(State from) {			
 			KernelRepositoryService.this.log.info(

@@ -40,6 +40,7 @@ import org.mockito.MockitoAnnotations;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@SuppressWarnings("all")
 public class LifecycleSkillTest {
 
 	private Lifecycle skill;

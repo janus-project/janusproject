@@ -51,8 +51,8 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Inject
 	private ScheduledExecutorService executor;
 
-	private Map<String, AgentTask> tasks = new ConcurrentHashMap<>();
-	private Map<String, ScheduledFuture<AgentRunnableTask>> futures = new ConcurrentHashMap<>();
+	private final Map<String, AgentTask> tasks = new ConcurrentHashMap<>();
+	private final Map<String, ScheduledFuture<AgentRunnableTask>> futures = new ConcurrentHashMap<>();
 
 	/**
 	 * @param agent
@@ -84,7 +84,8 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Override
 	public AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
 		task.setProcedure((Procedure1<Agent>) procedure);
-		ScheduledFuture<AgentRunnableTask> sf = (ScheduledFuture<AgentRunnableTask>) this.executor.schedule(
+		ScheduledFuture<AgentRunnableTask> sf = 
+				(ScheduledFuture<AgentRunnableTask>) this.executor.schedule(
 				new AgentRunnableTask(task, getOwner()), delay, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
 		return task;
@@ -144,8 +145,8 @@ class SchedulesSkill extends Skill implements Schedules {
 		private WeakReference<Agent> agentRef;
 
 		public AgentRunnableTask(AgentTask task, Agent agent) {
-			this.agentTaskRef = new WeakReference<AgentTask>(task);
-			this.agentRef = new WeakReference<Agent>(agent);
+			this.agentTaskRef = new WeakReference<>(task);
+			this.agentRef = new WeakReference<>(agent);
 		}
 
 		@Override

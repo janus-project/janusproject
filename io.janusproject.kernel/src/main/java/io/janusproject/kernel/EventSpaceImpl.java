@@ -115,7 +115,7 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	}
 
 	@Override
-	public void emit(Event event, final Scope scope) {
+	public void emit(Event event, Scope<Address> scope) {
 		Preconditions.checkNotNull(event);
 		Preconditions.checkNotNull(event.getSource(), "Every event must have a source"); //$NON-NLS-1$
 		Preconditions.checkArgument(this.getID().equals(event.getSource().getSpaceId()),

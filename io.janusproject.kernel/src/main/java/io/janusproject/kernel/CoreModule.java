@@ -137,7 +137,7 @@ public class CoreModule extends AbstractModule {
 	}
 
 	@Provides
-	private AsyncEventBus createAgentInternalBus(Injector injector, ExecutorService service,
+	private static AsyncEventBus createAgentInternalBus(Injector injector, ExecutorService service,
 			SubscriberExceptionHandler exceptionHandler) {
 		AsyncEventBus aeb = new AsyncEventBus(service, exceptionHandler);
 		// to be able to inject the SubscriberFindingStrategy
@@ -173,13 +173,13 @@ public class CoreModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	private ServiceManager createServiceManager(Set<Service> services) {
+	private static ServiceManager createServiceManager(Set<Service> services) {
 		return new ServiceManager(services);
 	}
 
 	@Provides
 	@Singleton
-	private HazelcastInstance createHazelcastInstance(Config config) {
+	private static HazelcastInstance createHazelcastInstance(Config config) {
 		return Hazelcast.newHazelcastInstance(config);
 	}
 

@@ -42,7 +42,7 @@ class EventSpaceSpecificationImpl implements OpenEventSpaceSpecification, EventS
 	public EventSpaceImpl create(SpaceID id, Object... params) {
 		EventSpaceImpl space = new EventSpaceImpl(id);
 		this.injector.injectMembers(space);
-		return (EventSpaceImpl) space;
+		return space;
 	}
 
 }

@@ -51,6 +51,7 @@ import com.google.inject.Injector;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@SuppressWarnings("all")
 public class BuiltinCapacitiesProviderTest {
 	private BuiltinCapacitiesProviderImpl builtinProvider;
 	private Map<Class<? extends Capacity>, Skill> builtins;

@@ -237,9 +237,10 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 
 		private WeakReference<UUID> aid;
 
+		@SuppressWarnings("synthetic-access")
 		public AgentEventListener(BehaviorsAndInnerContextSkill skill) {
-			this.skill = new WeakReference<BehaviorsAndInnerContextSkill>(skill);
-			this.aid = new WeakReference<UUID>(skill.getOwner().getID());
+			this.skill = new WeakReference<>(skill);
+			this.aid = new WeakReference<>(skill.getOwner().getID());
 		}
 
 		@Override
@@ -247,6 +248,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 			return this.aid.get();
 		}
 
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void receiveEvent(Event event) {
 			if (this.skill.get().running.get() && !this.skill.get().stoping.get()) {
@@ -262,7 +264,8 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 			}
 		}
 
-		private void agentInitialized() {
+		@SuppressWarnings("synthetic-access")
+		void agentInitialized() {
 			for (Event evt : this.buffer) {
 				this.skill.get().internalReceiveEvent(evt);
 			}

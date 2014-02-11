@@ -36,7 +36,7 @@ import java.util.UUID;
 class LifecycleSkill extends Skill implements Lifecycle {
 
 	
-	private SpawnService spawnService;
+	private final SpawnService spawnService;
 	
 	
 	/** Constructs the skill.

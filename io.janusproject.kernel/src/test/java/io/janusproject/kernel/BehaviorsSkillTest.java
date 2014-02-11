@@ -39,6 +39,7 @@ import com.google.common.eventbus.AsyncEventBus;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@SuppressWarnings("all")
 public class BehaviorsSkillTest {
 	private Agent agentMock;
 	/** 

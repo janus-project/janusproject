@@ -92,10 +92,12 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		this.uri = uri;
 	}
 
+	@Override
 	public void connectPeer(String peerURI) throws Exception {
 
 		this.log.finer(Locale.getString("PEER_CONNECTION", peerURI)); //$NON-NLS-1$
 //		Socket subscriber = this.context.socket(ZMQ.SUB);
+		@SuppressWarnings("resource")
 		Socket subscriber = this.context.createSocket(ZMQ.SUB);
 
 		this.subcribers.put(peerURI, subscriber);
@@ -111,6 +113,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	@Override
 	public void disconnectPeer(String peerURI) throws Exception {
 		this.log.finer(Locale.getString("PEER_DISCONNECTION", peerURI)); //$NON-NLS-1$
+		@SuppressWarnings("resource")
 		Socket s = this.subcribers.get(peerURI);
 		this.poller.unregister(s);
 
@@ -119,6 +122,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		this.log.finer(Locale.getString("PEER_DISCONNECTED", peerURI)); //$NON-NLS-1$
 	}
 
+	@Override
 	public void register(DistributedSpace space) throws Exception {
 
 		this.log.finer(Locale.getString("REGISTERING_DISTRIBUTED_SPACE", space.getID())); //$NON-NLS-1$
@@ -146,6 +150,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 
 	}
 
+	@Override
 	public void publish(SpaceID spaceID, Scope<?> scope, Event e) throws Exception {
 
 		EventEnvelope env = processOutgoing(e.getSource().getSpaceId(), e, scope);
@@ -180,7 +185,6 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		final DistributedSpace realSpace = space;
 
 		this.executorService.execute(new Runnable() {
-
 			@Override
 			public void run() {
 				realSpace.recv(dispatch.getScope(), dispatch.getEvent());
@@ -220,6 +224,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	private void stopPoller() {
 		this.log.info(Locale.getString("STOPPING_POLLER")); //$NON-NLS-1$
 		for (int i = 0; i < this.poller.getSize(); i++) {
+			@SuppressWarnings("resource")
 			Socket socket = this.poller.getSocket(i);
 			this.poller.unregister(socket);
 			socket.close();
@@ -230,7 +235,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		return this.serializer.serialize(dispatch);
 	}
 
-	private EventEnvelope processOutgoing(SpaceID spaceID, Event event, Scope scope) throws Exception {
+	private EventEnvelope processOutgoing(SpaceID spaceID, Event event, Scope<?> scope) throws Exception {
 		return processOutgoing(new EventDispatch(spaceID, event, scope));
 	}
 

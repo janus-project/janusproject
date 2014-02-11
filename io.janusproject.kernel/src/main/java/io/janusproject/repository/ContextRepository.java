@@ -61,8 +61,7 @@ public class ContextRepository {
 	/** Constructs <code>ContextRepository</code>.
 	 */
 	public ContextRepository() {
-		this.contexts = new ConcurrentHashMap<UUID, AgentContext>();
-		
+		this.contexts = new ConcurrentHashMap<>();
 	}
 	
 	/**

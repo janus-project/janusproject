@@ -34,6 +34,7 @@ import org.junit.Test;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@SuppressWarnings("all")
 public class CommandLineParserTest {
 
 	private Options janusOptions;

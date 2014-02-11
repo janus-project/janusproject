@@ -44,6 +44,7 @@ import com.google.inject.Injector;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@SuppressWarnings("all")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ContextFactory.class)
 public class ContextFactoryTest {

@@ -41,6 +41,7 @@ import com.google.common.util.concurrent.ServiceManager;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@SuppressWarnings("all")
 public class KernelTest {
 	private Kernel kernel;
 
