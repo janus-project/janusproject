@@ -41,8 +41,9 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/**
- * @author $Author: Sebastian Rodriguez$
+/** Default implementation of an event space.
+ * 
+ * @author $Author: srodriguez$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -59,51 +60,59 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	@Inject
 	private ExecutorService executorService;
 
-
+	/** Constructs an event space.
+	 * 
+	 * @param id - identifier of the space.
+	 */
 	public EventSpaceImpl(SpaceID id) {
 		super(id);
-
 	}
 
+	/**
+	 * 
+	 * @param injector
+	 */
 	@Inject
 	void setInjector(Injector injector) {
 		this.participants = new UniqueAddressParticipantRepository<>(getID().getID().toString() + "-participants"); //$NON-NLS-1$
 		injector.injectMembers(this.participants);
 	}
 
+	/** Set the network service to be used by this space to be distributed over the network.
+	 * 
+	 * @param net - instance of the network service.
+	 * @throws Exception
+	 */
 	@Inject
 	void setNetwork(Network net) throws Exception {
 		this.network = net;
 		this.network.register(new DistributedProxy(this));
 	}
 
-	public Address getAddress(EventListener entity) {
+	/** Replies the address associated to the given participant.
+	 * 
+	 * @param entity - instance of a participant.
+	 * @return the address of the participant with the given id.
+	 */
+	public final Address getAddress(EventListener entity) {
 		return getAddress(entity.getID());
 	}
 
+	@Override
 	public Address getAddress(UUID id) {
 		return this.participants.getAddress(id);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 */
+	@Override
 	public Address register(EventListener entity) {
 		Address a = new Address(getID(), entity.getID());
 		return this.participants.registerParticipant(a, entity);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Address unregister(EventListener entity) {
 		return this.participants.unregisterParticipant(entity);
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 
 	@Override
 	public void emit(Event event, final Scope scope) {
@@ -143,6 +152,11 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 		}
 	}
 
+	/**
+	 * Invoked when an event was not handled by a listener.
+	 * 
+	 * @param e - dead event
+	 */
 	@Subscribe
 	public void unhandledEvent(DeadEvent e) {
 		this.log.finer(Locale.getString("UNHANDLED_EVENT", //$NON-NLS-1$
@@ -159,16 +173,13 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 			this.space = space;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public SpaceID getID() {
 			return this.space.getID();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@SuppressWarnings("synthetic-access")
+		@Override
 		public void recv(Scope<?> scope, Event event) {
 			this.space.doEmit(event, (Scope<Address>) scope);
 		}

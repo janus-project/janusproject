@@ -26,19 +26,17 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Module that provides the network layer based on the ZeroMQ library.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class ZeroMQNetworkModule extends AbstractModule {
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void configure() {
-		
 		bind(Network.class).to(ZeroMQNetwork.class).in(Singleton.class);
 		bind(EventSerializer.class).to(GsonEventSerializer.class).in(Singleton.class);
 		bind(EventEncrypter.class).to(AESEventEncrypter.class).in(Singleton.class);

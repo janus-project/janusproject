@@ -39,9 +39,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Provider of the built-in capacities of the Janus platform.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -112,17 +113,29 @@ class BuiltinCapacitiesProviderImpl implements BuiltinCapacitiesProvider {
 	}
 
 	// --- Injections
+	
+	/** Set the spawning service.
+	 * 
+	 * @param spawnService
+	 */
 	@Inject
 	void setSpawnService(SpawnService spawnService) {
 		this.spawnService = spawnService;
 	}
 	
+	/** Set the context repository.
+	 * 
+	 * @param contextRepository
+	 */
 	@Inject
 	void setContextRepository(ContextRepository contextRepository) {
 		this.contextRepository = contextRepository;
 	}
 
-
+	/** Set the injector.
+	 * 
+	 * @param injector
+	 */
 	@Inject
 	void setInjector(Injector injector) {
 		this.injector = injector;

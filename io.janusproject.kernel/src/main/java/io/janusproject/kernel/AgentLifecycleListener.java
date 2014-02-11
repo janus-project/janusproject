@@ -19,13 +19,25 @@
  */
 package io.janusproject.kernel;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+import java.util.EventListener;
+
+/** Listener on events related to the life-cycle of an agent.
+ *  
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface AgentLifecycleListener {
+public interface AgentLifecycleListener extends EventListener {
+
+	/** Invoked when the agent is spawned.
+	 * 
+	 * @param initializationParameters - list of parameters that were passed to the agent.
+	 */
 	public void agentSpawned(Object[] initializationParameters);
+	
+	/** Invoked when the agent is destroyed.
+	 */
 	public void agentDestroy();
 }

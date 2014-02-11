@@ -31,9 +31,10 @@ import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Skill;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Skill to access to the default interaction context.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -45,8 +46,10 @@ class DefaultContextInteractionsImpl extends Skill implements
 	private Address agentAddress;
 
 
-	/**
-	 * @param agent
+	/** Constructs a <code>DefaultContextInteractionsImpl</code>.
+	 * 
+	 * @param agent - owner of the skill.
+	 * @param parentContext - reference to the parent context.
 	 */
 	public DefaultContextInteractionsImpl(Agent agent, AgentContext parentContext) {
 		super(agent);
@@ -54,10 +57,6 @@ class DefaultContextInteractionsImpl extends Skill implements
 		
 	}
 
-	
-	
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void install() {
 		this.defaultSpace = this.parentContext.getDefaultSpace();
@@ -65,71 +64,47 @@ class DefaultContextInteractionsImpl extends Skill implements
 		
 	}
 	
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void uninstall() {	
 		super.uninstall();
 	}
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
 	public void emit(Event event) {
 		event.setSource(this.agentAddress);
 		this.defaultSpace.emit(event);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void emit(Event event, Scope<Address> scope) {
 		event.setSource(this.agentAddress);
 		this.defaultSpace.emit(event, scope);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Address getDefaultAddress() {
 		return this.agentAddress;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public AgentContext getDefaultContext() {
 		return this.parentContext;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public EventSpace getDefaultSpace() {
 		return this.defaultSpace;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void receive(UUID receiverID, Event event) {
 		Address recAddr = this.defaultSpace.getAddress(receiverID);
 		this.emit(event, AddressScope.getScope(recAddr));
 	}
 
-
-	/** {@inheritDoc}
-	 */
 	@Override
 	public UUID spawn(Class<? extends Agent> aAgent, Object[] params) {
 		return getSkill(Lifecycle.class).spawnInContext(aAgent, this.parentContext, params);
-		
 	}
-
 	
 }

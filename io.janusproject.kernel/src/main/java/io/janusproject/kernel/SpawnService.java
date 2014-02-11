@@ -20,6 +20,7 @@
 package io.janusproject.kernel;
 
 import io.sarl.lang.core.Agent;
+
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,9 +33,10 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/**
+/** Implementation of a spawning service.
+ * 
  * @author $Author: srodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -51,13 +53,20 @@ class SpawnService {
 	@Inject
 	private Injector injector;
 
+	/** Spawn an agent of the given type, and pass the parameters to
+	 * its initialization function.
+	 * 
+	 * @param parentID - the identifier of the parent entity that is creating the agent.
+	 * @param agentClazz - the type of the agent to spawn.
+	 * @param params - the list of the parameters to pass to the agent initialization function.
+	 * @return the identifier of the agent.
+	 */
 	public UUID spawn(UUID parentID, Class<? extends Agent> agentClazz, Object... params) {
-
 		try {
 			Agent agent = agentClazz.getConstructor(UUID.class).newInstance(parentID);
 			this.agents.put(agent.getID(), agent);
 			this.injector.injectMembers(agent);
-			
+
 			notifyListenersAgentCreation(agent.getID(), params);
 			return agent.getID();
 		} catch (Exception e) {
@@ -66,6 +75,10 @@ class SpawnService {
 		}
 	}
 
+	/** Kill the agent with the given identifier.
+	 * 
+	 * @param agentID - the identifier of the agent to kill.
+	 */
 	public void killAgent(UUID agentID) {
 		this.agents.remove(agentID);
 		notifyListenersAgentDestruction(agentID);
@@ -75,10 +88,8 @@ class SpawnService {
 		}
 	}
 
-
-
-	/**
-	 * @param id
+	/** Add a listener on the changes in the current state of an agent.
+	 * @param id - identifier of the agent.
 	 * @param agentLifecycleListener
 	 */
 	public void addAgentLifecycleListener(UUID id, AgentLifecycleListener agentLifecycleListener) {
@@ -91,7 +102,7 @@ class SpawnService {
 			l.agentSpawned(params);
 		}
 	}
-	
+
 	private void notifyListenersAgentDestruction(UUID agentID) {
 		for (AgentLifecycleListener l : this.lifecycleListeners.get(agentID)) {
 			this.log.finer(Locale.getString("NOTIFY_AGENT_DESTRUCTION_TO", l)); //$NON-NLS-1$

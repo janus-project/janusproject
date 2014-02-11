@@ -26,30 +26,40 @@ import java.util.UUID;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/**
- * A Factory to create Agent Contexts
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** A factory to create agent contexts.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 class ContextFactory {
+	
 	@Inject
 	private Injector injector;
 	
 	
 	private ContextRepository contextRepository;
 	
+	/** Create a context.
+	 * 
+	 * @param contextID - identifier of the context.
+	 * @param defaultSpaceId - identifier of the default space in the context.
+	 * @return the context.
+	 */
 	public Context create(UUID contextID, UUID defaultSpaceId){
-
 		Context ctx = new Context(this.injector, contextID, defaultSpaceId);
 		this.contextRepository.addContext(ctx);
 		return ctx;
 	}
 	
+	/** Set the context repository of the platform.
+	 * 
+	 * @param contextRepo - reference to the context repository to use to store the contexts.
+	 */
 	@Inject
 	void setContextRepository(ContextRepository contextRepo){
-		this.contextRepository=contextRepo;
+		this.contextRepository = contextRepo;
 	}
 	
 }

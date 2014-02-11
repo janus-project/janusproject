@@ -26,9 +26,10 @@ import io.sarl.lang.core.Skill;
 
 import java.util.UUID;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Skill that permits to manage the life cycle of the agents.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -38,45 +39,34 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	private SpawnService spawnService;
 	
 	
-	/**
+	/** Constructs the skill.
 	 * 
+	 * @param agent - owner of the skill.
+	 * @param service - reference to the spawning service to use.
 	 */
 	public LifecycleSkill(Agent agent, SpawnService service) {
 		super(agent);
 		this.spawnService = service;
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void install() {
 		super.install();
 	}
 	
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void uninstall() {	
 		super.uninstall();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public UUID spawnInContext(Class<? extends Agent> aAgent, AgentContext context,Object[] params) {
 		return this.spawnService.spawn(context.getID(), aAgent, params);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void killMe() {
 		this.spawnService.killAgent(this.getOwner().getID());
 	}
-
-
-
-	
 
 }

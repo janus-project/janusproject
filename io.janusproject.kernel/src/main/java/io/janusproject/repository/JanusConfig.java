@@ -19,13 +19,21 @@
  */
 package io.janusproject.repository;
 
-/**
+/** Constants for the Janus configuration.
+ * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class JanusConfig {
-	public static final String JANUS_CONTEXT_ID = "janus.context.id";
-	public static final String JANUS_DEF_SPACE_ID = "janus.context.defspace.id";
+	
+	/** Identifier of the Janus context.
+	 */
+	public static final String JANUS_CONTEXT_ID = "janus.context.id"; //$NON-NLS-1$
+
+	/** Identifier for the default space of the Janus context.
+	 */
+	public static final String JANUS_DEF_SPACE_ID = "janus.context.defspace.id"; //$NON-NLS-1$
+	
 }

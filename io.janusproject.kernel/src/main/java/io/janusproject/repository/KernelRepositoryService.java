@@ -42,7 +42,8 @@ import com.hazelcast.core.ISet;
 import com.hazelcast.core.ItemEvent;
 import com.hazelcast.core.ItemListener;
 
-/**
+/** Service that is providing the access to the repository of the Janus kernels.
+ * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -65,20 +66,31 @@ public class KernelRepositoryService extends AbstractService {
 	@Kernel
 	private ExecutorService executorService;
 
+	/** Constructs a <code>KernelRepositoryService</code>.
+	 * 
+	 * @param janusID - injected identifier of the Janus context.
+	 * @param repositoryImplFactory - factory to build a context.
+	 * @param myuri - injected URI of the current kernel.
+	 */
 	@Inject
 	void KernelRepository(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID,
 			RepositoryImplFactory repositoryImplFactory, @Named(ZeroMQConfig.PUB_URI) String myuri) {
 		this.kernels = repositoryImplFactory.getSet(janusID.toString() + "-kernels"); //$NON-NLS-1$
 		this.localURI = myuri;
-
 	}
 
+	/** Change the network interface.
+	 * 
+	 * @param network
+	 */
 	@Inject
 	void setNetwork(Network network) {
 		this.network = network;
 		this.network.addListener(new NetworkListener(this), this.executorService);
 	}
 
+	/** Connect to the known kernel peers.
+	 */
 	void connectExiting() {
 
 		for (String peerURI : this.kernels) {
@@ -89,6 +101,10 @@ public class KernelRepositoryService extends AbstractService {
 		}
 	}
 
+	/** Connect to a peer repository.
+	 * 
+	 * @param peer
+	 */
 	void connect(String peer) {
 		try {
 			this.network.connectPeer(peer);
@@ -97,6 +113,10 @@ public class KernelRepositoryService extends AbstractService {
 		}
 	}
 
+	/** Disconnect from a peer repository.
+	 * 
+	 * @param peer
+	 */
 	void disconnect(String peer) {
 		try {
 			this.network.disconnectPeer(peer);
@@ -105,8 +125,14 @@ public class KernelRepositoryService extends AbstractService {
 		}
 	}
 
-	private static class HazelcastListener implements ItemListener<String> {
-		private final KernelRepositoryService kernelRepositoryService;
+	/**
+	 * @author $Author: srodriguez$
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class HazelcastListener implements ItemListener<String> {
 
 		/**
 		 * 
@@ -137,9 +163,6 @@ public class KernelRepositoryService extends AbstractService {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void doStart() {
 		this.kernels.add(this.localURI);
@@ -147,9 +170,6 @@ public class KernelRepositoryService extends AbstractService {
 		notifyStarted();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void doStop() {
 		this.kernels.remove(this.localURI);

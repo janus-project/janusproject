@@ -23,13 +23,26 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** This class defines a space that is distributed over a network.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public interface DistributedSpace {
+	
+	/** Replies the identifier of the space.
+	 * 
+	 * @return the identifier of the space.
+	 */
 	public SpaceID getID();
+	
+	/** Invoked when a data is received from a distant peer.
+	 * 
+	 * @param scope - the scope of the received data.
+	 * @param envelope - the envelope with the data inside.
+	 */
 	public void recv(Scope<?> scope, Event envelope);
+	
 }

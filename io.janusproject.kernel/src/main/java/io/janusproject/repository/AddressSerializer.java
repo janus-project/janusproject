@@ -29,7 +29,8 @@ import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.StreamSerializer;
 
-/**
+/** Serializer for Janus addresses.
+ * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -37,27 +38,20 @@ import com.hazelcast.nio.serialization.StreamSerializer;
  */
 public class AddressSerializer implements StreamSerializer<Address> {
 
+	/** Unique identifier for the {@link Address} type.
+	 */
 	public static final int ADDRESS_CLASS_TYPE = 19119;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int getTypeId() {
 		return ADDRESS_CLASS_TYPE;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void destroy() {
 		//
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void write(ObjectDataOutput out, Address object) throws IOException {
 		out.writeObject(object.getUUID());
@@ -65,9 +59,6 @@ public class AddressSerializer implements StreamSerializer<Address> {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Address read(ObjectDataInput in) throws IOException {
 		UUID id = in.readObject();

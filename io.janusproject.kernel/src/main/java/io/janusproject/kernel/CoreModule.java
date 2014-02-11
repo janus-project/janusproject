@@ -65,7 +65,7 @@ import com.hazelcast.core.HazelcastInstance;
  * 
  * 
  * @author $Author: srodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */

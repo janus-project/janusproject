@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.arakhne.afc.vmutil.ClassComparator;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
@@ -41,25 +43,28 @@ import com.google.inject.Inject;
 
 
 /**
- * A repository of spaces specific to a given context
+ * A repository of spaces specific to a given context.
  * 
  * @author $Author: ngaud$
- *
+ * @author $Author: sgalland$
+ * @version $FullVersion$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
  */
 public class SpaceRepository {
-	
+
 	/**
 	 * The set of the id of all spaces stored in this repository
 	 * This set must be distributed and synchronized all over the network
 	 */
 	private Set<SpaceID> spaceIDs;
-	
+
 	/**
 	 * Map linking a space id to its related Space object
 	 * This is local non-distributed map
 	 */
 	private final Map<SpaceID, Space> spaces;
-	
+
 	/**
 	 * Map linking a a class of Space specification to its related implementations' ids
 	 * Use the map <code>spaces</code> to get the Space object associated to a given id
@@ -82,7 +87,11 @@ public class SpaceRepository {
 		Multimap<Class<? extends SpaceSpecification>, SpaceID> tmp = TreeMultimap.create(new ClassComparator(), new ObjectReferenceComparator<SpaceID>());
 		this.spacesBySpec = Multimaps.synchronizedMultimap(tmp) ;		
 	}
-	
+
+	/** Change the repository factory used by this space repository.
+	 * 
+	 * @param repositoryImplFactory
+	 */
 	@Inject
 	void setRespositoryImplFactory(RepositoryImplFactory repositoryImplFactory){
 		this.spaceIDs = repositoryImplFactory.getSet(this.distributedSpaceSetName);
@@ -97,7 +106,7 @@ public class SpaceRepository {
 		this.spaces.put(id, space);
 		this.spacesBySpec.put(id.getSpaceSpecification(), id);		
 	}	
-	
+
 	/**
 	 * Remove the specified space from this repository
 	 * @param space - the space to remove
@@ -108,7 +117,7 @@ public class SpaceRepository {
 		this.spacesBySpec.remove(id.getSpaceSpecification(), id);
 		this.spaceIDs.remove(space);
 	}
-	
+
 	/**
 	 * Remove the specified space from this repository
 	 * @param spaceID - the space of the space to remove
@@ -118,7 +127,7 @@ public class SpaceRepository {
 		this.spaces.remove(spaceID);
 		this.spacesBySpec.remove(spaceID.getSpaceSpecification(), spaceID);		
 	}
-	
+
 	/**
 	 * Clear the context of this repository
 	 */
@@ -127,7 +136,7 @@ public class SpaceRepository {
 		this.spaces.clear();
 		this.spacesBySpec.clear();
 	}
-	
+
 	/**
 	 * Returns the number of space registered in this repository
 	 * @return the number of space registered in this repository
@@ -160,7 +169,7 @@ public class SpaceRepository {
 	public Iterator<SpaceID> getSpaceIDIterator() {
 		return this.spaceIDs.iterator();
 	}
-	
+
 	/**
 	 * Returns an iterator over the various space's  stored in this repository
 	 * @return an iterator over the various space's stored in this repository
@@ -168,7 +177,7 @@ public class SpaceRepository {
 	public Iterator<Space> getSpaceIterator() {
 		return this.spaces.values().iterator();
 	}
-	
+
 	/**
 	 * Returns the set of all space's IDs stored in this repository
 	 * @return the set of all space's IDs stored in this repository
@@ -206,7 +215,7 @@ public class SpaceRepository {
 				return input.getID().getSpaceSpecification().equals(spec);
 			}
 		});
-		
+
 	}
 	/**
 	 * Returns the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
@@ -243,12 +252,13 @@ public class SpaceRepository {
 		}
 		
 	}
-	
-	/**
-	 * Provides support for object's comparisons using hashCode
-	 * $Author: ngaud$
-	 *
+	 * Provides support for object's comparisons using hashCode.
+	 * 
 	 * @param <T> - the type of object to compare
+	 * @author $Author: ngaud$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
 	 */
 	private static class ObjectReferenceComparator<T> implements Comparator<T> {
 
@@ -258,14 +268,12 @@ public class SpaceRepository {
 			//
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public int compare(T o1, T o2) {
 			return System.identityHashCode(o2) - System.identityHashCode(o1);
 		}
-		
+
 	}
-	
-	
+
+
 }

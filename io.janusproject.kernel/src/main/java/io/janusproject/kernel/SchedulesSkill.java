@@ -39,8 +39,9 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import com.google.common.base.Objects;
 import com.google.inject.Inject;
 
-/**
- * @author $Author: Sebastian Rodriguez$
+/** Skill that permits to execute tasks with an executor service.
+ * 
+ * @author $Author: srodriguez$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -60,17 +61,11 @@ class SchedulesSkill extends Skill implements Schedules {
 		super(agent);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void install() {
 		super.install();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void uninstall() {
 		for (ScheduledFuture<AgentRunnableTask> future : this.futures.values()) {
@@ -81,17 +76,11 @@ class SchedulesSkill extends Skill implements Schedules {
 		super.uninstall();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public AgentTask in(long delay, Procedure1<? super Agent> procedure) {
 		return in(this.task("task-" + UUID.randomUUID()), delay, procedure); //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
 		task.setProcedure((Procedure1<Agent>) procedure);
@@ -144,6 +133,12 @@ class SchedulesSkill extends Skill implements Schedules {
 
 
 
+	/**
+	 * @author $Author: srodriguez$
+	 * @version $Name$ $Revision$ $Date$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
 	private static class AgentRunnableTask implements Runnable {
 		private WeakReference<AgentTask> agentTaskRef;
 		private WeakReference<Agent> agentRef;

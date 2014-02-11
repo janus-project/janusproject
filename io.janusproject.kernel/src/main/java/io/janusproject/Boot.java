@@ -19,11 +19,12 @@
  */
 package io.janusproject;
 
-
 import io.janusproject.kernel.Janus;
 import io.janusproject.kernel.JanusDefaultConfigModule;
 import io.janusproject.kernel.Kernel;
 import io.sarl.lang.core.Agent;
+
+import java.util.Arrays;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -33,19 +34,34 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.arakhne.afc.vmutil.locale.Locale;
 
-/**
+/** This is the class that permits to boot the Janus platform.
+ * <p>
+ * This class provides the "main" function for the platform.
+ * The list of the parameters is composed of a list of options,
+ * the classname of an agent to launch, and the parameters to pass
+ * to the launched agent.
+ * <p>
+ * The supported options may be obtain by passing no parameter, or
+ * the option <code>-h</code>.  
+ * <p>
+ * Example of Janus launching with Maven:
+ * <pre><code>mvn exec:java
+ *     -Dexec.mainClass="io.janusproject.Boot"
+ *     -Dexec.args="my.Agent"</code></pre>
+ * <p>
+ * Example of Janus launching from the CLI (only with the Jar file that is containing
+ * all the jar dependencies):
+ * <pre><code>java -jar janus-with-dependencies.jar my.Agent</code></pre>  
  * 
- * mvn exec:java -Dexec.mainClass="io.janusproject.Boot"
- * [-Dexec.args="my.Agent"]
- * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class Boot {
 
-	/**
+	/** Main function.
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -76,14 +92,20 @@ public class Boot {
 
 	}
 
-	static Options getOptions() {
+	/** Replies the command line options supported by this boot class.
+	 * 
+	 * @return the command line options.
+	 */
+	public static Options getOptions() {
 		Options options = new Options();
 
 		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		return options;
 	}
 
-	static void showHelp() {
+	/** Show the help message on the standard console.
+	 */
+	public static void showHelp() {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("io.janusproject.Boot [OPTIONS] AGENT_FQN", getOptions()); //$NON-NLS-1$
 		System.exit(0);

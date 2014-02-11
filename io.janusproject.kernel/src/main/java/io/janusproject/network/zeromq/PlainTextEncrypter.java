@@ -23,21 +23,18 @@ import java.util.UUID;
 
 /**
  * A utility implementation of the {@link EventEncrypter} that creates the
- * {@link EventEnvelope} fields using {@link String#getBytes()}
- * 
+ * {@link EventEnvelope} fields using {@link String#getBytes()}.
+ * <p>
  * The main use of the class should be development to be able to easy see what's
  * being transfered on the wire.
  * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class PlainTextEncrypter implements EventEncrypter {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public EventEnvelope encrypt(EventPack pack) {
 		return EventEnvelope.build(pack.getContextId().getBytes(), pack
@@ -45,9 +42,6 @@ public class PlainTextEncrypter implements EventEncrypter {
 				.getHeaders().getBytes(), pack.getEvent().getBytes());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public EventPack decrypt(EventEnvelope envelope) {
 		EventPack pack = new EventPack();
@@ -59,9 +53,6 @@ public class PlainTextEncrypter implements EventEncrypter {
 		return pack;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public byte[] encrytContextID(UUID id) throws Exception {
 		return id.toString().getBytes();

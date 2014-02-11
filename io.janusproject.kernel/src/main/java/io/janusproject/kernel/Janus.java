@@ -27,15 +27,21 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Utility functions to set-up the Janus platform.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class Janus {
 	private static Map<UUID, Kernel> kernels = new TreeMap<>();
 	
+	/** Create an instance of {@link Kernel}.
+	 * 
+	 * @param modules - modules to link to the new kernel.
+	 * @return the new kernel.
+	 */
 	public static final Kernel create(Module... modules){
 		Injector injector = Guice.createInjector(modules);
 		Kernel k = injector.getInstance(Kernel.class);

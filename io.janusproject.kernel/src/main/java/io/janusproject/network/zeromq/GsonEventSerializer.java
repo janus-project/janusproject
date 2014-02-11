@@ -35,9 +35,12 @@ import org.arakhne.afc.vmutil.locale.Locale;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/**  Serialize the {@link EventDispatch} content using GSON to
+ * generate the corresponding {@link EventEnvelope}.
+ * 
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -45,16 +48,12 @@ public class GsonEventSerializer implements EventSerializer {
 
 	@Inject
 	private Gson gson;
+	
 	@Inject
 	private EventEncrypter encrypter;
-	/**
-	 * {@inheritDoc}
-	 * @throws Exception 
-	 */
+	
 	@Override
 	public EventEnvelope serialize(EventDispatch dispatch) throws Exception {
-		
-
 		Event event = dispatch.getEvent();
 		Scope<?> scope = dispatch.getScope();
 		SpaceID spaceID = dispatch.getSpaceID();
@@ -85,11 +84,6 @@ public class GsonEventSerializer implements EventSerializer {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws Exception
-	 */
 	@Override
 	public EventDispatch deserialize(EventEnvelope envelope) throws Exception {
 		EventPack pack = this.encrypter.decrypt(envelope);

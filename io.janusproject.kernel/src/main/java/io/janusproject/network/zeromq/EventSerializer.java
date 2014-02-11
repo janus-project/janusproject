@@ -21,19 +21,37 @@ package io.janusproject.network.zeromq;
 
 import java.util.UUID;
 
-
-
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** A serializer of events to be published over the network.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public interface EventSerializer {
 
+	/** Serialize the given event.
+	 * 
+	 * @param dispatch - event to serialize.
+	 * @return the envelope with the serialized event.
+	 * @throws Exception
+	 */
 	public EventEnvelope serialize(EventDispatch dispatch) throws Exception;
-	public EventDispatch deserialize(EventEnvelope envelop) throws Exception;
+
+	/** Deserialize the given envelope to obtain an event.
+	 * 
+	 * @param envelope - envelope to deserialize.
+	 * @return the dispatched event.
+	 * @throws Exception
+	 */
+	public EventDispatch deserialize(EventEnvelope envelope) throws Exception;
 	
+	/** Serialize the given identifier of context.
+	 * 
+	 * @param id - identifier ti serialize. 
+	 * @return the byte-representation of the given identifier.
+	 * @throws Exception
+	 */
 	public byte[] serializeContextID(UUID id) throws Exception;
 	
 }

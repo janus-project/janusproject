@@ -28,7 +28,8 @@ import org.arakhne.afc.vmutil.locale.Locale;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 
-/**
+/** Platform service that supports the execution resources.
+ * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$

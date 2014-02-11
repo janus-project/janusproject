@@ -19,13 +19,17 @@
  */
 package io.janusproject.network.zeromq;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Set of data that should be exchanged on the network
+ * by the ZeroMQ peers.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
+ * @see EventEnvelope
  */
 public class EventPack {
+	
 	private String contextId;
 	private String spaceId;
 	private String headers;
@@ -38,54 +42,63 @@ public class EventPack {
 	public String getContextId() {
 		return this.contextId;
 	}
+	
 	/**
 	 * @param contextId the contextId to set
 	 */
 	public void setContextId(String contextId) {
 		this.contextId = contextId;
 	}
+	
 	/**
 	 * @return the spaceId
 	 */
 	public String getSpaceId() {
 		return this.spaceId;
 	}
+	
 	/**
 	 * @param spaceId the spaceId to set
 	 */
 	public void setSpaceId(String spaceId) {
 		this.spaceId = spaceId;
 	}
+	
 	/**
 	 * @return the headers
 	 */
 	public String getHeaders() {
 		return this.headers;
 	}
+	
 	/**
 	 * @param headers the headers to set
 	 */
 	public void setHeaders(String headers) {
 		this.headers = headers;
 	}
+	
 	/**
 	 * @return the scope
 	 */
 	public String getScope() {
 		return this.scope;
 	}
+	
 	/**
 	 * @param scope the scope to set
 	 */
 	public void setScope(String scope) {
 		this.scope = scope;
 	}
+	
 	/**
 	 * @return the event
 	 */
 	public String getEvent() {
 		return this.event;
 	}
+	
 	/**
 	 * @param event the event to set
 	 */

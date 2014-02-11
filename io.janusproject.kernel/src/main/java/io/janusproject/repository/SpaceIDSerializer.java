@@ -31,35 +31,30 @@ import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.StreamSerializer;
 
-/**
+/** Serializer of identifiers of spaces.
+ * 
  * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 
+	/** Unique identifier for the {@link SpaceID} type.
+	 */
 	public static final int SPACE_ID_CLASS_TYPE = 19118;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int getTypeId() {
 		return SPACE_ID_CLASS_TYPE;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void destroy() {
 		//
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void write(ObjectDataOutput out, SpaceID object) throws IOException {
 		out.writeObject(object.getContextID());
@@ -68,9 +63,6 @@ public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public SpaceID read(ObjectDataInput in) throws IOException {
 		try {

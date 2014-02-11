@@ -35,11 +35,13 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 /**
- * A repository of Agent's Context
+ * A repository of Agent's Context.
  * 
  * @author $Author: ngaud$
  * @author $Author: srodriguez$
- * 
+ * @version $FullVersion$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
  */
 public class ContextRepository {
 
@@ -56,12 +58,19 @@ public class ContextRepository {
 	private Map<UUID, SpaceID> spaces;
 
 
-
+	/** Constructs <code>ContextRepository</code>.
+	 */
 	public ContextRepository() {
 		this.contexts = new ConcurrentHashMap<UUID, AgentContext>();
 		
 	}
 	
+	/**
+	 * Change the identifier of the Janus context.
+	 * 
+	 * @param janusID - injected identifier
+	 * @param repositoryImplFactory - factory that permits to create a repository.
+	 */
 	@Inject
 	void setJanusID(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID, RepositoryImplFactory repositoryImplFactory){
 		this.spaces = repositoryImplFactory.getMap(janusID.toString());

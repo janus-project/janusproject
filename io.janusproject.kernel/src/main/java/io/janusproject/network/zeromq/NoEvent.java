@@ -21,14 +21,17 @@ package io.janusproject.network.zeromq;
 
 import io.sarl.lang.core.Event;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Utility class that is representing the "no-event" event.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 class NoEvent extends Event {
-	final static Event INSTANCE = new NoEvent();
 	
+	/** Singleton instance.
+	 */
+	final static Event INSTANCE = new NoEvent();
 
 }

@@ -22,16 +22,23 @@ package io.janusproject.kernel;
 import io.sarl.lang.core.Scope;
 
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Accessors and utilities related to the scopes.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class Scopes {
+
+	/** Replies the scope that is representing everything.
+	 * This scope represents the entire interaction space, and all
+	 * the entities in this space.
+	 * 
+	 * @return the null scope.
+	 */
 	@SuppressWarnings("unchecked")
 	public final static <T> Scope<T> nullScope() {
-		
 		return (Scope<T>) AlwaysTrueScope.INSTANCE;
 	}
 }

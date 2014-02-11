@@ -26,9 +26,10 @@ import io.sarl.util.OpenEventSpaceSpecification;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Default implementation of the specification of an event space.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -37,10 +38,7 @@ class EventSpaceSpecificationImpl implements OpenEventSpaceSpecification, EventS
 	@Inject
 	private Injector injector;
 
-	/**
-	 * {@inheritDoc}
-	 */
-
+	@Override
 	public EventSpaceImpl create(SpaceID id, Object... params) {
 		EventSpaceImpl space = new EventSpaceImpl(id);
 		this.injector.injectMembers(space);

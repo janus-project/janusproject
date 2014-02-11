@@ -35,7 +35,8 @@ import org.arakhne.afc.vmutil.locale.Locale;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-/**
+/** Skill that permits to access to the context in which the agent is located.
+ * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -48,15 +49,14 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 	
 	private ContextRepository contextRepository;
 	/**
-	 * @param agent
+	 * @param agent - owner of the skill.
+	 * @param contextRepository - repository of the contexts.
 	 */
 	public ExternalContextAccessSkill(Agent agent, ContextRepository contextRepository) {
 		super(agent);
 		this.contextRepository = contextRepository;
 	}
 	
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void install() {
 		super.install();
@@ -64,8 +64,6 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		this.join(ac.getID(), ac.getDefaultSpace().getID().getID());	
 	}
 	
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void uninstall() {
 		//Leave all contexts including the default one.
@@ -75,15 +73,11 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		super.uninstall();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Collection<AgentContext> getAllContexts() {
 		return this.contextRepository.getContexts(this.contexts);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public AgentContext getContext(UUID contextID) {
 		Preconditions.checkNotNull(contextID);
@@ -93,8 +87,6 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		return this.contextRepository.getContext(contextID);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void join(UUID futureContext, UUID futureContextDefaultSpaceID) {
 		Preconditions.checkNotNull(futureContext);
@@ -118,8 +110,6 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		imp.registerOnDefaultSpace((EventSpaceImpl) ac.getDefaultSpace());
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void leave(UUID contextID) {
 		Preconditions.checkNotNull(contextID);

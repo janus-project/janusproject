@@ -46,14 +46,17 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-/**
- * @author $Author: Sebastian Rodriguez$
+/** Service that is providing the ZeroMQ network.
+ * 
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
 class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
+
 	private ZContext context;
 	private Socket publisher;
 
@@ -80,7 +83,9 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	private final String uri;
 
 	/**
+	 * Construct a <code>ZeroMQNetwork</code>.
 	 * 
+	 * @param uri - inhected URI of the PUB socket.
 	 */
 	@Inject
 	ZeroMQNetwork(@Named(PUB_URI) String uri) {
@@ -103,9 +108,6 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void disconnectPeer(String peerURI) throws Exception {
 		this.log.finer(Locale.getString("PEER_DISCONNECTION", peerURI)); //$NON-NLS-1$

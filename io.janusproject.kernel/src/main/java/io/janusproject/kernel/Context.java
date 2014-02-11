@@ -32,9 +32,10 @@ import java.util.UUID;
 
 import com.google.inject.Injector;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Implementation of an agent context in the Janus platform.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -49,6 +50,12 @@ class Context implements AgentContext{
 
 	private Injector injector;
 
+	/** Constructs a <code>Context</code>.
+	 * 
+	 * @param injector - reference to the injector to be used.
+	 * @param id - identifier of the context.
+	 * @param defaultSpaceID - identifier of the default space in the context.
+	 */
 	protected Context(Injector injector, UUID id, UUID defaultSpaceID) {
 		this.id = id;
 		this.injector = injector;

@@ -23,16 +23,22 @@ import com.google.inject.name.Named;
 
 /**
  * Public configuration properties for the {@link ZeroMQNetwork} module.
- * Define the properties as required in your application module as a {@link Named} annotation.
+ * Define the properties as required in your application module as a
+ * {@link Named} annotation.
  * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class ZeroMQConfig {
 
-	public static final String PUB_URI = "network.pub.uri";
-	public static final String AES_KEY = "network.encrypter.aes.key";
+	/** Name of the property for the PUB uri.
+	 */
+	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
+	
+	/** Name of the property for the AES key.
+	 */
+	public static final String AES_KEY = "network.encrypter.aes.key"; //$NON-NLS-1$
 
 }

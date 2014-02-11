@@ -45,19 +45,20 @@ import com.google.common.collect.Queues;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.inject.Inject;
 
-/**
- * Janus implementation of SARL's {@link Behaviors} built-in capacity
- * 
+/** Janus implementation of SARL's {@link Behaviors} built-in capacity.
+ * <p>
  * This implementation uses a holonic vision where behaviors interact via an
  * {@link EventSpaceImpl} allowing them to be agent's as well.
  * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerContextAccess {
 
+	/** Reference to the event bus.
+	 */
 	protected AsyncEventBus eventBus;
 	private AgentContext innerContext;
 
@@ -75,12 +76,20 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		this.agentAsEventListener = new AgentEventListener(this);
 	}
 
+	/** Create the internal context.
+	 * 
+	 * @param factory - reference to the factory of context provided by the platform.
+	 */
 	@Inject
 	void createInternalContext(ContextFactory factory) {
 		this.innerContext = factory.create(getOwner().getID(), UUID.randomUUID());
 		((EventSpaceImpl) this.innerContext.getDefaultSpace()).register(this.agentAsEventListener);
 	}
 
+	/** Change the event bus inside the agent.
+	 * 
+	 * @param bus
+	 */
 	@Inject
 	void setInternalEventBus(AsyncEventBus bus) {
 		this.eventBus = bus;
@@ -89,6 +98,10 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 			this.log.finest(Locale.getString("EVENT_BUS_CHANGE", this.getOwner().getID())); //$NON-NLS-1$
 	}
 
+	/** Change the logger that is accessible to the inner behaviors or agents.
+	 * 
+	 * @param log
+	 */
 	@Inject
 	void setLogger(Logger log) {
 		this.log = log;
@@ -193,19 +206,29 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		return this.agentAsEventListener;
 	}
 
+	/** Register the agent from the given default space.
+	 * 
+	 * @param space
+	 */
 	void registerOnDefaultSpace(EventSpaceImpl space) {
 		space.register(agentAsEventListener());
 	}
 
-	/**
-	 * @param defaultSpace
+	/** Unregister the agent from the given default space.
+	 * 
+	 * @param space
 	 */
 	void unregisterFromDefaultSpace(EventSpaceImpl space) {
 		space.unregister(agentAsEventListener());
 	}
 
 
-
+	/**
+	 * @author $Author: srodriguez$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
 	private static class AgentEventListener implements EventListener {
 
 		private Queue<Event> buffer = Queues.newConcurrentLinkedQueue();

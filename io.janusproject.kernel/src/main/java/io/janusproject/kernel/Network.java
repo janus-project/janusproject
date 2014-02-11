@@ -25,26 +25,43 @@ import io.sarl.lang.core.SpaceID;
 
 import com.google.common.util.concurrent.Service;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** This class enables the Janus kernel to be distributed
+ * other a network.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public interface Network extends Service{
 
-	/**
-	 * @param id
-	 * @param scope
-	 * @param data
-	 * @throws Exception 
+	/** Publish a data over the network.
+	 * 
+	 * @param id - identifier of the space in which the data was published.
+	 * @param scope - scope of the published data.
+	 * @param data - data to propage over the network.
+	 * @throws Exception
 	 */
 	void publish(SpaceID id, Scope<?> scope, Event data) throws Exception;
+	
+	/** Register the given distributed space in the network layer. 
+	 * 
+	 * @param space - the space distributed over the network by this peer.
+	 * @throws Exception
+	 */
 	void register(DistributedSpace space) throws Exception;
 	
+	/** Connect this instance of kernel to the given peer over the network.
+	 * 
+	 * @param peerUri
+	 * @throws Exception
+	 */
 	public void connectPeer(String peerUri) throws Exception;
-	/**
+	
+	/** Disconnect this peer from the given peer.
+	 * 
 	 * @param peer
+	 * @throws Exception
 	 */
 	public void disconnectPeer(String peer) throws Exception;
 

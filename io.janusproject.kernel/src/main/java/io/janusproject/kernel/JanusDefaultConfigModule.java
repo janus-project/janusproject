@@ -25,14 +25,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
 /**
- * The module configures Janus to run using CRIO and a ZeroMQ based network.
+ * The module configures Janus to run using Core concepts and a ZeroMQ based network.
  * 
  * @see CoreModule
  * @see ZeroMQNetworkModule
- * 
- * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -46,7 +44,6 @@ public class JanusDefaultConfigModule extends AbstractModule {
 		Names.bindProperties(binder(), System.getProperties());
 		install(new CoreModule());
 		install(new ZeroMQNetworkModule());
-
 	}
 
 }

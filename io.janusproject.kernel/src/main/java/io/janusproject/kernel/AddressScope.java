@@ -39,25 +39,31 @@ public class AddressScope implements Scope<Address> {
 
 	private Collection<Address> addresses = null;
 
+	/** Construct a scope.
+	 * 
+	 * @param addrs - set of the addresses that is describing the scope.
+	 */
 	AddressScope(Address... addrs) {
 		this.addresses = Sets.newHashSet(addrs) ;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getRepresentation() {
+	@Override
+	public String toString() {
 		return this.SCOPE_ID + this.addresses.toString();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean matches(Address address) {
 		return this.addresses.contains(address);
 	}
 	
-	public final static AddressScope getScope(Address... addresses){
+
+	/** Create a scope that is restricted to the given list of addresses.
+	 * 
+	 * @param addresses -addresses that are allowed in the scope.
+	 * @return the scope, restricted to the given set of addresses.
+	 */
+	public final static AddressScope getScope(Address... addresses) {
 		return new AddressScope(addresses);
 	}
 

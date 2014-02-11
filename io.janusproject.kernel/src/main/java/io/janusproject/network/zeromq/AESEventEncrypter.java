@@ -34,12 +34,12 @@ import com.google.common.base.Charsets;
 
 /**
  * Encrypts the {@link EventDispatch} content using the AES algorithm to
- * generate the {@link EventEnvelope}
+ * generate the {@link EventEnvelope}.
+ * <p>
+ * To define the key you need to specify the binding {@link ZeroMQConfig}.
  * 
- * To define the key you need to specify the binding {@link ZeroMQConfig#}
- * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -50,6 +50,11 @@ public class AESEventEncrypter implements EventEncrypter {
 
 	//private Cipher cipher;
 
+	/** Change the encryption key.
+	 * 
+	 * @param key - injected encryption key.
+	 * @throws Exception
+	 */
 	@Inject
 	void setKey(@Named(ZeroMQConfig.AES_KEY) String key)
 			throws Exception {
@@ -64,11 +69,6 @@ public class AESEventEncrypter implements EventEncrypter {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws Exception
-	 */
 	@Override
 	public EventEnvelope encrypt(EventPack pack) throws Exception {
 		return EventEnvelope.build(encrypt(pack.getContextId()),
@@ -76,11 +76,6 @@ public class AESEventEncrypter implements EventEncrypter {
 				encrypt(pack.getHeaders()), encrypt(pack.getEvent()));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws Exception
-	 */
 	@Override
 	public EventPack decrypt(EventEnvelope envelope) throws Exception {
 		EventPack pack = new EventPack();

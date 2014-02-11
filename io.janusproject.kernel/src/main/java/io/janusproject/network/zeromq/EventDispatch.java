@@ -23,21 +23,32 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Description of the required information for dispatching
+ * an event over the network.
+ * 
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class EventDispatch {
+	
 	private final Scope<?> scope;
 	private final Event event;
 	private final SpaceID spaceID;
 	private Map<String, String> headers;
 	
+	/** Construct a <code>EventDispatch</code>
+	 * 
+	 * @param sid - identifier of the space in which the event occurs.
+	 * @param event - event to dispatch.
+	 * @param scope - scope of the event.
+	 * @param headers - custom headers associated to the event.
+	 */
 	public EventDispatch(SpaceID sid, Event event, Scope<?> scope, Map<String, String> headers){
 		this.spaceID = sid;
 		this.event = event;
@@ -45,28 +56,48 @@ public class EventDispatch {
 		this.headers = headers;
 		
 	}
-	public EventDispatch(SpaceID sid, Event event, Scope<?> scope){
-		this(sid,event,scope,new HashMap<String, String>());
+
+	/** Construct a <code>EventDispatch</code>
+	 * 
+	 * @param sid - identifier of the space in which the event occurs.
+	 * @param event - event to dispatch.
+	 * @param scope - scope of the event.
+	 */
+	public EventDispatch(SpaceID sid, Event event, Scope<?> scope) {
+		this(sid,event,scope,Collections.<String,String>emptyMap());
 	}
 	
-	
 
-	/**
-	 * @return
+	/** Replies the event to dispatch.
+	 * 
+	 * @return the event.
 	 */
 	public Event getEvent() {
 		return this.event;
 	}
-	
+
+	/** Replies the scope of the event.
+	 * 
+	 * @return the scope.
+	 */
 	public Scope<?> getScope(){
 		return this.scope;
 	}
 	
+	/** Replies the custom headers associated to the event.
+	 * 
+	 * @return the custom headers.
+	 */
 	public Map<String, String> getHeaders(){
 		return this.headers;
 	}
 	
+	/** Replies the identifier of the space in which the event occurs.
+	 * 
+	 * @return the space identifier.
+	 */
 	public SpaceID getSpaceID(){
 		return this.spaceID;
 	}
+	
 }

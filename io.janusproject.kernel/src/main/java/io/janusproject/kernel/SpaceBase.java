@@ -22,7 +22,8 @@ package io.janusproject.kernel;
 import io.sarl.lang.core.SpaceID;
 
 
-/**
+/** Abstract implementation of a space.
+ * 
  * @author $Author: Sebastian Rodriguez$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
@@ -32,12 +33,15 @@ abstract class SpaceBase implements io.sarl.lang.core.Space{
 
 	private SpaceID id;
 
+	/** Constructs a space.
+	 * 
+	 * @param id - identifier of the space.
+	 */
 	public SpaceBase(SpaceID id){
 		this.id = id;
 	}
-	/**
-	 * @return the id
-	 */
+
+	@Override
 	public SpaceID getID() {
 		return this.id;
 	}
