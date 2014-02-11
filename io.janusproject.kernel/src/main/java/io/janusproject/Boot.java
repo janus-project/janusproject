@@ -64,6 +64,7 @@ public class Boot {
 	/** Main function.
 	 * @param args
 	 */
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 
 		CommandLineParser parser = new BasicParser();
@@ -81,9 +82,24 @@ public class Boot {
 
 			String agentToLaunch = cmd.getArgs()[0];
 			showHeader();
-			System.out.println("Launching agent: " + agentToLaunch);
-			Class<?> agent = Class.forName(agentToLaunch);			
-			startJanus((Class<? extends Agent>) agent, Arrays.copyOfRange(cmd.getArgs(), 1, cmd.getArgs().length));
+			Class<?> agent = Class.forName(agentToLaunch);
+			// The following test is needed because the
+			// cast to Class<? extends Agent> is not checking
+			// the Agent type (it is a generic type, not
+			// tested at runtime).
+			if (Agent.class.isAssignableFrom(agent)) {
+				System.out.println(Locale.getString("LAUNCHING_AGENT", agentToLaunch)); //$NON-NLS-1$
+				startJanus(
+						(Class<? extends Agent>)agent,
+						Arrays.copyOfRange(
+								cmd.getArgs(),
+								1, cmd.getArgs().length,
+								Object[].class));
+			}
+			else {
+				throw new ClassCastException(
+						Locale.getString("INVALID_AGENT_TYPE", agentToLaunch)); //$NON-NLS-1$
+			}
 		} catch (ParseException | ClassNotFoundException e) {
 			e.printStackTrace();
 			showHelp();
@@ -98,7 +114,6 @@ public class Boot {
 	 */
 	public static Options getOptions() {
 		Options options = new Options();
-
 		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		return options;
 	}
@@ -110,7 +125,6 @@ public class Boot {
 		formatter.printHelp("io.janusproject.Boot [OPTIONS] AGENT_FQN", getOptions()); //$NON-NLS-1$
 		System.exit(0);
 	}
-
 	
 	/** Show the heading logo of the Janus platform.
 	 */
@@ -118,9 +132,8 @@ public class Boot {
 		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
 	}
 
-	static void startJanus(Class<? extends Agent> agentCls, String... params) {
+	private static void startJanus(Class<? extends Agent> agentCls, Object... params) {
 		Kernel k = Janus.create(new JanusDefaultConfigModule());
-		
 		k.spawn(agentCls, params);
 	}
 
