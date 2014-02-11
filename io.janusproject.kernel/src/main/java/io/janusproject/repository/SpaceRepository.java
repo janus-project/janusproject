@@ -81,8 +81,10 @@ public class SpaceRepository {
 	 */
 	public SpaceRepository(String distributedSpaceSetName) {		
 		this.distributedSpaceSetName = distributedSpaceSetName;
-		this.spaces = new ConcurrentHashMap<SpaceID, Space>();	
-		Multimap<Class<? extends SpaceSpecification>, SpaceID> tmp = TreeMultimap.create(new ClassComparator(), new ObjectReferenceComparator<SpaceID>());
+		this.spaces = new ConcurrentHashMap<>();	
+		Multimap<Class<? extends SpaceSpecification>, SpaceID> tmp = TreeMultimap.create(
+				ClassComparator.SINGLETON,
+				new ObjectReferenceComparator<SpaceID>());
 		this.spacesBySpec = Multimaps.synchronizedMultimap(tmp) ;		
 	}
 
@@ -224,32 +226,7 @@ public class SpaceRepository {
 		return this.getSpaceIterator().next();
 	}
 
-		
-	
 	/**
-	 * Provides support for class comparisons based on class's canonical name
-	 * @author $Author: ngaud$
-	 *
-	 */
-	private static class ClassComparator implements Comparator<Class<?>> {
-
-		/**
-		 */
-		public ClassComparator() {
-			//
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public int compare(Class<?> o1, Class<?> o2) {
-			if (o1==o2) return 0;
-			if (o1==null) return Integer.MIN_VALUE;
-			if (o2==null) return Integer.MAX_VALUE;
-			return o1.getCanonicalName().compareTo(o2.getCanonicalName());
-		}
-		
-	}
 	 * Provides support for object's comparisons using hashCode.
 	 * 
 	 * @param <T> - the type of object to compare
