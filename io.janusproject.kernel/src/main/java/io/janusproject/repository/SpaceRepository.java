@@ -71,12 +71,10 @@ public class SpaceRepository {
 	 * This is local non-distributed map
 	 */
 	private final Multimap<Class<? extends SpaceSpecification>, SpaceID> spacesBySpec;
-	
-	
-	private RepositoryImplFactory repositoryImplFactory;
-	
+
+
 	private final String distributedSpaceSetName;
-	
+
 	/**
 	 * 
 	 * @param distributedSpaceSetName - the name used to identify distributed map over network
