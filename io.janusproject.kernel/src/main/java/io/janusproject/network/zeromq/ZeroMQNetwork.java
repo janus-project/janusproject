@@ -265,7 +265,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 			}
 		}
 		
-
+		stopPoller();
 	}
 
 }
