@@ -90,12 +90,14 @@ class Context implements AgentContext{
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <S extends io.sarl.lang.core.Space> S getOrCreateSpace(
 			Class<? extends SpaceSpecification> spec, UUID spaceUUID,
 			Object... creationParams) {
 		Space s = this.spaceRepository.getFirstSpaceFromSpec(spec);
 		if (s != null) {
+			//Type safety: assume that any ClassCastException will be thrown in the caller context.
 			return (S) s;
 		}
 		return createSpace(spec, spaceUUID, creationParams);
@@ -103,8 +105,10 @@ class Context implements AgentContext{
 
 	/** {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public <S extends Space> Collection<S> getSpaces(Class<? extends SpaceSpecification> spec) {
+		//Type safety: assume that any ClassCastException will be thrown in the caller context.
 		return (Collection<S>) this.spaceRepository.getSpacesFromSpec(spec);
 	}
 
