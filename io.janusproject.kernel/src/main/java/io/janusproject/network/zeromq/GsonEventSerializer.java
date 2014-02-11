@@ -99,8 +99,12 @@ public class GsonEventSerializer implements EventSerializer {
 		Class<?> eventClazz = Class.forName(headers.get("x-java-event-class")); //$NON-NLS-1$
 		Class<?> scopeClazz = Class.forName(headers.get("x-java-scope-class")); //$NON-NLS-1$
 
+		if (spaceSpec==null || !SpaceSpecification.class.isAssignableFrom(spaceSpec)) {
+			throw new ClassCastException(Locale.getString("INVALID_TYPE", spaceSpec)); //$NON-NLS-1$
+		}
+		
 		SpaceID spaceID = new SpaceID(contextId, spaceId,
-				(Class<? extends SpaceSpecification>) spaceSpec);
+				spaceSpec.asSubclass(SpaceSpecification.class));
 		
 		Event event = (Event) this.gson.fromJson(pack.getEvent(), eventClazz);
 		Scope<?> scope = (Scope<?>) this.gson.fromJson(pack.getScope(), scopeClazz);
