@@ -27,14 +27,12 @@ import io.janusproject.repository.impl.RepositoryImplFactory;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.util.concurrent.AbstractService;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.hazelcast.core.HazelcastInstance;
@@ -50,8 +48,8 @@ import com.hazelcast.core.ItemListener;
  * @mavenartifactid $ArtifactId$
  */
 public class KernelRepositoryService extends AbstractService {
+
 	private ISet<String> kernels;
-	private String distributedParticipantMapName;
 	private String localURI;
 
 	@Inject
@@ -86,13 +84,12 @@ public class KernelRepositoryService extends AbstractService {
 	@Inject
 	void setNetwork(Network network) {
 		this.network = network;
-		this.network.addListener(new NetworkListener(this), this.executorService);
+		this.network.addListener(new NetworkListener(), this.executorService);
 	}
 
 	/** Connect to the known kernel peers.
 	 */
 	void connectExiting() {
-
 		for (String peerURI : this.kernels) {
 			this.log.finer(Locale.getString("CONNECTING_TO_PEER", peerURI)); //$NON-NLS-1$
 			if (!this.localURI.equals(peerURI)) {
@@ -135,19 +132,16 @@ public class KernelRepositoryService extends AbstractService {
 	private class HazelcastListener implements ItemListener<String> {
 
 		/**
-		 * 
 		 */
-		public HazelcastListener(KernelRepositoryService kernelRepositoryService) {
-			this.kernelRepositoryService = kernelRepositoryService;
+		public HazelcastListener() {
+			//
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemAdded(ItemEvent<String> item) {
-			if (!this.kernelRepositoryService.localURI.equals(item.getItem())) {
-				this.kernelRepositoryService.connect(item.getItem());
+			if (!KernelRepositoryService.this.localURI.equals(item.getItem())) {
+				KernelRepositoryService.this.connect(item.getItem());
 			}
 		}
 
@@ -157,8 +151,8 @@ public class KernelRepositoryService extends AbstractService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemRemoved(ItemEvent<String> item) {
-			if (!this.kernelRepositoryService.localURI.equals(item.getItem())) {
-				this.kernelRepositoryService.disconnect(item.getItem());
+			if (!KernelRepositoryService.this.localURI.equals(item.getItem())) {
+				KernelRepositoryService.this.disconnect(item.getItem());
 			}
 		}
 
@@ -179,45 +173,49 @@ public class KernelRepositoryService extends AbstractService {
 		this.log.info(Locale.getString("SHUTDOWN")); //$NON-NLS-1$
 	}
 
-	private static class NetworkListener extends Listener {
-
-		private final KernelRepositoryService kernelRepositoryService;
+	/**
+	 * @author $Author: srodriguez$
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class NetworkListener extends Listener {
 
 		/**
-		 * 
 		 */
-		public NetworkListener(KernelRepositoryService kernelRepositoryService) {
-			this.kernelRepositoryService = kernelRepositoryService;
+		public NetworkListener() {
+			//
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void starting() {
 			KernelRepositoryService.this.log.info(
 					Locale.getString(KernelRepositoryService.class, "HAZELCAST_STARTING")); //$NON-NLS-1$
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void running() {
-			this.kernelRepositoryService.log.info("Hazelcast init start");
-			this.kernelRepositoryService.kernels.addItemListener(new HazelcastListener(this.kernelRepositoryService),
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_INIT_STARTING")); //$NON-NLS-1$
+			KernelRepositoryService.this.kernels.addItemListener(new HazelcastListener(),
 					true);
-			this.kernelRepositoryService.connectExiting();
-			this.kernelRepositoryService.log.info("Hazelcast init end");
+			KernelRepositoryService.this.connectExiting();
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_INIT_ENDING")); //$NON-NLS-1$
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void terminated(State from) {			
-			this.kernelRepositoryService.log.info("Hazelcast Shutdown");
-			this.kernelRepositoryService.instance.shutdown();
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_ENDING")); //$NON-NLS-1$
+			KernelRepositoryService.this.instance.shutdown();
 		}
 
 		/**
