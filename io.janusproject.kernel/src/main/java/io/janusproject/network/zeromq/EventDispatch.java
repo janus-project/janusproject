@@ -23,7 +23,7 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /** Description of the required information for dispatching
@@ -54,7 +54,6 @@ public class EventDispatch {
 		this.event = event;
 		this.scope = scope;
 		this.headers = headers;
-		
 	}
 
 	/** Construct a <code>EventDispatch</code>
@@ -64,7 +63,7 @@ public class EventDispatch {
 	 * @param scope - scope of the event.
 	 */
 	public EventDispatch(SpaceID sid, Event event, Scope<?> scope) {
-		this(sid,event,scope,Collections.<String,String>emptyMap());
+		this(sid,event,scope,new HashMap<String,String>());
 	}
 	
 
