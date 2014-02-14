@@ -1,12 +1,16 @@
 /*
- * Copyright 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND
- *
+ * $Id$
+ * 
+ * Janus platform is an open-source multiagent platform.
+ * More details on http://www.janusproject.io
+ * 
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,10 +30,13 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-/**
+/** Skill that permits to access to the context in which the agent is located.
+ * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -39,18 +46,17 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 
 	private Set<UUID> contexts = Sets.newConcurrentHashSet();
 	
+	private final ContextRepository contextRepository;
 	
-	private ContextRepository contextRepository;
 	/**
-	 * @param agent
+	 * @param agent - owner of the skill.
+	 * @param contextRepository - repository of the contexts.
 	 */
 	public ExternalContextAccessSkill(Agent agent, ContextRepository contextRepository) {
 		super(agent);
 		this.contextRepository = contextRepository;
 	}
 	
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void install() {
 		super.install();
@@ -58,8 +64,6 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		this.join(ac.getID(), ac.getDefaultSpace().getID().getID());	
 	}
 	
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void uninstall() {
 		//Leave all contexts including the default one.
@@ -69,26 +73,20 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		super.uninstall();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Collection<AgentContext> getAllContexts() {
 		return this.contextRepository.getContexts(this.contexts);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public AgentContext getContext(UUID contextID) {
 		Preconditions.checkNotNull(contextID);
 		if(!this.contexts.contains(contextID)){
-			throw new IllegalArgumentException("The specified context ID is known by the agent");
+			throw new IllegalArgumentException(Locale.getString("UNKNOWN_CONTEXT_ID", contextID)); //$NON-NLS-1$
 		}
 		return this.contextRepository.getContext(contextID);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void join(UUID futureContext, UUID futureContextDefaultSpaceID) {
 		Preconditions.checkNotNull(futureContext);
@@ -96,7 +94,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		
 		AgentContext ac = this.contextRepository.getContext(futureContext);
 		
-		Preconditions.checkNotNull(ac, "Unknown Context");
+		Preconditions.checkNotNull(ac, "Unknown Context"); //$NON-NLS-1$
 		
 		if(this.contexts.contains(futureContext)){			
 			return;
@@ -104,7 +102,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		
 		
 		if(ac.getDefaultSpace().getID().getID() != futureContextDefaultSpaceID){
-			throw new IllegalArgumentException("The specified default Space ID does not match the specified context ID");
+			throw new IllegalArgumentException(Locale.getString("INVALID_DEFAULT_SPACE_MATCHING", futureContextDefaultSpaceID)); //$NON-NLS-1$
 		}
 		
 		this.contexts.add(futureContext);
@@ -112,13 +110,11 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		imp.registerOnDefaultSpace((EventSpaceImpl) ac.getDefaultSpace());
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void leave(UUID contextID) {
 		Preconditions.checkNotNull(contextID);
 		AgentContext ac = this.contextRepository.getContext(contextID);
-		Preconditions.checkNotNull(ac, "Unknown Context");
+		Preconditions.checkNotNull(ac, "Unknown Context"); //$NON-NLS-1$
 		if(!this.contexts.contains(contextID)){
 			return;
 		}

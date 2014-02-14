@@ -33,6 +33,11 @@
 			<artifactId>gson</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.arakhne.afc.core</groupId>
+			<artifactId>vmutils</artifactId>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -55,8 +60,6 @@
 			<scope>test</scope>
 		</dependency>
 
-
 	</dependencies>
-
 
 </project>

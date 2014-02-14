@@ -43,6 +43,7 @@
 		<guava.version>17.0-SNAPSHOT</guava.version>
 		<jeromq.version>0.3.2</jeromq.version>
 		<gson.version>2.2.4</gson.version>
+		<afc.version>11.0-SNAPSHOT</afc.version>
 	</properties>
 
 	<!-- ======================================= -->
@@ -96,6 +97,12 @@
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${gson.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.arakhne.afc.core</groupId>
+				<artifactId>vmutils</artifactId>
+				<version>${afc.version}</version>
 			</dependency>
 
 			<!-- Testing -->
@@ -365,7 +372,7 @@
 						<link>http://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/</link>
 						<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/</link>
 						<link>http://google-guice.googlecode.com/svn/trunk/javadoc/</link>
-						
+
 					</links>
 					<docfilessubdirs>true</docfilessubdirs>
 					<excludePackageNames></excludePackageNames>
@@ -436,6 +443,27 @@
 			<version>${guice.version}</version>
 		</dependency>
 	</dependencies>
+
+	<!-- ======================================= -->
+	<!-- ==== Third-Party Repositories       === -->
+	<!-- ==== Should be removed when all     === -->
+	<!-- ==== dependencies are available on  === -->
+	<!-- ==== central                        === -->
+	<!-- ======================================= -->
+	<repositories>
+		<!-- for the fixes on the Guava io api -->
+		<repository>
+			<id>org.janus-project.maven</id>
+			<name>Janus Project Snapshots</name>
+			<url>http://www.janus-project.org/maven/</url>
+		</repository>
+		<!-- for Arakhne.org vmutil api -->
+		<repository>
+			<id>org.arakhne-maven</id>
+			<name>Arakhnê.org Snapshots</name>
+			<url>http://download.tuxfamily.org/arakhne/maven/</url>
+		</repository>
+	</repositories>
 
 	<!-- ======================================= -->
 	<!-- ==== Organization Information === -->

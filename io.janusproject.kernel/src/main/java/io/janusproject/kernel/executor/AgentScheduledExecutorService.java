@@ -20,11 +20,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- *  A {@link ScheduledExecutorService} implementation that re-throws Errors and Exceptions encountered on the task execution.
- * 
- *  Original Code : http://code.nomad-labs.com/2011/12/09/mother-fk-the-scheduledexecutorservice/
- *  
+import org.arakhne.afc.vmutil.locale.Locale;
+
+/** A {@link ScheduledExecutorService} implementation that re-throws Errors 
+ * and Exceptions encountered on the task execution.
+ * <p>
+ * Original Code: {@link "http://code.nomad-labs.com/2011/12/09/mother-fk-the-scheduledexecutorservice/"}.
+ *
+ * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -37,44 +40,44 @@ public class AgentScheduledExecutorService extends ScheduledThreadPoolExecutor {
 	public AgentScheduledExecutorService(int corePoolSize) {
 		super(corePoolSize);
 	}
-	
-	
+
+
 	@Override
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-            return super.scheduleAtFixedRate(wrapRunnable(command), initialDelay, period, unit);
-    }
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+		return super.scheduleAtFixedRate(wrapRunnable(command), initialDelay, period, unit);
+	}
 
-    @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-            return super.scheduleWithFixedDelay(wrapRunnable(command), initialDelay, delay, unit);
-    }
+	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+		return super.scheduleWithFixedDelay(wrapRunnable(command), initialDelay, delay, unit);
+	}
 
-    private Runnable wrapRunnable(Runnable command) {
-            return new LogOnExceptionRunnable(command);
-    }
+	private static Runnable wrapRunnable(Runnable command) {
+		return new LogOnExceptionRunnable(command);
+	}
 
-    private static class LogOnExceptionRunnable implements Runnable {
-            private Runnable theRunnable;
+	private static class LogOnExceptionRunnable implements Runnable {
+		private Runnable theRunnable;
 
-            public LogOnExceptionRunnable(Runnable theRunnable) {
-                    super();
-                    this.theRunnable = theRunnable;
-            }
+		public LogOnExceptionRunnable(Runnable theRunnable) {
+			super();
+			this.theRunnable = theRunnable;
+		}
 
-            @Override
-            public void run() {
-                    try {
-                            this.theRunnable.run();
-                    } catch (Throwable t) {
-                            // LOG IT HERE!!!
-                            System.err.println("Schedule task [" + this.theRunnable + "] failed to execute. It will no longer be run!");
-                            t.printStackTrace();
-
-                            // and re throw it so that the Executor also gets this error so that it can do what it would
-                            // usually do
-                            throw new RuntimeException("Schedule task [" + this.theRunnable + "] failed to execute.", t);
-                    }
-            }
-    }
+		@Override
+		public void run() {
+			try {
+				this.theRunnable.run();
+			} catch (Throwable t) {
+				String message = Locale.getString("SCHEDULED_TASK_ERROR", this.theRunnable); //$NON-NLS-1$
+				// LOG IT HERE!!!
+				System.err.println(message);
+				t.printStackTrace();
+				// and re throw it so that the Executor also gets this error so that it can do what it would
+				// usually do
+				throw new RuntimeException(message, t);
+			}
+		}
+	}
 
 }

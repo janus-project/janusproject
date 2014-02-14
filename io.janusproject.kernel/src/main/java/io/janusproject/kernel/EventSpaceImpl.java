@@ -2,21 +2,20 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janus-project.org&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.kernel;
 
@@ -34,14 +33,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/**
- * @author $Author: Sebastian Rodriguez$
+/** Default implementation of an event space.
+ * 
+ * @author $Author: srodriguez$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -58,58 +60,66 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	@Inject
 	private ExecutorService executorService;
 
-
+	/** Constructs an event space.
+	 * 
+	 * @param id - identifier of the space.
+	 */
 	public EventSpaceImpl(SpaceID id) {
 		super(id);
-
 	}
 
+	/**
+	 * 
+	 * @param injector
+	 */
 	@Inject
 	void setInjector(Injector injector) {
-		this.participants = new UniqueAddressParticipantRepository<>(getID().getID().toString() + "-participants");
+		this.participants = new UniqueAddressParticipantRepository<>(getID().getID().toString() + "-participants"); //$NON-NLS-1$
 		injector.injectMembers(this.participants);
 	}
 
+	/** Set the network service to be used by this space to be distributed over the network.
+	 * 
+	 * @param net - instance of the network service.
+	 * @throws Exception
+	 */
 	@Inject
 	void setNetwork(Network net) throws Exception {
 		this.network = net;
 		this.network.register(new DistributedProxy(this));
 	}
 
-	public Address getAddress(EventListener entity) {
+	/** Replies the address associated to the given participant.
+	 * 
+	 * @param entity - instance of a participant.
+	 * @return the address of the participant with the given id.
+	 */
+	public final Address getAddress(EventListener entity) {
 		return getAddress(entity.getID());
 	}
 
+	@Override
 	public Address getAddress(UUID id) {
 		return this.participants.getAddress(id);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 */
+	@Override
 	public Address register(EventListener entity) {
 		Address a = new Address(getID(), entity.getID());
 		return this.participants.registerParticipant(a, entity);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Address unregister(EventListener entity) {
 		return this.participants.unregisterParticipant(entity);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-
 	@Override
-	public void emit(Event event, final Scope scope) {
+	public void emit(Event event, Scope<Address> scope) {
 		Preconditions.checkNotNull(event);
-		Preconditions.checkNotNull(event.getSource(), "Every event must have a source");
+		Preconditions.checkNotNull(event.getSource(), "Every event must have a source"); //$NON-NLS-1$
 		Preconditions.checkArgument(this.getID().equals(event.getSource().getSpaceId()),
-				"The source address must belong to this space");
+				"The source address must belong to this space"); //$NON-NLS-1$
 
 		try {
 			this.network.publish(this.getID(), scope, event);
@@ -142,11 +152,17 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 		}
 	}
 
+	/**
+	 * Invoked when an event was not handled by a listener.
+	 * 
+	 * @param e - dead event
+	 */
 	@Subscribe
 	public void unhandledEvent(DeadEvent e) {
-		System.out.println("----- DeadEvent : My SpaceID : " + getID());
-		System.out.println("----- DeadEvent Source : " + ((Event) e.getEvent()).getSource());
-		System.out.println("----- DeadEvent : " + e.getEvent());
+		this.log.finer(Locale.getString("UNHANDLED_EVENT", //$NON-NLS-1$
+				getID(),
+				((Event) e.getEvent()).getSource(),
+				e.getEvent()));
 	}
 
 	private static class DistributedProxy implements DistributedSpace {
@@ -157,16 +173,13 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 			this.space = space;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public SpaceID getID() {
 			return this.space.getID();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@SuppressWarnings("synthetic-access")
+		@Override
 		public void recv(Scope<?> scope, Event event) {
 			this.space.doEmit(event, (Scope<Address>) scope);
 		}

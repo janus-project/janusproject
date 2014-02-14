@@ -1,12 +1,16 @@
 /*
- * Copyright 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND
- *
+ * $Id$
+ * 
+ * Janus platform is an open-source multiagent platform.
+ * More details on http://www.janusproject.io
+ * 
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,39 +25,36 @@ import io.sarl.lang.core.SpaceSpecification;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.StreamSerializer;
 
-/**
+/** Serializer of identifiers of spaces.
+ * 
  * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 
+	/** Unique identifier for the {@link SpaceID} type.
+	 */
 	public static final int SPACE_ID_CLASS_TYPE = 19118;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int getTypeId() {
 		return SPACE_ID_CLASS_TYPE;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void destroy() {
 		//
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void write(ObjectDataOutput out, SpaceID object) throws IOException {
 		out.writeObject(object.getContextID());
@@ -62,24 +63,22 @@ public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public SpaceID read(ObjectDataInput in) throws IOException {
 		try {
 			UUID cid = in.readObject();
 			UUID id = in.readObject();
 			String specCls = in.readUTF();
-			if (cid == null || id == null || specCls == null) {
-				throw new IOException(String.format(
-						"Cannot build SpaceID object with contextID=%s, ID=%s, SpecClass=%s", cid, id, specCls));
+			if (cid != null && id != null && specCls != null) {
+				Class<?> type = Class.forName(specCls);
+				if (SpaceSpecification.class.isAssignableFrom(type)) {
+					SpaceID s = new SpaceID(cid, id, type.asSubclass(SpaceSpecification.class));
+					return s;
+				}
 			}
-			Class<? extends SpaceSpecification> spec = (Class<? extends SpaceSpecification>) Class.forName(specCls);
-			SpaceID s = new SpaceID(cid, id, spec);
-			return s;
+			throw new IOException(Locale.getString("BUILD_ERROR", cid, id, specCls)); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
-			throw new IOException("Specification Class not found.", e);
+			throw new IOException(Locale.getString("SPECIFICATION_CLASS_NOT_FOUND"), e); //$NON-NLS-1$
 		}
 
 	}

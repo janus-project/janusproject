@@ -2,21 +2,20 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janus-project.org&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.kernel;
 
@@ -33,9 +32,10 @@ import java.util.UUID;
 
 import com.google.inject.Injector;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** Implementation of an agent context in the Janus platform.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -44,16 +44,22 @@ class Context implements AgentContext{
 	private final UUID id;
 
 	
-	private SpaceRepository spaceRepository;
+	private final SpaceRepository spaceRepository;
 	
 	private final EventSpaceImpl defaultSpace;
 
-	private Injector injector;
+	private final Injector injector;
 
+	/** Constructs a <code>Context</code>.
+	 * 
+	 * @param injector - reference to the injector to be used.
+	 * @param id - identifier of the context.
+	 * @param defaultSpaceID - identifier of the default space in the context.
+	 */
 	protected Context(Injector injector, UUID id, UUID defaultSpaceID) {
 		this.id = id;
 		this.injector = injector;
-		this.spaceRepository = new SpaceRepository(id.toString()+"-spaces");
+		this.spaceRepository = new SpaceRepository(id.toString()+"-spaces"); //$NON-NLS-1$
 		this.injector.injectMembers(this.spaceRepository);
 		this.defaultSpace = createSpace(EventSpaceSpecification.class, defaultSpaceID);
 
@@ -84,12 +90,14 @@ class Context implements AgentContext{
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <S extends io.sarl.lang.core.Space> S getOrCreateSpace(
 			Class<? extends SpaceSpecification> spec, UUID spaceUUID,
 			Object... creationParams) {
 		Space s = this.spaceRepository.getFirstSpaceFromSpec(spec);
 		if (s != null) {
+			//Type safety: assume that any ClassCastException will be thrown in the caller context.
 			return (S) s;
 		}
 		return createSpace(spec, spaceUUID, creationParams);
@@ -97,8 +105,10 @@ class Context implements AgentContext{
 
 	/** {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public <S extends Space> Collection<S> getSpaces(Class<? extends SpaceSpecification> spec) {
+		//Type safety: assume that any ClassCastException will be thrown in the caller context.
 		return (Collection<S>) this.spaceRepository.getSpacesFromSpec(spec);
 	}
 

@@ -2,21 +2,20 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janusproject.io&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.kernel;
 
@@ -32,14 +31,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import org.arakhne.afc.vmutil.locale.Locale;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 import com.google.common.base.Objects;
 import com.google.inject.Inject;
 
-/**
- * @author $Author: Sebastian Rodriguez$
+/** Skill that permits to execute tasks with an executor service.
+ * 
+ * @author $Author: srodriguez$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -49,8 +51,8 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Inject
 	private ScheduledExecutorService executor;
 
-	private Map<String, AgentTask> tasks = new ConcurrentHashMap<>();
-	private Map<String, ScheduledFuture<AgentRunnableTask>> futures = new ConcurrentHashMap<>();
+	private final Map<String, AgentTask> tasks = new ConcurrentHashMap<>();
+	private final Map<String, ScheduledFuture<AgentRunnableTask>> futures = new ConcurrentHashMap<>();
 
 	/**
 	 * @param agent
@@ -59,17 +61,11 @@ class SchedulesSkill extends Skill implements Schedules {
 		super(agent);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void install() {
 		super.install();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void uninstall() {
 		for (ScheduledFuture<AgentRunnableTask> future : this.futures.values()) {
@@ -80,21 +76,16 @@ class SchedulesSkill extends Skill implements Schedules {
 		super.uninstall();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public AgentTask in(long delay, Procedure1<? super Agent> procedure) {
-		return in(this.task("task-" + UUID.randomUUID()), delay, procedure);
+		return in(this.task("task-" + UUID.randomUUID()), delay, procedure); //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
 		task.setProcedure((Procedure1<Agent>) procedure);
-		ScheduledFuture<AgentRunnableTask> sf = (ScheduledFuture<AgentRunnableTask>) this.executor.schedule(
+		ScheduledFuture<AgentRunnableTask> sf = 
+				(ScheduledFuture<AgentRunnableTask>) this.executor.schedule(
 				new AgentRunnableTask(task, getOwner()), delay, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
 		return task;
@@ -126,7 +117,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	 */
 	@Override
 	public AgentTask every(long period, Procedure1<? super Agent> procedure) {
-		return every(this.task("task-" + UUID.randomUUID()), period, procedure);
+		return every(this.task("task-" + UUID.randomUUID()), period, procedure); //$NON-NLS-1$
 	}
 
 	/**
@@ -143,20 +134,26 @@ class SchedulesSkill extends Skill implements Schedules {
 
 
 
+	/**
+	 * @author $Author: srodriguez$
+	 * @version $Name$ $Revision$ $Date$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
 	private static class AgentRunnableTask implements Runnable {
 		private WeakReference<AgentTask> agentTaskRef;
 		private WeakReference<Agent> agentRef;
 
 		public AgentRunnableTask(AgentTask task, Agent agent) {
-			this.agentTaskRef = new WeakReference<AgentTask>(task);
-			this.agentRef = new WeakReference<Agent>(agent);
+			this.agentTaskRef = new WeakReference<>(task);
+			this.agentRef = new WeakReference<>(agent);
 		}
 
 		@Override
 		public void run() {
 
 			if (this.agentTaskRef.get() == null) {
-				System.out.println("Agent Task is null");
+				System.out.println(Locale.getString("NULL_AGENT_TASK")); //$NON-NLS-1$
 			} else {
 				AgentTask task = this.agentTaskRef.get();
 				if (task.getGuard().apply(this.agentRef.get())) {
@@ -171,8 +168,9 @@ class SchedulesSkill extends Skill implements Schedules {
 		 */
 		@Override
 		public String toString() {
-			return Objects.toStringHelper(this).add("name", this.agentTaskRef.get().getName())
-					.add("agent", this.agentRef.get().getID()).toString();
+			return Objects.toStringHelper(this).add(
+					"name", this.agentTaskRef.get().getName()) //$NON-NLS-1$
+					.add("agent", this.agentRef.get().getID()).toString(); //$NON-NLS-1$
 		}
 
 	}

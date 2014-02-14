@@ -2,21 +2,20 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janusproject.io&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.kernel;
 
@@ -40,23 +39,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.collect.Queues;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.inject.Inject;
 
-/**
- * Janus implementation of SARL's {@link Behaviors} built-in capacity
- * 
+/** Janus implementation of SARL's {@link Behaviors} built-in capacity.
+ * <p>
  * This implementation uses a holonic vision where behaviors interact via an
  * {@link EventSpaceImpl} allowing them to be agent's as well.
  * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerContextAccess {
 
+	/** Reference to the event bus.
+	 */
 	protected AsyncEventBus eventBus;
 	private AgentContext innerContext;
 
@@ -74,20 +76,32 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		this.agentAsEventListener = new AgentEventListener(this);
 	}
 
+	/** Create the internal context.
+	 * 
+	 * @param factory - reference to the factory of context provided by the platform.
+	 */
 	@Inject
 	void createInternalContext(ContextFactory factory) {
 		this.innerContext = factory.create(getOwner().getID(), UUID.randomUUID());
 		((EventSpaceImpl) this.innerContext.getDefaultSpace()).register(this.agentAsEventListener);
 	}
 
+	/** Change the event bus inside the agent.
+	 * 
+	 * @param bus
+	 */
 	@Inject
 	void setInternalEventBus(AsyncEventBus bus) {
 		this.eventBus = bus;
 		this.eventBus.register(this.getOwner());
 		if (this.log != null)
-			this.log.severe("[" + this.getOwner().getID() + "] Agent registered in internal Event Bus");
+			this.log.finest(Locale.getString("EVENT_BUS_CHANGE", this.getOwner().getID())); //$NON-NLS-1$
 	}
 
+	/** Change the logger that is accessible to the inner behaviors or agents.
+	 * 
+	 * @param log
+	 */
 	@Inject
 	void setLogger(Logger log) {
 		this.log = log;
@@ -178,7 +192,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		EventSpace defSpace = getSkill(InnerContextAccess.class).getInnerContext().getDefaultSpace();
 		event.setSource(defSpace.getAddress(getOwner().getID()));
 		internalReceiveEvent(event);
-		this.log.finer("selfEvent: " + event);
+		this.log.finer(Locale.getString("SELF_EVENT", event)); //$NON-NLS-1$
 		if (event instanceof Initialize) {
 			this.running.set(true);
 			this.agentAsEventListener.agentInitialized();
@@ -192,19 +206,29 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		return this.agentAsEventListener;
 	}
 
+	/** Register the agent from the given default space.
+	 * 
+	 * @param space
+	 */
 	void registerOnDefaultSpace(EventSpaceImpl space) {
 		space.register(agentAsEventListener());
 	}
 
-	/**
-	 * @param defaultSpace
+	/** Unregister the agent from the given default space.
+	 * 
+	 * @param space
 	 */
 	void unregisterFromDefaultSpace(EventSpaceImpl space) {
 		space.unregister(agentAsEventListener());
 	}
 
 
-
+	/**
+	 * @author $Author: srodriguez$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
 	private static class AgentEventListener implements EventListener {
 
 		private Queue<Event> buffer = Queues.newConcurrentLinkedQueue();
@@ -213,9 +237,10 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 
 		private WeakReference<UUID> aid;
 
+		@SuppressWarnings("synthetic-access")
 		public AgentEventListener(BehaviorsAndInnerContextSkill skill) {
-			this.skill = new WeakReference<BehaviorsAndInnerContextSkill>(skill);
-			this.aid = new WeakReference<UUID>(skill.getOwner().getID());
+			this.skill = new WeakReference<>(skill);
+			this.aid = new WeakReference<>(skill.getOwner().getID());
 		}
 
 		@Override
@@ -223,6 +248,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 			return this.aid.get();
 		}
 
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void receiveEvent(Event event) {
 			if (this.skill.get().running.get() && !this.skill.get().stoping.get()) {
@@ -230,13 +256,16 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 				this.skill.get().internalReceiveEvent(event);
 			} else if (!this.skill.get().running.get() && this.skill.get().stoping.get()) {
 				// Dropping messages since agent is dying
-				this.skill.get().log.log(Level.WARNING, "Dropping event since agent is dying: " + event.toString());
+				this.skill.get().log.log(Level.WARNING, 
+						Locale.getString(BehaviorsAndInnerContextSkill.class,
+								"EVENT_DROP_WARNING", event)); //$NON-NLS-1$
 			} else {
 				this.buffer.add(event);
 			}
 		}
 
-		private void agentInitialized() {
+		@SuppressWarnings("synthetic-access")
+		void agentInitialized() {
 			for (Event evt : this.buffer) {
 				this.skill.get().internalReceiveEvent(evt);
 			}

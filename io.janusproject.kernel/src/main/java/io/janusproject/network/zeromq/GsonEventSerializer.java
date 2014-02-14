@@ -2,21 +2,20 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janus-project.org&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.network.zeromq;
 
@@ -31,12 +30,17 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/**  Serialize the {@link EventDispatch} content using GSON to
+ * generate the corresponding {@link EventEnvelope}.
+ * 
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -44,27 +48,21 @@ public class GsonEventSerializer implements EventSerializer {
 
 	@Inject
 	private Gson gson;
+	
 	@Inject
 	private EventEncrypter encrypter;
-	/**
-	 * {@inheritDoc}
-	 * @throws Exception 
-	 */
+	
 	@Override
 	public EventEnvelope serialize(EventDispatch dispatch) throws Exception {
-		
-
 		Event event = dispatch.getEvent();
 		Scope<?> scope = dispatch.getScope();
 		SpaceID spaceID = dispatch.getSpaceID();
 
-
-
-		dispatch.getHeaders().put("x-java-event-class",
+		dispatch.getHeaders().put("x-java-event-class", //$NON-NLS-1$
 				event.getClass().getName());
-		dispatch.getHeaders().put("x-java-scope-class",
+		dispatch.getHeaders().put("x-java-scope-class", //$NON-NLS-1$
 				scope.getClass().getName());
-		dispatch.getHeaders().put("x-java-spacespec-class",
+		dispatch.getHeaders().put("x-java-spacespec-class", //$NON-NLS-1$
 				spaceID.getSpaceSpecification().getName());
 		
 		EventPack pack = new EventPack();
@@ -81,16 +79,12 @@ public class GsonEventSerializer implements EventSerializer {
 	private static Map<String, String> getHeadersFromString(String src) {
 		Gson gson = new Gson();
 		Type headersType = new TypeToken<Map<String, String>>() {
+			//
 		}.getType();
 		return gson.fromJson(src, headersType);
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws Exception
-	 */
 	@Override
 	public EventDispatch deserialize(EventEnvelope envelope) throws Exception {
 		EventPack pack = this.encrypter.decrypt(envelope);
@@ -101,12 +95,16 @@ public class GsonEventSerializer implements EventSerializer {
 		Map<String, String> headers = getHeadersFromString(pack.getHeaders());
 
 		Class<?> spaceSpec = Class.forName(headers
-				.get("x-java-spacespec-class"));
-		Class<?> eventClazz = Class.forName(headers.get("x-java-event-class"));
-		Class<?> scopeClazz = Class.forName(headers.get("x-java-scope-class"));
+				.get("x-java-spacespec-class")); //$NON-NLS-1$
+		Class<?> eventClazz = Class.forName(headers.get("x-java-event-class")); //$NON-NLS-1$
+		Class<?> scopeClazz = Class.forName(headers.get("x-java-scope-class")); //$NON-NLS-1$
 
+		if (spaceSpec==null || !SpaceSpecification.class.isAssignableFrom(spaceSpec)) {
+			throw new ClassCastException(Locale.getString("INVALID_TYPE", spaceSpec)); //$NON-NLS-1$
+		}
+		
 		SpaceID spaceID = new SpaceID(contextId, spaceId,
-				(Class<? extends SpaceSpecification>) spaceSpec);
+				spaceSpec.asSubclass(SpaceSpecification.class));
 		
 		Event event = (Event) this.gson.fromJson(pack.getEvent(), eventClazz);
 		Scope<?> scope = (Scope<?>) this.gson.fromJson(pack.getScope(), scopeClazz);

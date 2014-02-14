@@ -2,21 +2,20 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janus-project.org&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.kernel;
 
@@ -26,26 +25,43 @@ import io.sarl.lang.core.SpaceID;
 
 import com.google.common.util.concurrent.Service;
 
-/**
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+/** This class enables the Janus kernel to be distributed
+ * other a network.
+ * 
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public interface Network extends Service{
 
-	/**
-	 * @param id
-	 * @param scope
-	 * @param data
-	 * @throws Exception 
+	/** Publish a data over the network.
+	 * 
+	 * @param id - identifier of the space in which the data was published.
+	 * @param scope - scope of the published data.
+	 * @param data - data to propage over the network.
+	 * @throws Exception
 	 */
 	void publish(SpaceID id, Scope<?> scope, Event data) throws Exception;
+	
+	/** Register the given distributed space in the network layer. 
+	 * 
+	 * @param space - the space distributed over the network by this peer.
+	 * @throws Exception
+	 */
 	void register(DistributedSpace space) throws Exception;
 	
+	/** Connect this instance of kernel to the given peer over the network.
+	 * 
+	 * @param peerUri
+	 * @throws Exception
+	 */
 	public void connectPeer(String peerUri) throws Exception;
-	/**
+	
+	/** Disconnect this peer from the given peer.
+	 * 
 	 * @param peer
+	 * @throws Exception
 	 */
 	public void disconnectPeer(String peer) throws Exception;
 

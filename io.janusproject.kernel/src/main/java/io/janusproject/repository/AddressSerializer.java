@@ -1,12 +1,16 @@
 /*
- * Copyright 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND
- *
+ * $Id$
+ * 
+ * Janus platform is an open-source multiagent platform.
+ * More details on http://www.janusproject.io
+ * 
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +29,8 @@ import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.StreamSerializer;
 
-/**
+/** Serializer for Janus addresses.
+ * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -33,27 +38,20 @@ import com.hazelcast.nio.serialization.StreamSerializer;
  */
 public class AddressSerializer implements StreamSerializer<Address> {
 
+	/** Unique identifier for the {@link Address} type.
+	 */
 	public static final int ADDRESS_CLASS_TYPE = 19119;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int getTypeId() {
 		return ADDRESS_CLASS_TYPE;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void destroy() {
 		//
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void write(ObjectDataOutput out, Address object) throws IOException {
 		out.writeObject(object.getUUID());
@@ -61,9 +59,6 @@ public class AddressSerializer implements StreamSerializer<Address> {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Address read(ObjectDataInput in) throws IOException {
 		UUID id = in.readObject();

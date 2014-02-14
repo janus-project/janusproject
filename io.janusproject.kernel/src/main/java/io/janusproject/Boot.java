@@ -2,30 +2,29 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janusproject.io&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject;
-
-import java.util.Arrays;
 
 import io.janusproject.kernel.Janus;
 import io.janusproject.kernel.JanusDefaultConfigModule;
 import io.janusproject.kernel.Kernel;
 import io.sarl.lang.core.Agent;
+
+import java.util.Arrays;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -33,22 +32,39 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.arakhne.afc.vmutil.locale.Locale;
 
-/**
+/** This is the class that permits to boot the Janus platform.
+ * <p>
+ * This class provides the "main" function for the platform.
+ * The list of the parameters is composed of a list of options,
+ * the classname of an agent to launch, and the parameters to pass
+ * to the launched agent.
+ * <p>
+ * The supported options may be obtain by passing no parameter, or
+ * the option <code>-h</code>.  
+ * <p>
+ * Example of Janus launching with Maven:
+ * <pre><code>mvn exec:java
+ *     -Dexec.mainClass="io.janusproject.Boot"
+ *     -Dexec.args="my.Agent"</code></pre>
+ * <p>
+ * Example of Janus launching from the CLI (only with the Jar file that is containing
+ * all the jar dependencies):
+ * <pre><code>java -jar janus-with-dependencies.jar my.Agent</code></pre>  
  * 
- * mvn exec:java -Dexec.mainClass="io.janusproject.Boot"
- * [-Dexec.args="my.Agent"]
- * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class Boot {
 
-	/**
+	/** Main function.
 	 * @param args
 	 */
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 
 		CommandLineParser parser = new BasicParser();
@@ -66,9 +82,24 @@ public class Boot {
 
 			String agentToLaunch = cmd.getArgs()[0];
 			showHeader();
-			System.out.println("Launching agent: " + agentToLaunch);
-			Class<?> agent = Class.forName(agentToLaunch);			
-			startJanus((Class<? extends Agent>) agent, Arrays.copyOfRange(cmd.getArgs(), 1, cmd.getArgs().length));
+			Class<?> agent = Class.forName(agentToLaunch);
+			// The following test is needed because the
+			// cast to Class<? extends Agent> is not checking
+			// the Agent type (it is a generic type, not
+			// tested at runtime).
+			if (Agent.class.isAssignableFrom(agent)) {
+				System.out.println(Locale.getString("LAUNCHING_AGENT", agentToLaunch)); //$NON-NLS-1$
+				startJanus(
+						(Class<? extends Agent>)agent,
+						Arrays.copyOfRange(
+								cmd.getArgs(),
+								1, cmd.getArgs().length,
+								Object[].class));
+			}
+			else {
+				throw new ClassCastException(
+						Locale.getString("INVALID_AGENT_TYPE", agentToLaunch)); //$NON-NLS-1$
+			}
 		} catch (ParseException | ClassNotFoundException e) {
 			e.printStackTrace();
 			showHelp();
@@ -77,51 +108,32 @@ public class Boot {
 
 	}
 
-	static Options getOptions() {
+	/** Replies the command line options supported by this boot class.
+	 * 
+	 * @return the command line options.
+	 */
+	public static Options getOptions() {
 		Options options = new Options();
-
-		options.addOption("h", "help", false, "Display help");
+		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		return options;
 	}
 
-	static void showHelp() {
+	/** Show the help message on the standard console.
+	 */
+	public static void showHelp() {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("io.janusproject.Boot [OPTIONS] AGENT_FQN", getOptions());
+		formatter.printHelp("io.janusproject.Boot [OPTIONS] AGENT_FQN", getOptions()); //$NON-NLS-1$
 		System.exit(0);
 	}
-
-	static void showHeader() {
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMM$77777777777777777777777777NMMMMMM");
-		System.out.println("MMMM$77777$ZO8OO7777$77777777777777OMMMM");
-		System.out.println("MM77MMMMMMMMMMMM7777MMMZ777$MMMMN7777MMM");
-		System.out.println("MMMMMMMMMMMMMMMM777NMMN77778MMMMMM777ZMM");
-		System.out.println("MMMMMMMMMMMMMMMO77OMMM$7777MMMMMMMD777MM");
-		System.out.println("MMMMMMMMMMMMMMN777MMMM7777NMMMMMMMN777MM");
-		System.out.println("MMMMMMMMMMMMMMO777MMMM7777MMMMMMMMO777MM");
-		System.out.println("MMMMMMMMMMMMMM$77$MMMD7777MMMMMMMM7777MM");
-		System.out.println("MMMMMMMMMMMMMM777DMMM$777$MMMMMMZ7777MMM");
-		System.out.println("MMMMMMMMMMNDO$777ZZZZ7777$$777777777MMMM");
-		System.out.println("MMMMMD777777777777777777777777777$MMMMMM");
-		System.out.println("MMMM77777777777777777777777777$8MMMMMMMM");
-		System.out.println("MM77777$NMMMM777NMMMO7778MMMMMMMMMMMMMMM");
-		System.out.println("M$77ZMMMMMMMM777MMMMZ777MMMMMMMMMMMMMMMM");
-		System.out.println("M77ZMMMMMMMM8777MMMM777ZMMMMMMMMMMMMMMMM");
-		System.out.println("877NMMMMMMMM7778MMMM77DMMMMMMMMMMMMMMMMM");
-		System.out.println("877DMMMMMMMN77ZMMMMO7$MMMMMMMMMMMMMMMMMM");
-		System.out.println("M777NMMMMN7777MMMMZ7DMMMM777MMMMMMMMMMMM");
-		System.out.println("MM777777777$MMMMMZMMMMMM$777MMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		  
+	
+	/** Show the heading logo of the Janus platform.
+	 */
+	public static void showHeader() {
+		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
 	}
 
-	static void startJanus(Class<? extends Agent> agentCls, String... params) {
+	private static void startJanus(Class<? extends Agent> agentCls, Object... params) {
 		Kernel k = Janus.create(new JanusDefaultConfigModule());
-		
 		k.spawn(agentCls, params);
 	}
 

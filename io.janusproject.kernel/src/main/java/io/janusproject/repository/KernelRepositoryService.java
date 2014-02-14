@@ -1,12 +1,17 @@
 /*
- * Copyright 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND
- *
+/*
+ * $Id$
+ * 
+ * Janus platform is an open-source multiagent platform.
+ * More details on http://www.janusproject.io
+ * 
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,12 +27,12 @@ import io.janusproject.repository.impl.RepositoryImplFactory;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.util.concurrent.AbstractService;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.hazelcast.core.HazelcastInstance;
@@ -35,15 +40,16 @@ import com.hazelcast.core.ISet;
 import com.hazelcast.core.ItemEvent;
 import com.hazelcast.core.ItemListener;
 
-/**
+/** Service that is providing the access to the repository of the Janus kernels.
+ * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class KernelRepositoryService extends AbstractService {
+
 	private ISet<String> kernels;
-	private String distributedParticipantMapName;
 	private String localURI;
 
 	@Inject
@@ -58,83 +64,100 @@ public class KernelRepositoryService extends AbstractService {
 	@Kernel
 	private ExecutorService executorService;
 
+	/** Constructs a <code>KernelRepositoryService</code>.
+	 * 
+	 * @param janusID - injected identifier of the Janus context.
+	 * @param repositoryImplFactory - factory to build a context.
+	 * @param myuri - injected URI of the current kernel.
+	 */
 	@Inject
 	void KernelRepository(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID,
 			RepositoryImplFactory repositoryImplFactory, @Named(ZeroMQConfig.PUB_URI) String myuri) {
-		this.kernels = repositoryImplFactory.getSet(janusID.toString() + "-kernels");
-
+		this.kernels = repositoryImplFactory.getSet(janusID.toString() + "-kernels"); //$NON-NLS-1$
 		this.localURI = myuri;
-
 	}
 
+	/** Change the network interface.
+	 * 
+	 * @param network
+	 */
 	@Inject
 	void setNetwork(Network network) {
 		this.network = network;
-		this.network.addListener(new NetworkListener(this), this.executorService);
+		this.network.addListener(new NetworkListener(), this.executorService);
 	}
 
+	/** Connect to the known kernel peers.
+	 */
 	void connectExiting() {
-
 		for (String peerURI : this.kernels) {
-			this.log.finer("Connecting to existing Peer " + peerURI);
+			this.log.finer(Locale.getString("CONNECTING_TO_PEER", peerURI)); //$NON-NLS-1$
 			if (!this.localURI.equals(peerURI)) {
 				connect(peerURI);
 			}
 		}
 	}
 
+	/** Connect to a peer repository.
+	 * 
+	 * @param peer
+	 */
 	void connect(String peer) {
 		try {
 			this.network.connectPeer(peer);
 		} catch (Exception e) {
-			throw new RuntimeException("Error while connecting to peer " + peer + " to Network");
+			throw new RuntimeException(Locale.getString("CONNECTION_ERROR", peer)); //$NON-NLS-1$
 		}
 	}
 
+	/** Disconnect from a peer repository.
+	 * 
+	 * @param peer
+	 */
 	void disconnect(String peer) {
 		try {
 			this.network.disconnectPeer(peer);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("Error while disconnecting to peer " + peer + " to Network");
+			throw new RuntimeException(Locale.getString("DISCONNECTION_ERROR", peer)); //$NON-NLS-1$
 		}
-	}
-
-	private static class HazelcastListener implements ItemListener<String> {
-		private final KernelRepositoryService kernelRepositoryService;
-
-		/**
-		 * 
-		 */
-		public HazelcastListener(KernelRepositoryService kernelRepositoryService) {
-			this.kernelRepositoryService = kernelRepositoryService;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void itemAdded(ItemEvent<String> item) {
-			if (!this.kernelRepositoryService.localURI.equals(item.getItem())) {
-				this.kernelRepositoryService.connect(item.getItem());
-			}
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void itemRemoved(ItemEvent<String> item) {
-			if (!this.kernelRepositoryService.localURI.equals(item.getItem())) {
-				this.kernelRepositoryService.disconnect(item.getItem());
-			}
-		}
-
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @author $Author: srodriguez$
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
 	 */
+	private class HazelcastListener implements ItemListener<String> {
+
+		/**
+		 */
+		public HazelcastListener() {
+			//
+		}
+
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void itemAdded(ItemEvent<String> item) {
+			if (!KernelRepositoryService.this.localURI.equals(item.getItem())) {
+				KernelRepositoryService.this.connect(item.getItem());
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void itemRemoved(ItemEvent<String> item) {
+			if (!KernelRepositoryService.this.localURI.equals(item.getItem())) {
+				KernelRepositoryService.this.disconnect(item.getItem());
+			}
+		}
+
+	}
+
 	@Override
 	protected void doStart() {
 		this.kernels.add(this.localURI);
@@ -142,75 +165,79 @@ public class KernelRepositoryService extends AbstractService {
 		notifyStarted();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void doStop() {
 		this.kernels.remove(this.localURI);
 
 		notifyStopped();
-		this.log.info("KernelRespositoryService Shutdown");
+		this.log.info(Locale.getString("SHUTDOWN")); //$NON-NLS-1$
 	}
 
-	private static class NetworkListener extends Listener {
-
-		private final KernelRepositoryService kernelRepositoryService;
+	/**
+	 * @author $Author: srodriguez$
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class NetworkListener extends Listener {
 
 		/**
-		 * 
 		 */
-		public NetworkListener(KernelRepositoryService kernelRepositoryService) {
-			this.kernelRepositoryService = kernelRepositoryService;
+		public NetworkListener() {
+			//
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void starting() {
-			this.kernelRepositoryService.log.info("Hazelcast starting");
-
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_STARTING")); //$NON-NLS-1$
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void running() {
-			this.kernelRepositoryService.log.info("Hazelcast init start");
-			this.kernelRepositoryService.kernels.addItemListener(new HazelcastListener(this.kernelRepositoryService),
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_INIT_STARTING")); //$NON-NLS-1$
+			KernelRepositoryService.this.kernels.addItemListener(new HazelcastListener(),
 					true);
-			this.kernelRepositoryService.connectExiting();
-			this.kernelRepositoryService.log.info("Hazelcast init end");
+			KernelRepositoryService.this.connectExiting();
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_INIT_ENDING")); //$NON-NLS-1$
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void terminated(State from) {			
-			this.kernelRepositoryService.log.info("Hazelcast Shutdown");
-			this.kernelRepositoryService.instance.shutdown();
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_ENDING")); //$NON-NLS-1$
+			KernelRepositoryService.this.instance.shutdown();
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void stopping(State from) {			
-			this.kernelRepositoryService.log.info("Hazelcast stopping");
+			KernelRepositoryService.this.log.info(
+					Locale.getString(KernelRepositoryService.class, "HAZELCAST_ENDING")); //$NON-NLS-1$
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void failed(State from, Throwable failure) {
-			System.out.println("Syso Hazelcast Failure");
-
 			super.failed(from, failure);
-			this.kernelRepositoryService.log.log(Level.SEVERE, "Failure on Network Service ", failure);
+			KernelRepositoryService.this.log.log(Level.SEVERE, 
+					Locale.getString(KernelRepositoryService.class, "NETWORK_FAILURE"), //$NON-NLS-1$
+					failure);
 		}
 	}
 }

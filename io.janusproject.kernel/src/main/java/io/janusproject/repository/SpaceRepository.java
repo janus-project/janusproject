@@ -1,3 +1,22 @@
+/*
+ * $Id$
+ * 
+ * Janus platform is an open-source multiagent platform.
+ * More details on http://www.janusproject.io
+ * 
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.janusproject.repository;
 
 import io.janusproject.repository.impl.RepositoryImplFactory;
@@ -12,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.arakhne.afc.vmutil.ClassComparator;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
@@ -22,48 +43,55 @@ import com.google.inject.Inject;
 
 
 /**
- * A repository of spaces specific to a given context
+ * A repository of spaces specific to a given context.
  * 
  * @author $Author: ngaud$
- *
+ * @author $Author: sgalland$
+ * @version $FullVersion$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
  */
 public class SpaceRepository {
-	
+
 	/**
 	 * The set of the id of all spaces stored in this repository
 	 * This set must be distributed and synchronized all over the network
 	 */
 	private Set<SpaceID> spaceIDs;
-	
+
 	/**
 	 * Map linking a space id to its related Space object
 	 * This is local non-distributed map
 	 */
 	private final Map<SpaceID, Space> spaces;
-	
+
 	/**
 	 * Map linking a a class of Space specification to its related implementations' ids
 	 * Use the map <code>spaces</code> to get the Space object associated to a given id
 	 * This is local non-distributed map
 	 */
 	private final Multimap<Class<? extends SpaceSpecification>, SpaceID> spacesBySpec;
-	
-	
-	private RepositoryImplFactory repositoryImplFactory;
-	
+
+
 	private final String distributedSpaceSetName;
-	
+
 	/**
 	 * 
 	 * @param distributedSpaceSetName - the name used to identify distributed map over network
 	 */
 	public SpaceRepository(String distributedSpaceSetName) {		
 		this.distributedSpaceSetName = distributedSpaceSetName;
-		this.spaces = new ConcurrentHashMap<SpaceID, Space>();	
-		Multimap<Class<? extends SpaceSpecification>, SpaceID> tmp = TreeMultimap.create(new ClassComparator(), new ObjectReferenceComparator<SpaceID>());
+		this.spaces = new ConcurrentHashMap<>();	
+		Multimap<Class<? extends SpaceSpecification>, SpaceID> tmp = TreeMultimap.create(
+				ClassComparator.SINGLETON,
+				new ObjectReferenceComparator<SpaceID>());
 		this.spacesBySpec = Multimaps.synchronizedMultimap(tmp) ;		
 	}
-	
+
+	/** Change the repository factory used by this space repository.
+	 * 
+	 * @param repositoryImplFactory
+	 */
 	@Inject
 	void setRespositoryImplFactory(RepositoryImplFactory repositoryImplFactory){
 		this.spaceIDs = repositoryImplFactory.getSet(this.distributedSpaceSetName);
@@ -78,7 +106,7 @@ public class SpaceRepository {
 		this.spaces.put(id, space);
 		this.spacesBySpec.put(id.getSpaceSpecification(), id);		
 	}	
-	
+
 	/**
 	 * Remove the specified space from this repository
 	 * @param space - the space to remove
@@ -89,7 +117,7 @@ public class SpaceRepository {
 		this.spacesBySpec.remove(id.getSpaceSpecification(), id);
 		this.spaceIDs.remove(space);
 	}
-	
+
 	/**
 	 * Remove the specified space from this repository
 	 * @param spaceID - the space of the space to remove
@@ -99,7 +127,7 @@ public class SpaceRepository {
 		this.spaces.remove(spaceID);
 		this.spacesBySpec.remove(spaceID.getSpaceSpecification(), spaceID);		
 	}
-	
+
 	/**
 	 * Clear the context of this repository
 	 */
@@ -108,7 +136,7 @@ public class SpaceRepository {
 		this.spaces.clear();
 		this.spacesBySpec.clear();
 	}
-	
+
 	/**
 	 * Returns the number of space registered in this repository
 	 * @return the number of space registered in this repository
@@ -141,7 +169,7 @@ public class SpaceRepository {
 	public Iterator<SpaceID> getSpaceIDIterator() {
 		return this.spaceIDs.iterator();
 	}
-	
+
 	/**
 	 * Returns an iterator over the various space's  stored in this repository
 	 * @return an iterator over the various space's stored in this repository
@@ -149,7 +177,7 @@ public class SpaceRepository {
 	public Iterator<Space> getSpaceIterator() {
 		return this.spaces.values().iterator();
 	}
-	
+
 	/**
 	 * Returns the set of all space's IDs stored in this repository
 	 * @return the set of all space's IDs stored in this repository
@@ -187,7 +215,7 @@ public class SpaceRepository {
 				return input.getID().getSpaceSpecification().equals(spec);
 			}
 		});
-		
+
 	}
 	/**
 	 * Returns the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
@@ -198,38 +226,14 @@ public class SpaceRepository {
 		return this.getSpaceIterator().next();
 	}
 
-		
-	
 	/**
-	 * Provides support for class comparisons based on class's canonical name
-	 * @author $Author: ngaud$
-	 *
-	 */
-	private static class ClassComparator implements Comparator<Class<?>> {
-
-		/**
-		 */
-		public ClassComparator() {
-			//
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public int compare(Class<?> o1, Class<?> o2) {
-			if (o1==o2) return 0;
-			if (o1==null) return Integer.MIN_VALUE;
-			if (o2==null) return Integer.MAX_VALUE;
-			return o1.getCanonicalName().compareTo(o2.getCanonicalName());
-		}
-		
-	}
-	
-	/**
-	 * Provides support for object's comparisons using hashCode
-	 * $Author: ngaud$
-	 *
+	 * Provides support for object's comparisons using hashCode.
+	 * 
 	 * @param <T> - the type of object to compare
+	 * @author $Author: ngaud$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
 	 */
 	private static class ObjectReferenceComparator<T> implements Comparator<T> {
 
@@ -239,14 +243,12 @@ public class SpaceRepository {
 			//
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public int compare(T o1, T o2) {
 			return System.identityHashCode(o2) - System.identityHashCode(o1);
 		}
-		
+
 	}
-	
-	
+
+
 }

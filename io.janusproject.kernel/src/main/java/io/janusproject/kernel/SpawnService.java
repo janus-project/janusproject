@@ -2,38 +2,41 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janus-project.org&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.kernel;
 
 import io.sarl.lang.core.Agent;
+
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+
+import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/**
+/** Implementation of a spawning service.
+ * 
  * @author $Author: srodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -50,33 +53,43 @@ class SpawnService {
 	@Inject
 	private Injector injector;
 
+	/** Spawn an agent of the given type, and pass the parameters to
+	 * its initialization function.
+	 * 
+	 * @param parentID - the identifier of the parent entity that is creating the agent.
+	 * @param agentClazz - the type of the agent to spawn.
+	 * @param params - the list of the parameters to pass to the agent initialization function.
+	 * @return the identifier of the agent.
+	 */
 	public UUID spawn(UUID parentID, Class<? extends Agent> agentClazz, Object... params) {
-
 		try {
 			Agent agent = agentClazz.getConstructor(UUID.class).newInstance(parentID);
 			this.agents.put(agent.getID(), agent);
 			this.injector.injectMembers(agent);
-			
+
 			notifyListenersAgentCreation(agent.getID(), params);
 			return agent.getID();
 		} catch (Exception e) {
-			throw new RuntimeException("Cannot instanciate Agent of type " + agentClazz.getName(), e);
+			throw new RuntimeException(
+					Locale.getString("CANNOT_INSTANCIATE_AGENT", agentClazz.getName()), e); //$NON-NLS-1$
 		}
 	}
 
+	/** Kill the agent with the given identifier.
+	 * 
+	 * @param agentID - the identifier of the agent to kill.
+	 */
 	public void killAgent(UUID agentID) {
 		this.agents.remove(agentID);
 		notifyListenersAgentDestruction(agentID);
 		if (this.agents.isEmpty()) {
-			this.log.severe("Requesting Kernel Stop");
+			this.log.severe(Locale.getString("KERNEL_AGENT_STOPPED")); //$NON-NLS-1$
 			this.injector.getInstance(Kernel.class).stop();
 		}
 	}
 
-
-
-	/**
-	 * @param id
+	/** Add a listener on the changes in the current state of an agent.
+	 * @param id - identifier of the agent.
 	 * @param agentLifecycleListener
 	 */
 	public void addAgentLifecycleListener(UUID id, AgentLifecycleListener agentLifecycleListener) {
@@ -85,14 +98,14 @@ class SpawnService {
 
 	private void notifyListenersAgentCreation(UUID agentID, Object[] params) {
 		for (AgentLifecycleListener l : this.lifecycleListeners.get(agentID)) {
-			this.log.finer("Notifing of agent creation to" + l.toString());
+			this.log.finer(Locale.getString("NOTIFY_AGENT_CREATION_TO", l)); //$NON-NLS-1$
 			l.agentSpawned(params);
 		}
 	}
-	
+
 	private void notifyListenersAgentDestruction(UUID agentID) {
 		for (AgentLifecycleListener l : this.lifecycleListeners.get(agentID)) {
-			this.log.finer("Notifing of agent destruction to" + l.toString());
+			this.log.finer(Locale.getString("NOTIFY_AGENT_DESTRUCTION_TO", l)); //$NON-NLS-1$
 			l.agentDestroy();
 		}
 	}

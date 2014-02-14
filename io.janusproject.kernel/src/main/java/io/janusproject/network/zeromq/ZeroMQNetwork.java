@@ -2,21 +2,20 @@
  * $Id$
  * 
  * Janus platform is an open-source multiagent platform.
- * More details on &lt;http://www.janus-project.org&gt;
- * Copyright (C) 2013 Janus Core Developers
+ * More details on http://www.janusproject.io
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.network.zeromq;
 
@@ -36,6 +35,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import org.arakhne.afc.vmutil.locale.Locale;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Poller;
@@ -46,18 +46,21 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-/**
- * @author $Author: Sebastian Rodriguez$
+/** Service that is providing the ZeroMQ network.
+ * 
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
 class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
+
 	private ZContext context;
 	private Socket publisher;
 
-	private static final String CMD_DISCOVER = "DICOVER_SPACE";
+	private static final String CMD_DISCOVER = "DICOVER_SPACE"; //$NON-NLS-1$
 
 	private Map<SpaceID, DistributedSpace> spaces = new ConcurrentHashMap<>();
 	private Map<String, Socket> subcribers = new ConcurrentHashMap<>();
@@ -80,17 +83,21 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	private final String uri;
 
 	/**
+	 * Construct a <code>ZeroMQNetwork</code>.
 	 * 
+	 * @param uri - inhected URI of the PUB socket.
 	 */
 	@Inject
 	ZeroMQNetwork(@Named(PUB_URI) String uri) {
 		this.uri = uri;
 	}
 
+	@Override
 	public void connectPeer(String peerURI) throws Exception {
 
-		this.log.severe("Connecting Peer " + peerURI);
+		this.log.finer(Locale.getString("PEER_CONNECTION", peerURI)); //$NON-NLS-1$
 //		Socket subscriber = this.context.socket(ZMQ.SUB);
+		@SuppressWarnings("resource")
 		Socket subscriber = this.context.createSocket(ZMQ.SUB);
 
 		this.subcribers.put(peerURI, subscriber);
@@ -99,27 +106,26 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		}
 		subscriber.connect(peerURI);
 		this.poller.register(subscriber, Poller.POLLIN);
-		this.log.severe("Connected Peer " + peerURI);
+		this.log.finer(Locale.getString("PEER_CONNECTED", peerURI)); //$NON-NLS-1$
 		
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void disconnectPeer(String peerURI) throws Exception {
-		this.log.severe("Disconnecting Peer " + peerURI);
+		this.log.finer(Locale.getString("PEER_DISCONNECTION", peerURI)); //$NON-NLS-1$
+		@SuppressWarnings("resource")
 		Socket s = this.subcribers.get(peerURI);
 		this.poller.unregister(s);
 
 		//FIXME s.close();
 		//this.context.destroySocket(s);
-		this.log.severe("Disconnected Peer " + peerURI);
+		this.log.finer(Locale.getString("PEER_DISCONNECTED", peerURI)); //$NON-NLS-1$
 	}
 
+	@Override
 	public void register(DistributedSpace space) throws Exception {
 
-		this.log.fine("Registering distributed Space: " + space.getID());
+		this.log.finer(Locale.getString("REGISTERING_DISTRIBUTED_SPACE", space.getID())); //$NON-NLS-1$
 		byte[] topic = this.serializer.serializeContextID(space.getID().getContextID());
 		this.spaces.put(space.getID(), space);
 		int next = this.poller.getNext();
@@ -137,18 +143,19 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 */
 	private void notifyOfSpace(DistributedSpace space) throws Exception {
 		EventDispatch d = new EventDispatch(space.getID(), NoEvent.INSTANCE, Scopes.nullScope());
-		d.getHeaders().put("x-netcmd", CMD_DISCOVER);
+		d.getHeaders().put("x-netcmd", CMD_DISCOVER); //$NON-NLS-1$
 
 		EventEnvelope command = processOutgoing(d);
 		command.send(this.publisher);
 
 	}
 
+	@Override
 	public void publish(SpaceID spaceID, Scope<?> scope, Event e) throws Exception {
 
 		EventEnvelope env = processOutgoing(e.getSource().getSpaceId(), e, scope);
 		env.send(this.publisher);
-		this.log.fine("Publishing Event - spaceID : " + spaceID.toString() + " Event:" + e);
+		this.log.finer(Locale.getString("PUBLISH_EVENT", spaceID, e)); //$NON-NLS-1$
 
 	}
 
@@ -157,7 +164,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 * @throws Exception
 	 */
 	void receive(EventEnvelope env) throws Exception {
-		this.log.fine("Network on " + this.uri + " received " + env);
+		this.log.finer(Locale.getString("ENVELOPE_RECEIVED", this.uri, env)); //$NON-NLS-1$
 		final EventDispatch dispatch = processIncomming(env);
 
 		DistributedSpace space = this.spaces.get(dispatch.getSpaceID());
@@ -166,11 +173,11 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 			SpaceID spaceID = dispatch.getSpaceID();
 			this.contextRepository.getContext(spaceID.getContextID()).createSpace(spaceID.getSpaceSpecification(),
 					spaceID.getID());
-			Preconditions.checkNotNull(this.spaces.get(spaceID), "Space ( %s ) was not created on time", spaceID);
+			Preconditions.checkNotNull(this.spaces.get(spaceID), "Space ( %s ) was not created on time", spaceID); //$NON-NLS-1$
 			// FIXME: Improve before release
 			space = this.spaces.get(spaceID);
 		}
-		String cmd = dispatch.getHeaders().get("x-netcmd");
+		String cmd = dispatch.getHeaders().get("x-netcmd"); //$NON-NLS-1$
 		if (cmd != null && CMD_DISCOVER.equals(cmd)) {
 			return;
 		}
@@ -178,7 +185,6 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		final DistributedSpace realSpace = space;
 
 		this.executorService.execute(new Runnable() {
-
 			@Override
 			public void run() {
 				realSpace.recv(dispatch.getScope(), dispatch.getEvent());
@@ -212,12 +218,13 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		//this.publisher.close();
 		
 		this.context.destroy();
-		this.log.info("ZeroMQNetwork Shutdown");
+		this.log.info(Locale.getString("ZEROMQ_SHUTDOWN")); //$NON-NLS-1$
 	}
 
 	private void stopPoller() {
-		this.log.info("Stopping Poller");
+		this.log.info(Locale.getString("STOPPING_POLLER")); //$NON-NLS-1$
 		for (int i = 0; i < this.poller.getSize(); i++) {
+			@SuppressWarnings("resource")
 			Socket socket = this.poller.getSocket(i);
 			this.poller.unregister(socket);
 			socket.close();
@@ -228,7 +235,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		return this.serializer.serialize(dispatch);
 	}
 
-	private EventEnvelope processOutgoing(SpaceID spaceID, Event event, Scope scope) throws Exception {
+	private EventEnvelope processOutgoing(SpaceID spaceID, Event event, Scope<?> scope) throws Exception {
 		return processOutgoing(new EventDispatch(spaceID, event, scope));
 	}
 
@@ -247,18 +254,18 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 				if (signaled > 0) {
 					for (int i = 0; i < this.poller.getSize(); i++) {
 						if (this.poller.pollin(i)) {
-							this.log.fine("Polling in from " + i);
+							this.log.finer(Locale.getString("POLLING", i)); //$NON-NLS-1$
 							EventEnvelope ev = EventEnvelope.recv(this.poller.getSocket(i));
 							this.receive(ev);
 						} else if (this.poller.pollerr(i)) {
-							this.log.warning("Error in pollerr for " + this.poller.getSocket(i));
+							this.log.warning(Locale.getString("POLLING_ERROR", this.poller.getSocket(i))); //$NON-NLS-1$
 						}
 					}
 				}
 			}
 		}
 		
-
+		stopPoller();
 	}
 
 }
