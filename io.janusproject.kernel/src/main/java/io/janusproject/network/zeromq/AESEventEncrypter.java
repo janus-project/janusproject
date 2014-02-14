@@ -88,20 +88,19 @@ public class AESEventEncrypter implements EventEncrypter {
 		return pack;
 	}
 
-	private String decrypt(byte[] encrypted) throws GeneralSecurityException {
+	private byte[] decrypt(byte[] encrypted) throws GeneralSecurityException {
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(Cipher.DECRYPT_MODE, this.skeySpec, new IvParameterSpec(
 				new byte[16]));
-		byte[] original = cipher.doFinal(encrypted);
-		return new String(original, Charsets.UTF_8);
+		return cipher.doFinal(encrypted);
 
 	}
 
-	private byte[] encrypt(String value) throws GeneralSecurityException {
+	private byte[] encrypt(byte[] value) throws GeneralSecurityException {
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(Cipher.ENCRYPT_MODE, this.skeySpec, new IvParameterSpec(
 				new byte[16]));
-		return cipher.doFinal(value.getBytes(Charsets.UTF_8));
+		return cipher.doFinal(value);
 	}
 
 	/**
@@ -111,6 +110,6 @@ public class AESEventEncrypter implements EventEncrypter {
 	 */
 	@Override
 	public byte[] encrytContextID(UUID id) throws Exception {
-		return encrypt(id.toString());
+		return encrypt(id.toString().getBytes());
 	}
 }

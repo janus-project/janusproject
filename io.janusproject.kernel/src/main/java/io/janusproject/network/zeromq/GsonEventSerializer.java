@@ -66,11 +66,11 @@ public class GsonEventSerializer implements EventSerializer {
 				spaceID.getSpaceSpecification().getName());
 		
 		EventPack pack = new EventPack();
-		pack.setEvent(this.gson.toJson(event));
-		pack.setScope(this.gson.toJson(scope));
-		pack.setHeaders(this.gson.toJson(dispatch.getHeaders()));
-		pack.setSpaceId(dispatch.getSpaceID().getID().toString());
-		pack.setContextId(dispatch.getSpaceID().getContextID().toString());
+		pack.setEvent(this.gson.toJson(event).getBytes());
+		pack.setScope(this.gson.toJson(scope).getBytes());
+		pack.setHeaders(this.gson.toJson(dispatch.getHeaders()).getBytes());
+		pack.setSpaceId(spaceID.getID().toString().getBytes());
+		pack.setContextId(spaceID.getContextID().toString().getBytes());
 
 		return this.encrypter.encrypt(pack);
 
@@ -89,10 +89,10 @@ public class GsonEventSerializer implements EventSerializer {
 	public EventDispatch deserialize(EventEnvelope envelope) throws Exception {
 		EventPack pack = this.encrypter.decrypt(envelope);
 		
-		UUID contextId = UUID.fromString(pack.getContextId());
-		UUID spaceId = UUID.fromString(pack.getSpaceId());
+		UUID contextId = UUID.fromString(new String(pack.getContextId()));
+		UUID spaceId = UUID.fromString(new String(pack.getSpaceId()));
 
-		Map<String, String> headers = getHeadersFromString(pack.getHeaders());
+		Map<String, String> headers = getHeadersFromString(new String(pack.getHeaders()));
 
 		Class<?> spaceSpec = Class.forName(headers
 				.get("x-java-spacespec-class")); //$NON-NLS-1$
@@ -106,8 +106,8 @@ public class GsonEventSerializer implements EventSerializer {
 		SpaceID spaceID = new SpaceID(contextId, spaceId,
 				spaceSpec.asSubclass(SpaceSpecification.class));
 		
-		Event event = (Event) this.gson.fromJson(pack.getEvent(), eventClazz);
-		Scope<?> scope = (Scope<?>) this.gson.fromJson(pack.getScope(), scopeClazz);
+		Event event = (Event) this.gson.fromJson(new String(pack.getEvent()), eventClazz);
+		Scope<?> scope = (Scope<?>) this.gson.fromJson(new String(pack.getScope()), scopeClazz);
 		return new EventDispatch(spaceID,event, scope,headers);
 
 	}

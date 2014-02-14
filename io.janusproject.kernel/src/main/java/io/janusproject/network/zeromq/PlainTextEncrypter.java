@@ -37,19 +37,19 @@ public class PlainTextEncrypter implements EventEncrypter {
 
 	@Override
 	public EventEnvelope encrypt(EventPack pack) {
-		return EventEnvelope.build(pack.getContextId().getBytes(), pack
-				.getSpaceId().getBytes(), pack.getScope().getBytes(), pack
-				.getHeaders().getBytes(), pack.getEvent().getBytes());
+		return EventEnvelope.build(pack.getContextId(), pack
+				.getSpaceId(), pack.getScope(), pack
+				.getHeaders(), pack.getEvent());
 	}
 
 	@Override
 	public EventPack decrypt(EventEnvelope envelope) {
 		EventPack pack = new EventPack();
-		pack.setContextId(new String(envelope.getContextId()));
-		pack.setSpaceId(new String(envelope.getSpaceId()));
-		pack.setScope(new String(envelope.getScope()));
-		pack.setEvent(new String(envelope.getBody()));
-		pack.setHeaders(new String(envelope.getCustomHeaders()));
+		pack.setContextId(envelope.getContextId());
+		pack.setSpaceId(envelope.getSpaceId());
+		pack.setScope(envelope.getScope());
+		pack.setEvent(envelope.getBody());
+		pack.setHeaders(envelope.getCustomHeaders());
 		return pack;
 	}
 

@@ -80,12 +80,12 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	@Inject
 	private ExecutorService executorService;
 
-	private final String uri;
+	private String uri;
 
 	/**
 	 * Construct a <code>ZeroMQNetwork</code>.
 	 * 
-	 * @param uri - inhected URI of the PUB socket.
+	 * @param uri - injected URI of the PUB socket.
 	 */
 	@Inject
 	ZeroMQNetwork(@Named(PUB_URI) String uri) {
@@ -152,8 +152,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 
 	@Override
 	public void publish(SpaceID spaceID, Scope<?> scope, Event e) throws Exception {
-
-		EventEnvelope env = processOutgoing(e.getSource().getSpaceId(), e, scope);
+		EventEnvelope env = processOutgoing(spaceID, e, scope);
 		env.send(this.publisher);
 		this.log.finer(Locale.getString("PUBLISH_EVENT", spaceID, e)); //$NON-NLS-1$
 

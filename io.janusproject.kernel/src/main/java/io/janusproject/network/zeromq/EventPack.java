@@ -30,79 +30,79 @@ package io.janusproject.network.zeromq;
  */
 public class EventPack {
 	
-	private String contextId;
-	private String spaceId;
-	private String headers;
-	private String scope;
-	private String event;
+	private byte[] contextId;
+	private byte[] spaceId;
+	private byte[] headers;
+	private byte[] scope;
+	private byte[] event;
 	
 	/**
 	 * @return the contextId
 	 */
-	public String getContextId() {
+	public byte[] getContextId() {
 		return this.contextId;
 	}
 	
 	/**
 	 * @param contextId the contextId to set
 	 */
-	public void setContextId(String contextId) {
+	public void setContextId(byte[] contextId) {
 		this.contextId = contextId;
 	}
 	
 	/**
 	 * @return the spaceId
 	 */
-	public String getSpaceId() {
+	public byte[] getSpaceId() {
 		return this.spaceId;
 	}
 	
 	/**
 	 * @param spaceId the spaceId to set
 	 */
-	public void setSpaceId(String spaceId) {
+	public void setSpaceId(byte[] spaceId) {
 		this.spaceId = spaceId;
 	}
 	
 	/**
 	 * @return the headers
 	 */
-	public String getHeaders() {
+	public byte[] getHeaders() {
 		return this.headers;
 	}
 	
 	/**
 	 * @param headers the headers to set
 	 */
-	public void setHeaders(String headers) {
+	public void setHeaders(byte[] headers) {
 		this.headers = headers;
 	}
 	
 	/**
 	 * @return the scope
 	 */
-	public String getScope() {
+	public byte[] getScope() {
 		return this.scope;
 	}
 	
 	/**
 	 * @param scope the scope to set
 	 */
-	public void setScope(String scope) {
+	public void setScope(byte[] scope) {
 		this.scope = scope;
 	}
 	
 	/**
 	 * @return the event
 	 */
-	public String getEvent() {
+	public byte[] getEvent() {
 		return this.event;
 	}
 	
 	/**
 	 * @param event the event to set
 	 */
-	public void setEvent(String event) {
+	public void setEvent(byte[] event) {
 		this.event = event;
 	}
 
