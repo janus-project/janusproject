@@ -15,6 +15,7 @@ limitations under the License.
 
 This project uses:
   AOP alliance under Public Domain
+  Arakhnê Foundation Classes under GNU General Lesser Public License (LGPL) version 3.0
   Commons CLI under The Apache Software License, Version 2.0
   Eclipse Xbase Runtime Library under Eclipse Public License - v 1.0
   Eclipse Xtend Runtime Library under Eclipse Public License - v 1.0
