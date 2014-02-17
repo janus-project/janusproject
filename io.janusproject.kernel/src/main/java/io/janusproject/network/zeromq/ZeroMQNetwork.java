@@ -220,15 +220,15 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		this.log.info(Locale.getString("ZEROMQ_SHUTDOWN")); //$NON-NLS-1$
 	}
 
-	private void stopPoller() {
-		this.log.info(Locale.getString("STOPPING_POLLER")); //$NON-NLS-1$
-		for (int i = 0; i < this.poller.getSize(); i++) {
-			@SuppressWarnings("resource")
-			Socket socket = this.poller.getSocket(i);
-			this.poller.unregister(socket);
-			socket.close();
-		}
-	}
+//	private void stopPoller() {
+//		this.log.info(Locale.getString("STOPPING_POLLER")); //$NON-NLS-1$
+//		for (int i = 0; i < this.poller.getSize(); i++) {
+//			@SuppressWarnings("resource")
+//			Socket socket = this.poller.getSocket(i);
+//			this.poller.unregister(socket);
+//			socket.close();
+//		}
+//	}
 
 	private EventEnvelope processOutgoing(EventDispatch dispatch) throws Exception {
 		return this.serializer.serialize(dispatch);
@@ -263,8 +263,8 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 				}
 			}
 		}
-		
-		stopPoller();
+		//FIXME: May the poller be stopped?
+		//stopPoller();
 	}
 
 }
