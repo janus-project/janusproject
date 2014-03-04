@@ -451,11 +451,15 @@
 	<!-- ==== central === -->
 	<!-- ======================================= -->
 	<repositories>
-		<!-- for the fixes on the Guava io api -->
 		<repository>
-			<id>org.janus-project.maven</id>
-			<name>Janus Project Snapshots</name>
-			<url>http://www.janus-project.org/maven/</url>
+			<id>io.janusproject.maven</id>
+			<name>Janus Repository</name>
+			<url>http://maven.janusproject.io/</url>
+		</repository>
+		<repository>
+			<id>io.sarl.maven</id>
+			<name>SARL Repository</name>
+			<url>http://maven.sarl.io/</url>
 		</repository>
 		<!-- for Arakhne.org vmutil api -->
 		<repository>
@@ -521,23 +525,6 @@
 			</roles>
 		</developer>
 	</developers>
-
-	<!-- =================== -->
-	<!-- ==== Repositories === -->
-	<!-- =================== -->
-
-	<repositories>
-		<repository>
-			<id>io.janusproject.maven</id>
-			<name>Janus Repository</name>
-			<url>http://maven.janusproject.io/</url>
-		</repository>
-		<repository>
-			<id>io.sarl.maven</id>
-			<name>SARL Repository</name>
-			<url>http://maven.sarl.io/</url>
-		</repository>
-	</repositories>
 
 	<!-- =================== -->
 	<!-- ==== Deployment === -->
