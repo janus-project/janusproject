@@ -445,17 +445,21 @@
 	</dependencies>
 
 	<!-- ======================================= -->
-	<!-- ==== Third-Party Repositories       === -->
-	<!-- ==== Should be removed when all     === -->
-	<!-- ==== dependencies are available on  === -->
-	<!-- ==== central                        === -->
+	<!-- ==== Third-Party Repositories === -->
+	<!-- ==== Should be removed when all === -->
+	<!-- ==== dependencies are available on === -->
+	<!-- ==== central === -->
 	<!-- ======================================= -->
 	<repositories>
-		<!-- for the fixes on the Guava io api -->
 		<repository>
-			<id>org.janus-project.maven</id>
-			<name>Janus Project Snapshots</name>
-			<url>http://www.janus-project.org/maven/</url>
+			<id>io.janusproject.maven</id>
+			<name>Janus Repository</name>
+			<url>http://maven.janusproject.io/</url>
+		</repository>
+		<repository>
+			<id>io.sarl.maven</id>
+			<name>SARL Repository</name>
+			<url>http://maven.sarl.io/</url>
 		</repository>
 		<!-- for Arakhne.org vmutil api -->
 		<repository>
@@ -521,4 +525,20 @@
 			</roles>
 		</developer>
 	</developers>
+
+	<!-- =================== -->
+	<!-- ==== Deployment === -->
+	<!-- =================== -->
+
+	<distributionManagement>
+		<repository>
+			<id>local-release-repository</id>
+			<url>file:///var/www/janus-maven-repository/</url>
+		</repository>
+		<snapshotRepository>
+			<id>local-snapshot-repository</id>
+			<url>file:///var/www/janus-maven-repository/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>
