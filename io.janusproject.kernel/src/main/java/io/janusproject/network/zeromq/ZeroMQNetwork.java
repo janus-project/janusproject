@@ -22,11 +22,11 @@ package io.janusproject.network.zeromq;
 import static io.janusproject.network.zeromq.ZeroMQConfig.PUB_URI;
 import io.janusproject.kernel.DistributedSpace;
 import io.janusproject.kernel.Network;
-import io.janusproject.kernel.Scopes;
 import io.janusproject.repository.ContextRepository;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.util.Scopes;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -142,7 +142,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 * @throws Exception
 	 */
 	private void notifyOfSpace(DistributedSpace space) throws Exception {
-		EventDispatch d = new EventDispatch(space.getID(), NoEvent.INSTANCE, Scopes.nullScope());
+		EventDispatch d = new EventDispatch(space.getID(), NoEvent.INSTANCE, Scopes.allParticipants());
 		d.getHeaders().put("x-netcmd", CMD_DISCOVER); //$NON-NLS-1$
 
 		EventEnvelope command = processOutgoing(d);

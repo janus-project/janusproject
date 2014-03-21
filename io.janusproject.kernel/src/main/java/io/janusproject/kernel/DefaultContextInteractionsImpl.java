@@ -30,6 +30,7 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Skill;
+import io.sarl.util.AddressScope;
 
 /** Skill to access to the default interaction context.
  * 

@@ -26,6 +26,7 @@ import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpace;
+import io.sarl.util.Scopes;
 
 import java.util.Set;
 import java.util.UUID;
@@ -133,7 +134,7 @@ class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 
 	@Override
 	public void emit(Event event) {
-		this.emit(event, Scopes.<Address> nullScope());
+		this.emit(event, Scopes.<Address>allParticipants());
 	}
 
 	private void doEmit(final Event event, final Scope<Address> scope) {

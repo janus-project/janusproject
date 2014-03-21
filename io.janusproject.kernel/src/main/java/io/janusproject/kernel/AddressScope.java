@@ -32,7 +32,9 @@ import com.google.common.collect.Sets;
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
+ * @deprecated see {@link io.sarl.util.AddressScope}
  */
+@Deprecated
 public class AddressScope implements Scope<Address> {
 
 	//TODO: URI?

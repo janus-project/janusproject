@@ -28,7 +28,9 @@ import io.sarl.lang.core.Scope;
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
+ * @deprecated see {@link io.sarl.util.Scopes}
  */
+@Deprecated
 public class Scopes {
 
 	/** Replies the scope that is representing everything.
