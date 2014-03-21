@@ -22,7 +22,10 @@ package io.janusproject.network.zeromq;
 import io.janusproject.kernel.Network;
 
 import com.google.common.util.concurrent.Service;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 
@@ -39,10 +42,20 @@ public class ZeroMQNetworkModule extends AbstractModule {
 	protected void configure() {
 		bind(Network.class).to(ZeroMQNetwork.class).in(Singleton.class);
 		bind(EventSerializer.class).to(GsonEventSerializer.class).in(Singleton.class);
-		bind(EventEncrypter.class).to(AESEventEncrypter.class).in(Singleton.class);
+		//bind(EventEncrypter.class).to(AESEventEncrypter.class).in(Singleton.class);
+		bind(EventEncrypter.class).to(PlainTextEncrypter.class).in(Singleton.class);
 
 		Multibinder<Service> uriBinder = Multibinder.newSetBinder(binder(), Service.class);
 	    uriBinder.addBinding().to(ZeroMQNetwork.class);
 	}
 
+	@Provides
+	private Gson createGson() {
+		return new GsonBuilder()
+        .registerTypeAdapter(Class.class, new ClassTypeAdapter())
+        .setPrettyPrinting()
+        .create();
+	}
+	
+	
 }
