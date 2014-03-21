@@ -19,6 +19,7 @@
  */
 package io.janusproject.repository;
 
+
 /** Constants for the Janus configuration.
  * 
  * @author $Author: srodriguez$
@@ -28,12 +29,24 @@ package io.janusproject.repository;
  */
 public class JanusConfig {
 	
-	/** Identifier of the Janus context.
+	/** Name of the property that contains the identifier of the Janus context.
+	 * @see #DEFAULT_JANUS_CONTEXT_ID
 	 */
 	public static final String JANUS_CONTEXT_ID = "janus.context.id"; //$NON-NLS-1$
 
-	/** Identifier for the default space of the Janus context.
+	/** Name of the property that contains the identifier for the default
+	 * space of the Janus context.
+	 * @see #DEFAULT_JANUS_SPACE_ID
 	 */
 	public static final String JANUS_DEF_SPACE_ID = "janus.context.defspace.id"; //$NON-NLS-1$
 	
+	/** The default value for the Janus context identifier.
+	 * @see #JANUS_CONTEXT_ID
+	 */
+	public static final String DEFAULT_JANUS_CONTEXT_ID = "2c38fb7f-f363-4f6e-877b-110b1f07cc77"; //$NON-NLS-1$
+	
+	/** The default value for the Janus space identifier.
+	 * @see #JANUS_DEF_SPACE_ID
+	 */
+	public static final String DEFAULT_JANUS_SPACE_ID = "7ba8885d-545b-445a-a0e9-b655bc15ebe0"; //$NON-NLS-1$
 }

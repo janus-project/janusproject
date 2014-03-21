@@ -82,9 +82,9 @@ public class CoreModule extends AbstractModule {
 	@Override
 	protected void configure() {
 
-		UUID JanusContextID = UUID.fromString("2c38fb7f-f363-4f6e-877b-110b1f07cc77");
+		UUID JanusContextID = UUID.fromString(JanusConfig.DEFAULT_JANUS_CONTEXT_ID);
 
-		UUID defaultJanusSpaceId = UUID.fromString("7ba8885d-545b-445a-a0e9-b655bc15ebe0");
+		UUID defaultJanusSpaceId = UUID.fromString(JanusConfig.DEFAULT_JANUS_SPACE_ID);
 
 		bind(UUID.class).annotatedWith(Names.named(JanusConfig.JANUS_CONTEXT_ID)).toInstance(JanusContextID);
 
