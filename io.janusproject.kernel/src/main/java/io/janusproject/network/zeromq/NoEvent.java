@@ -19,8 +19,6 @@
  */
 package io.janusproject.network.zeromq;
 
-import java.io.Serializable;
-
 import io.sarl.lang.core.Event;
 
 /** Utility class that is representing the "no-event" event.
@@ -30,7 +28,7 @@ import io.sarl.lang.core.Event;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class NoEvent extends Event implements Serializable {
+class NoEvent extends Event {
 	
 	private static final long serialVersionUID = 2295545404161454509L;
 	

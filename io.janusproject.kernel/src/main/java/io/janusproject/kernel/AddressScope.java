@@ -37,6 +37,8 @@ import com.google.common.collect.Sets;
 @Deprecated
 public class AddressScope implements Scope<Address> {
 
+	private static final long serialVersionUID = 6544932857914994641L;
+
 	//TODO: URI?
 	private final String SCOPE_ID = "aid://"; //$NON-NLS-1$
 
