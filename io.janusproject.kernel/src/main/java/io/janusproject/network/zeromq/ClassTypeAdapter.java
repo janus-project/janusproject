@@ -10,6 +10,13 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+/** Json adapter for supporting the {@link Class} type.
+ * 
+ * @author $Author: ngaud$
+ * @version $FullVersion$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
+ */
 public class ClassTypeAdapter  implements JsonSerializer<Class<?>>, JsonDeserializer<Class<?>> {
 
     @Override
