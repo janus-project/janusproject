@@ -26,6 +26,7 @@ import io.sarl.lang.core.EventSpace;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.locale.Locale;
@@ -53,17 +54,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class Kernel {
 	
-	private static UncaughtExceptionHandler GLOBAL_HANDLER = new UncaughtExceptionHandler() {
-		@Override
-		public void uncaughtException(Thread t, Throwable e) {
-			e.printStackTrace();
-		}
-	};
-	
-	static{
-		Thread.setDefaultUncaughtExceptionHandler(GLOBAL_HANDLER);
-	}
-
 	private AgentContext janusContext;
 
 	private ServiceManager serviceManager = null;
@@ -87,9 +77,21 @@ public class Kernel {
 	 */
 	@Inject
 	Kernel(ServiceManager serviceManager) {
+		// Register a default exception handler that
+		// is logging on the kernel's log.
+		UncaughtExceptionHandler h = Thread.getDefaultUncaughtExceptionHandler();
+		if (h==null) {
+			UncaughtExceptionHandler handler = new UncaughtExceptionHandler() {
+				@Override
+				public void uncaughtException(Thread t, Throwable e) {
+					Kernel.this.log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+				}
+			};
+			Thread.setDefaultUncaughtExceptionHandler(handler);
+		}
+
 		this.serviceManager = serviceManager;
 		this.serviceManager.startAsync().awaitHealthy();
-		
 	}
 
 	/** Replies the default space of the Janus agent.
