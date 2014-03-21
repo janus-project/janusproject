@@ -50,7 +50,7 @@ public class ZeroMQNetworkModule extends AbstractModule {
 	}
 
 	@Provides
-	private Gson createGson() {
+	private static Gson createGson() {
 		return new GsonBuilder()
         .registerTypeAdapter(Class.class, new ClassTypeAdapter())
         .setPrettyPrinting()
