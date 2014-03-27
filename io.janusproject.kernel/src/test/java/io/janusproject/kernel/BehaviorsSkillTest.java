@@ -41,7 +41,9 @@ import com.google.common.eventbus.AsyncEventBus;
  */
 @SuppressWarnings("all")
 public class BehaviorsSkillTest {
+	
 	private Agent agentMock;
+	
 	/** 
 	 * @throws java.lang.Exception
 	 */

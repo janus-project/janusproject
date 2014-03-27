@@ -19,20 +19,24 @@
  */
 package io.janusproject.kernel;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.UUID;
-
+import io.sarl.core.Behaviors;
+import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.util.OpenEventSpace;
+
+import java.util.Collections;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
 
 /**
  * @author $Author: srodriguez$
@@ -55,6 +59,10 @@ public class LifecycleSkillTest {
 	
 	@Mock
 	private SpawnService spawnService;
+
+	
+	private Agent agentMock;
+	
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -64,6 +72,20 @@ public class LifecycleSkillTest {
 		this.skill = new LifecycleSkill(this.agent, this.spawnService);
 		when(this.parentContext.getID()).thenReturn(this.parentContextID);
 		when(this.agent.getID()).thenReturn(this.agentID);
+		
+		BehaviorsAndInnerContextSkill behaviorsMock = mock(BehaviorsAndInnerContextSkill.class);
+		ExternalContextAccessSkill extContextMock = mock(ExternalContextAccessSkill.class);
+				
+		Lifecycle l = PowerMockito.spy(this.skill);
+		PowerMockito.when(l,"getSkill",Behaviors.class).thenReturn(behaviorsMock);		
+		PowerMockito.when(l,"getSkill",ExternalContextAccess.class).thenReturn(extContextMock);
+				
+		Agent agentMock = mock(Agent.class);
+		PowerMockito.when(l,"getOwner").thenReturn(agentMock);
+		
+		OpenEventSpace spaceMock = mock(OpenEventSpace.class);
+		when(this.parentContext.getDefaultSpace()).thenReturn(spaceMock);
+		
 	}
 
 	@Test
