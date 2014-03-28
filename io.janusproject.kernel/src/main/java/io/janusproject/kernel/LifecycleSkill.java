@@ -68,7 +68,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	@Override
 	public UUID spawnInContext(Class<? extends Agent> aAgent, AgentContext context,Object[] params) {
 		UUID id = this.spawnService.spawn(context.getID(), aAgent, params);
-		fireAgentSpawned(context);
+		fireAgentSpawned(aAgent,context);
 		return id;
 	}
 	
@@ -76,11 +76,11 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	 * Fire an {@link AgentSpawned} event to inform other context members of the creation of a new agent in the specified context.
 	 * @param parentContext - the context in which the owner agent has been spanwed
 	 */
-	protected void fireAgentSpawned(AgentContext parentContext) {
+	protected void fireAgentSpawned(Class<? extends Agent> aAgent, AgentContext parentContext) {
 		EventSpace defSpace = parentContext.getDefaultSpace();
 		AgentSpawned event = new AgentSpawned();
 		event.setAgentID(this.getOwner().getID());
-		event.setAgentType(this.getOwner().getClass());
+		event.setAgentType(aAgent);
 		event.setSource(defSpace.getAddress(getOwner().getID()));
 		defSpace.emit(event);
 	}
