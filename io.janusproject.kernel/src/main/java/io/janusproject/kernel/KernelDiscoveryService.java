@@ -18,10 +18,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.repository;
+package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
-import io.janusproject.kernel.Network;
 import io.janusproject.kernel.annotations.Kernel;
 import io.janusproject.network.zeromq.ZeroMQConfig;
 import io.janusproject.repository.impl.DistributedDataStructureFactory;
@@ -48,7 +47,7 @@ import com.hazelcast.core.ItemListener;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class KernelRepositoryService extends AbstractService {
+public class KernelDiscoveryService extends AbstractService {
 
 	private ISet<String> kernels;
 	private String localURI;
@@ -141,8 +140,8 @@ public class KernelRepositoryService extends AbstractService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemAdded(ItemEvent<String> item) {
-			if (!KernelRepositoryService.this.localURI.equals(item.getItem())) {
-				KernelRepositoryService.this.connect(item.getItem());
+			if (!KernelDiscoveryService.this.localURI.equals(item.getItem())) {
+				KernelDiscoveryService.this.connect(item.getItem());
 			}
 		}
 
@@ -152,8 +151,8 @@ public class KernelRepositoryService extends AbstractService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemRemoved(ItemEvent<String> item) {
-			if (!KernelRepositoryService.this.localURI.equals(item.getItem())) {
-				KernelRepositoryService.this.disconnect(item.getItem());
+			if (!KernelDiscoveryService.this.localURI.equals(item.getItem())) {
+				KernelDiscoveryService.this.disconnect(item.getItem());
 			}
 		}
 
@@ -192,20 +191,20 @@ public class KernelRepositoryService extends AbstractService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void starting() {
-			KernelRepositoryService.this.log.info(
-					Locale.getString(KernelRepositoryService.class, "HAZELCAST_STARTING")); //$NON-NLS-1$
+			KernelDiscoveryService.this.log.info(
+					Locale.getString(KernelDiscoveryService.class, "HAZELCAST_STARTING")); //$NON-NLS-1$
 		}
 
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void running() {
-			KernelRepositoryService.this.log.info(
-					Locale.getString(KernelRepositoryService.class, "HAZELCAST_INIT_STARTING")); //$NON-NLS-1$
-			KernelRepositoryService.this.kernels.addItemListener(new HazelcastListener(),
+			KernelDiscoveryService.this.log.info(
+					Locale.getString(KernelDiscoveryService.class, "HAZELCAST_INIT_STARTING")); //$NON-NLS-1$
+			KernelDiscoveryService.this.kernels.addItemListener(new HazelcastListener(),
 					true);
-			KernelRepositoryService.this.connectExiting();
-			KernelRepositoryService.this.log.info(
-					Locale.getString(KernelRepositoryService.class, "HAZELCAST_INIT_ENDING")); //$NON-NLS-1$
+			KernelDiscoveryService.this.connectExiting();
+			KernelDiscoveryService.this.log.info(
+					Locale.getString(KernelDiscoveryService.class, "HAZELCAST_INIT_ENDING")); //$NON-NLS-1$
 		}
 
 		/**
@@ -214,9 +213,9 @@ public class KernelRepositoryService extends AbstractService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void terminated(State from) {			
-			KernelRepositoryService.this.log.info(
-					Locale.getString(KernelRepositoryService.class, "HAZELCAST_ENDING")); //$NON-NLS-1$
-			KernelRepositoryService.this.instance.shutdown();
+			KernelDiscoveryService.this.log.info(
+					Locale.getString(KernelDiscoveryService.class, "HAZELCAST_ENDING")); //$NON-NLS-1$
+			KernelDiscoveryService.this.instance.shutdown();
 		}
 
 		/**
@@ -225,8 +224,8 @@ public class KernelRepositoryService extends AbstractService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void stopping(State from) {			
-			KernelRepositoryService.this.log.info(
-					Locale.getString(KernelRepositoryService.class, "HAZELCAST_ENDING")); //$NON-NLS-1$
+			KernelDiscoveryService.this.log.info(
+					Locale.getString(KernelDiscoveryService.class, "HAZELCAST_ENDING")); //$NON-NLS-1$
 		}
 
 		/**
@@ -236,8 +235,8 @@ public class KernelRepositoryService extends AbstractService {
 		@Override
 		public void failed(State from, Throwable failure) {
 			super.failed(from, failure);
-			KernelRepositoryService.this.log.log(Level.SEVERE, 
-					Locale.getString(KernelRepositoryService.class, "NETWORK_FAILURE"), //$NON-NLS-1$
+			KernelDiscoveryService.this.log.log(Level.SEVERE, 
+					Locale.getString(KernelDiscoveryService.class, "NETWORK_FAILURE"), //$NON-NLS-1$
 					failure);
 		}
 	}

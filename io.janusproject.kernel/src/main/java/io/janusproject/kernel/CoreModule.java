@@ -24,7 +24,6 @@ import io.janusproject.kernel.annotations.Kernel;
 import io.janusproject.kernel.executor.AgentScheduledExecutorService;
 import io.janusproject.repository.AddressSerializer;
 import io.janusproject.repository.ContextRepository;
-import io.janusproject.repository.KernelRepositoryService;
 import io.janusproject.repository.SpaceIDSerializer;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.AgentContext;
@@ -112,7 +111,7 @@ public class CoreModule extends AbstractModule {
 
 		Multibinder<Service> uriBinder = Multibinder.newSetBinder(binder(), Service.class);
 		uriBinder.addBinding().to(JanusExecutorsService.class);
-		uriBinder.addBinding().to(KernelRepositoryService.class);
+		uriBinder.addBinding().to(KernelDiscoveryService.class);
 
 		bind(EventSpaceSpecification.class).to(EventSpaceSpecificationImpl.class).in(Singleton.class);
 		bind(OpenEventSpaceSpecification.class).to(EventSpaceSpecificationImpl.class).in(Singleton.class);
