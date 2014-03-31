@@ -49,7 +49,7 @@ import com.google.inject.Injector;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
+public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 
 	private UniqueAddressParticipantRepository<Address> participants;
 
