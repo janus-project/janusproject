@@ -19,6 +19,7 @@
  */
 package io.janusproject.repository;
 
+import io.janusproject.JanusConfig;
 import io.janusproject.repository.impl.DistributedDataStructureFactory;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.SpaceID;

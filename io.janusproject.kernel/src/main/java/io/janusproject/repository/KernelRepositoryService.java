@@ -20,6 +20,7 @@
  */
 package io.janusproject.repository;
 
+import io.janusproject.JanusConfig;
 import io.janusproject.kernel.Network;
 import io.janusproject.kernel.annotations.Kernel;
 import io.janusproject.network.zeromq.ZeroMQConfig;

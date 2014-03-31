@@ -19,11 +19,11 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.JanusConfig;
 import io.janusproject.kernel.annotations.Kernel;
 import io.janusproject.kernel.executor.AgentScheduledExecutorService;
 import io.janusproject.repository.AddressSerializer;
 import io.janusproject.repository.ContextRepository;
-import io.janusproject.repository.JanusConfig;
 import io.janusproject.repository.KernelRepositoryService;
 import io.janusproject.repository.SpaceIDSerializer;
 import io.sarl.lang.core.Address;
