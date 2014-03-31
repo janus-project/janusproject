@@ -23,7 +23,7 @@ package io.janusproject.repository;
 import io.janusproject.kernel.Network;
 import io.janusproject.kernel.annotations.Kernel;
 import io.janusproject.network.zeromq.ZeroMQConfig;
-import io.janusproject.repository.impl.RepositoryImplFactory;
+import io.janusproject.repository.impl.DistributedDataStructureFactory;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -72,7 +72,7 @@ public class KernelRepositoryService extends AbstractService {
 	 */
 	@Inject
 	void KernelRepository(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID,
-			RepositoryImplFactory repositoryImplFactory, @Named(ZeroMQConfig.PUB_URI) String myuri) {
+			DistributedDataStructureFactory repositoryImplFactory, @Named(ZeroMQConfig.PUB_URI) String myuri) {
 		this.kernels = repositoryImplFactory.getSet(janusID.toString() + "-kernels"); //$NON-NLS-1$
 		this.localURI = myuri;
 	}

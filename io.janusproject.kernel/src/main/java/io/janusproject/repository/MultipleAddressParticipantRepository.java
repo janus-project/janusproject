@@ -19,7 +19,7 @@
  */
 package io.janusproject.repository;
 
-import io.janusproject.repository.impl.RepositoryImplFactory;
+import io.janusproject.repository.impl.DistributedDataStructureFactory;
 import io.sarl.lang.core.EventListener;
 
 import java.io.Serializable;
@@ -69,7 +69,7 @@ public final class MultipleAddressParticipantRepository<ADDRESS extends Serializ
 	 * @param repositoryImplFactory
 	 */
 	@Inject
-	void setFactory(RepositoryImplFactory repositoryImplFactory){
+	void setFactory(DistributedDataStructureFactory repositoryImplFactory){
 		this.participants = repositoryImplFactory.getMultiMap(this.distributedParticipantMapName);
 	}
 

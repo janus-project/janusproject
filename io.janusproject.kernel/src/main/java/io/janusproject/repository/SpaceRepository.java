@@ -19,7 +19,7 @@
  */
 package io.janusproject.repository;
 
-import io.janusproject.repository.impl.RepositoryImplFactory;
+import io.janusproject.repository.impl.DistributedDataStructureFactory;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
@@ -93,7 +93,7 @@ public class SpaceRepository {
 	 * @param repositoryImplFactory
 	 */
 	@Inject
-	void setRespositoryImplFactory(RepositoryImplFactory repositoryImplFactory){
+	void setRespositoryImplFactory(DistributedDataStructureFactory repositoryImplFactory){
 		this.spaceIDs = repositoryImplFactory.getSet(this.distributedSpaceSetName);
 	}
 	/**

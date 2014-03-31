@@ -19,7 +19,7 @@
  */
 package io.janusproject.repository;
 
-import io.janusproject.repository.impl.RepositoryImplFactory;
+import io.janusproject.repository.impl.DistributedDataStructureFactory;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.SpaceID;
 
@@ -71,7 +71,7 @@ public class ContextRepository {
 	 * @param repositoryImplFactory - factory that permits to create a repository.
 	 */
 	@Inject
-	void setJanusID(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID, RepositoryImplFactory repositoryImplFactory){
+	void setJanusID(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID, DistributedDataStructureFactory repositoryImplFactory){
 		this.spaces = repositoryImplFactory.getMap(janusID.toString());
 	}
 
