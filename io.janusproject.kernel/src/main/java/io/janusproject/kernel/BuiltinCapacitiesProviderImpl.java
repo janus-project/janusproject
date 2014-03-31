@@ -64,7 +64,7 @@ class BuiltinCapacitiesProviderImpl implements BuiltinCapacitiesProvider {
 		final BehaviorsAndInnerContextSkill behaviorsSkill = createBehaviorsSkill(agent);
 		final ExternalContextAccessSkill externalContextSkill = createExternalContextAccessSkill(agent);
 		final LifecycleSkill lifecyleSkill = new LifecycleSkill(agent, this.spawnService);
-		final DefaultContextInteractionsImpl defaultContextInteractionsSkill = new DefaultContextInteractionsImpl(agent,
+		final DefaultContextInteractionsSkill defaultContextInteractionsSkill = new DefaultContextInteractionsSkill(agent,
 				this.contextRepository.getContext(agent.getParentID()));
 
 		

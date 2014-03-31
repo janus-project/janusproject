@@ -39,7 +39,7 @@ import io.sarl.util.AddressScope;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class DefaultContextInteractionsImpl extends Skill implements
+class DefaultContextInteractionsSkill extends Skill implements
 		DefaultContextInteractions {
 
 	private AgentContext parentContext;
@@ -52,7 +52,7 @@ class DefaultContextInteractionsImpl extends Skill implements
 	 * @param agent - owner of the skill.
 	 * @param parentContext - reference to the parent context.
 	 */
-	public DefaultContextInteractionsImpl(Agent agent, AgentContext parentContext) {
+	public DefaultContextInteractionsSkill(Agent agent, AgentContext parentContext) {
 		super(agent);
 		this.parentContext = parentContext;
 		
