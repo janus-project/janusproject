@@ -81,13 +81,15 @@ public class CoreModule extends AbstractModule {
 	@Override
 	protected void configure() {
 
-		UUID JanusContextID = UUID.fromString(JanusConfig.DEFAULT_JANUS_CONTEXT_ID);
+		// Retreive the default UUID from the Janus configuration
+		UUID defaultContextID = UUID.fromString(JanusConfig.getProperty(
+				JanusConfig.DEFAULT_CONTEXT_ID));
+		UUID defaultSpaceId = UUID.fromString(JanusConfig.getProperty(
+				JanusConfig.DEFAULT_SPACE_ID));
 
-		UUID defaultJanusSpaceId = UUID.fromString(JanusConfig.DEFAULT_JANUS_SPACE_ID);
+		bind(UUID.class).annotatedWith(Names.named(JanusConfig.DEFAULT_CONTEXT_ID)).toInstance(defaultContextID);
 
-		bind(UUID.class).annotatedWith(Names.named(JanusConfig.JANUS_CONTEXT_ID)).toInstance(JanusContextID);
-
-		bind(UUID.class).annotatedWith(Names.named(JanusConfig.JANUS_DEF_SPACE_ID)).toInstance(defaultJanusSpaceId);
+		bind(UUID.class).annotatedWith(Names.named(JanusConfig.DEFAULT_SPACE_ID)).toInstance(defaultSpaceId);
 
 		// Hazelcast config
 		Config hazelcastConfig = new Config();
@@ -126,8 +128,8 @@ public class CoreModule extends AbstractModule {
 	@Provides
 	@Kernel
 	@Singleton
-	private AgentContext getKernel(ContextFactory factory, @Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusContextID,
-			@Named(JanusConfig.JANUS_DEF_SPACE_ID) UUID defaultJanusSpaceId) {
+	private AgentContext getKernel(ContextFactory factory, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusContextID,
+			@Named(JanusConfig.DEFAULT_SPACE_ID) UUID defaultJanusSpaceId) {
 
 		if (this.janusContext == null) {
 			this.janusContext = factory.create(janusContextID, defaultJanusSpaceId);

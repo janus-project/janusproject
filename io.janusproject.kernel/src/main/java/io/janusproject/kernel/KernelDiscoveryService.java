@@ -71,7 +71,7 @@ public class KernelDiscoveryService extends AbstractService {
 	 * @param myuri - injected URI of the current kernel.
 	 */
 	@Inject
-	void KernelRepository(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID,
+	void KernelRepository(@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID,
 			DistributedDataStructureFactory repositoryImplFactory, @Named(ZeroMQConfig.PUB_URI) String myuri) {
 		this.kernels = repositoryImplFactory.getSet(janusID.toString() + "-kernels"); //$NON-NLS-1$
 		this.localURI = myuri;

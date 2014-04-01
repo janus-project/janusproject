@@ -24,12 +24,20 @@ import io.janusproject.kernel.JanusDefaultConfigModule;
 import io.janusproject.kernel.Kernel;
 import io.sarl.lang.core.Agent;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
 
-import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.arakhne.afc.vmutil.locale.Locale;
@@ -67,27 +75,66 @@ public class Boot {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 
-		CommandLineParser parser = new BasicParser();
+		CommandLineParser parser = new GnuParser();
 
 		try {
 			CommandLine cmd = parser.parse(getOptions(), args);
-			if (cmd.hasOption('h')) {
-				showHelp();
-
-			}
-
-			if (cmd.getArgs().length == 0) {
+			if (cmd.hasOption('h') || cmd.getArgs().length == 0) {
 				showHelp();
 			}
+			
+			if (cmd.hasOption('R')) {
+				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
+				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID, Boolean.TRUE.toString());
+			}
+			else if (cmd.hasOption('B')) {
+				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID, Boolean.TRUE.toString());
+				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
+			}
+			else if (cmd.hasOption('W')) {
+				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
+				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
+			}
 
+			// Define the system properties, if not already done by the JRE.
+			Properties props = cmd.getOptionProperties("D"); //$NON-NLS-1$
+			if (props!=null) {
+				for(Entry<Object,Object> entry : props.entrySet()) {
+					System.setProperty(
+							entry.getKey().toString(),
+							entry.getValue().toString());
+				}
+			}
+
+			// Retreive the list of the property files given on CLI
+			List<URL> propertyFiles = new ArrayList<>();
+			if (cmd.hasOption('f')) {
+				for(String rawFilename : cmd.getOptionValues('f')) {
+					if (rawFilename==null || "".equals(rawFilename)) { //$NON-NLS-1$
+						showHelp();
+					}
+					File file = new File(rawFilename);
+					if (!file.canRead()) {
+						System.err.println(Locale.getString("INVALID_PROPERTY_FILENAME", rawFilename)); //$NON-NLS-1$
+						System.exit(255);
+					}
+					propertyFiles.add(file.toURI().toURL());
+				}
+			}
+			
 			String agentToLaunch = cmd.getArgs()[0];
 			showHeader();
 			Class<?> agent = Class.forName(agentToLaunch);
+
 			// The following test is needed because the
 			// cast to Class<? extends Agent> is not checking
 			// the Agent type (it is a generic type, not
 			// tested at runtime).
 			if (Agent.class.isAssignableFrom(agent)) {
+				
+				// Initialize the Janus configuration
+				JanusConfig.init((Class<? extends Agent>)agent, propertyFiles);
+
 				System.out.println(Locale.getString("LAUNCHING_AGENT", agentToLaunch)); //$NON-NLS-1$
 				startJanus(
 						(Class<? extends Agent>)agent,
@@ -100,10 +147,9 @@ public class Boot {
 				throw new ClassCastException(
 						Locale.getString("INVALID_AGENT_TYPE", agentToLaunch)); //$NON-NLS-1$
 			}
-		} catch (ParseException | ClassNotFoundException e) {
+		} catch (IOException | ParseException | ClassNotFoundException e) {
 			e.printStackTrace();
 			showHelp();
-			System.exit(-1);
 		}
 
 	}
@@ -113,17 +159,27 @@ public class Boot {
 	 * @return the command line options.
 	 */
 	public static Options getOptions() {
+		Option opt;
 		Options options = new Options();
 		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("f", "file", true, Locale.getString("CLI_HELP_F"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("B", "bootid", false, Locale.getString("CLI_HELP_SET_PROP", JanusConfig.BOOT_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("R", "randomid", false, Locale.getString("CLI_HELP_SET_PROP", JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_UNSET_PROPS", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		opt = new Option("D", true, Locale.getString("CLI_HELP_D"));  //$NON-NLS-1$//$NON-NLS-2$
+		opt.setArgs(2);
+		opt.setValueSeparator('=');
+		options.addOption(opt);
 		return options;
 	}
 
 	/** Show the help message on the standard console.
+	 * This function never returns.
 	 */
 	public static void showHelp() {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("io.janusproject.Boot [OPTIONS] AGENT_FQN", getOptions()); //$NON-NLS-1$
-		System.exit(0);
+		System.exit(255);
 	}
 	
 	/** Show the heading logo of the Janus platform.

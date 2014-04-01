@@ -72,7 +72,7 @@ public class ContextRepository {
 	 * @param repositoryImplFactory - factory that permits to create a repository.
 	 */
 	@Inject
-	void setJanusID(@Named(JanusConfig.JANUS_CONTEXT_ID) UUID janusID, DistributedDataStructureFactory repositoryImplFactory){
+	void setJanusID(@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID, DistributedDataStructureFactory repositoryImplFactory){
 		this.spaces = repositoryImplFactory.getMap(janusID.toString());
 	}
 
