@@ -112,4 +112,14 @@ class Context implements AgentContext{
 		return (Collection<S>) this.spaceRepository.getSpacesFromSpec(spec);
 	}
 
+	@Override
+	public <S extends io.sarl.lang.core.Space> S getSpace(UUID spaceUUID) {
+		//Type safety: assume that any ClassCastException will be thrown in the caller context.
+		return (S) this.spaceRepository.getSpace(
+				// The space specification parameter
+				// could be null because it will
+				// not be used during the search.
+				new SpaceID(this.id, spaceUUID, null));
+	}
+
 }

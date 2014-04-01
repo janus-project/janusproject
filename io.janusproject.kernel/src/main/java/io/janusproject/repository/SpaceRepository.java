@@ -229,6 +229,13 @@ public class SpaceRepository {
 		return this.spaces.get(spaces.iterator().next());
 	}
 
+	/**
+	 * Returns the first instance of a space with the specified SpaceID.
+	 * @param spaceID - the identifier to retreive.
+	 * @return the space instance of <code>null</code> if none.
+	 */
+	public Space getSpace(SpaceID spaceID) {
+		return this.spaces.get(spaceID);
 	}
 
 	/**
