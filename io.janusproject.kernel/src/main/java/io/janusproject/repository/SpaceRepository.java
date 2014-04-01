@@ -217,13 +217,18 @@ public class SpaceRepository {
 		});
 
 	}
+	
 	/**
-	 * Returns the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
+	 * Returns the first instance of a space with the specified {@link SpaceSpecification} stored in this repository.
 	 * @param spec - the specification used to filter the set of stored spaces
-	 * @return the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
+	 * @return the space instance of <code>null</code> if none.
 	 */
 	public Space getFirstSpaceFromSpec(Class<? extends SpaceSpecification> spec) {
-		return this.getSpaceIterator().next();
+		Collection<SpaceID> spaces = this.spacesBySpec.get(spec);
+		if (spaces==null || spaces.isEmpty()) return null;
+		return this.spaces.get(spaces.iterator().next());
+	}
+
 	}
 
 	/**
