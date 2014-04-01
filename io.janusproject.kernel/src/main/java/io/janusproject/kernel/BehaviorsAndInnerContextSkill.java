@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.collect.Queues;
-import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.AsyncSyncEventBus;
 import com.google.inject.Inject;
 
 /** Janus implementation of SARL's {@link Behaviors} built-in capacity.
@@ -59,11 +59,11 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 
 	/** Reference to the event bus.
 	 */
-	protected AsyncEventBus eventBus;
+	protected AsyncSyncEventBus eventBus;
 	private AgentContext innerContext;
 
 	private AtomicBoolean running = new AtomicBoolean(false);
-	private AtomicBoolean stoping = new AtomicBoolean(false);
+	private AtomicBoolean stopping = new AtomicBoolean(false);
 	private final AgentEventListener agentAsEventListener;
 
 	private Logger log;
@@ -91,7 +91,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * @param bus
 	 */
 	@Inject
-	void setInternalEventBus(AsyncEventBus bus) {
+	void setInternalEventBus(AsyncSyncEventBus bus) {
 		this.eventBus = bus;
 		this.eventBus.register(this.getOwner());
 		if (this.log != null)
@@ -183,23 +183,26 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 
 	/**
 	 * Sends an event to itself using its defaultInnerAddress as source. Used
-	 * for platform levet event dispatching (i.e. {@link Initialize} and
+	 * for platform level event dispatching (i.e. {@link Initialize} and
 	 * {@link Destroy})
 	 * 
 	 * @param event
 	 */
 	void selfEvent(Event event) {
 		EventSpace defSpace = getSkill(InnerContextAccess.class).getInnerContext().getDefaultSpace();
-		event.setSource(defSpace.getAddress(getOwner().getID()));
-		internalReceiveEvent(event);
-		this.log.finer(Locale.getString("SELF_EVENT", event)); //$NON-NLS-1$
+		event.setSource(defSpace.getAddress(getOwner().getID()));				
 		if (event instanceof Initialize) {
+			this.eventBus.fire(event);//Immediate synchronous dispatching of Initialize event
 			this.running.set(true);
 			this.agentAsEventListener.agentInitialized();
 		} else if (event instanceof Destroy) {
+			this.eventBus.fire(event);//Immediate synchronous dispatching of Destroy event
 			this.running.set(false);
-			this.stoping.set(true);
+			this.stopping.set(true);
+		} else {
+			internalReceiveEvent(event);//Asynchronous parallel dispatching of this event
 		}
+		this.log.finer(Locale.getString("SELF_EVENT", event)); //$NON-NLS-1$
 	}
 
 	@Override
@@ -253,10 +256,10 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void receiveEvent(Event event) {
-			if (this.skill.get().running.get() && !this.skill.get().stoping.get()) {
+			if (this.skill.get().running.get() && !this.skill.get().stopping.get()) {
 
 				this.skill.get().internalReceiveEvent(event);
-			} else if (!this.skill.get().running.get() && this.skill.get().stoping.get()) {
+			} else if (!this.skill.get().running.get() && this.skill.get().stopping.get()) {
 				// Dropping messages since agent is dying
 				this.skill.get().log.log(Level.WARNING, 
 						Locale.getString(BehaviorsAndInnerContextSkill.class,

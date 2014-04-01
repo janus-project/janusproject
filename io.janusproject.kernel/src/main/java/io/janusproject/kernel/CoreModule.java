@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.google.common.eventbus.AnnotationModule;
-import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.AsyncSyncEventBus;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
@@ -136,9 +136,9 @@ public class CoreModule extends AbstractModule {
 	}
 
 	@Provides
-	private static AsyncEventBus createAgentInternalBus(Injector injector, ExecutorService service,
+	private static AsyncSyncEventBus createAgentInternalBus(Injector injector, ExecutorService service,
 			SubscriberExceptionHandler exceptionHandler) {
-		AsyncEventBus aeb = new AsyncEventBus(service, exceptionHandler);
+		AsyncSyncEventBus aeb = new AsyncSyncEventBus(service, exceptionHandler);
 		// to be able to inject the SubscriberFindingStrategy
 		injector.injectMembers(aeb);
 		return aeb;

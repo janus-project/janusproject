@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.AsyncSyncEventBus;
 
 /**
  * @author $Author: srodriguez$
@@ -62,7 +62,7 @@ public class BehaviorsSkillTest {
 
 	@Test
 	public void test() {
-		AsyncEventBus bus = mock(AsyncEventBus.class);
+		AsyncSyncEventBus bus = mock(AsyncSyncEventBus.class);
 		BehaviorsAndInnerContextSkill behavior = new BehaviorsAndInnerContextSkill(this.agentMock);
 		behavior.setLogger(mock(Logger.class));
 		behavior.setInternalEventBus(bus);
