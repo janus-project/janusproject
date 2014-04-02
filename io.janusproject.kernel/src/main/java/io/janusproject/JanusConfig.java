@@ -80,7 +80,7 @@ public class JanusConfig {
 	 * from the boot agent type.
 	 * @see #BOOT_DEFAULT_CONTEXT_ID
 	 */
-	private static final boolean VALUE_BOOT_DEFAULT_CONTEXT_ID = true;
+	private static final boolean VALUE_BOOT_DEFAULT_CONTEXT_ID = false;
 
 	/** Reference to the type of the boot agent.
 	 */
