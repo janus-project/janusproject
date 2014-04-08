@@ -28,9 +28,11 @@ import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.Scopes;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -249,23 +251,55 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	@Override
 	protected void run() throws Exception {
 		while (isRunning()) {
-			if (this.poller.getSize() > 0) {
-				int signaled = this.poller.poll(1000);
-				if (signaled > 0) {
-					for (int i = 0; i < this.poller.getSize(); i++) {
-						if (this.poller.pollin(i)) {
-							this.log.finer(Locale.getString("POLLING", i)); //$NON-NLS-1$
-							EventEnvelope ev = EventEnvelope.recv(this.poller.getSocket(i));
-							this.receive(ev);
-						} else if (this.poller.pollerr(i)) {
-							this.log.warning(Locale.getString("POLLING_ERROR", this.poller.getSocket(i))); //$NON-NLS-1$
+			try {
+				if (this.poller.getSize() > 0) {
+					int signaled = this.poller.poll(1000);
+					if (signaled > 0) {
+						for (int i = 0; i < this.poller.getSize(); i++) {
+							if (this.poller.pollin(i)) {
+								this.log.finer(Locale.getString("POLLING", i)); //$NON-NLS-1$
+								EventEnvelope ev = EventEnvelope.recv(this.poller.getSocket(i));
+								try {
+									this.receive(ev);
+								}
+								catch(Throwable e) {
+									catchExceptionWithoutStopping(e, "CANNOT_RECEIVE_EVENT"); //$NON-NLS-1$
+								}
+							} else if (this.poller.pollerr(i)) {
+								this.log.warning(Locale.getString("POLLING_ERROR", this.poller.getSocket(i))); //$NON-NLS-1$
+							}
 						}
 					}
 				}
 			}
+			catch(Throwable e) {
+				catchExceptionWithoutStopping(e, "UNEXPECTED_EXCEPTION"); //$NON-NLS-1$
+			}
 		}
 		//FIXME: May the poller be stopped?
 		//stopPoller();
+	}
+	
+	private void catchExceptionWithoutStopping(Throwable e, String errorMessageKey) {
+		// Catch the deserialization or unencrypting exceptions
+		// Notify the default listener if one, but do not
+		// stop the thread.
+		UncaughtExceptionHandler h = Thread.getDefaultUncaughtExceptionHandler();
+		if (h!=null) {
+			try {
+				h.uncaughtException(Thread.currentThread(), e);
+			}
+			catch(Throwable _) {
+				//Ignore the exception according to the
+				// document of the function
+				// UncaughtExceptionHandler.uncaughtException()
+			}
+		}
+		else {
+			this.log.log(Level.FINE,
+					Locale.getString(errorMessageKey, e.getLocalizedMessage()),
+					e);
+		}
 	}
 
 }
