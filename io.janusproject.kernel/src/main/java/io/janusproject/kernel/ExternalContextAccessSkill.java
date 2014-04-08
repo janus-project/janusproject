@@ -37,7 +37,6 @@ import java.util.UUID;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 /** Skill that permits to access to the context in which the agent is located.
@@ -85,7 +84,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 
 	@Override
 	public AgentContext getContext(UUID contextID) {
-		Preconditions.checkNotNull(contextID);
+		assert (contextID!=null);
 		if(!this.contexts.contains(contextID)){
 			throw new IllegalArgumentException(Locale.getString("UNKNOWN_CONTEXT_ID", contextID)); //$NON-NLS-1$
 		}
@@ -94,12 +93,12 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 
 	@Override
 	public void join(UUID futureContext, UUID futureContextDefaultSpaceID) {
-		Preconditions.checkNotNull(futureContext);
-		Preconditions.checkNotNull(futureContextDefaultSpaceID);
+		assert (futureContext!=null);
+		assert (futureContextDefaultSpaceID!=null);
 		
 		AgentContext ac = this.contextRepository.getContext(futureContext);
 		
-		Preconditions.checkNotNull(ac, "Unknown Context"); //$NON-NLS-1$
+		assert (ac!=null) : "Unknown Context"; //$NON-NLS-1$
 		
 		if(this.contexts.contains(futureContext)){			
 			return;
@@ -147,9 +146,9 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 
 	@Override
 	public void leave(UUID contextID) {
-		Preconditions.checkNotNull(contextID);
+		assert (contextID!=null);
 		AgentContext ac = this.contextRepository.getContext(contextID);
-		Preconditions.checkNotNull(ac, "Unknown Context"); //$NON-NLS-1$
+		assert (ac!=null) : "Unknown Context"; //$NON-NLS-1$
 		if(!this.contexts.contains(contextID)){
 			return;
 		}

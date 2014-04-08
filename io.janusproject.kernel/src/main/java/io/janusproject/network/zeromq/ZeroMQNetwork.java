@@ -172,6 +172,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 			SpaceID spaceID = dispatch.getSpaceID();
 			this.contextRepository.getContext(spaceID.getContextID()).createSpace(spaceID.getSpaceSpecification(),
 					spaceID.getID());
+			//XXX: use assert? I'm not sure: is it for testing synchronization state at runtime? 
 			Preconditions.checkNotNull(this.spaces.get(spaceID), "Space ( %s ) was not created on time", spaceID); //$NON-NLS-1$
 			// FIXME: Improve before release
 			space = this.spaces.get(spaceID);
