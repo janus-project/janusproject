@@ -42,16 +42,48 @@ public class ZeroMQNetworkModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(Network.class).to(ZeroMQNetwork.class).in(Singleton.class);
-		bind(EventSerializer.class).to(GsonEventSerializer.class).in(Singleton.class);
-		
-		String aesKey = JanusConfig.getProperty(ZeroMQConfig.AES_KEY);
-		
-		if (aesKey!=null && !"".equals(aesKey)) { //$NON-NLS-1$
-			bind(EventEncrypter.class).to(AESEventEncrypter.class).in(Singleton.class);
+
+		// Bind the serializer
+		Class<? extends EventSerializer> serializerType = GsonEventSerializer.class;
+		String serializerClassname = JanusConfig.getProperty(ZeroMQConfig.SERIALIZER_CLASSNAME);
+		if (serializerClassname!=null && !serializerClassname.isEmpty()) {
+			try {
+				Class<?> type = Class.forName(serializerClassname);
+				if (type!=null && EventSerializer.class.isAssignableFrom(type)) {
+					serializerType = type.asSubclass(EventSerializer.class);
+				}
+			}
+			catch(Throwable _) {
+				//
+			}
 		}
-		else {
-			bind(EventEncrypter.class).to(PlainTextEncrypter.class).in(Singleton.class);
+		bind(EventSerializer.class).to(serializerType).in(Singleton.class);
+		
+		
+		// Bind the encrypter
+		Class<? extends EventEncrypter> encrypterType = null;
+		String encrypterClassname = JanusConfig.getProperty(ZeroMQConfig.ENCRYPTER_CLASSNAME);
+		if (encrypterClassname!=null && !encrypterClassname.isEmpty()) {
+			try {
+				Class<?> type = Class.forName(encrypterClassname);
+				if (type!=null && EventEncrypter.class.isAssignableFrom(type)) {
+					encrypterType = type.asSubclass(EventEncrypter.class);
+				}
+			}
+			catch(Throwable _) {
+				//
+			}
 		}
+		if (encrypterType==null) {
+			String aesKey = JanusConfig.getProperty(ZeroMQConfig.AES_KEY);
+			if (aesKey!=null && !aesKey.isEmpty()) {
+				encrypterType = AESEventEncrypter.class;
+			}
+			else {
+				encrypterType = PlainTextEncrypter.class;
+			}
+		}
+		bind(EventEncrypter.class).to(encrypterType).in(Singleton.class);
 
 		Multibinder<Service> uriBinder = Multibinder.newSetBinder(binder(), Service.class);
 	    uriBinder.addBinding().to(ZeroMQNetwork.class);

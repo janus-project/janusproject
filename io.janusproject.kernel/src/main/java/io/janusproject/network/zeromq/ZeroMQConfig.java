@@ -41,4 +41,12 @@ public class ZeroMQConfig {
 	 */
 	public static final String AES_KEY = "network.encrypter.aes.key"; //$NON-NLS-1$
 
+	/** Name of the property for the classname of the serializer to use.
+	 */
+	public static final String SERIALIZER_CLASSNAME = "network.serializer.class"; //$NON-NLS-1$
+
+	/** Name of the property for the classname of the encrypter to use.
+	 */
+	public static final String ENCRYPTER_CLASSNAME = "network.encrypter.class"; //$NON-NLS-1$
+
 }
