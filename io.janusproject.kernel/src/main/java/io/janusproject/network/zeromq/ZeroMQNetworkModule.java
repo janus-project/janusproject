@@ -19,6 +19,7 @@
  */
 package io.janusproject.network.zeromq;
 
+import io.janusproject.JanusConfig;
 import io.janusproject.kernel.Network;
 
 import com.google.common.util.concurrent.Service;
@@ -42,8 +43,15 @@ public class ZeroMQNetworkModule extends AbstractModule {
 	protected void configure() {
 		bind(Network.class).to(ZeroMQNetwork.class).in(Singleton.class);
 		bind(EventSerializer.class).to(GsonEventSerializer.class).in(Singleton.class);
-		//bind(EventEncrypter.class).to(AESEventEncrypter.class).in(Singleton.class);
-		bind(EventEncrypter.class).to(PlainTextEncrypter.class).in(Singleton.class);
+		
+		String aesKey = JanusConfig.getProperty(ZeroMQConfig.AES_KEY);
+		
+		if (aesKey!=null && !"".equals(aesKey)) { //$NON-NLS-1$
+			bind(EventEncrypter.class).to(AESEventEncrypter.class).in(Singleton.class);
+		}
+		else {
+			bind(EventEncrypter.class).to(PlainTextEncrypter.class).in(Singleton.class);
+		}
 
 		Multibinder<Service> uriBinder = Multibinder.newSetBinder(binder(), Service.class);
 	    uriBinder.addBinding().to(ZeroMQNetwork.class);
