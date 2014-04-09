@@ -19,6 +19,11 @@
  */
 package io.janusproject.network.zeromq;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import io.janusproject.JanusConfig;
 import io.janusproject.kernel.Network;
 
@@ -53,8 +58,9 @@ public class ZeroMQNetworkModule extends AbstractModule {
 					serializerType = type.asSubclass(EventSerializer.class);
 				}
 			}
-			catch(Throwable _) {
-				//
+			catch(Throwable e) {
+				Logger.getAnonymousLogger().log(Level.SEVERE,
+						Locale.getString("CANNOT_CREATE_SERIALIZER", serializerClassname, ZeroMQConfig.SERIALIZER_CLASSNAME), e); //$NON-NLS-1$
 			}
 		}
 		bind(EventSerializer.class).to(serializerType).in(Singleton.class);
@@ -70,8 +76,9 @@ public class ZeroMQNetworkModule extends AbstractModule {
 					encrypterType = type.asSubclass(EventEncrypter.class);
 				}
 			}
-			catch(Throwable _) {
-				//
+			catch(Throwable e) {
+				Logger.getAnonymousLogger().log(Level.SEVERE,
+						Locale.getString("CANNOT_CREATE_ENCRYPTER", encrypterClassname, ZeroMQConfig.ENCRYPTER_CLASSNAME), e); //$NON-NLS-1$
 			}
 		}
 		if (encrypterType==null) {
