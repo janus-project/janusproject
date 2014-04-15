@@ -30,7 +30,7 @@ public class ClassTypeAdapter  implements JsonSerializer<Class<?>>, JsonDeserial
         try {
             return Class.forName(json.getAsString());
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new JsonParseException(e);
         }
     }
 

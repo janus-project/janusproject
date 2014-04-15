@@ -54,22 +54,37 @@ public class GsonEventSerializer implements EventSerializer {
 	
 	@Override
 	public EventEnvelope serialize(EventDispatch dispatch) throws Exception {
-		Event event = dispatch.getEvent();
-		Scope<?> scope = dispatch.getScope();
-		SpaceID spaceID = dispatch.getSpaceID();
+		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		assert(this.gson!=null) : "Invalid injection of Gson"; //$NON-NLS-1$
+		assert(dispatch!=null) : "Parameter 'dispatch' must not be null"; //$NON-NLS-1$
 
-		dispatch.getHeaders().put("x-java-event-class", //$NON-NLS-1$
+		Event event = dispatch.getEvent();
+		assert(event!=null);
+		Scope<?> scope = dispatch.getScope();
+		assert(scope!=null);
+		SpaceID spaceID = dispatch.getSpaceID();
+		assert(spaceID!=null);
+		assert(spaceID.getSpaceSpecification()!=null);
+		Map<String,String> headers = dispatch.getHeaders();
+		assert(headers!=null);
+		
+		headers.put("x-java-event-class", //$NON-NLS-1$
 				event.getClass().getName());
-		dispatch.getHeaders().put("x-java-scope-class", //$NON-NLS-1$
+		headers.put("x-java-scope-class", //$NON-NLS-1$
 				scope.getClass().getName());
-		dispatch.getHeaders().put("x-java-spacespec-class", //$NON-NLS-1$
+		headers.put("x-java-spacespec-class", //$NON-NLS-1$
 				spaceID.getSpaceSpecification().getName());
 		
 		EventPack pack = new EventPack();
+		//FIXME: Ensure that the default string encoding does not introduce bugs
 		pack.setEvent(this.gson.toJson(event).getBytes());
+		//FIXME: Ensure that the default string encoding does not introduce bugs
 		pack.setScope(this.gson.toJson(scope).getBytes());
+		//FIXME: Ensure that the default string encoding does not introduce bugs
 		pack.setHeaders(this.gson.toJson(dispatch.getHeaders()).getBytes());
+		//FIXME: Ensure that the default string encoding does not introduce bugs
 		pack.setSpaceId(spaceID.getID().toString().getBytes());
+		//FIXME: Ensure that the default string encoding does not introduce bugs
 		pack.setContextId(spaceID.getContextID().toString().getBytes());
 
 		return this.encrypter.encrypt(pack);
@@ -85,31 +100,57 @@ public class GsonEventSerializer implements EventSerializer {
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public EventDispatch deserialize(EventEnvelope envelope) throws Exception {
+		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		assert(this.gson!=null) : "Invalid injection of Gson"; //$NON-NLS-1$
+
 		EventPack pack = this.encrypter.decrypt(envelope);
 		
+		//FIXME: Ensure that the default string encoding does not introduce bugs
 		UUID contextId = UUID.fromString(new String(pack.getContextId()));
+		//FIXME: Ensure that the default string encoding does not introduce bugs
 		UUID spaceId = UUID.fromString(new String(pack.getSpaceId()));
 
 		Map<String, String> headers = getHeadersFromString(new String(pack.getHeaders()));
 
-		Class<?> spaceSpec = Class.forName(headers
-				.get("x-java-spacespec-class")); //$NON-NLS-1$
-		Class<?> eventClazz = Class.forName(headers.get("x-java-event-class")); //$NON-NLS-1$
-		Class<?> scopeClazz = Class.forName(headers.get("x-java-scope-class")); //$NON-NLS-1$
-
-		if (spaceSpec==null || !SpaceSpecification.class.isAssignableFrom(spaceSpec)) {
-			throw new ClassCastException(Locale.getString("INVALID_TYPE", spaceSpec)); //$NON-NLS-1$
-		}
+		Class<? extends SpaceSpecification> spaceSpec = extractClass("x-java-spacespec-class", headers, SpaceSpecification.class); //$NON-NLS-1$
+		Class<? extends Event> eventClazz = extractClass("x-java-event-class", headers, Event.class); //$NON-NLS-1$
+		Class<? extends Scope> scopeClazz = extractClass("x-java-scope-class", headers, Scope.class); //$NON-NLS-1$
 		
 		SpaceID spaceID = new SpaceID(contextId, spaceId,
 				spaceSpec.asSubclass(SpaceSpecification.class));
 		
-		Event event = (Event) this.gson.fromJson(new String(pack.getEvent()), eventClazz);
-		Scope<?> scope = (Scope<?>) this.gson.fromJson(new String(pack.getScope()), scopeClazz);
+		//FIXME: Ensure that the default string encoding does not introduce bugs
+		Event event = this.gson.fromJson(new String(pack.getEvent()), eventClazz);
+		assert(event!=null);
+		//FIXME: Ensure that the default string encoding does not introduce bugs
+		Scope scope = this.gson.fromJson(new String(pack.getScope()), scopeClazz);
+		assert(scope!=null);
+
 		return new EventDispatch(spaceID,event, scope,headers);
 
+	}
+	
+	private static <T> Class<? extends T> extractClass(String key, Map<String,String> headers, Class<T> expectedType) {
+		assert(key!=null);
+		assert(headers!=null);
+		String classname = headers.get(key);
+		Class<?> type = null;
+		if (classname!=null) {
+			try {
+				type = Class.forName(classname);
+			}
+			catch(Throwable _) {
+				//
+			}
+		}
+		if (type==null || !expectedType.isAssignableFrom(type)) {
+			throw new ClassCastException(Locale.getString("INVALID_TYPE", type)); //$NON-NLS-1$
+		}
+		assert(type!=null);
+		return type.asSubclass(expectedType);
 	}
 
 
@@ -118,7 +159,10 @@ public class GsonEventSerializer implements EventSerializer {
 	 */
 	@Override
 	public byte[] serializeContextID(UUID id) throws Exception {
-		return this.encrypter.encrytContextID(id);
+		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		byte[] b = this.encrypter.encrytContextID(id);
+		assert(b!=null && b.length>0);
+		return b;
 	}
 
 }

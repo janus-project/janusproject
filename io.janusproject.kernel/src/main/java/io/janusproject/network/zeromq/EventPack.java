@@ -77,6 +77,7 @@ public class EventPack {
 	 * @param headers the headers to set
 	 */
 	public void setHeaders(byte[] headers) {
+		assert(headers!=null && headers.length>0) : "Parameter 'headers' must not be null or zero-length"; //$NON-NLS-1$
 		this.headers = headers;
 	}
 	
@@ -91,6 +92,7 @@ public class EventPack {
 	 * @param scope the scope to set
 	 */
 	public void setScope(byte[] scope) {
+		assert(scope!=null && scope.length>0) : "Parameter 'scope' must not be null or zero-length"; //$NON-NLS-1$
 		this.scope = scope;
 	}
 	

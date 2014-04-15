@@ -58,6 +58,7 @@ public class AESEventEncrypter implements EventEncrypter {
 	@Inject
 	void setKey(@Named(ZeroMQConfig.AES_KEY) String key)
 			throws Exception {
+		//FIXME: Unify the string charset to convert from to byte array
 		byte[] raw = key.getBytes(Charsets.UTF_8);
 		int keySize = raw.length;
 		if ((keySize % 16) == 0 || (keySize % 24) == 0 || (keySize % 32) == 0) {
@@ -71,6 +72,7 @@ public class AESEventEncrypter implements EventEncrypter {
 
 	@Override
 	public EventEnvelope encrypt(EventPack pack) throws Exception {
+		assert(pack!=null) : "Parameter 'pack' must not be null"; //$NON-NLS-1$
 		return EventEnvelope.build(encrypt(pack.getContextId()),
 				encrypt(pack.getSpaceId()), encrypt(pack.getScope()),
 				encrypt(pack.getHeaders()), encrypt(pack.getEvent()));
@@ -78,6 +80,7 @@ public class AESEventEncrypter implements EventEncrypter {
 
 	@Override
 	public EventPack decrypt(EventEnvelope envelope) throws Exception {
+		assert(envelope!=null) : "Parameter 'envelope' must not be null"; //$NON-NLS-1$
 		EventPack pack = new EventPack();
 		pack.setContextId(decrypt(envelope.getContextId()));
 		pack.setSpaceId(decrypt(envelope.getSpaceId()));
@@ -89,18 +92,23 @@ public class AESEventEncrypter implements EventEncrypter {
 	}
 
 	private byte[] decrypt(byte[] encrypted) throws GeneralSecurityException {
+		assert(encrypted!=null && encrypted.length>0) : "Parameter 'encrypted' must not be null nor zero-length"; //$NON-NLS-1$
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(Cipher.DECRYPT_MODE, this.skeySpec, new IvParameterSpec(
 				new byte[16]));
-		return cipher.doFinal(encrypted);
-
+		byte[] b = cipher.doFinal(encrypted);
+		assert(b!=null && b.length>0) : "Result of decryption is null or empty"; //$NON-NLS-1$
+		return b;
 	}
 
 	private byte[] encrypt(byte[] value) throws GeneralSecurityException {
+		assert(value!=null && value.length>0) : "Parameter 'value' must not be null nor zero-length"; //$NON-NLS-1$
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(Cipher.ENCRYPT_MODE, this.skeySpec, new IvParameterSpec(
 				new byte[16]));
-		return cipher.doFinal(value);
+		byte[] b = cipher.doFinal(value);
+		assert(b!=null && b.length>0) : "Result of encryption is null or empty"; //$NON-NLS-1$
+		return b;
 	}
 
 	/**
@@ -110,6 +118,9 @@ public class AESEventEncrypter implements EventEncrypter {
 	 */
 	@Override
 	public byte[] encrytContextID(UUID id) throws Exception {
-		return encrypt(id.toString().getBytes());
+		assert(id!=null) : "Parameter 'id' must not be null"; //$NON-NLS-1$
+		byte[] b = encrypt(id.toString().getBytes());
+		assert(b!=null && b.length>0) : "Result of encryption is null or empty"; //$NON-NLS-1$
+		return b;
 	}
 }

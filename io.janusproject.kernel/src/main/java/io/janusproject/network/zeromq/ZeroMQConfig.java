@@ -19,6 +19,8 @@
  */
 package io.janusproject.network.zeromq;
 
+import java.nio.charset.Charset;
+
 import com.google.inject.name.Named;
 
 /**
@@ -33,6 +35,13 @@ import com.google.inject.name.Named;
  */
 public class ZeroMQConfig {
 
+	/** Charset that should be used for converting String to byte array or
+	 * byte array to String.
+	 * <p>
+	 * This constant was introduced to enforce the values on different platforms.
+	 */
+	public static final Charset BYTE_ARRAY_STRING_CHARSET = Charset.forName("UTF-8"); //$NON-NLS-1$
+	
 	/** Name of the property for the PUB uri.
 	 */
 	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$

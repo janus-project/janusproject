@@ -52,11 +52,18 @@ public class JavaBinaryEventSerializer implements EventSerializer {
 	
 	@Override
 	public EventEnvelope serialize(EventDispatch dispatch) throws Exception {
+		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		assert(dispatch!=null) : "Parameter 'dispatch' must not be null"; //$NON-NLS-1$
 		Event event = dispatch.getEvent();
+		assert(event!=null);
 		Scope<?> scope = dispatch.getScope();
 		SpaceID spaceID = dispatch.getSpaceID();
+		assert(spaceID!=null);
+		assert(spaceID.getSpaceSpecification()!=null);
 		
-		dispatch.getHeaders().put("x-java-spacespec-class", //$NON-NLS-1$
+		Map<String,String> headers = dispatch.getHeaders();
+		assert(headers!=null);
+		headers.put("x-java-spacespec-class", //$NON-NLS-1$
 				spaceID.getSpaceSpecification().getName());
 
 		EventPack pack = new EventPack();
@@ -81,15 +88,28 @@ public class JavaBinaryEventSerializer implements EventSerializer {
 	@SuppressWarnings("unchecked")
 	@Override
 	public EventDispatch deserialize(EventEnvelope envelope) throws Exception {
+		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		assert(envelope!=null) : "Parameter 'envelope' must not be null"; //$NON-NLS-1$
+		
 		EventPack pack = this.encrypter.decrypt(envelope);
+		assert(pack!=null);
 		
 		UUID contextId = UUID.fromString(new String(pack.getContextId()));
 		UUID spaceId = UUID.fromString(new String(pack.getSpaceId()));
 
 		Map<String, String> headers = fromBytes(pack.getHeaders(), Map.class);
-
-		Class<?> spaceSpec = Class.forName(headers
-				.get("x-java-spacespec-class")); //$NON-NLS-1$
+		assert(headers!=null);
+		
+		Class<?> spaceSpec = null;
+		String classname = headers.get("x-java-spacespec-class"); //$NON-NLS-1$
+		if (classname!=null) {
+			try {
+				spaceSpec = Class.forName(classname);
+			}
+			catch(Throwable _) {
+				//
+			}
+		}
 
 		if (spaceSpec==null || !SpaceSpecification.class.isAssignableFrom(spaceSpec)) {
 			throw new ClassCastException(Locale.getString("INVALID_TYPE", spaceSpec)); //$NON-NLS-1$
@@ -99,6 +119,7 @@ public class JavaBinaryEventSerializer implements EventSerializer {
 				spaceSpec.asSubclass(SpaceSpecification.class));
 		
 		Event event = fromBytes(pack.getEvent(), Event.class);
+		assert(event!=null);
 		Scope<?> scope = fromBytes(pack.getScope(), Scope.class);
 		return new EventDispatch(spaceID,event, scope,headers);
 
@@ -117,7 +138,10 @@ public class JavaBinaryEventSerializer implements EventSerializer {
 
 	@Override
 	public byte[] serializeContextID(UUID id) throws Exception {
-		return this.encrypter.encrytContextID(id);
+		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		byte[] b = this.encrypter.encrytContextID(id);
+		assert(b!=null && b.length>0);
+		return b;
 	}
 
 }

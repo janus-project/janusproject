@@ -48,6 +48,11 @@ public class EventEnvelope {
 	 */
 	EventEnvelope(byte[] contextId, byte[] spaceID, byte[] scope,
 			byte[] headers, byte[] body) {
+		assert(contextId!=null && contextId.length>0) : "Parameter 'contextId' must not be null or zero-length"; //$NON-NLS-1$
+		assert(spaceID!=null && spaceID.length>0) : "Parameter 'spaceID' must not be null or zero-length"; //$NON-NLS-1$
+		assert(scope!=null && scope.length>0) : "Parameter 'contextId' must not be null or zero-length"; //$NON-NLS-1$
+		assert(headers!=null && headers.length>0) : "Parameter 'contextId' must not be null or zero-length"; //$NON-NLS-1$
+		assert(body!=null && body.length>0) : "Parameter 'contextId' must not be null or zero-length"; //$NON-NLS-1$
 		this.contextId = contextId;
 		this.spaceId = spaceID;
 		this.scope = scope;
