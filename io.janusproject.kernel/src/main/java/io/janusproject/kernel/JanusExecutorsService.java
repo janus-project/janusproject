@@ -58,11 +58,11 @@ class JanusExecutorsService extends AbstractService {
 		try {
 			this.schedules.awaitTermination(5, TimeUnit.SECONDS);
 			this.exec.awaitTermination(5, TimeUnit.SECONDS);
-			this.schedules.shutdownNow();
-			this.exec.shutdownNow();
 		} catch (InterruptedException e) {
 			throw new RuntimeException(Locale.getString("STOP_ERROR"),e); //$NON-NLS-1$
 		} finally{
+			this.schedules.shutdownNow();
+			this.exec.shutdownNow();
 			notifyStopped();					
 		}
 		
