@@ -28,18 +28,18 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.inject.Inject;
-
 import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.inject.Inject;
 
-/**  Serialize the {@link EventDispatch} content using GSON to
- * generate the corresponding {@link EventEnvelope}.
+/**
+ * Serialize the {@link EventDispatch} content using GSON to generate the corresponding {@link EventEnvelope}.
  * 
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
+ * @author $Author: ngaud$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -48,33 +48,33 @@ public class GsonEventSerializer implements EventSerializer {
 
 	@Inject
 	private Gson gson;
-	
+
 	@Inject
 	private EventEncrypter encrypter;
-	
+
 	@Override
 	public EventEnvelope serialize(EventDispatch dispatch) throws Exception {
-		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
-		assert(this.gson!=null) : "Invalid injection of Gson"; //$NON-NLS-1$
-		assert(dispatch!=null) : "Parameter 'dispatch' must not be null"; //$NON-NLS-1$
+		assert (this.encrypter != null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		assert (this.gson != null) : "Invalid injection of Gson"; //$NON-NLS-1$
+		assert (dispatch != null) : "Parameter 'dispatch' must not be null"; //$NON-NLS-1$
 
 		Event event = dispatch.getEvent();
-		assert(event!=null);
+		assert (event != null);
 		Scope<?> scope = dispatch.getScope();
-		assert(scope!=null);
+		assert (scope != null);
 		SpaceID spaceID = dispatch.getSpaceID();
-		assert(spaceID!=null);
-		assert(spaceID.getSpaceSpecification()!=null);
-		Map<String,String> headers = dispatch.getHeaders();
-		assert(headers!=null);
-		
+		assert (spaceID != null);
+		assert (spaceID.getSpaceSpecification() != null);
+		Map<String, String> headers = dispatch.getHeaders();
+		assert (headers != null);
+
 		headers.put("x-java-event-class", //$NON-NLS-1$
 				event.getClass().getName());
 		headers.put("x-java-scope-class", //$NON-NLS-1$
 				scope.getClass().getName());
 		headers.put("x-java-spacespec-class", //$NON-NLS-1$
 				spaceID.getSpaceSpecification().getName());
-		
+
 		EventPack pack = new EventPack();
 		pack.setEvent(this.gson.toJson(event).getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
 		pack.setScope(this.gson.toJson(scope).getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
@@ -98,11 +98,11 @@ public class GsonEventSerializer implements EventSerializer {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public EventDispatch deserialize(EventEnvelope envelope) throws Exception {
-		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
-		assert(this.gson!=null) : "Invalid injection of Gson"; //$NON-NLS-1$
+		assert (this.encrypter != null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		assert (this.gson != null) : "Invalid injection of Gson"; //$NON-NLS-1$
 
 		EventPack pack = this.encrypter.decrypt(envelope);
-		
+
 		UUID contextId = UUID.fromString(new String(pack.getContextId(), ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
 		UUID spaceId = UUID.fromString(new String(pack.getSpaceId(), ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
 
@@ -111,48 +111,46 @@ public class GsonEventSerializer implements EventSerializer {
 		Class<? extends SpaceSpecification> spaceSpec = extractClass("x-java-spacespec-class", headers, SpaceSpecification.class); //$NON-NLS-1$
 		Class<? extends Event> eventClazz = extractClass("x-java-event-class", headers, Event.class); //$NON-NLS-1$
 		Class<? extends Scope> scopeClazz = extractClass("x-java-scope-class", headers, Scope.class); //$NON-NLS-1$
-		
-		SpaceID spaceID = new SpaceID(contextId, spaceId,
-				spaceSpec.asSubclass(SpaceSpecification.class));
-		
+
+		SpaceID spaceID = new SpaceID(contextId, spaceId, spaceSpec.asSubclass(SpaceSpecification.class));
+
 		Event event = this.gson.fromJson(new String(pack.getEvent(), ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET), eventClazz);
-		assert(event!=null);
+		assert (event != null);
 		Scope scope = this.gson.fromJson(new String(pack.getScope(), ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET), scopeClazz);
-		assert(scope!=null);
+		assert (scope != null);
 
-		return new EventDispatch(spaceID,event, scope,headers);
-
+		return new EventDispatch(spaceID, event, scope, headers);
 	}
-	
-	private static <T> Class<? extends T> extractClass(String key, Map<String,String> headers, Class<T> expectedType) {
-		assert(key!=null);
-		assert(headers!=null);
+
+	private static <T> Class<? extends T> extractClass(String key, Map<String, String> headers, Class<T> expectedType) {
+		assert (key != null);
+		assert (headers != null);
 		String classname = headers.get(key);
 		Class<?> type = null;
-		if (classname!=null) {
+		if (classname != null) {
 			try {
 				type = Class.forName(classname);
-			}
-			catch(Throwable _) {
+			} catch (Throwable _) {
 				//
 			}
 		}
-		if (type==null || !expectedType.isAssignableFrom(type)) {
+		if (type == null || !expectedType.isAssignableFrom(type)) {
 			throw new ClassCastException(Locale.getString("INVALID_TYPE", type)); //$NON-NLS-1$
 		}
-		assert(type!=null);
+		assert (type != null);
 		return type.asSubclass(expectedType);
 	}
 
-
-	/** {@inheritDoc}
-	 * @throws Exception 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws Exception
 	 */
 	@Override
 	public byte[] serializeContextID(UUID id) throws Exception {
-		assert(this.encrypter!=null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
+		assert (this.encrypter != null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
 		byte[] b = this.encrypter.encrytContextID(id);
-		assert(b!=null && b.length>0);
+		assert (b != null && b.length > 0);
 		return b;
 	}
 

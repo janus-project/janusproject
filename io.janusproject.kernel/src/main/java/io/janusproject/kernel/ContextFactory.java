@@ -19,47 +19,48 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.repository.ContextRepository;
-
 import java.util.UUID;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/** A factory to create agent contexts.
+/**
+ * A factory to create agent contexts.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: ngaud$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 class ContextFactory {
-	
+
 	@Inject
 	private Injector injector;
-	
-	
+
 	private ContextRepository contextRepository;
-	
-	/** Create a context.
+
+	/**
+	 * Create a context.
 	 * 
 	 * @param contextID - identifier of the context.
 	 * @param defaultSpaceId - identifier of the default space in the context.
 	 * @return the context.
 	 */
-	public Context create(UUID contextID, UUID defaultSpaceId){
+	public Context create(UUID contextID, UUID defaultSpaceId) {
 		Context ctx = new Context(this.injector, contextID, defaultSpaceId);
 		this.contextRepository.addContext(ctx);
 		return ctx;
 	}
-	
-	/** Set the context repository of the platform.
+
+	/**
+	 * Set the context repository of the platform.
 	 * 
 	 * @param contextRepo - reference to the context repository to use to store the contexts.
 	 */
 	@Inject
-	void setContextRepository(ContextRepository contextRepo){
+	void setContextRepository(ContextRepository contextRepo) {
 		this.contextRepository = contextRepo;
 	}
-	
+
 }

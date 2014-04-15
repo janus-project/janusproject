@@ -19,7 +19,6 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.repository.ContextRepository;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;
@@ -39,19 +38,21 @@ import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.collect.Sets;
 
-/** Skill that permits to access to the context in which the agent is located.
+/**
+ * Skill that permits to access to the context in which the agent is located.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: ngaud$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
+class ExternalContextAccessSkill extends Skill implements ExternalContextAccess {
 
 	private Set<UUID> contexts = Sets.newConcurrentHashSet();
-	
+
 	private final ContextRepository contextRepository;
-	
+
 	/**
 	 * @param agent - owner of the skill.
 	 * @param contextRepository - repository of the contexts.
@@ -60,17 +61,17 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		super(agent);
 		this.contextRepository = contextRepository;
 	}
-	
+
 	@Override
 	protected void install() {
 		super.install();
 		AgentContext ac = this.contextRepository.getContext(getOwner().getParentID());
-		this.join(ac.getID(), ac.getDefaultSpace().getID().getID());	
+		this.join(ac.getID(), ac.getDefaultSpace().getID().getID());
 	}
-	
+
 	@Override
 	protected void uninstall() {
-		//Leave all contexts including the default one.
+		// Leave all contexts including the default one.
 		for (UUID contextID : this.contexts) {
 			this.leave(contextID);
 		}
@@ -84,8 +85,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 
 	@Override
 	public AgentContext getContext(UUID contextID) {
-		assert (contextID!=null);
-		if(!this.contexts.contains(contextID)){
+		assert (contextID != null);
+		if (!this.contexts.contains(contextID)) {
 			throw new IllegalArgumentException(Locale.getString("UNKNOWN_CONTEXT_ID", contextID)); //$NON-NLS-1$
 		}
 		return this.contextRepository.getContext(contextID);
@@ -93,33 +94,32 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 
 	@Override
 	public void join(UUID futureContext, UUID futureContextDefaultSpaceID) {
-		assert (futureContext!=null);
-		assert (futureContextDefaultSpaceID!=null);
-		
+		assert (futureContext != null);
+		assert (futureContextDefaultSpaceID != null);
+
 		AgentContext ac = this.contextRepository.getContext(futureContext);
-		
-		assert (ac!=null) : "Unknown Context"; //$NON-NLS-1$
-		
-		if(this.contexts.contains(futureContext)){			
+
+		assert (ac != null) : "Unknown Context"; //$NON-NLS-1$
+
+		if (this.contexts.contains(futureContext)) {
 			return;
 		}
-		
-		
-		if(ac.getDefaultSpace().getID().getID() != futureContextDefaultSpaceID){
+
+		if (ac.getDefaultSpace().getID().getID() != futureContextDefaultSpaceID) {
 			throw new IllegalArgumentException(Locale.getString("INVALID_DEFAULT_SPACE_MATCHING", futureContextDefaultSpaceID)); //$NON-NLS-1$
 		}
-		
+
 		this.contexts.add(futureContext);
 		BehaviorsAndInnerContextSkill imp = (BehaviorsAndInnerContextSkill) getSkill(Behaviors.class);
 		imp.registerOnDefaultSpace((EventSpaceImpl) ac.getDefaultSpace());
-		
-		fireContextJoined(futureContext,futureContextDefaultSpaceID);
+
+		fireContextJoined(futureContext, futureContextDefaultSpaceID);
 		fireMemberJoined(ac);
 	}
-	
+
 	/**
-	 * Fires an {@link ContextJoined} event into the Inner Context default space of the owner agent to 
-	 * notify behaviors/members that a new context has been joined.
+	 * Fires an {@link ContextJoined} event into the Inner Context default space of the owner agent to notify behaviors/members that a new context has been joined.
+	 * 
 	 * @param futureContext - ID of the newly joined context
 	 * @param futureContextDefaultSpaceID - ID of the default space of the newly joined context
 	 */
@@ -129,10 +129,10 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 		event.setHolonContextID(futureContext);
 		getSkill(Behaviors.class).wake(event);
 	}
-	
+
 	/**
-	 * Fires an {@link MemberJoined} event into the newly joined parent Context default space to 
-	 * notify other context's members that a new agent joined this context.
+	 * Fires an {@link MemberJoined} event into the newly joined parent Context default space to notify other context's members that a new agent joined this context.
+	 * 
 	 * @param newJoinedContext - the newly joined context to notify its members
 	 */
 	protected void fireMemberJoined(AgentContext newJoinedContext) {
@@ -146,44 +146,43 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess{
 
 	@Override
 	public void leave(UUID contextID) {
-		assert (contextID!=null);
+		assert (contextID != null);
 		AgentContext ac = this.contextRepository.getContext(contextID);
-		assert (ac!=null) : "Unknown Context"; //$NON-NLS-1$
-		if(!this.contexts.contains(contextID)){
+		assert (ac != null) : "Unknown Context"; //$NON-NLS-1$
+		if (!this.contexts.contains(contextID)) {
 			return;
 		}
-		//TO send this event the agent must still be inside the context and its default space
+		// TO send this event the agent must still be inside the context and its default space
 		fireContextLeft(contextID);
 		fireMemberLeft(ac);
-		
+
 		BehaviorsAndInnerContextSkill imp = (BehaviorsAndInnerContextSkill) getSkill(Behaviors.class);
 		imp.unregisterFromDefaultSpace((EventSpaceImpl) ac.getDefaultSpace());
-		this.contexts.remove(contextID);		
+		this.contexts.remove(contextID);
 	}
-	
+
 	/**
-	 * Fires an {@link ContextLeft} event into the Inner Context Default space of the owner agent to 
-	 * notify behaviors/members that the specified context has been left.
+	 * Fires an {@link ContextLeft} event into the Inner Context Default space of the owner agent to notify behaviors/members that the specified context has been left.
+	 * 
 	 * @param contextID - the ID of context that will be left
 	 */
 	protected void fireContextLeft(UUID contextID) {
-		ContextLeft event = new ContextLeft();		
+		ContextLeft event = new ContextLeft();
 		event.setHolonContextID(contextID);
 		getSkill(Behaviors.class).wake(event);
 	}
-		
+
 	/**
-	 * Fires an {@link MemberLeft} event into the default space of the Context that will be left to 
-	 * notify other context's members that an agent has left this context.
+	 * Fires an {@link MemberLeft} event into the default space of the Context that will be left to notify other context's members that an agent has left this context.
+	 * 
 	 * @param leftContext - the context that will be left
 	 */
 	protected void fireMemberLeft(AgentContext leftContext) {
 		EventSpace defSpace = leftContext.getDefaultSpace();
 		MemberLeft event = new MemberLeft();
-		event.setAgentID(this.getOwner().getID());		
+		event.setAgentID(this.getOwner().getID());
 		event.setSource(defSpace.getAddress(getOwner().getID()));
 		defSpace.emit(event);
 	}
 
-	
 }

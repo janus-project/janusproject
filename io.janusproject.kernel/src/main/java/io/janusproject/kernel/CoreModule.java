@@ -23,7 +23,6 @@ import io.janusproject.JanusConfig;
 import io.janusproject.kernel.annotations.Kernel;
 import io.janusproject.kernel.executor.AgentScheduledExecutorService;
 import io.janusproject.repository.AddressSerializer;
-import io.janusproject.repository.ContextRepository;
 import io.janusproject.repository.SpaceIDSerializer;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.AgentContext;
@@ -161,8 +160,8 @@ public class CoreModule extends AbstractModule {
 			this.kernelExecutorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).build());
 		}
 		return this.kernelExecutorService;
-	}
-
+	} 
+	
 	@Provides
 	private ScheduledExecutorService createScheduledExecutorService() {
 		if (this.scheduledExecutorService == null) {

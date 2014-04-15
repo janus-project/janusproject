@@ -19,7 +19,6 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.repository.ContextRepository;
 import io.sarl.core.Behaviors;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
@@ -42,6 +41,7 @@ import com.google.inject.Injector;
 /** Provider of the built-in capacities of the Janus platform.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: ngaud$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$

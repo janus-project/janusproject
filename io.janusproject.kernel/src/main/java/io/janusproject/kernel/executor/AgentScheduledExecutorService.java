@@ -22,12 +22,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
-/** A {@link ScheduledExecutorService} implementation that re-throws Errors 
- * and Exceptions encountered on the task execution.
+/**
+ * A {@link ScheduledExecutorService} implementation that re-throws Errors and Exceptions encountered on the task execution.
  * <p>
  * Original Code: {@link "http://code.nomad-labs.com/2011/12/09/mother-fk-the-scheduledexecutorservice/"}.
- *
+ * 
  * @author $Author: srodriguez$
+ * @author $Author: ngaud$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -40,7 +41,6 @@ public class AgentScheduledExecutorService extends ScheduledThreadPoolExecutor {
 	public AgentScheduledExecutorService(int corePoolSize) {
 		super(corePoolSize);
 	}
-
 
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {

@@ -36,15 +36,16 @@ import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
-import com.google.common.base.Preconditions;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-/** Default implementation of an event space.
+/**
+ * Default implementation of an event space.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: ngaud$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -61,7 +62,8 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	@Inject
 	private ExecutorService executorService;
 
-	/** Constructs an event space.
+	/**
+	 * Constructs an event space.
 	 * 
 	 * @param id - identifier of the space.
 	 */
@@ -79,7 +81,8 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 		injector.injectMembers(this.participants);
 	}
 
-	/** Set the network service to be used by this space to be distributed over the network.
+	/**
+	 * Set the network service to be used by this space to be distributed over the network.
 	 * 
 	 * @param net - instance of the network service.
 	 * @throws Exception
@@ -90,7 +93,8 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 		this.network.register(new DistributedProxy(this));
 	}
 
-	/** Replies the address associated to the given participant.
+	/**
+	 * Replies the address associated to the given participant.
 	 * 
 	 * @param entity - instance of a participant.
 	 * @return the address of the participant with the given id.
@@ -117,8 +121,8 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 
 	@Override
 	public void emit(Event event, Scope<Address> scope) {
-		assert (event!=null);
-		assert (event.getSource()!=null) : "Every event must have a source"; //$NON-NLS-1$
+		assert (event != null);
+		assert (event.getSource() != null) : "Every event must have a source"; //$NON-NLS-1$
 		assert this.getID().equals(event.getSource().getSpaceId()) : "The source address must belong to this space"; //$NON-NLS-1$
 
 		try {
@@ -133,7 +137,7 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 
 	@Override
 	public void emit(Event event) {
-		this.emit(event, Scopes.<Address>allParticipants());
+		this.emit(event, Scopes.<Address> allParticipants());
 	}
 
 	private void doEmit(final Event event, final Scope<Address> scope) {
@@ -160,9 +164,7 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	@Subscribe
 	public void unhandledEvent(DeadEvent e) {
 		this.log.finer(Locale.getString("UNHANDLED_EVENT", //$NON-NLS-1$
-				getID(),
-				((Event) e.getEvent()).getSource(),
-				e.getEvent()));
+				getID(), ((Event) e.getEvent()).getSource(), e.getEvent()));
 	}
 
 	private static class DistributedProxy implements DistributedSpace {
