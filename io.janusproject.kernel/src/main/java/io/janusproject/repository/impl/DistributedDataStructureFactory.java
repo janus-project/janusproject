@@ -19,7 +19,7 @@
  */
 package io.janusproject.repository.impl;
 
-import java.util.Map;
+import java.net.InetSocketAddress;
 
 import com.google.inject.Inject;
 import com.hazelcast.core.HazelcastInstance;
@@ -30,8 +30,8 @@ import com.hazelcast.core.ISemaphore;
 import com.hazelcast.core.ISet;
 import com.hazelcast.core.MultiMap;
 
-/** Factory that permits to manage data structures that are shared
- * over a network.
+/**
+ * Factory that permits to manage data structures that are shared over a network.
  * 
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -43,36 +43,38 @@ public class DistributedDataStructureFactory {
 
 	@Inject
 	private HazelcastInstance hazelcastInstance;
-	
-	/** Replies the {@link Map} with the given name.
+
+	/**
+	 * Replies the local IP address used by Hazelcast to register local member into the Hazelcast cluster
+	 * 
+	 * @return the local IP address used by Hazelcast to register local member
+	 */
+	public InetSocketAddress getJanusLocalAddress() {
+		return this.hazelcastInstance.getCluster().getLocalMember().getInetSocketAddress();
+	}
+
+	/**
+	 * Replies the {@link IMap} with the given name.
 	 * 
 	 * @param name - name of the shared map.
 	 * @return the map.
 	 */
-	public <K,V> Map<K,V> getMap(String name) {
+	public <K, V> IMap<K, V> getMap(String name) {
 		return this.hazelcastInstance.getMap(name);
 	}
-	
-	/** Replies the {@link IMap} with the given name.
-	 * 
-	 * @param name - name of the shared map.
-	 * @return the map.
-	 */
-	public <K,V> IMap<K,V> getIMap(String name) {
-		return this.hazelcastInstance.getMap(name);
-	}
-		
-	/** Replies the {@link MultiMap} with the given name.
+
+	/**
+	 * Replies the {@link MultiMap} with the given name.
 	 * 
 	 * @param name - name of the shared multi-map.
 	 * @return the map.
 	 */
-	public <K,V> MultiMap<K,V> getMultiMap(String name) {
+	public <K, V> MultiMap<K, V> getMultiMap(String name) {
 		return this.hazelcastInstance.getMultiMap(name);
 	}
 
-
-	/** Replies the {@link IQueue} with the given name.
+	/**
+	 * Replies the {@link IQueue} with the given name.
 	 * 
 	 * @param name - name of the shared queue.
 	 * @return the queue.
@@ -81,8 +83,8 @@ public class DistributedDataStructureFactory {
 		return this.hazelcastInstance.getQueue(name);
 	}
 
-
-	/** Replies the {@link ISet} with the given name.
+	/**
+	 * Replies the {@link ISet} with the given name.
 	 * 
 	 * @param name - name of the shared set.
 	 * @return the set.
@@ -91,8 +93,8 @@ public class DistributedDataStructureFactory {
 		return this.hazelcastInstance.getSet(name);
 	}
 
-
-	/** Replies the {@link IList} with the given name.
+	/**
+	 * Replies the {@link IList} with the given name.
 	 * 
 	 * @param name - name of the shared list.
 	 * @return the list.
@@ -101,8 +103,8 @@ public class DistributedDataStructureFactory {
 		return this.hazelcastInstance.getList(name);
 	}
 
-
-	/** Replies the {@link ISemaphore} with the given name.
+	/**
+	 * Replies the {@link ISemaphore} with the given name.
 	 * 
 	 * @param name - name of the shared semaphore.
 	 * @return the semaphore.
@@ -110,5 +112,5 @@ public class DistributedDataStructureFactory {
 	public ISemaphore getSemaphore(String name) {
 		return this.hazelcastInstance.getSemaphore(name);
 	}
-	
+
 }
