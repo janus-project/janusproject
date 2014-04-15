@@ -21,6 +21,7 @@ package io.janusproject.network.zeromq;
 
 import java.nio.charset.Charset;
 
+import com.google.common.base.Charsets;
 import com.google.inject.name.Named;
 
 /**
@@ -40,7 +41,7 @@ public class ZeroMQConfig {
 	 * <p>
 	 * This constant was introduced to enforce the values on different platforms.
 	 */
-	public static final Charset BYTE_ARRAY_STRING_CHARSET = Charset.forName("UTF-8"); //$NON-NLS-1$
+	public static final Charset BYTE_ARRAY_STRING_CHARSET = Charsets.UTF_8;
 	
 	/** Name of the property for the PUB uri.
 	 */

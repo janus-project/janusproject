@@ -76,16 +76,11 @@ public class GsonEventSerializer implements EventSerializer {
 				spaceID.getSpaceSpecification().getName());
 		
 		EventPack pack = new EventPack();
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		pack.setEvent(this.gson.toJson(event).getBytes());
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		pack.setScope(this.gson.toJson(scope).getBytes());
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		pack.setHeaders(this.gson.toJson(dispatch.getHeaders()).getBytes());
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		pack.setSpaceId(spaceID.getID().toString().getBytes());
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		pack.setContextId(spaceID.getContextID().toString().getBytes());
+		pack.setEvent(this.gson.toJson(event).getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
+		pack.setScope(this.gson.toJson(scope).getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
+		pack.setHeaders(this.gson.toJson(dispatch.getHeaders()).getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
+		pack.setSpaceId(spaceID.getID().toString().getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
+		pack.setContextId(spaceID.getContextID().toString().getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
 
 		return this.encrypter.encrypt(pack);
 
@@ -108,10 +103,8 @@ public class GsonEventSerializer implements EventSerializer {
 
 		EventPack pack = this.encrypter.decrypt(envelope);
 		
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		UUID contextId = UUID.fromString(new String(pack.getContextId()));
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		UUID spaceId = UUID.fromString(new String(pack.getSpaceId()));
+		UUID contextId = UUID.fromString(new String(pack.getContextId(), ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
+		UUID spaceId = UUID.fromString(new String(pack.getSpaceId(), ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
 
 		Map<String, String> headers = getHeadersFromString(new String(pack.getHeaders()));
 
@@ -122,11 +115,9 @@ public class GsonEventSerializer implements EventSerializer {
 		SpaceID spaceID = new SpaceID(contextId, spaceId,
 				spaceSpec.asSubclass(SpaceSpecification.class));
 		
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		Event event = this.gson.fromJson(new String(pack.getEvent()), eventClazz);
+		Event event = this.gson.fromJson(new String(pack.getEvent(), ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET), eventClazz);
 		assert(event!=null);
-		//FIXME: Ensure that the default string encoding does not introduce bugs
-		Scope scope = this.gson.fromJson(new String(pack.getScope()), scopeClazz);
+		Scope scope = this.gson.fromJson(new String(pack.getScope(), ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET), scopeClazz);
 		assert(scope!=null);
 
 		return new EventDispatch(spaceID,event, scope,headers);

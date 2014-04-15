@@ -30,8 +30,6 @@ import javax.inject.Named;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
-import com.google.common.base.Charsets;
-
 /**
  * Encrypts the {@link EventDispatch} content using the AES algorithm to
  * generate the {@link EventEnvelope}.
@@ -59,7 +57,7 @@ public class AESEventEncrypter implements EventEncrypter {
 	void setKey(@Named(ZeroMQConfig.AES_KEY) String key)
 			throws Exception {
 		//FIXME: Unify the string charset to convert from to byte array
-		byte[] raw = key.getBytes(Charsets.UTF_8);
+		byte[] raw = key.getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET);
 		int keySize = raw.length;
 		if ((keySize % 16) == 0 || (keySize % 24) == 0 || (keySize % 32) == 0) {
 			this.skeySpec = new SecretKeySpec(raw, "AES"); //$NON-NLS-1$
