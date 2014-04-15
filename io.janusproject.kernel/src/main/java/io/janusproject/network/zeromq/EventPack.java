@@ -47,6 +47,7 @@ public class EventPack {
 	 * @param contextId the contextId to set
 	 */
 	public void setContextId(byte[] contextId) {
+		assert(contextId!=null && contextId.length>0) : "Parameter 'contextId' must not be null or zero-length"; //$NON-NLS-1$
 		this.contextId = contextId;
 	}
 	
@@ -61,6 +62,7 @@ public class EventPack {
 	 * @param spaceId the spaceId to set
 	 */
 	public void setSpaceId(byte[] spaceId) {
+		assert(spaceId!=null && spaceId.length>0) : "Parameter 'spaceId' must not be null or zero-length"; //$NON-NLS-1$
 		this.spaceId = spaceId;
 	}
 	
@@ -103,6 +105,7 @@ public class EventPack {
 	 * @param event the event to set
 	 */
 	public void setEvent(byte[] event) {
+		assert(event!=null && event.length>0) : "Parameter 'event' must not be null or zero-length"; //$NON-NLS-1$
 		this.event = event;
 	}
 

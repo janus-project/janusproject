@@ -37,6 +37,7 @@ public class PlainTextEncrypter implements EventEncrypter {
 
 	@Override
 	public EventEnvelope encrypt(EventPack pack) {
+		assert(pack!=null) : "Parameter 'pack' must not be null"; //$NON-NLS-1$
 		return EventEnvelope.build(pack.getContextId(), pack
 				.getSpaceId(), pack.getScope(), pack
 				.getHeaders(), pack.getEvent());
@@ -44,6 +45,7 @@ public class PlainTextEncrypter implements EventEncrypter {
 
 	@Override
 	public EventPack decrypt(EventEnvelope envelope) {
+		assert(envelope!=null) : "Parameter 'envelope' must not be null"; //$NON-NLS-1$
 		EventPack pack = new EventPack();
 		pack.setContextId(envelope.getContextId());
 		pack.setSpaceId(envelope.getSpaceId());
@@ -55,6 +57,7 @@ public class PlainTextEncrypter implements EventEncrypter {
 
 	@Override
 	public byte[] encrytContextID(UUID id) throws Exception {
+		assert(id!=null) : "Parameter 'id' must not be null"; //$NON-NLS-1$
 		return id.toString().getBytes();
 	}
 

@@ -259,6 +259,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 							if (this.poller.pollin(i)) {
 								this.log.finer(Locale.getString("POLLING", i)); //$NON-NLS-1$
 								EventEnvelope ev = EventEnvelope.recv(this.poller.getSocket(i));
+								assert(ev!=null);
 								try {
 									this.receive(ev);
 								}
