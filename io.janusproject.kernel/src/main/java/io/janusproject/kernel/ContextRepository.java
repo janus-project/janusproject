@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.repository;
+package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.repository.impl.DistributedDataStructureFactory;
@@ -33,7 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.name.Named;
+import com.hazelcast.core.EntryListener;
+import com.hazelcast.core.IMap;
 
 /**
  * A repository of Agent's Context.
@@ -46,6 +49,8 @@ import com.google.inject.name.Named;
  */
 public class ContextRepository {
 
+	private Injector injector;
+		
 	/**
 	 * Map linking a context id to its related Context object This is local
 	 * non-distributed map
@@ -56,13 +61,18 @@ public class ContextRepository {
 	 * Map linking a context id to its associated default space id This map must
 	 * be distributed and synchronized all over the network
 	 */
-	private Map<UUID, SpaceID> spaces;
+	private IMap<UUID, SpaceID> defaultSpaces;
 
+	/**
+	 * The listener on the modifications occurring in the {@link spaces} distributed map
+	 */
+	private EntryListener<UUID, SpaceID> spacesEntryListener;
 
 	/** Constructs <code>ContextRepository</code>.
 	 */
 	public ContextRepository() {
 		this.contexts = new ConcurrentHashMap<>();
+		
 	}
 	
 	/**
@@ -72,8 +82,45 @@ public class ContextRepository {
 	 * @param repositoryImplFactory - factory that permits to create a repository.
 	 */
 	@Inject
-	void setJanusID(@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID, DistributedDataStructureFactory repositoryImplFactory){
-		this.spaces = repositoryImplFactory.getMap(janusID.toString());
+	void setJanusID(Injector injector, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID, DistributedDataStructureFactory repositoryImplFactory){
+		this.injector = injector;
+		this.defaultSpaces = repositoryImplFactory.getMap(janusID.toString());
+		/*Context ctx;
+		for(IMap.Entry<UUID, SpaceID> entry: defaultSpaces.entrySet()) {
+			if(!this.contexts.containsKey(entry.getKey())) {
+				ctx = new Context(this.injector, entry.getKey(), entry.getValue().getID());
+				assert(ctx != null);
+				this.contexts.put(entry.getKey(), ctx);
+			}
+		}
+		this.spacesEntryListener = new EntryListener<UUID, SpaceID>() {
+
+			@Override
+			public void entryAdded(EntryEvent<UUID, SpaceID> event) {
+				Context ctx = new Context(ContextRepository.this.injector,event.getKey(), event.getValue().getID());
+				assert(ctx != null);
+				ContextRepository.this.contexts.put(event.getKey(), ctx);				
+			}
+
+			@Override
+			public void entryRemoved(EntryEvent<UUID, SpaceID> event) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void entryUpdated(EntryEvent<UUID, SpaceID> event) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void entryEvicted(EntryEvent<UUID, SpaceID> event) {
+				// TODO Auto-generated method stub
+				
+			}			
+		};
+		this.defaultSpaces.addEntryListener(this.spacesEntryListener, true);*/
 	}
 
 	/**
@@ -114,7 +161,7 @@ public class ContextRepository {
 	 *            - the context to add
 	 */
 	public void addContext(AgentContext context) {
-		this.spaces.put(context.getID(), context.getDefaultSpace().getID());
+		this.defaultSpaces.put(context.getID(), context.getDefaultSpace().getID());
 		this.contexts.put(context.getID(), context);
 	}
 
@@ -135,7 +182,7 @@ public class ContextRepository {
 	 *            - the id of the context to remove
 	 */
 	public void removeContext(UUID contextID) {
-		this.spaces.remove(contextID);
+		this.defaultSpaces.remove(contextID);
 		this.contexts.remove(contextID);
 	}
 
@@ -143,7 +190,7 @@ public class ContextRepository {
 	 * Clear the context of this repository
 	 */
 	public void clearRepository() {
-		this.spaces.clear();
+		this.defaultSpaces.clear();
 		this.contexts.clear();
 	}
 

@@ -20,9 +20,9 @@
 package io.janusproject.network.zeromq;
 
 import static io.janusproject.network.zeromq.ZeroMQConfig.PUB_URI;
+import io.janusproject.kernel.ContextRepository;
 import io.janusproject.kernel.DistributedSpace;
 import io.janusproject.kernel.Network;
-import io.janusproject.repository.ContextRepository;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
@@ -35,8 +35,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.inject.Inject;
-
 import org.arakhne.afc.vmutil.locale.Locale;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
@@ -45,13 +43,16 @@ import org.zeromq.ZMQ.Socket;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-/** Service that is providing the ZeroMQ network.
+/**
+ * Service that is providing the ZeroMQ network.
  * 
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
+ * @author $Author: ngaud$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -98,7 +99,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	public void connectPeer(String peerURI) throws Exception {
 
 		this.log.finer(Locale.getString("PEER_CONNECTION", peerURI)); //$NON-NLS-1$
-//		Socket subscriber = this.context.socket(ZMQ.SUB);
+		// Socket subscriber = this.context.socket(ZMQ.SUB);
 		@SuppressWarnings("resource")
 		Socket subscriber = this.context.createSocket(ZMQ.SUB);
 
@@ -109,7 +110,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		subscriber.connect(peerURI);
 		this.poller.register(subscriber, Poller.POLLIN);
 		this.log.finer(Locale.getString("PEER_CONNECTED", peerURI)); //$NON-NLS-1$
-		
+
 	}
 
 	@Override
@@ -119,8 +120,8 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		Socket s = this.subcribers.get(peerURI);
 		this.poller.unregister(s);
 
-		//FIXME s.close();
-		//this.context.destroySocket(s);
+		// FIXME s.close();
+		// this.context.destroySocket(s);
 		this.log.finer(Locale.getString("PEER_DISCONNECTED", peerURI)); //$NON-NLS-1$
 	}
 
@@ -172,9 +173,9 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 
 		if (space == null) {
 			SpaceID spaceID = dispatch.getSpaceID();
-			this.contextRepository.getContext(spaceID.getContextID()).createSpace(spaceID.getSpaceSpecification(),
-					spaceID.getID());
-			//XXX: use assert? I'm not sure: is it for testing synchronization state at runtime? 
+			this.contextRepository.getContext(spaceID.getContextID()).createSpace(spaceID.getSpaceSpecification(), spaceID.getID());
+			// XXX: use assert? I'm not sure: is it for testing synchronization
+			// state at runtime?
 			Preconditions.checkNotNull(this.spaces.get(spaceID), "Space ( %s ) was not created on time", spaceID); //$NON-NLS-1$
 			// FIXME: Improve before release
 			space = this.spaces.get(spaceID);
@@ -201,9 +202,9 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 */
 	@Override
 	protected void startUp() throws Exception {
-		//this.context = ZMQ.context(1);
+		// this.context = ZMQ.context(1);
 		this.context = new ZContext();
-		//this.publisher = this.context.socket(ZMQ.PUB);
+		// this.publisher = this.context.socket(ZMQ.PUB);
 		this.publisher = this.context.createSocket(ZMQ.PUB);
 		this.publisher.bind(this.uri);
 		this.poller = new Poller(0);
@@ -215,23 +216,23 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	@Override
 	protected void shutDown() throws Exception {
 		// TODO this.poller.stop();
-		//stopPoller();
-		
-		//this.publisher.close();
-		
+		// stopPoller();
+
+		// this.publisher.close();
+
 		this.context.destroy();
 		this.log.info(Locale.getString("ZEROMQ_SHUTDOWN")); //$NON-NLS-1$
 	}
 
-//	private void stopPoller() {
-//		this.log.info(Locale.getString("STOPPING_POLLER")); //$NON-NLS-1$
-//		for (int i = 0; i < this.poller.getSize(); i++) {
-//			@SuppressWarnings("resource")
-//			Socket socket = this.poller.getSocket(i);
-//			this.poller.unregister(socket);
-//			socket.close();
-//		}
-//	}
+	// private void stopPoller() {
+	//		this.log.info(Locale.getString("STOPPING_POLLER")); //$NON-NLS-1$
+	// for (int i = 0; i < this.poller.getSize(); i++) {
+	// @SuppressWarnings("resource")
+	// Socket socket = this.poller.getSocket(i);
+	// this.poller.unregister(socket);
+	// socket.close();
+	// }
+	// }
 
 	private EventEnvelope processOutgoing(EventDispatch dispatch) throws Exception {
 		return this.serializer.serialize(dispatch);
@@ -259,11 +260,11 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 							if (this.poller.pollin(i)) {
 								this.log.finer(Locale.getString("POLLING", i)); //$NON-NLS-1$
 								EventEnvelope ev = EventEnvelope.recv(this.poller.getSocket(i));
-								assert(ev!=null);
+								assert (ev != null);
+
 								try {
 									this.receive(ev);
-								}
-								catch(Throwable e) {
+								} catch (Throwable e) {
 									catchExceptionWithoutStopping(e, "CANNOT_RECEIVE_EVENT"); //$NON-NLS-1$
 								}
 							} else if (this.poller.pollerr(i)) {
@@ -272,34 +273,29 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 						}
 					}
 				}
-			}
-			catch(Throwable e) {
+			} catch (Throwable e) {
 				catchExceptionWithoutStopping(e, "UNEXPECTED_EXCEPTION"); //$NON-NLS-1$
 			}
 		}
-		//FIXME: May the poller be stopped?
-		//stopPoller();
+		// FIXME: May the poller be stopped?
+		// stopPoller();
 	}
-	
+
 	private void catchExceptionWithoutStopping(Throwable e, String errorMessageKey) {
 		// Catch the deserialization or unencrypting exceptions
 		// Notify the default listener if one, but do not
 		// stop the thread.
 		UncaughtExceptionHandler h = Thread.getDefaultUncaughtExceptionHandler();
-		if (h!=null) {
+		if (h != null) {
 			try {
 				h.uncaughtException(Thread.currentThread(), e);
-			}
-			catch(Throwable _) {
-				//Ignore the exception according to the
+			} catch (Throwable _) {
+				// Ignore the exception according to the
 				// document of the function
 				// UncaughtExceptionHandler.uncaughtException()
 			}
-		}
-		else {
-			this.log.log(Level.FINE,
-					Locale.getString(errorMessageKey, e.getLocalizedMessage()),
-					e);
+		} else {
+			this.log.log(Level.FINE, Locale.getString(errorMessageKey, e.getLocalizedMessage()), e);
 		}
 	}
 
