@@ -61,6 +61,10 @@ public class JanusConfig {
 	 */
 	public static final String DEFAULT_SPACE_ID = "janus.context.space.id"; //$NON-NLS-1$
 	
+	/** Name of the property that contains the public network URI.
+	 */
+	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
+
 	/** The default value for the Janus context identifier.
 	 * @see #DEFAULT_CONTEXT_ID
 	 */

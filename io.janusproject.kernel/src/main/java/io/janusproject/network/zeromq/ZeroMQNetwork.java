@@ -19,7 +19,8 @@
  */
 package io.janusproject.network.zeromq;
 
-import static io.janusproject.network.zeromq.ZeroMQConfig.PUB_URI;
+import static io.janusproject.JanusConfig.PUB_URI;
+import io.janusproject.JanusConfig;
 import io.janusproject.kernel.DistributedSpace;
 import io.janusproject.kernel.Network;
 import io.janusproject.repository.ContextRepository;
@@ -82,7 +83,8 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	@Inject
 	private ExecutorService executorService;
 
-	private final String uri;
+	private String uriCandidate;
+	private volatile String validatedURI = null;
 
 	/**
 	 * Construct a <code>ZeroMQNetwork</code>.
@@ -92,7 +94,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	@Inject
 	ZeroMQNetwork(@Named(PUB_URI) String uri) {
 		assert(uri!=null && !uri.isEmpty()) : "Injected URI must be not null nor empty"; //$NON-NLS-1$
-		this.uri = uri;
+		this.uriCandidate = uri;
 	}
 
 	@Override
@@ -111,6 +113,13 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		this.poller.register(subscriber, Poller.POLLIN);
 		this.log.info(Locale.getString("PEER_CONNECTED", peerURI)); //$NON-NLS-1$
 		
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String getURI() {
+		return this.validatedURI;
 	}
 
 	@Override
@@ -166,7 +175,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 * @throws Exception
 	 */
 	void receive(EventEnvelope env) throws Exception {
-		this.log.info(Locale.getString("ENVELOPE_RECEIVED", this.uri, env)); //$NON-NLS-1$
+		this.log.info(Locale.getString("ENVELOPE_RECEIVED", this.validatedURI, env)); //$NON-NLS-1$
 		final EventDispatch dispatch = processIncomming(env);
 
 		DistributedSpace space = this.spaces.get(dispatch.getSpaceID());
@@ -202,16 +211,25 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 */
 	@Override
 	protected void startUp() throws Exception {
+		super.startUp();
 		//this.context = ZMQ.context(1);
 		this.context = new ZContext();
 		//this.publisher = this.context.socket(ZMQ.PUB);
 		this.publisher = this.context.createSocket(ZMQ.PUB);
-		this.log.info("Binding ZeroMQ PUB socket to "+this.uri); //$NON-NLS-1$
-		int port = this.publisher.bind(this.uri);
-		this.log.info("Binding ZeroMQ PUB to port: "+port); //$NON-NLS-1$
+		int port = this.publisher.bind(this.uriCandidate);
+		if (port>=0 && this.uriCandidate.endsWith(":*")) { //$NON-NLS-1$
+			String prefix = this.uriCandidate.substring (0, this.uriCandidate.lastIndexOf (':') + 1);
+			this.validatedURI = prefix+port;
+		}
+		else {
+			this.validatedURI = this.uriCandidate;
+		}
+		System.setProperty(JanusConfig.PUB_URI, this.validatedURI);
+		this.log.info(Locale.getString("ZEROMQ_BINDED", this.validatedURI)); //$NON-NLS-1$
+		this.uriCandidate = null;
 		this.poller = new Poller(0);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */

@@ -22,7 +22,6 @@ package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.kernel.annotations.Kernel;
-import io.janusproject.network.zeromq.ZeroMQConfig;
 import io.janusproject.repository.impl.DistributedDataStructureFactory;
 
 import java.util.UUID;
@@ -50,7 +49,6 @@ import com.hazelcast.core.ItemListener;
 public class KernelDiscoveryService extends AbstractService {
 
 	private ISet<String> kernels;
-	private String localURI;
 
 	@Inject
 	private HazelcastInstance instance;
@@ -68,13 +66,11 @@ public class KernelDiscoveryService extends AbstractService {
 	 * 
 	 * @param janusID - injected identifier of the Janus context.
 	 * @param repositoryImplFactory - factory to build a context.
-	 * @param myuri - injected URI of the current kernel.
 	 */
 	@Inject
 	void KernelRepository(@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID,
-			DistributedDataStructureFactory repositoryImplFactory, @Named(ZeroMQConfig.PUB_URI) String myuri) {
+			DistributedDataStructureFactory repositoryImplFactory) {
 		this.kernels = repositoryImplFactory.getSet(janusID.toString() + "-kernels"); //$NON-NLS-1$
-		this.localURI = myuri;
 	}
 
 	/** Change the network interface.
@@ -92,7 +88,8 @@ public class KernelDiscoveryService extends AbstractService {
 	void connectExiting() {
 		for (String peerURI : this.kernels) {
 			this.log.finer(Locale.getString("CONNECTING_TO_PEER", peerURI)); //$NON-NLS-1$
-			if (!this.localURI.equals(peerURI)) {
+			String pubUri = this.network.getURI();
+			if (pubUri!=null && !pubUri.equals(peerURI)) {
 				connect(peerURI);
 			}
 		}
@@ -140,7 +137,8 @@ public class KernelDiscoveryService extends AbstractService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemAdded(ItemEvent<String> item) {
-			if (!KernelDiscoveryService.this.localURI.equals(item.getItem())) {
+			String pubUri = KernelDiscoveryService.this.network.getURI();
+			if (pubUri!=null && !pubUri.equals(item.getItem())) {
 				KernelDiscoveryService.this.connect(item.getItem());
 			}
 		}
@@ -151,7 +149,8 @@ public class KernelDiscoveryService extends AbstractService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemRemoved(ItemEvent<String> item) {
-			if (!KernelDiscoveryService.this.localURI.equals(item.getItem())) {
+			String pubUri = KernelDiscoveryService.this.network.getURI();
+			if (pubUri!=null && !pubUri.equals(item.getItem())) {
 				KernelDiscoveryService.this.disconnect(item.getItem());
 			}
 		}
@@ -160,14 +159,17 @@ public class KernelDiscoveryService extends AbstractService {
 
 	@Override
 	protected void doStart() {
-		this.kernels.add(this.localURI);
-
+		String uri = this.network.getURI();
+		if (uri!=null && !uri.isEmpty()) 
+			this.kernels.add(uri);
 		notifyStarted();
 	}
 
 	@Override
 	protected void doStop() {
-		this.kernels.remove(this.localURI);
+		String pubUri = this.network.getURI();
+		if (pubUri!=null) 
+			this.kernels.remove(pubUri);
 
 		notifyStopped();
 		this.log.info(Locale.getString("SHUTDOWN")); //$NON-NLS-1$
@@ -200,6 +202,9 @@ public class KernelDiscoveryService extends AbstractService {
 		public void running() {
 			KernelDiscoveryService.this.log.info(
 					Locale.getString(KernelDiscoveryService.class, "HAZELCAST_INIT_STARTING")); //$NON-NLS-1$
+			String uri = KernelDiscoveryService.this.network.getURI();
+			if (uri!=null && !uri.isEmpty()) 
+				KernelDiscoveryService.this.kernels.add(uri);
 			KernelDiscoveryService.this.kernels.addItemListener(new HazelcastListener(),
 					true);
 			KernelDiscoveryService.this.connectExiting();
