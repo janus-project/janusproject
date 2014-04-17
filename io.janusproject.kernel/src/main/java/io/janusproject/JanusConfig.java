@@ -68,7 +68,7 @@ public class JanusConfig {
 	/** The default value for the Janus context identifier.
 	 * @see #DEFAULT_CONTEXT_ID
 	 */
-	private static final String VALUE_DEFAULT_CONTEXT_ID = "2c38fb7f-f363-4f6e-877b-110b1f07cc77"; //$NON-NLS-1$
+	public static final String VALUE_DEFAULT_CONTEXT_ID = "2c38fb7f-f363-4f6e-877b-110b1f07cc77"; //$NON-NLS-1$
 	
 	/** The default value for the Janus space identifier.
 	 * @see #DEFAULT_SPACE_ID
@@ -78,14 +78,12 @@ public class JanusConfig {
 	/** Indicates if the default context id has a random value or not at each boot time.
 	 * @see #RANDOM_DEFAULT_CONTEXT_ID
 	 */
-	private static final boolean VALUE_RANDOM_DEFAULT_CONTEXT_ID = false;
+	public static final boolean VALUE_RANDOM_DEFAULT_CONTEXT_ID = false;
 
 	/** Indicates if the default context id has a value computed
 	 * from the boot agent type.
 	 * @see #BOOT_DEFAULT_CONTEXT_ID
 	 */
-	private static final boolean VALUE_BOOT_DEFAULT_CONTEXT_ID = false;
-
 	/** Reference to the type of the boot agent.
 	 */
 	private static Class<? extends Agent> bootAgent = null;
@@ -107,45 +105,6 @@ public class JanusConfig {
 		// Force the "janus.boot.agent" to have the name of the bootClass
 		bootAgent = bootClass;
 		
-		// Compute the default context ID if it must be random.
-		String defaultContextID = getProperty(DEFAULT_CONTEXT_ID, false, null);
-		if (defaultContextID==null || "".equals(defaultContextID)) { //$NON-NLS-1$
-			Boolean v;
-
-			// From boot agent type
-			defaultContextID = getProperty(BOOT_DEFAULT_CONTEXT_ID, false, null);
-			if (defaultContextID==null) {
-				v = VALUE_BOOT_DEFAULT_CONTEXT_ID;
-			}
-			else {
-				v = Boolean.parseBoolean(defaultContextID);
-			}
-			if (v.booleanValue()) {
-				defaultContextID = UUID.nameUUIDFromBytes(bootClass.getCanonicalName().getBytes()).toString();
-			}
-			else {
-				// Random
-				defaultContextID = getProperty(RANDOM_DEFAULT_CONTEXT_ID, false, null);
-				if (defaultContextID==null) {
-					v = VALUE_RANDOM_DEFAULT_CONTEXT_ID;
-				}
-				else {
-					v = Boolean.parseBoolean(defaultContextID);
-				}
-				if (v.booleanValue()) {
-					defaultContextID = UUID.randomUUID().toString();
-				}
-				else {
-					defaultContextID = VALUE_DEFAULT_CONTEXT_ID;
-				}
-			}
-		}
-		
-		assert(defaultContextID!=null);
-
-		// Force the properties for the Janus configuration variables.
-		// These values will be used by the injectors.
-		System.setProperty(DEFAULT_CONTEXT_ID, defaultContextID);
 		System.setProperty(DEFAULT_SPACE_ID,
 				getProperty(DEFAULT_SPACE_ID, true, VALUE_DEFAULT_SPACE_ID));
 	}
@@ -221,5 +180,6 @@ public class JanusConfig {
 		
 		return defaultValue;
 	}
+	public static final boolean VALUE_BOOT_DEFAULT_CONTEXT_ID = false;
 	
 }
