@@ -19,14 +19,6 @@
  */
 package io.janusproject;
 
-import io.sarl.lang.core.Agent;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
 
 
 /** Constants for the Janus configuration.
@@ -54,6 +46,10 @@ public class JanusConfig {
 	 * @see #DEFAULT_CONTEXT_ID
 	 */
 	public static final String BOOT_DEFAULT_CONTEXT_ID = "janus.context.id.boot"; //$NON-NLS-1$
+
+	/** Name of the property that contains the classname of the boot agent.
+	 */
+	public static final String BOOT_AGENT = "janus.boot.agent"; //$NON-NLS-1$
 
 	/** Name of the property that contains the identifier for the default
 	 * space of the Janus context.
@@ -84,100 +80,6 @@ public class JanusConfig {
 	 * from the boot agent type.
 	 * @see #BOOT_DEFAULT_CONTEXT_ID
 	 */
-	/** Reference to the type of the boot agent.
-	 */
-	private static Class<? extends Agent> bootAgent = null;
-	
-	/** Set the system properties from the given files.
-	 * 
-	 * @param bootClass - class of the first agent to launch.
-	 * @param propertyFiles - list of the property files to read.
-	 * @throws IOException when a property file cannot be read.
-	 */
-	static void init(Class<? extends Agent> bootClass, List<URL> propertyFiles) throws IOException {
-		Properties systemProperties = System.getProperties();
-		for(URL url : propertyFiles) {
-			try(InputStream stream = url.openStream()) {
-				systemProperties.load(stream);
-			}
-		}
-		
-		// Force the "janus.boot.agent" to have the name of the bootClass
-		bootAgent = bootClass;
-		
-	}
-	
-	/** Replies the type of the agent that is launched
-	 * when Janus was started.
-	 * @return the type of the boot agent.
-	 */
-	public static Class<? extends Agent> getBootAgent() {
-		return bootAgent;
-	}
-	
-	/** Replies the value of the given property.
-	 * <p>
-	 * The value is search in the following sources.
-	 * The first value found is replied.
-	 * <ol>
-	 * <li>{@link System#getProperty(String) system property};</li>
-	 * <li>{@link System#getenv(String) environment variable};</li>
-	 * <li>The default value defined by the Janus developers.</li>
-	 * </ol>
-	 * 
-	 * @param name - name of the property to search for.
-	 * @return the value of the property, or <code>null</code> if not found.
-	 * @see #VALUE_DEFAULT_CONTEXT_ID
-	 * @see #VALUE_DEFAULT_SPACE_ID
-	 * @see #getProperty(String, String)
-	 */
-	public static String getProperty(String name) {
-		return getProperty(name, true, null);
-	}
-	
-	/** Replies the value of the given property.
-	 * <p>
-	 * The value is search in the following sources.
-	 * The first value found is replied.
-	 * <ol>
-	 * <li>{@link System#getProperty(String) system property};</li>
-	 * <li>{@link System#getenv(String) environment variable};</li>
-	 * <li>the default value defined by the Janus developers, if known;</li>
-	 * <li>the value of <var>defaultValue</var>.</li>
-	 * </ol>
-	 * 
-	 * @param name - name of the property to search for.
-	 * @param defaultValue - value to reply if none was found.
-	 * @return the value of the property, or <var>defaultValue</var> if not found.
-	 * @see #VALUE_DEFAULT_CONTEXT_ID
-	 * @see #VALUE_DEFAULT_SPACE_ID
-	 * @see #getProperty(String)
-	 */
-	public static String getProperty(String name, String defaultValue) {
-		return getProperty(name, true, defaultValue);
-	}
-	
-	private static String getProperty(String name, boolean useDefaults, String defaultValue) {
-		String value;
-		
-		value = System.getProperty(name, null);
-		if (value!=null) return value;
-		
-		value = System.getenv(name);
-		if (value!=null) return value;
-		
-		if (useDefaults) {
-			switch(name) {
-			case DEFAULT_CONTEXT_ID:
-				return VALUE_DEFAULT_CONTEXT_ID;
-			case DEFAULT_SPACE_ID:
-				return VALUE_DEFAULT_SPACE_ID;
-			default:
-			}
-		}
-		
-		return defaultValue;
-	}
 	public static final boolean VALUE_BOOT_DEFAULT_CONTEXT_ID = false;
 	
 }
