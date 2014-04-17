@@ -73,7 +73,7 @@ public class JanusConfig {
 	/** The default value for the Janus space identifier.
 	 * @see #DEFAULT_SPACE_ID
 	 */
-	private static final String VALUE_DEFAULT_SPACE_ID = "7ba8885d-545b-445a-a0e9-b655bc15ebe0"; //$NON-NLS-1$
+	public static final String VALUE_DEFAULT_SPACE_ID = "7ba8885d-545b-445a-a0e9-b655bc15ebe0"; //$NON-NLS-1$
 	
 	/** Indicates if the default context id has a random value or not at each boot time.
 	 * @see #RANDOM_DEFAULT_CONTEXT_ID
@@ -105,8 +105,6 @@ public class JanusConfig {
 		// Force the "janus.boot.agent" to have the name of the bootClass
 		bootAgent = bootClass;
 		
-		System.setProperty(DEFAULT_SPACE_ID,
-				getProperty(DEFAULT_SPACE_ID, true, VALUE_DEFAULT_SPACE_ID));
 	}
 	
 	/** Replies the type of the agent that is launched

@@ -85,11 +85,9 @@ public class CoreModule extends AbstractModule {
 	@Override
 	protected void configure() {
 
-		UUID defaultSpaceId = UUID.fromString(JanusConfig.getProperty(
-				JanusConfig.DEFAULT_SPACE_ID));
 		bind(UUID.class).annotatedWith(Names.named(JanusConfig.DEFAULT_CONTEXT_ID)).toProvider(new ContextIDProvider());
+		bind(UUID.class).annotatedWith(Names.named(JanusConfig.DEFAULT_SPACE_ID)).toProvider(new SpaceIDProvider());
 
-		bind(UUID.class).annotatedWith(Names.named(JanusConfig.DEFAULT_SPACE_ID)).toInstance(defaultSpaceId);
 		// Provider for the public URI
 		bind(Key.get(String.class, Names.named(JanusConfig.PUB_URI))).toProvider(new PublicURIProvider());
 
@@ -282,6 +280,31 @@ public class CoreModule extends AbstractModule {
 			
 			assert(defaultContextID!=null && !defaultContextID.isEmpty());
 			return UUID.fromString(defaultContextID);
+		}
+		
+	}	
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class SpaceIDProvider extends AbstractSystemPropertyProvider<UUID> {
+		
+		/**
+		 */
+		public SpaceIDProvider() {
+			//
+		}
+		
+		/** {@inheritDoc}
+		 */
+		@Override
+		public UUID get() {
+			String v = getSystemProperty(JanusConfig.DEFAULT_SPACE_ID);
+			if (v==null) v = JanusConfig.VALUE_DEFAULT_SPACE_ID;
+			return UUID.fromString(v);
 		}
 		
 	}	
