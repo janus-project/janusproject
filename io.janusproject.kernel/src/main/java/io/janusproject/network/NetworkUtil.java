@@ -42,7 +42,7 @@ public class NetworkUtil {
 	 * @return the first public address or <code>null</code> if
 	 * none.
 	 */
-	public static InetAddress getFirstPublicAddress(boolean onlyIPv4) {
+	public static InetAddress getPrimaryAddress(boolean onlyIPv4) {
 		try {
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			if (interfaces!=null) {

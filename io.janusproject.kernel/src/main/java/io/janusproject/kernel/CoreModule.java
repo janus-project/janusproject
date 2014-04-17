@@ -22,9 +22,11 @@ package io.janusproject.kernel;
 import io.janusproject.JanusConfig;
 import io.janusproject.kernel.annotations.Kernel;
 import io.janusproject.kernel.executor.AgentScheduledExecutorService;
+import io.janusproject.network.NetworkUtil;
 import io.janusproject.repository.AddressSerializer;
 import io.janusproject.repository.ContextRepository;
 import io.janusproject.repository.SpaceIDSerializer;
+import io.janusproject.util.AbstractSystemPropertyProvider;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
@@ -33,6 +35,7 @@ import io.sarl.lang.core.Percept;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpaceSpecification;
 
+import java.net.InetAddress;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -47,6 +50,7 @@ import com.google.common.util.concurrent.ServiceManager;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
@@ -90,6 +94,8 @@ public class CoreModule extends AbstractModule {
 		bind(UUID.class).annotatedWith(Names.named(JanusConfig.DEFAULT_CONTEXT_ID)).toInstance(defaultContextID);
 
 		bind(UUID.class).annotatedWith(Names.named(JanusConfig.DEFAULT_SPACE_ID)).toInstance(defaultSpaceId);
+		// Provider for the public URI
+		bind(Key.get(String.class, Names.named(JanusConfig.PUB_URI))).toProvider(new PublicURIProvider());
 
 		// Hazelcast config
 		Config hazelcastConfig = new Config();
@@ -183,5 +189,36 @@ public class CoreModule extends AbstractModule {
 	private static HazelcastInstance createHazelcastInstance(Config config) {
 		return Hazelcast.newHazelcastInstance(config);
 	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class PublicURIProvider extends AbstractSystemPropertyProvider<String> {
+		
+		/**
+		 */
+		public PublicURIProvider() {
+			//
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public String get() {
+			String pubUri = getSystemProperty(JanusConfig.PUB_URI);
+			if (pubUri==null || pubUri.isEmpty()) {
+				InetAddress a = NetworkUtil.getPrimaryAddress(true);
+				if (a!=null) {
+					pubUri = "tcp://"+a.getHostAddress()+":*";  //$NON-NLS-1$//$NON-NLS-2$
+					System.setProperty(JanusConfig.PUB_URI, pubUri);
+				}
+			}
+			return pubUri;
+		}
+		
+	}	
 
 }

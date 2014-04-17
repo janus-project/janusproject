@@ -51,20 +51,6 @@ public class ZeroMQNetworkModule extends AbstractModule {
 	
 	@Override
 	protected void configure() {
-	    //
-	    // Ensure that the injectable system properties have a value
-	    //
-		String pubUri = System.getProperty(ZeroMQConfig.PUB_URI, null);
-		if (pubUri==null || pubUri.isEmpty()) {
-			InetAddress a = NetworkUtil.getFirstPublicAddress(true);
-			if (a!=null) {
-				pubUri = "tcp://"+a.getHostAddress()+":*";  //$NON-NLS-1$//$NON-NLS-2$
-				System.setProperty(ZeroMQConfig.PUB_URI, pubUri);
-				Names.bindProperties(binder(),
-						Collections.singletonMap(ZeroMQConfig.PUB_URI, pubUri));
-			}
-		}
-
 		bind(Network.class).to(ZeroMQNetwork.class).in(Singleton.class);
 
 		// Bind the serializer
@@ -112,15 +98,15 @@ public class ZeroMQNetworkModule extends AbstractModule {
 		bind(EventEncrypter.class).to(encrypterType).in(Singleton.class);
 
 		Multibinder<Service> uriBinder = Multibinder.newSetBinder(binder(), Service.class);
-	    uriBinder.addBinding().to(ZeroMQNetwork.class);
+		uriBinder.addBinding().to(ZeroMQNetwork.class);
 	}
 
 	@Provides
 	private static Gson createGson() {
 		return new GsonBuilder()
-        .registerTypeAdapter(Class.class, new ClassTypeAdapter())
-        .setPrettyPrinting()
-        .create();
+		.registerTypeAdapter(Class.class, new ClassTypeAdapter())
+		.setPrettyPrinting()
+		.create();
 	}
 	
 	
