@@ -42,11 +42,7 @@ public class ZeroMQConfig {
 	 * This constant was introduced to enforce the values on different platforms.
 	 */
 	public static final Charset BYTE_ARRAY_STRING_CHARSET = Charsets.UTF_8;
-	
-	/** Name of the property for the PUB uri.
-	 */
-	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
-	
+		
 	/** Name of the property for the AES key.
 	 */
 	public static final String AES_KEY = "network.encrypter.aes.key"; //$NON-NLS-1$
