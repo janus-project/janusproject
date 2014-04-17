@@ -19,13 +19,16 @@
  */
 package io.janusproject.network.zeromq;
 
+import io.janusproject.JanusConfig;
+import io.janusproject.kernel.Network;
+import io.janusproject.network.NetworkUtil;
+
+import java.net.InetAddress;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.locale.Locale;
-
-import io.janusproject.JanusConfig;
-import io.janusproject.kernel.Network;
 
 import com.google.common.util.concurrent.Service;
 import com.google.gson.Gson;
@@ -34,18 +37,34 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
 
 /** Module that provides the network layer based on the ZeroMQ library.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 public class ZeroMQNetworkModule extends AbstractModule {
-
+	
 	@Override
 	protected void configure() {
+	    //
+	    // Ensure that the injectable system properties have a value
+	    //
+		String pubUri = System.getProperty(ZeroMQConfig.PUB_URI, null);
+		if (pubUri==null || pubUri.isEmpty()) {
+			InetAddress a = NetworkUtil.getFirstPublicAddress(true);
+			if (a!=null) {
+				pubUri = "tcp://"+a.getHostAddress()+":*";  //$NON-NLS-1$//$NON-NLS-2$
+				System.setProperty(ZeroMQConfig.PUB_URI, pubUri);
+				Names.bindProperties(binder(),
+						Collections.singletonMap(ZeroMQConfig.PUB_URI, pubUri));
+			}
+		}
+
 		bind(Network.class).to(ZeroMQNetwork.class).in(Singleton.class);
 
 		// Bind the serializer
