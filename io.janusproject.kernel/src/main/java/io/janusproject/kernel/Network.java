@@ -29,6 +29,7 @@ import com.google.common.util.concurrent.Service;
  * other a network.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -64,5 +65,12 @@ public interface Network extends Service{
 	 * @throws Exception
 	 */
 	public void disconnectPeer(String peer) throws Exception;
+	
+	/** Replies the public URI used by this network interface.
+	 * 
+	 * @return the public URI, or <code>null</code> if the
+	 * network is not started.
+	 */
+	public String getURI();
 
 }

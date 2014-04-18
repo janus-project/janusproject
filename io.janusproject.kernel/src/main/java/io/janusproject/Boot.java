@@ -26,6 +26,7 @@ import io.sarl.lang.core.Agent;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,8 +133,16 @@ public class Boot {
 			// tested at runtime).
 			if (Agent.class.isAssignableFrom(agent)) {
 				
-				// Initialize the Janus configuration
-				JanusConfig.init((Class<? extends Agent>)agent, propertyFiles);
+				// Load property files
+				Properties systemProperties = System.getProperties();
+				for(URL url : propertyFiles) {
+					try(InputStream stream = url.openStream()) {
+						systemProperties.load(stream);
+					}
+				}
+
+				// Set the boot agent classname
+				System.setProperty(JanusConfig.BOOT_AGENT, agent.getCanonicalName());
 
 				System.out.println(Locale.getString("LAUNCHING_AGENT", agentToLaunch)); //$NON-NLS-1$
 				startJanus(
