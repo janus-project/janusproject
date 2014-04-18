@@ -23,14 +23,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.arakhne.afc.vmutil.locale.Locale;
-
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 
 /** Platform service that supports the execution resources.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: ngaud$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -59,7 +59,8 @@ class JanusExecutorsService extends AbstractService {
 			this.schedules.awaitTermination(5, TimeUnit.SECONDS);
 			this.exec.awaitTermination(5, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
-			throw new RuntimeException(Locale.getString("STOP_ERROR"),e); //$NON-NLS-1$
+			// This error may occur when the thread is killed before this
+			// function is waiting for its termination.
 		} finally{
 			this.schedules.shutdownNow();
 			this.exec.shutdownNow();

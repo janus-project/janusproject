@@ -19,7 +19,8 @@
  */
 package io.janusproject.network.zeromq;
 
-import static io.janusproject.network.zeromq.ZeroMQConfig.PUB_URI;
+import static io.janusproject.JanusConfig.PUB_URI;
+import io.janusproject.JanusConfig;
 import io.janusproject.kernel.ContextRepository;
 import io.janusproject.kernel.DistributedSpace;
 import io.janusproject.kernel.Network;
@@ -83,7 +84,8 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	@Inject
 	private ExecutorService executorService;
 
-	private String uri;
+	private String uriCandidate;
+	private volatile String validatedURI = null;
 
 	/**
 	 * Construct a <code>ZeroMQNetwork</code>.
@@ -92,13 +94,14 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 */
 	@Inject
 	ZeroMQNetwork(@Named(PUB_URI) String uri) {
-		this.uri = uri;
+		assert (uri != null && !uri.isEmpty()) : "Injected URI must be not null nor empty"; //$NON-NLS-1$
+		this.uriCandidate = uri;
 	}
 
 	@Override
 	public void connectPeer(String peerURI) throws Exception {
 
-		this.log.finer(Locale.getString("PEER_CONNECTION", peerURI)); //$NON-NLS-1$
+		this.log.info(Locale.getString("PEER_CONNECTION", peerURI)); //$NON-NLS-1$
 		// Socket subscriber = this.context.socket(ZMQ.SUB);
 		@SuppressWarnings("resource")
 		Socket subscriber = this.context.createSocket(ZMQ.SUB);
@@ -109,26 +112,35 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		}
 		subscriber.connect(peerURI);
 		this.poller.register(subscriber, Poller.POLLIN);
-		this.log.finer(Locale.getString("PEER_CONNECTED", peerURI)); //$NON-NLS-1$
 
+		this.log.info(Locale.getString("PEER_CONNECTED", peerURI)); //$NON-NLS-1$
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getURI() {
+		return this.validatedURI;
 	}
 
 	@Override
 	public void disconnectPeer(String peerURI) throws Exception {
-		this.log.finer(Locale.getString("PEER_DISCONNECTION", peerURI)); //$NON-NLS-1$
+		this.log.info(Locale.getString("PEER_DISCONNECTION", peerURI)); //$NON-NLS-1$
 		@SuppressWarnings("resource")
 		Socket s = this.subcribers.get(peerURI);
 		this.poller.unregister(s);
-
 		// FIXME s.close();
 		// this.context.destroySocket(s);
-		this.log.finer(Locale.getString("PEER_DISCONNECTED", peerURI)); //$NON-NLS-1$
+		this.log.info(Locale.getString("PEER_DISCONNECTED", peerURI)); //$NON-NLS-1$
+
 	}
 
 	@Override
 	public void register(DistributedSpace space) throws Exception {
 
-		this.log.finer(Locale.getString("REGISTERING_DISTRIBUTED_SPACE", space.getID())); //$NON-NLS-1$
+		this.log.info(Locale.getString("REGISTERING_DISTRIBUTED_SPACE", space.getID())); //$NON-NLS-1$
 		byte[] topic = this.serializer.serializeContextID(space.getID().getContextID());
 		this.spaces.put(space.getID(), space);
 		int next = this.poller.getNext();
@@ -157,7 +169,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	public void publish(SpaceID spaceID, Scope<?> scope, Event e) throws Exception {
 		EventEnvelope env = processOutgoing(spaceID, e, scope);
 		env.send(this.publisher);
-		this.log.finer(Locale.getString("PUBLISH_EVENT", spaceID, e)); //$NON-NLS-1$
+		this.log.info(Locale.getString("PUBLISH_EVENT", spaceID, e)); //$NON-NLS-1$
 
 	}
 
@@ -166,7 +178,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 * @throws Exception
 	 */
 	void receive(EventEnvelope env) throws Exception {
-		this.log.finer(Locale.getString("ENVELOPE_RECEIVED", this.uri, env)); //$NON-NLS-1$
+		this.log.info(Locale.getString("ENVELOPE_RECEIVED", this.validatedURI, env)); //$NON-NLS-1$
 		final EventDispatch dispatch = processIncomming(env);
 
 		DistributedSpace space = this.spaces.get(dispatch.getSpaceID());
@@ -202,11 +214,22 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 */
 	@Override
 	protected void startUp() throws Exception {
+		super.startUp();
 		// this.context = ZMQ.context(1);
+
 		this.context = new ZContext();
 		// this.publisher = this.context.socket(ZMQ.PUB);
 		this.publisher = this.context.createSocket(ZMQ.PUB);
-		this.publisher.bind(this.uri);
+		int port = this.publisher.bind(this.uriCandidate);
+		if (port >= 0 && this.uriCandidate.endsWith(":*")) { //$NON-NLS-1$
+			String prefix = this.uriCandidate.substring(0, this.uriCandidate.lastIndexOf(':') + 1);
+			this.validatedURI = prefix + port;
+		} else {
+			this.validatedURI = this.uriCandidate;
+		}
+		System.setProperty(JanusConfig.PUB_URI, this.validatedURI);
+		this.log.info(Locale.getString("ZEROMQ_BINDED", this.validatedURI)); //$NON-NLS-1$
+		this.uriCandidate = null;
 		this.poller = new Poller(0);
 	}
 
@@ -258,7 +281,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 					if (signaled > 0) {
 						for (int i = 0; i < this.poller.getSize(); i++) {
 							if (this.poller.pollin(i)) {
-								this.log.finer(Locale.getString("POLLING", i)); //$NON-NLS-1$
+								this.log.info(Locale.getString("POLLING", i)); //$NON-NLS-1$
 								EventEnvelope ev = EventEnvelope.recv(this.poller.getSocket(i));
 								assert (ev != null);
 
@@ -295,8 +318,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 				// UncaughtExceptionHandler.uncaughtException()
 			}
 		} else {
-			this.log.log(Level.FINE, Locale.getString(errorMessageKey, e.getLocalizedMessage()), e);
+			this.log.log(Level.WARNING, Locale.getString(errorMessageKey, e.getLocalizedMessage()), e);
 		}
 	}
-
 }

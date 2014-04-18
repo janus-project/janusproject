@@ -74,7 +74,8 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	/**
 	 * Fire an {@link AgentSpawned} event to inform other context members of the creation of a new agent in the specified context.
 	 * 
-	 * @param parentContext - the context in which the owner agent has been spanwed
+	 * @param aAgent - type of the agent that was spawned.
+	 * @param parentContext - the context in which the owner agent has been spawned.
 	 */
 	protected void fireAgentSpawned(Class<? extends Agent> aAgent, AgentContext parentContext) {
 		EventSpace defSpace = parentContext.getDefaultSpace();
@@ -103,7 +104,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 	/**
 	 * Fire an {@link AgentKilled} event to inform other context members of the death of the owner agent in the specified context.
-	 * @param parentContext - the default context of the owner agent
+	 * @param leftContext - the default context of the owner agent
 	 */
 	protected void fireAgentKilled(AgentContext leftContext) {
 		EventSpace defSpace = leftContext.getDefaultSpace();

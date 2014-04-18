@@ -101,21 +101,29 @@ public class SpaceRepository {
 		this.spaceIDs = repositoryImplFactory.getSet(this.distributedSpaceSetName);
 		Space space;
 		for (SpaceID id : this.spaceIDs) {
-			// FIXME manage the propagation of the creationParams inside the ID of the space
-			space = this.injector.getInstance(id.getSpaceSpecification()).create(id);
-			assert (space != null);
-			this.spaces.put(id, space);
-			this.spacesBySpec.put(id.getSpaceSpecification(), id);
+			if (!this.spaces.containsKey(id)) {
+				//FIXME manage the propagation of the creationParams inside the ID of the space
+				space = this.injector.getInstance(id.getSpaceSpecification()).create(id);
+				assert (space != null);
+				this.spaces.put(id, space);
+			}
+			if (!this.spacesBySpec.containsKey(id.getSpaceSpecification())) {
+				this.spacesBySpec.put(id.getSpaceSpecification(), id);
+			}
 		}
 		this.spaceIDsEntryListener = new ItemListener<SpaceID>() {
 
 			@Override
 			public void itemAdded(ItemEvent<SpaceID> item) {
 				SpaceID id = item.getItem();
-				Space space = SpaceRepository.this.injector.getInstance(id.getSpaceSpecification()).create(id);
-				assert (space != null);
-				SpaceRepository.this.spaces.put(id, space);
-				SpaceRepository.this.spacesBySpec.put(id.getSpaceSpecification(), id);
+				if (!SpaceRepository.this.spaces.containsKey(id)) {
+					Space ispace = SpaceRepository.this.injector.getInstance(id.getSpaceSpecification()).create(id);
+					assert (ispace != null);
+					SpaceRepository.this.spaces.put(id, ispace);
+				}
+				if (!SpaceRepository.this.spacesBySpec.containsKey(id.getSpaceSpecification())) {
+					SpaceRepository.this.spacesBySpec.put(id.getSpaceSpecification(), id);
+				}
 			}
 
 			@Override
