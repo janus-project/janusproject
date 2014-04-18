@@ -35,5 +35,10 @@ class NoEvent extends Event {
 	/** Singleton instance.
 	 */
 	final static Event INSTANCE = new NoEvent();
+	
+	@Override
+	protected String attributesToString() {
+		return "NO_EVENT"; //$NON-NLS-1$
+	}
 
 }

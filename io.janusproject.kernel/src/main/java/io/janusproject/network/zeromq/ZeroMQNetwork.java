@@ -183,6 +183,8 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		this.log.info(Locale.getString("ENVELOPE_RECEIVED", this.validatedURI, env)); //$NON-NLS-1$
 		final EventDispatch dispatch = processIncomming(env);
 
+		this.log.info(Locale.getString("DISPATCH_RECEIVED", dispatch)); //$NON-NLS-1$
+
 		DistributedSpace space = this.spaces.get(dispatch.getSpaceID());
 
 		if (space == null) {

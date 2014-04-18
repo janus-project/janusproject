@@ -60,6 +60,18 @@ public class EventDispatch {
 		this.headers = headers;
 	}
 
+	
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return "EventDispatch [scope=" + this.scope + ", event=" + this.event  //$NON-NLS-1$//$NON-NLS-2$
+				+ ", spaceID=" + this.spaceID + ", headers=" + this.headers + "]";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+
+
 	/** Construct a <code>EventDispatch</code>
 	 * 
 	 * @param sid - identifier of the space in which the event occurs.

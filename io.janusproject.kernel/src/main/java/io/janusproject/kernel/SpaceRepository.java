@@ -17,13 +17,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.repository;
+package io.janusproject.kernel;
 
 import io.janusproject.repository.impl.DistributedDataStructureFactory;
+import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -39,7 +41,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.hazelcast.core.ISet;
 import com.hazelcast.core.ItemEvent;
 import com.hazelcast.core.ItemListener;
@@ -53,9 +54,7 @@ import com.hazelcast.core.ItemListener;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class SpaceRepository {
-
-	private Injector injector;
+class SpaceRepository {
 
 	/**
 	 * The set of the id of all spaces stored in this repository This set must be distributed and synchronized all over the network
@@ -79,53 +78,45 @@ public class SpaceRepository {
 	 */
 	private ItemListener<SpaceID> spaceIDsEntryListener;
 
+	private final WeakReference<AgentContext> agentContext;
+	
 	/**
 	 * 
 	 * @param distributedSpaceSetName - the name used to identify distributed map over network
+	 * @param agentContext - is the owner of this space repository.
 	 */
-	public SpaceRepository(String distributedSpaceSetName) {
+	public SpaceRepository(String distributedSpaceSetName, AgentContext agentContext) {
 		this.distributedSpaceSetName = distributedSpaceSetName;
+		this.agentContext = new WeakReference<>(agentContext);
 		this.spaces = new ConcurrentHashMap<>();
 		Multimap<Class<? extends SpaceSpecification>, SpaceID> tmp = TreeMultimap.create(ClassComparator.SINGLETON, new ObjectReferenceComparator<SpaceID>());
 		this.spacesBySpec = Multimaps.synchronizedMultimap(tmp);
+	}
+	
+	/** Replies the context associated to this space repository.
+	 * 
+	 * @return the agent context.
+	 */
+	protected AgentContext getContext() {
+		return this.agentContext.get();
 	}
 
 	/**
 	 * Change the repository factory used by this space repository.
 	 * 
-	 * @param injector
 	 * @param repositoryImplFactory
 	 */
 	@Inject
-	void setRespositoryImplFactory(Injector injector, DistributedDataStructureFactory repositoryImplFactory) {
-		this.injector = injector;
+	void setRespositoryImplFactory(DistributedDataStructureFactory repositoryImplFactory) {
 		this.spaceIDs = repositoryImplFactory.getSet(this.distributedSpaceSetName);
-		Space space;
 		for (SpaceID id : this.spaceIDs) {
-			if (!this.spaces.containsKey(id)) {
-				//FIXME manage the propagation of the creationParams inside the ID of the space
-				space = this.injector.getInstance(id.getSpaceSpecification()).create(id);
-				assert (space != null);
-				this.spaces.put(id, space);
-			}
-			if (!this.spacesBySpec.containsKey(id.getSpaceSpecification())) {
-				this.spacesBySpec.put(id.getSpaceSpecification(), id);
-			}
+			addExistingSpace(id);
 		}
 		this.spaceIDsEntryListener = new ItemListener<SpaceID>() {
 
-			@SuppressWarnings("synthetic-access")
 			@Override
 			public void itemAdded(ItemEvent<SpaceID> item) {
-				SpaceID id = item.getItem();
-				if (!SpaceRepository.this.spaces.containsKey(id)) {
-					Space ispace = SpaceRepository.this.injector.getInstance(id.getSpaceSpecification()).create(id);
-					assert (ispace != null);
-					SpaceRepository.this.spaces.put(id, ispace);
-				}
-				if (!SpaceRepository.this.spacesBySpec.containsKey(id.getSpaceSpecification())) {
-					SpaceRepository.this.spacesBySpec.put(id.getSpaceSpecification(), id);
-				}
+				addExistingSpace(item.getItem());
 			}
 
 			@Override
@@ -138,12 +129,28 @@ public class SpaceRepository {
 		this.spaceIDs.addItemListener(this.spaceIDsEntryListener, true);
 	}
 
+	/** Add the existing, but not yet known, spaces into this repository. 
+	 * 
+	 * @param id - identifier of the space
+	 */
+	protected void addExistingSpace(SpaceID id) {
+		if (!this.spaces.containsKey(id)) {
+			//FIXME manage the propagation of the creationParams inside the ID of the space
+			Space ispace = getContext().createSpace(id.getSpaceSpecification(), id.getID());
+			assert (ispace != null);
+			this.spaces.put(id, ispace);
+		}
+		if (!this.spacesBySpec.containsKey(id.getSpaceSpecification())) {
+			this.spacesBySpec.put(id.getSpaceSpecification(), id);
+		}
+	}
+
 	/**
 	 * Add a new space to this repository
 	 * 
 	 * @param space - the space to add
 	 */
-	public void addSpace(Space space) {
+	void addSpace(Space space) {
 		SpaceID id = space.getID();
 		this.spaceIDs.add(id);
 		this.spaces.put(id, space);
@@ -155,7 +162,7 @@ public class SpaceRepository {
 	 * 
 	 * @param space - the space to remove
 	 */
-	public void removeSpace(Space space) {
+	void removeSpace(Space space) {
 		SpaceID id = space.getID();
 		this.spaces.remove(id);
 		this.spacesBySpec.remove(id.getSpaceSpecification(), id);

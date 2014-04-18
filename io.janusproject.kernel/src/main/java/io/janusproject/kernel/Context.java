@@ -19,7 +19,6 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.repository.SpaceRepository;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.Space;
@@ -59,7 +58,9 @@ class Context implements AgentContext{
 	protected Context(Injector injector, UUID id, UUID defaultSpaceID) {
 		this.id = id;
 		this.injector = injector;
-		this.spaceRepository = new SpaceRepository(id.toString()+"-spaces"); //$NON-NLS-1$
+		this.spaceRepository = new SpaceRepository(
+				id.toString()+"-spaces", //$NON-NLS-1$
+				this);
 		this.injector.injectMembers(this.spaceRepository);
 		this.defaultSpace = createSpace(EventSpaceSpecification.class, defaultSpaceID);
 
@@ -80,13 +81,17 @@ class Context implements AgentContext{
 		return this.spaceRepository.getSpaces();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <S extends io.sarl.lang.core.Space> S createSpace(Class<? extends SpaceSpecification> spec,
+	public synchronized <S extends io.sarl.lang.core.Space> S createSpace(Class<? extends SpaceSpecification> spec,
 			UUID spaceUUID, Object... creationParams) {
-		S space = this.injector.getInstance(spec).create(
-				new SpaceID(this.id, spaceUUID,spec), creationParams);
-		this.spaceRepository.addSpace(space);
-		return space;
+		SpaceID spaceID = new SpaceID(this.id, spaceUUID,spec);
+		Space space = this.spaceRepository.getSpace(spaceID);
+		if (space==null) {
+			space = this.injector.getInstance(spec).create(spaceID, creationParams);
+			this.spaceRepository.addSpace(space);
+		}
+		return (S)space;
 	}
 
 
