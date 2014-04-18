@@ -93,6 +93,7 @@ public class SpaceRepository {
 	/**
 	 * Change the repository factory used by this space repository.
 	 * 
+	 * @param injector
 	 * @param repositoryImplFactory
 	 */
 	@Inject
@@ -113,6 +114,7 @@ public class SpaceRepository {
 		}
 		this.spaceIDsEntryListener = new ItemListener<SpaceID>() {
 
+			@SuppressWarnings("synthetic-access")
 			@Override
 			public void itemAdded(ItemEvent<SpaceID> item) {
 				SpaceID id = item.getItem();

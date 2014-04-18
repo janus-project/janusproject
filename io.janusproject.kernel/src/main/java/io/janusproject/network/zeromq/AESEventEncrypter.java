@@ -72,7 +72,7 @@ public class AESEventEncrypter implements EventEncrypter {
 	@Override
 	public EventEnvelope encrypt(EventPack pack) throws Exception {
 		assert (pack != null) : "Parameter 'pack' must not be null"; //$NON-NLS-1$
-		return EventEnvelope.build(encrypt(pack.getContextId()), encrypt(pack.getSpaceId()), encrypt(pack.getScope()), encrypt(pack.getHeaders()), encrypt(pack.getEvent()));
+		return new EventEnvelope(encrypt(pack.getContextId()), encrypt(pack.getSpaceId()), encrypt(pack.getScope()), encrypt(pack.getHeaders()), encrypt(pack.getEvent()));
 	}
 
 	@Override
@@ -106,16 +106,16 @@ public class AESEventEncrypter implements EventEncrypter {
 		return b;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws Exception
+	/** {@inheritDoc}
 	 */
 	@Override
-	public byte[] encrytContextID(UUID id) throws Exception {
-		assert (id != null) : "Parameter 'id' must not be null"; //$NON-NLS-1$
-		byte[] b = encrypt(id.toString().getBytes());
-		assert (b != null && b.length > 0) : "Result of encryption is null or empty"; //$NON-NLS-1$
-		return b;
+	public byte[] encryptUUID(UUID uuid) {
+		try {
+			return encrypt(uuid.toString().getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET));
+		}
+		catch (GeneralSecurityException e) {
+			throw new RuntimeException(e);
+		}
 	}
+
 }

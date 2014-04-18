@@ -108,7 +108,9 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 
 		this.subcribers.put(peerURI, subscriber);
 		for (SpaceID sid : this.spaces.keySet()) {
-			subscriber.subscribe(this.serializer.serializeContextID(sid.getContextID()));
+			subscriber.subscribe(
+					EventEnvelope.buildFilterableHeader(
+							this.serializer.serializeContextID(sid.getContextID())));
 		}
 		subscriber.connect(peerURI);
 		this.poller.register(subscriber, Poller.POLLIN);

@@ -60,7 +60,7 @@ public class ZeroMQNetworkModule extends AbstractModule {
 	}
 
 	@Provides
-	public static EventSerializer createEventSerializer(Injector injector) {
+	private static EventSerializer createEventSerializer(Injector injector) {
 		Class<? extends EventSerializer> serializerType = GsonEventSerializer.class;
 		String serializerClassname = AbstractSystemPropertyProvider.getSystemProperty(ZeroMQConfig.SERIALIZER_CLASSNAME);
 		try {
@@ -78,7 +78,7 @@ public class ZeroMQNetworkModule extends AbstractModule {
 	}
 
 	@Provides
-	public static EventEncrypter getEncrypter(Injector injector) {
+	private static EventEncrypter getEncrypter(Injector injector) {
 		Class<? extends EventEncrypter> encrypterType = null;
 		String encrypterClassname = AbstractSystemPropertyProvider.getSystemProperty(ZeroMQConfig.ENCRYPTER_CLASSNAME);
 		try {

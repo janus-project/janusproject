@@ -148,10 +148,8 @@ public class GsonEventSerializer implements EventSerializer {
 	 */
 	@Override
 	public byte[] serializeContextID(UUID id) throws Exception {
-		assert (this.encrypter != null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
-		byte[] b = this.encrypter.encrytContextID(id);
-		assert (b != null && b.length > 0);
-		return b;
+		assert(this.encrypter!=null) : "Error in the injection of the encrypter"; //$NON-NLS-1$
+		return this.encrypter.encryptUUID(id);
 	}
-
+	
 }

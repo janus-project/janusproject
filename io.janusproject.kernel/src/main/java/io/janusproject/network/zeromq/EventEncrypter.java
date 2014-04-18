@@ -21,6 +21,7 @@ package io.janusproject.network.zeromq;
 
 import java.util.UUID;
 
+
 /** An encrypter of events to be published over the network.
  * 
  * @author $Author: srodriguez$
@@ -45,13 +46,12 @@ public interface EventEncrypter {
 	 * @throws Exception
 	 */
 	public EventPack decrypt(EventEnvelope envelope) throws Exception;
-	
-	/** Encrypt the identifier of a content.
+		
+	/** Encrypt the given UUID.
 	 * 
-	 * @param id - the identifier to encrypt.
-	 * @return the encrypted identifier.
-	 * @throws Exception
+	 * @param uuid
+	 * @return the encrypted UUID.
 	 */
-	public byte[] encrytContextID(UUID id) throws Exception;
+	public byte[] encryptUUID(UUID uuid);
 	
 }

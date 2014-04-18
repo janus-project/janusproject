@@ -21,6 +21,7 @@ package io.janusproject.network.zeromq;
 
 import java.util.UUID;
 
+
 /**
  * A utility implementation of the {@link EventEncrypter} that creates the
  * {@link EventEnvelope} fields using {@link String#getBytes()}.
@@ -38,7 +39,7 @@ public class PlainTextEncrypter implements EventEncrypter {
 	@Override
 	public EventEnvelope encrypt(EventPack pack) {
 		assert(pack!=null) : "Parameter 'pack' must not be null"; //$NON-NLS-1$
-		return EventEnvelope.build(pack.getContextId(), pack
+		return new EventEnvelope(pack.getContextId(), pack
 				.getSpaceId(), pack.getScope(), pack
 				.getHeaders(), pack.getEvent());
 	}
@@ -55,10 +56,11 @@ public class PlainTextEncrypter implements EventEncrypter {
 		return pack;
 	}
 
+	/** {@inheritDoc}
+	 */
 	@Override
-	public byte[] encrytContextID(UUID id) throws Exception {
-		assert(id!=null) : "Parameter 'id' must not be null"; //$NON-NLS-1$
-		return id.toString().getBytes();
+	public byte[] encryptUUID(UUID uuid) {
+		return uuid.toString().getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET);
 	}
 
 }

@@ -133,13 +133,15 @@ public class JavaBinaryEventSerializer implements EventSerializer {
 					type.getName()));
 		}
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws Exception
+	 */
 	@Override
 	public byte[] serializeContextID(UUID id) throws Exception {
-		assert (this.encrypter != null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
-		byte[] b = this.encrypter.encrytContextID(id);
-		assert (b != null && b.length > 0);
-		return b;
+		return id.toString().getBytes(ZeroMQConfig.BYTE_ARRAY_STRING_CHARSET);
 	}
 
 }
