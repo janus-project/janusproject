@@ -19,9 +19,6 @@
  */
 package io.janusproject.network.zeromq;
 
-import io.janusproject.kernel.Network;
-import io.janusproject.util.AbstractSystemPropertyProvider;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +32,9 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
+
+import io.janusproject.kernel.Network;
+import io.janusproject.util.AbstractSystemPropertyProvider;
 
 /**
  * Module that provides the network layer based on the ZeroMQ library.
@@ -69,6 +69,8 @@ public class ZeroMQNetworkModule extends AbstractModule {
 				if (type != null && EventSerializer.class.isAssignableFrom(type)) {
 					serializerType = type.asSubclass(EventSerializer.class);
 				}
+				assert(injector!=null);
+				return injector.getInstance(serializerType);
 			}
 			return injector.getInstance(serializerType);
 		} catch (Throwable e) {
@@ -100,6 +102,7 @@ public class ZeroMQNetworkModule extends AbstractModule {
 					encrypterType = PlainTextEncrypter.class;
 				}
 			}
+			assert(injector!=null);
 			return injector.getInstance(encrypterType);
 		} catch (Throwable e) {
 			Logger.getAnonymousLogger().log(Level.SEVERE, Locale.getString("CANNOT_CREATE_ENCRYPTER", encrypterClassname, ZeroMQConfig.ENCRYPTER_CLASSNAME), e); //$NON-NLS-1$

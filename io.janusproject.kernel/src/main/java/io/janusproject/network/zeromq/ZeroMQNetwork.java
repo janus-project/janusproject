@@ -137,7 +137,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	public String getURI() {
 		return this.validatedURI;
 	}
-
+	
 	@Override
 	public void disconnectPeer(String peerURI) throws Exception {
 		this.log.info(Locale.getString("PEER_DISCONNECTION", peerURI)); //$NON-NLS-1$
@@ -147,7 +147,6 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		// FIXME s.close();
 		// this.context.destroySocket(s);
 		this.log.info(Locale.getString("PEER_DISCONNECTED", peerURI)); //$NON-NLS-1$
-
 	}
 
 	@Override
@@ -257,7 +256,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 			}
 		}
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */

@@ -206,6 +206,9 @@ public class CoreModule extends AbstractModule {
 
 	}
 
+	/**
+	 * @return the contextID
+	 */
 	@Provides
 	@Named(JanusConfig.DEFAULT_CONTEXT_ID)
 	public static UUID getContextID() {
@@ -253,6 +256,9 @@ public class CoreModule extends AbstractModule {
 		return UUID.fromString(defaultContextID);
 	}
 
+	/**
+	 * @return the spaceID
+	 */
 	@Provides
 	@Named(JanusConfig.DEFAULT_SPACE_ID)
 	public static UUID getSpaceID() {
@@ -261,5 +267,5 @@ public class CoreModule extends AbstractModule {
 			v = JanusConfig.VALUE_DEFAULT_SPACE_ID;
 		return UUID.fromString(v);
 	}
-
+	
 }
