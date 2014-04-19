@@ -27,8 +27,8 @@ import io.sarl.lang.core.SpaceSpecification;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,7 +107,7 @@ class SpaceRepository {
 	 * @param repositoryImplFactory
 	 */
 	@Inject
-	void setRespositoryImplFactory(DistributedDataStructureFactory repositoryImplFactory) {
+	synchronized void setRespositoryImplFactory(DistributedDataStructureFactory repositoryImplFactory) {
 		this.spaceIDs = repositoryImplFactory.getSet(this.distributedSpaceSetName);
 		for (SpaceID id : this.spaceIDs) {
 			addExistingSpace(id);
@@ -150,7 +150,7 @@ class SpaceRepository {
 	 * 
 	 * @param space - the space to add
 	 */
-	void addSpace(Space space) {
+	synchronized void addSpace(Space space) {
 		SpaceID id = space.getID();
 		this.spaceIDs.add(id);
 		this.spaces.put(id, space);
@@ -162,7 +162,7 @@ class SpaceRepository {
 	 * 
 	 * @param space - the space to remove
 	 */
-	void removeSpace(Space space) {
+	synchronized void removeSpace(Space space) {
 		SpaceID id = space.getID();
 		this.spaces.remove(id);
 		this.spacesBySpec.remove(id.getSpaceSpecification(), id);
@@ -174,7 +174,7 @@ class SpaceRepository {
 	 * 
 	 * @param spaceID - the space of the space to remove
 	 */
-	public void removeSpace(SpaceID spaceID) {
+	public synchronized void removeSpace(SpaceID spaceID) {
 		this.spaceIDs.remove(this.spaces.get(spaceID));
 		this.spaces.remove(spaceID);
 		this.spacesBySpec.remove(spaceID.getSpaceSpecification(), spaceID);
@@ -183,7 +183,7 @@ class SpaceRepository {
 	/**
 	 * Clear the context of this repository
 	 */
-	public void clearRepository() {
+	public synchronized void clearRepository() {
 		this.spaceIDs.clear();
 		this.spaces.clear();
 		this.spacesBySpec.clear();
@@ -194,7 +194,7 @@ class SpaceRepository {
 	 * 
 	 * @return the number of space registered in this repository
 	 */
-	public int numberOfRegisteredSpaces() {
+	public synchronized int numberOfRegisteredSpaces() {
 		return this.spaceIDs.size();
 	}
 
@@ -203,7 +203,7 @@ class SpaceRepository {
 	 * 
 	 * @return true if this repository contains no space, false otherwise
 	 */
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		return this.spaceIDs.isEmpty();
 	}
 
@@ -213,26 +213,8 @@ class SpaceRepository {
 	 * @param spaceid - the space's ID to test
 	 * @return true if this repository contains a space with the specified ID, false otherwise
 	 */
-	public boolean containsSpace(SpaceID spaceid) {
+	public synchronized boolean containsSpace(SpaceID spaceid) {
 		return this.spaceIDs.contains(spaceid);
-	}
-
-	/**
-	 * Returns an iterator over the various space's IDs stored in this repository
-	 * 
-	 * @return an iterator over the various space's IDs stored in this repository
-	 */
-	public Iterator<SpaceID> getSpaceIDIterator() {
-		return this.spaceIDs.iterator();
-	}
-
-	/**
-	 * Returns an iterator over the various space's stored in this repository
-	 * 
-	 * @return an iterator over the various space's stored in this repository
-	 */
-	public Iterator<Space> getSpaceIterator() {
-		return this.spaces.values().iterator();
 	}
 
 	/**
@@ -241,7 +223,7 @@ class SpaceRepository {
 	 * @return the set of all space's IDs stored in this repository
 	 */
 	public Set<SpaceID> getSpaceIDs() {
-		return this.spaces.keySet();
+		return Collections.synchronizedSet(this.spaces.keySet());
 	}
 
 	/**
@@ -250,17 +232,7 @@ class SpaceRepository {
 	 * @return the collection of all spaces stored in this repository
 	 */
 	public Collection<Space> getSpaces() {
-		return this.spaces.values();
-	}
-
-	/**
-	 * Returns the collection of all spaces IDs with the specified {@link SpaceSpecification} stored in this repository
-	 * 
-	 * @param spec - the specification used to filter the set of stored spaces
-	 * @return the collection of all spaces IDs with the specified {@link SpaceSpecification} stored in this repository
-	 */
-	public Collection<SpaceID> getSpaceIDsFromSpec(Class<? extends SpaceSpecification> spec) {
-		return this.spacesBySpec.get(spec);
+		return Collections.synchronizedCollection(this.spaces.values());
 	}
 
 	/**
@@ -270,7 +242,8 @@ class SpaceRepository {
 	 * @return the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
 	 */
 	public Collection<Space> getSpacesFromSpec(final Class<? extends SpaceSpecification> spec) {
-		return Collections2.filter(this.spaces.values(), new Predicate<Space>() {
+		return Collections2.filter(
+				Collections.synchronizedCollection(this.spaces.values()), new Predicate<Space>() {
 			@Override
 			public boolean apply(Space input) {
 				return input.getID().getSpaceSpecification().equals(spec);
@@ -285,7 +258,7 @@ class SpaceRepository {
 	 * @param spec - the specification used to filter the set of stored spaces
 	 * @return the space instance of <code>null</code> if none.
 	 */
-	public Space getFirstSpaceFromSpec(Class<? extends SpaceSpecification> spec) {
+	public synchronized Space getFirstSpaceFromSpec(Class<? extends SpaceSpecification> spec) {
 		Collection<SpaceID> spaces = this.spacesBySpec.get(spec);
 		if (spaces == null || spaces.isEmpty())
 			return null;
@@ -298,7 +271,7 @@ class SpaceRepository {
 	 * @param spaceID - the identifier to retreive.
 	 * @return the space instance of <code>null</code> if none.
 	 */
-	public Space getSpace(SpaceID spaceID) {
+	public synchronized Space getSpace(SpaceID spaceID) {
 		return this.spaces.get(spaceID);
 	}
 

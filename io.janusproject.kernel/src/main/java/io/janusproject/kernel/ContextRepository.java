@@ -25,6 +25,7 @@ import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.SpaceID;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -82,7 +83,7 @@ public class ContextRepository {
 	 * @param repositoryImplFactory - factory that permits to create a repository.
 	 */
 	@Inject
-	void setJanusID(Injector injector, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID, DistributedDataStructureFactory repositoryImplFactory){
+	synchronized void setJanusID(Injector injector, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID, DistributedDataStructureFactory repositoryImplFactory){
 		this.injector = injector;
 		this.defaultSpaces = repositoryImplFactory.getMap(janusID.toString());
 		/*Context ctx;
@@ -128,7 +129,7 @@ public class ContextRepository {
 	 * 
 	 * @return true if this repository contains no context, false otherwise
 	 */
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		return this.contexts.isEmpty();
 	}
 
@@ -137,7 +138,7 @@ public class ContextRepository {
 	 * 
 	 * @return the number of context registered in this repository
 	 */
-	public int numberOfRegisteredContexts() {
+	public synchronized int numberOfRegisteredContexts() {
 		return this.contexts.size();
 	}
 
@@ -149,7 +150,7 @@ public class ContextRepository {
 	 * @return true if this repository contains a context with the specified id,
 	 *         false otherwise
 	 */
-	public boolean containsContext(UUID contextID) {
+	public synchronized boolean containsContext(UUID contextID) {
 		return this.contexts.containsKey(contextID);
 	}
 
@@ -160,7 +161,7 @@ public class ContextRepository {
 	 * @param context
 	 *            - the context to add
 	 */
-	public void addContext(AgentContext context) {
+	public synchronized void addContext(AgentContext context) {
 		this.defaultSpaces.put(context.getID(), context.getDefaultSpace().getID());
 		this.contexts.put(context.getID(), context);
 	}
@@ -171,7 +172,7 @@ public class ContextRepository {
 	 * @param context
 	 *            - the context to remove
 	 */
-	public void removeContext(AgentContext context) {
+	public final void removeContext(AgentContext context) {
 		this.removeContext(context.getID());
 	}
 
@@ -181,7 +182,7 @@ public class ContextRepository {
 	 * @param contextID
 	 *            - the id of the context to remove
 	 */
-	public void removeContext(UUID contextID) {
+	public synchronized void removeContext(UUID contextID) {
 		this.defaultSpaces.remove(contextID);
 		this.contexts.remove(contextID);
 	}
@@ -189,7 +190,7 @@ public class ContextRepository {
 	/**
 	 * Clear the context of this repository
 	 */
-	public void clearRepository() {
+	public synchronized void clearRepository() {
 		this.defaultSpaces.clear();
 		this.contexts.clear();
 	}
@@ -200,7 +201,7 @@ public class ContextRepository {
 	 * @return the collection of all agent's contexts stored in this repository
 	 */
 	public Collection<AgentContext> getContexts() {
-		return this.contexts.values();
+		return Collections.synchronizedCollection(this.contexts.values());
 	}
 
 	/**
@@ -209,7 +210,7 @@ public class ContextRepository {
 	 * @return the set of all agent context IDs stored in this repository
 	 */
 	public Set<UUID> getContextIDs() {
-		return this.contexts.keySet();
+		return Collections.synchronizedSet(this.contexts.keySet());
 	}
 
 	/**
@@ -218,7 +219,7 @@ public class ContextRepository {
 	 * @param contextID
 	 * @return the {@link AgentContext} with the given ID
 	 */
-	public AgentContext getContext(UUID contextID) {
+	public synchronized AgentContext getContext(UUID contextID) {
 		return this.contexts.get(contextID);
 	}
 	
@@ -228,7 +229,8 @@ public class ContextRepository {
 	 * @return the collection of {@link AgentContext} with the given IDs
 	 */
 	public Collection<AgentContext> getContexts(final Collection<UUID> contextIDs){
-		return Collections2.filter(this.contexts.values(),new Predicate<AgentContext>() {
+		return Collections2.filter(
+				Collections.synchronizedCollection(this.contexts.values()), new Predicate<AgentContext>() {
 			@Override
 			public boolean apply(AgentContext input) {	
 				return contextIDs.contains(input.getID());

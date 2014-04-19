@@ -30,6 +30,9 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.util.Scopes;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -85,7 +88,8 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	private ExecutorService executorService;
 
 	private String uriCandidate;
-	private volatile String validatedURI = null;
+	private String validatedURI = null;
+	private List<String> bufferedPeers = new ArrayList<>();
 
 	/**
 	 * Construct a <code>ZeroMQNetwork</code>.
@@ -99,24 +103,31 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	}
 
 	@Override
-	public void connectPeer(String peerURI) throws Exception {
-
-		this.log.info(Locale.getString("PEER_CONNECTION", peerURI)); //$NON-NLS-1$
-		// Socket subscriber = this.context.socket(ZMQ.SUB);
-		@SuppressWarnings("resource")
-		Socket subscriber = this.context.createSocket(ZMQ.SUB);
-
-		this.subcribers.put(peerURI, subscriber);
-		for (SpaceID sid : this.spaces.keySet()) {
-			subscriber.subscribe(
-					EventEnvelope.buildFilterableHeader(
-							this.serializer.serializeContextID(sid.getContextID())));
+	public synchronized void connectPeer(String peerURI) throws Exception {
+		if (this.validatedURI==null) {
+			// Bufferizing the peerURI.
+			assert(this.bufferedPeers!=null);
+			this.bufferedPeers.add(peerURI);
 		}
-		subscriber.connect(peerURI);
-		this.poller.register(subscriber, Poller.POLLIN);
-
-		this.log.info(Locale.getString("PEER_CONNECTED", peerURI)); //$NON-NLS-1$
-
+		else {
+			this.log.info(Locale.getString("PEER_CONNECTION", peerURI)); //$NON-NLS-1$
+			// Socket subscriber = this.context.socket(ZMQ.SUB);
+			@SuppressWarnings("resource")
+			Socket subscriber = this.context.createSocket(ZMQ.SUB);
+	
+			this.subcribers.put(peerURI, subscriber);
+			byte[] header;
+			for (SpaceID sid : this.spaces.keySet()) {
+				header = EventEnvelope.buildFilterableHeader(
+						this.serializer.serializeContextID(sid.getContextID()));
+				this.log.info("ZEROMQ_SUBSCRIBE_HEADER="+Arrays.toString(header)); //$NON-NLS-1$
+				subscriber.subscribe(header);
+			}
+			subscriber.connect(peerURI);
+			this.poller.register(subscriber, Poller.POLLIN);
+	
+			this.log.info(Locale.getString("PEER_CONNECTED", peerURI)); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -163,14 +174,14 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 		d.getHeaders().put("x-netcmd", CMD_DISCOVER); //$NON-NLS-1$
 
 		EventEnvelope command = processOutgoing(d);
-		command.send(this.publisher);
+		command.send(this.publisher, this.log);
 
 	}
 
 	@Override
 	public void publish(SpaceID spaceID, Scope<?> scope, Event e) throws Exception {
 		EventEnvelope env = processOutgoing(spaceID, e, scope);
-		env.send(this.publisher);
+		env.send(this.publisher, this.log);
 		this.log.info(Locale.getString("PUBLISH_EVENT", spaceID, e)); //$NON-NLS-1$
 
 	}
@@ -218,23 +229,33 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 	 */
 	@Override
 	protected void startUp() throws Exception {
-		super.startUp();
-		// this.context = ZMQ.context(1);
-
-		this.context = new ZContext();
-		// this.publisher = this.context.socket(ZMQ.PUB);
-		this.publisher = this.context.createSocket(ZMQ.PUB);
-		int port = this.publisher.bind(this.uriCandidate);
-		if (port >= 0 && this.uriCandidate.endsWith(":*")) { //$NON-NLS-1$
-			String prefix = this.uriCandidate.substring(0, this.uriCandidate.lastIndexOf(':') + 1);
-			this.validatedURI = prefix + port;
-		} else {
-			this.validatedURI = this.uriCandidate;
+		List<String> bPeers;
+		synchronized(this) {
+			bPeers = this.bufferedPeers;
+			super.startUp();
+			// this.context = ZMQ.context(1);
+	
+			this.context = new ZContext();
+			// this.publisher = this.context.socket(ZMQ.PUB);
+			this.publisher = this.context.createSocket(ZMQ.PUB);
+			int port = this.publisher.bind(this.uriCandidate);
+			if (port >= 0 && this.uriCandidate.endsWith(":*")) { //$NON-NLS-1$
+				String prefix = this.uriCandidate.substring(0, this.uriCandidate.lastIndexOf(':') + 1);
+				this.validatedURI = prefix + port;
+			} else {
+				this.validatedURI = this.uriCandidate;
+			}
+			System.setProperty(JanusConfig.PUB_URI, this.validatedURI);
+			this.log.info(Locale.getString("ZEROMQ_BINDED", this.validatedURI)); //$NON-NLS-1$
+			this.uriCandidate = null;
+			this.bufferedPeers = null;
+			this.poller = new Poller(0);
 		}
-		System.setProperty(JanusConfig.PUB_URI, this.validatedURI);
-		this.log.info(Locale.getString("ZEROMQ_BINDED", this.validatedURI)); //$NON-NLS-1$
-		this.uriCandidate = null;
-		this.poller = new Poller(0);
+		if (bPeers!=null) {
+			for(String peer : bPeers) {
+				connectPeer(peer);
+			}
+		}
 	}
 
 	/**
@@ -286,7 +307,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements Network {
 						for (int i = 0; i < this.poller.getSize(); i++) {
 							if (this.poller.pollin(i)) {
 								this.log.info(Locale.getString("POLLING", i)); //$NON-NLS-1$
-								EventEnvelope ev = EventEnvelope.recv(this.poller.getSocket(i));
+								EventEnvelope ev = EventEnvelope.recv(this.poller.getSocket(i), this.log);
 								assert (ev != null);
 
 								try {

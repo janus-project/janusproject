@@ -53,6 +53,10 @@ public interface Network extends Service{
 	void register(DistributedSpace space) throws Exception;
 	
 	/** Connect this instance of kernel to the given peer over the network.
+	 * <p>
+	 * If the network service is not yet ready for connecting the given
+	 * URI, this URI <strong>MUST</strong> be bufferized until the
+	 * network service has been fully started. 
 	 * 
 	 * @param peerUri
 	 * @throws Exception

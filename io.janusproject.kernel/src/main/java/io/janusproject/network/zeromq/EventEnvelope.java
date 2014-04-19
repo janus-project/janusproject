@@ -23,6 +23,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Socket;
@@ -138,9 +139,12 @@ public class EventEnvelope {
 	 * Send this envelope over the network.
 	 * 
 	 * @param publisher - network publisher.
+	 * @param logger
 	 */
-	public void send(Socket publisher) {
-		publisher.sendMore(buildFilterableHeader(this.contextId));
+	public void send(Socket publisher, Logger logger) {
+		byte[] header = buildFilterableHeader(this.contextId);
+		logger.info("ZEROMQ_MSG_HEADER="+Arrays.toString(header)); //$NON-NLS-1$
+		publisher.sendMore(header);
 		publisher.sendMore(Ints.toByteArray(this.spaceId.length));
 		publisher.sendMore(this.spaceId);
 		publisher.sendMore(Ints.toByteArray(this.scope.length));
@@ -169,10 +173,11 @@ public class EventEnvelope {
 	 * Receive data from the network.
 	 * 
 	 * @param socket - network reader.
+	 * @param logger
 	 * @return the envelope received over the network.
 	 * @throws IOException if the envelope cannot be read from the network.
 	 */
-	public static EventEnvelope recv(Socket socket) throws IOException {
+	public static EventEnvelope recv(Socket socket, Logger logger) throws IOException {
 		//TODO: Read the ZeroMQ socket via a NIO wrapper to support large data: indeed the arrays has a maximal size bounded by a native int value, and the real data could be larger than this limit.
 
 		byte[] data;
@@ -189,7 +194,9 @@ public class EventEnvelope {
 		}
 		
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		
+
+		logger.info("ZEROMQ_RECEIVED_HEADER="+Arrays.toString(data)); //$NON-NLS-1$
+
 		byte[] contextId = readBlock(buffer);
 		assert(contextId!=null && contextId.length>0);
 		
