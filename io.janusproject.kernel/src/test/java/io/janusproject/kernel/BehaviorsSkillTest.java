@@ -63,7 +63,7 @@ public class BehaviorsSkillTest {
 	@Test
 	public void test() {
 		AsyncSyncEventBus bus = mock(AsyncSyncEventBus.class);
-		BehaviorsAndInnerContextSkill behavior = new BehaviorsAndInnerContextSkill(this.agentMock);
+		BehaviorsAndInnerContextSkill_ behavior = new BehaviorsAndInnerContextSkill_(this.agentMock);
 		behavior.setLogger(mock(Logger.class));
 		behavior.setInternalEventBus(bus);
 		

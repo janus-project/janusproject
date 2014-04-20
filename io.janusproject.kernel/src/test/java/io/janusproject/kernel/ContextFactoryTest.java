@@ -52,7 +52,7 @@ public class ContextFactoryTest {
 	private UUID defaultSpaceId = UUID.randomUUID();
 	private ContextFactory factory;
 	@Mock
-	private ContextRepository contextRepository;
+	private ContextRepository_ contextRepository;
 
 	/**
 	 * @throws java.lang.Exception

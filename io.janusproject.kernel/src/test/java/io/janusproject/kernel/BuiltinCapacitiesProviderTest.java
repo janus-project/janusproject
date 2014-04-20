@@ -59,7 +59,7 @@ public class BuiltinCapacitiesProviderTest {
 	private SpawnService spawnService;
 
 	@Mock
-	private ContextRepository contextRepository;
+	private ContextRepository_ contextRepository;
 	
 	@Mock
 	private Agent agent;
