@@ -17,12 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject2.kernel;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import io.janusproject2.services.SpawnService;
 import io.sarl.core.Behaviors;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.ExternalContextAccess;
@@ -51,15 +52,15 @@ import com.google.inject.Injector;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings("all")
-public class BuiltinCapacitiesProviderTest {
-	private BuiltinCapacitiesProviderImpl builtinProvider;
+public class JanusBuiltinCapacitiesProviderTest {
+	private JanusBuiltinCapacitiesProvider builtinProvider;
 	private Map<Class<? extends Capacity>, Skill> builtins;
 
 	@Mock
 	private SpawnService spawnService;
 
 	@Mock
-	private ContextRepository_ contextRepository;
+	private ContextRepository contextRepository;
 	
 	@Mock
 	private Agent agent;
@@ -73,7 +74,7 @@ public class BuiltinCapacitiesProviderTest {
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
-		this.builtinProvider = new BuiltinCapacitiesProviderImpl();
+		this.builtinProvider = new JanusBuiltinCapacitiesProvider();
 		this.builtinProvider.setSpawnService(this.spawnService);
 		this.builtinProvider.setInjector(this.injector);
 		this.builtinProvider.setContextRepository(this.contextRepository);

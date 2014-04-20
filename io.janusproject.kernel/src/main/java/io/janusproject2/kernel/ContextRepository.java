@@ -20,9 +20,10 @@
 package io.janusproject2.kernel;
 
 import io.janusproject2.JanusConfig;
-import io.janusproject2.repository.DistributedDataStructureFactory;
+import io.janusproject2.kernel.hazelcast.HazelcastDistributedDataStructureFactory;
 import io.janusproject2.services.ContextService;
 import io.janusproject2.services.ContextServiceListener;
+import io.janusproject2.services.LogService;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.SpaceID;
 
@@ -38,8 +39,11 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.EntryListener;
+import com.hazelcast.core.IMap;
 
 /**
  * A repository of Agent's Context.
@@ -50,9 +54,8 @@ import com.google.inject.name.Named;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class ContextRepository_ extends AbstractService implements ContextService {
-
-	private Injector injector;
+@Singleton
+public class ContextRepository extends AbstractService implements ContextService {
 
 	private final Collection<ContextServiceListener> listeners;
 
@@ -60,17 +63,26 @@ public class ContextRepository_ extends AbstractService implements ContextServic
 	 * Map linking a context id to its associated default space id.
 	 * This map must be distributed and synchronized all over the network
 	 */
-	private Map<UUID, SpaceID> defaultSpaces;
+	private IMap<UUID, SpaceID> defaultSpaces;
 
 	/**
 	 * Map linking a context id to its related Context object This is local
 	 * non-distributed map
 	 */
-	private final Map<UUID, AgentContext> contexts;
+	private Map<UUID, AgentContext> contexts;
+	
+	private String hazelcastListener = null;
+	
+	@Inject 
+	private LogService logger;
+	
+	@Inject
+	private ContextFactory contextFactory;
 
+	
 	/** Constructs <code>ContextRepository</code>.
 	 */
-	public ContextRepository_() {
+	public ContextRepository() {
 		this.contexts = new TreeMap<>();
 		this.listeners = new ArrayList<>();
 	}
@@ -78,52 +90,14 @@ public class ContextRepository_ extends AbstractService implements ContextServic
 	/**
 	 * Change the identifier of the Janus context.
 	 * 
-	 * @param injector - the injector.
 	 * @param janusID - injected identifier.
 	 * @param repositoryImplFactory - factory that permits to create a repository.
 	 */
 	@Inject
-	synchronized void setJanusID(Injector injector, 
+	private synchronized void setJanusID( 
 			@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID,
-			DistributedDataStructureFactory repositoryImplFactory) {
-		this.injector = injector;
+			HazelcastDistributedDataStructureFactory repositoryImplFactory) {
 		this.defaultSpaces = repositoryImplFactory.getMap(janusID.toString());
-		/*Context ctx;
-		for(IMap.Entry<UUID, SpaceID> entry: defaultSpaces.entrySet()) {
-			if(!this.contexts.containsKey(entry.getKey())) {
-				ctx = new Context(this.injector, entry.getKey(), entry.getValue().getID());
-				assert(ctx != null);
-				this.contexts.put(entry.getKey(), ctx);
-			}
-		}
-		this.spacesEntryListener = new EntryListener<UUID, SpaceID>() {
-
-			@Override
-			public void entryAdded(EntryEvent<UUID, SpaceID> event) {
-				Context ctx = new Context(ContextRepository.this.injector,event.getKey(), event.getValue().getID());
-				assert(ctx != null);
-				ContextRepository.this.contexts.put(event.getKey(), ctx);				
-			}
-
-			@Override
-			public void entryRemoved(EntryEvent<UUID, SpaceID> event) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void entryUpdated(EntryEvent<UUID, SpaceID> event) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void entryEvicted(EntryEvent<UUID, SpaceID> event) {
-				// TODO Auto-generated method stub
-				
-			}			
-		};
-		this.defaultSpaces.addEntryListener(this.spacesEntryListener, true);*/
 	}
 
 
@@ -177,8 +151,12 @@ public class ContextRepository_ extends AbstractService implements ContextServic
 	 */
 	@Override
 	public synchronized void removeAllContexts() {
+		Map<UUID,AgentContext> old = this.contexts;
+		this.contexts = new TreeMap<>();
 		this.defaultSpaces.clear();
-		this.contexts.clear();
+		for(AgentContext context : old.values()) {
+			fireContextDestroyed(context);
+		}
 	}
 
 	/** {@inheritDoc}
@@ -261,19 +239,91 @@ public class ContextRepository_ extends AbstractService implements ContextServic
 			listener.contextDestroyed(context);
 		}
 	}
+	
+	/** Update the internal data structure when a default
+	 * space was discovered. 
+	 * @param spaceID
+	 */
+	protected synchronized void addRemoteDefaultSpace(SpaceID spaceID) {
+		AgentContext context = this.contextFactory.create(spaceID.getContextID(), spaceID.getID());
+		this.contexts.put(context.getID(), context);
+		fireContextCreated(context);
+	}
+
+	/** Update the internal data structure when a default
+	 * space was removed. 
+	 * @param spaceID
+	 */
+	protected synchronized void removeRemoteDefaultSpace(SpaceID spaceID) {
+		AgentContext context = this.contexts.remove(spaceID.getContextID());
+		if (context!=null) fireContextDestroyed(context);
+	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
-	protected void doStart() {
+	protected synchronized void doStart() {
+		for(SpaceID space : this.defaultSpaces.values()) {
+			addRemoteDefaultSpace(space);
+		}
+		this.hazelcastListener = this.defaultSpaces.addEntryListener(new HazelcastListener(), true);
 		notifyStarted();
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
-	protected void doStop() {
+	protected synchronized void doStop() {
+		if (this.hazelcastListener!=null) {
+			this.defaultSpaces.removeEntryListener(this.hazelcastListener);
+		}
 		notifyStopped();
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class HazelcastListener implements EntryListener<UUID,SpaceID> {
+
+		/**
+		 */
+		public HazelcastListener() {
+			//
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void entryAdded(EntryEvent<UUID, SpaceID> event) {
+			addRemoteDefaultSpace(event.getValue());
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void entryRemoved(EntryEvent<UUID, SpaceID> event) {
+			removeRemoteDefaultSpace(event.getValue());
+		}
+
+		/** {@inheritDoc}
+		 */
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void entryUpdated(EntryEvent<UUID, SpaceID> event) {
+			ContextRepository.this.logger.warning(ContextRepository.class, "UNSUPPORTED_HAZELCAST_EVENT", event.getValue()); //$NON-NLS-1$
+		}
+
+		/** {@inheritDoc}
+		 */
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void entryEvicted(EntryEvent<UUID, SpaceID> event) {
+			ContextRepository.this.logger.warning(ContextRepository.class, "UNSUPPORTED_HAZELCAST_EVENT", event.getValue()); //$NON-NLS-1$
+		}
+		
 	}
 
 }

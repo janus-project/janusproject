@@ -24,16 +24,12 @@ import io.janusproject2.services.ExecutorService;
 import io.janusproject2.services.KernelDiscoveryService;
 import io.janusproject2.services.LogService;
 import io.janusproject2.services.NetworkService;
+import io.janusproject2.services.SpaceService;
 import io.janusproject2.services.SpawnService;
-import io.janusproject2.services.SpawnServiceListener;
-import io.sarl.core.AgentKilled;
-import io.sarl.core.AgentSpawned;
-import io.sarl.core.ExternalContextAccess;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 
-import java.lang.reflect.Method;
 import java.util.UUID;
 
 import com.google.common.util.concurrent.ServiceManager;
@@ -95,6 +91,9 @@ public class Kernel {
 
 	@Inject
 	private KernelDiscoveryService kernelDiscoveryService;
+	
+	@Inject
+	private SpaceService spaceService;
 
 	/**
 	 * Constructs a Janus kernel.
@@ -105,9 +104,6 @@ public class Kernel {
 	Kernel(ServiceManager serviceManager) {
 		this.serviceManager = serviceManager;
 		this.serviceManager.startAsync().awaitHealthy();
-
-		// Null parameter is allowed and means: all contexts.
-		this.spawnService.addSpawnServiceListener(null, new SpawningEventEmitter());
 	}
 
 	/**
@@ -154,64 +150,6 @@ public class Kernel {
 	void setJanusContext(@io.janusproject2.kernel.annotations.Kernel AgentContext janusContext) {
 		assert (janusContext != null);
 		this.janusContext = janusContext;
-	}
-
-	/** This class permits to catch any spawning of an agent and emit
-	 * an event in the defualt space of the corresponding context.
-	 * 
-	 * @author $Author: ngaud$
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	private class SpawningEventEmitter implements SpawnServiceListener {
-
-		private volatile Method skillMethod = null;
-		
-		/**
-		 */
-		public SpawningEventEmitter() {
-			//
-		}
-
-		/** {@inheritDoc}
-		 */
-		@Override
-		public void agentSpawned(AgentContext parentContext, Agent agent, Object[] initializationParameters) {
-			EventSpace defSpace = parentContext.getDefaultSpace();
-			AgentSpawned event = new AgentSpawned();
-			event.setAgentID(agent.getID());
-			event.setAgentType(agent.getClass());
-			event.setSource(defSpace.getAddress(agent.getID()));
-			defSpace.emit(event);
-		}
-
-		/** {@inheritDoc}
-		 */
-		@Override
-		public void agentDestroy(final Agent agent) {
-			try {
-				Method method = this.skillMethod;
-				if (method==null) {
-					method = agent.getClass().getDeclaredMethod("getSkill", Class.class); //$NON-NLS-1$
-					method.setAccessible(true);
-					this.skillMethod = method;
-				}
-				ExternalContextAccess skill = (ExternalContextAccess)method.invoke(agent, ExternalContextAccess.class);
-				for (AgentContext context : skill.getAllContexts()) {
-					EventSpace defSpace = context.getDefaultSpace();
-					AgentKilled event = new AgentKilled();
-					event.setAgentID(agent.getID());
-					event.setSource(defSpace.getAddress(agent.getID()));
-					defSpace.emit(event);
-				}
-			}
-			catch(Exception e) {
-				throw new Error(e);
-			}
-		}
-
 	}
 
 }

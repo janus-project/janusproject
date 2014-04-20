@@ -17,11 +17,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject2.kernel;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import io.janusproject2.services.SpawnService;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 
@@ -47,6 +48,8 @@ public class KernelTest {
 
 	private SpawnService spawnSkill;
 	
+	private AgentContext jc;
+	
 	private UUID janusID = UUID.randomUUID();
 	
 	
@@ -70,27 +73,22 @@ public class KernelTest {
 			}
 		}));
 		this.kernel = new Kernel(manager);
-		AgentContext jc = mock(AgentContext.class);
-		when(jc.getID()).thenReturn(this.janusID);
+		this.jc = mock(AgentContext.class);
+		when(this.jc.getID()).thenReturn(this.janusID);
 				
-		this.kernel.setJanusContext(jc);
+		this.kernel.setJanusContext(this.jc);
 		this.spawnSkill = mock(SpawnService.class);
-		
-		this.kernel.setSpawnSkill(this.spawnSkill);
 	}
 
 	@Test
 	public void testSpawnWithoutArguements() {
-
-		this.kernel.spawn(Agent.class);
-		verify(this.spawnSkill).spawn(this.janusID,Agent.class, Collections.EMPTY_LIST.toArray());
+		verify(this.spawnSkill).spawn(this.jc,Agent.class, Collections.EMPTY_LIST.toArray());
 
 	}
 
 	@Test
 	public void testSpawnWitArguements() {
-		this.kernel.spawn(Agent.class, "hello", "world");
-		verify(this.spawnSkill).spawn(this.janusID,Agent.class, new String[] {"hello", "world"});
+		verify(this.spawnSkill).spawn(this.jc,Agent.class, new String[] {"hello", "world"});
 	}
 	
 

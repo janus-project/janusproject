@@ -51,13 +51,13 @@ class ExternalContextAccessSkill_ extends Skill implements ExternalContextAccess
 
 	private Set<UUID> contexts = Sets.newConcurrentHashSet();
 
-	private final ContextRepository_ contextRepository;
+	private final ContextRepository contextRepository;
 
 	/**
 	 * @param agent - owner of the skill.
 	 * @param contextRepository - repository of the contexts.
 	 */
-	public ExternalContextAccessSkill_(Agent agent, ContextRepository_ contextRepository) {
+	public ExternalContextAccessSkill_(Agent agent, ContextRepository contextRepository) {
 		super(agent);
 		this.contextRepository = contextRepository;
 	}

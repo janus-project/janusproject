@@ -17,33 +17,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject2.kernel;
+package io.janusproject2.services;
 
-import io.sarl.lang.core.SpaceID;
+import com.google.common.util.concurrent.Service;
 
-
-/** Abstract implementation of a space.
+/** This service enables to store the contexts in the janus platform.
  * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @author $Author: sgalland$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class SpaceBase implements DistributedSpace {
+public interface SpaceService extends Service {
 
-	private SpaceID id;
-
-	/** Constructs a space.
+	/** Add a listener on the context service events.
 	 * 
-	 * @param id - identifier of the space.
+	 * @param listener
 	 */
-	public SpaceBase(SpaceID id){
-		this.id = id;
-	}
+	public void addSpaceServiceListener(SpaceServiceListener listener);
 
-	@Override
-	public SpaceID getID() {
-		return this.id;
-	}
+	/** Remove a listener on the context service events.
+	 * 
+	 * @param listener
+	 */
+	public void removeSpaceServiceListener(SpaceServiceListener listener);
 
 }

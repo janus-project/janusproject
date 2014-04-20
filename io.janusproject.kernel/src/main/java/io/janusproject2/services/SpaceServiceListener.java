@@ -19,27 +19,29 @@
  */
 package io.janusproject2.services;
 
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.core.Space;
 
 import java.util.EventListener;
 
-/** Listener on events that are received from the network.
+/** Listener on events related to the space service.
  *  
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface NetworkEventReceivingListener extends EventListener {
+public interface SpaceServiceListener extends EventListener {
 
-	/** Invoked when a data is received from a distant peer.
+	/** Invoked when the space is added.
 	 * 
-	 * @param space - the id of the space.
-	 * @param scope - the scope of the received data.
-	 * @param event - the event with the data inside.
+	 * @param space
 	 */
-	public void eventReceived(SpaceID space, Scope<?> scope, Event event);
+	public void spaceCreated(Space space);
+	
+	/** Invoked when the space is destroyed.
+	 * 
+	 * @param space
+	 */
+	public void spaceDestroyed(Space space);
 	
 }

@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject;
+package io.janusproject2;
 
 import static org.junit.Assert.*;
 

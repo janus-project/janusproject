@@ -33,6 +33,7 @@ import io.janusproject2.kernel.hazelcast.AddressSerializer;
 import io.janusproject2.kernel.hazelcast.SpaceIDSerializer;
 import io.janusproject2.network.NetworkUtil;
 import io.janusproject2.services.ArakhneLocaleLogService;
+import io.janusproject2.services.SpaceService;
 import io.janusproject2.services.SpawnService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.AgentContext;
@@ -107,8 +108,9 @@ public class CoreModule extends AbstractModule {
 		Multibinder<Service> uriBinder = Multibinder.newSetBinder(binder(), Service.class);
 		uriBinder.addBinding().to(ArakhneLocaleLogService.class).in(Singleton.class);
 		uriBinder.addBinding().to(JanusExecutorService.class).in(Singleton.class);
-		uriBinder.addBinding().to(ContextRepository_.class).in(Singleton.class);
+		uriBinder.addBinding().to(ContextRepository.class).in(Singleton.class);
 		uriBinder.addBinding().to(SpawnService.class).in(Singleton.class);
+		uriBinder.addBinding().to(SpaceService.class).in(Singleton.class);
 		uriBinder.addBinding().to(JanusKernelDiscoveryService.class);
 
 		// Janus Guava bindings

@@ -55,7 +55,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 
 	private SpawnService spawnService;
 
-	private ContextRepository_ contextRepository;
+	private ContextRepository contextRepository;
 
 	/**
 	 * {@inheritDoc}
@@ -128,7 +128,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	 * @param contextRepository
 	 */
 	@Inject
-	void setContextRepository(ContextRepository_ contextRepository) {
+	void setContextRepository(ContextRepository contextRepository) {
 		this.contextRepository = contextRepository;
 	}
 

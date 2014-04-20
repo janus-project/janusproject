@@ -19,7 +19,9 @@
  */
 package io.janusproject2.kernel;
 
+import io.janusproject2.kernel.SpaceRepository.SpaceRepositoryListener;
 import io.janusproject2.kernel.hazelcast.HazelcastDistributedDataStructureFactory;
+import io.janusproject2.services.SpaceService;
 
 import java.util.UUID;
 
@@ -43,8 +45,15 @@ class ContextFactory {
 	
 	@Inject
 	private HazelcastDistributedDataStructureFactory repositoryImplFactory;
+	
+	private SpaceRepositoryListener spaceServiceEventRelay;
 
-	private ContextRepository_ contextRepository;
+	private ContextRepository contextRepository;
+
+	@Inject
+	private void setSpaceServiceEventRelay(SpaceService service) {
+		this.spaceServiceEventRelay = (SpaceRepositoryListener)service;
+	}
 
 	/**
 	 * Create a context.
@@ -54,7 +63,9 @@ class ContextFactory {
 	 * @return the context.
 	 */
 	public Context create(UUID contextID, UUID defaultSpaceId) {
-		Context ctx = new Context(this.injector, contextID, defaultSpaceId, this.repositoryImplFactory);
+		Context ctx = new Context(this.injector, contextID, defaultSpaceId,
+				this.repositoryImplFactory,
+				this.spaceServiceEventRelay);
 		this.contextRepository.addContext(ctx);
 		return ctx;
 	}
@@ -65,7 +76,7 @@ class ContextFactory {
 	 * @param contextRepo - reference to the context repository to use to store the contexts.
 	 */
 	@Inject
-	void setContextRepository(ContextRepository_ contextRepo) {
+	void setContextRepository(ContextRepository contextRepo) {
 		this.contextRepository = contextRepo;
 	}
 

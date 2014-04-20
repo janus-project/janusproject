@@ -19,31 +19,25 @@
  */
 package io.janusproject2.kernel;
 
-import io.sarl.lang.core.SpaceID;
+import io.janusproject2.services.NetworkService.NetworkEventReceivingListener;
+import io.sarl.lang.core.Space;
 
-
-/** Abstract implementation of a space.
+/**
+ * Represents an space in which the messages may be distributed other the network.
  * 
- * @author $Author: Sebastian Rodriguez$
+ * @author $Author: sgalland$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class SpaceBase implements DistributedSpace {
+public interface DistributedSpace extends Space {
 
-	private SpaceID id;
-
-	/** Constructs a space.
+	/** Replies the listener that may used by the network API
+	 * to notify this space that a message should be dispatch in
+	 * the local copy of the space.
 	 * 
-	 * @param id - identifier of the space.
+	 * @return the proxy
 	 */
-	public SpaceBase(SpaceID id){
-		this.id = id;
-	}
-
-	@Override
-	public SpaceID getID() {
-		return this.id;
-	}
-
+	public NetworkEventReceivingListener getNetworkProxy();
+	
 }

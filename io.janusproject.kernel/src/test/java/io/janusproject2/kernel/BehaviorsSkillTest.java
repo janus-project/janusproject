@@ -17,11 +17,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject2.kernel;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import io.janusproject2.services.LogService;
 import io.sarl.lang.core.Agent;
 import io.sarl.util.OpenEventSpace;
 
@@ -64,7 +65,7 @@ public class BehaviorsSkillTest {
 	public void test() {
 		AsyncSyncEventBus bus = mock(AsyncSyncEventBus.class);
 		BehaviorsAndInnerContextSkill_ behavior = new BehaviorsAndInnerContextSkill_(this.agentMock);
-		behavior.setLogger(mock(Logger.class));
+		behavior.setLogService(mock(LogService.class));
 		behavior.setInternalEventBus(bus);
 		
 	}

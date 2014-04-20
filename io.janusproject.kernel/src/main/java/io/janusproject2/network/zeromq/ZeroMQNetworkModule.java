@@ -28,17 +28,12 @@ import io.janusproject2.network.event.GsonEventSerializer;
 import io.janusproject2.network.event.PlainTextEncrypter;
 import io.janusproject2.services.NetworkService;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.google.common.util.concurrent.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.multibindings.Multibinder;
 
 /**
  * Module that provides the network layer based on the ZeroMQ library.

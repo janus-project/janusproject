@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject2.kernel;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -52,7 +52,7 @@ public class ContextFactoryTest {
 	private UUID defaultSpaceId = UUID.randomUUID();
 	private ContextFactory factory;
 	@Mock
-	private ContextRepository_ contextRepository;
+	private ContextRepository contextRepository;
 
 	/**
 	 * @throws java.lang.Exception

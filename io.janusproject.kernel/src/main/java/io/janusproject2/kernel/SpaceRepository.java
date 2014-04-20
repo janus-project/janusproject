@@ -240,7 +240,7 @@ class SpaceRepository {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	public class HazelcastListener implements ItemListener<SpaceID> {
+	private class HazelcastListener implements ItemListener<SpaceID> {
 
 		/**
 		 */
@@ -283,7 +283,7 @@ class SpaceRepository {
 		 * 
 		 * @param space
 		 */
-		public void spaceDetroyed(Space space);
+		public void spaceDestroyed(Space space);
 
 	}
 

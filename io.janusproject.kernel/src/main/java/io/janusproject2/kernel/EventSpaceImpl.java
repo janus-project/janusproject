@@ -23,6 +23,7 @@ import io.janusproject2.repository.UniqueAddressParticipantRepository;
 import io.janusproject2.services.ExecutorService;
 import io.janusproject2.services.LogService;
 import io.janusproject2.services.NetworkService;
+import io.janusproject2.services.NetworkService.NetworkEventReceivingListener;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -160,6 +161,39 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	public void unhandledEvent(DeadEvent e) {
 		this.logger.debug("UNHANDLED_EVENT", //$NON-NLS-1$
 				getID(), ((Event) e.getEvent()).getSource(), e.getEvent());
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public NetworkEventReceivingListener getNetworkProxy() {
+		return new DistributedSpaceProxy();
+	}
+	
+	/** Implementation of a proxy class that permits to link the network
+	 * API and an EventSpaceImpl.
+	 * 
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class DistributedSpaceProxy implements NetworkEventReceivingListener {
+
+		/**
+		 */
+		public DistributedSpaceProxy() {
+			//
+		}
+
+		/** {@inheritDoc}
+		 */
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void eventReceived(SpaceID space, Scope<?> scope, Event event) {
+			EventSpaceImpl.this.doEmit(event, (Scope<Address>) scope);
+		}
+
 	}
 
 }

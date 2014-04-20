@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /** Platform service that supports the execution resources.
  * 
@@ -38,6 +39,7 @@ import com.google.inject.Inject;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@Singleton
 class JanusExecutorService extends AbstractService implements io.janusproject2.services.ExecutorService {
 
 	@Inject

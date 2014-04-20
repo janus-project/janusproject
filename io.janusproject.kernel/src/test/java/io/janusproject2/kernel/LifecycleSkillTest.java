@@ -17,11 +17,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject2.kernel;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import io.janusproject2.services.SpawnService;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.Lifecycle;
@@ -97,7 +98,7 @@ public class LifecycleSkillTest {
 	@Test
 	public void spawn(){
 		this.skill.spawnInContext(Agent.class, this.parentContext,Collections.EMPTY_LIST.toArray());
-		verify(this.spawnService).spawn(this.parentContextID, Agent.class, Collections.EMPTY_LIST.toArray());
+		verify(this.spawnService).spawn(this.parentContext, Agent.class, Collections.EMPTY_LIST.toArray());
 	}
 
 }

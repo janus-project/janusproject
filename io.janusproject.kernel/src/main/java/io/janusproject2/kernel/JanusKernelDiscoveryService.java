@@ -35,6 +35,7 @@ import java.util.UUID;
 
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ISet;
@@ -48,6 +49,7 @@ import com.hazelcast.core.ItemListener;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@Singleton
 class JanusKernelDiscoveryService extends AbstractService implements io.janusproject2.services.KernelDiscoveryService {
 
 	private final UUID janusID;

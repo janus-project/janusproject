@@ -22,9 +22,14 @@ package io.janusproject2.kernel;
 import io.janusproject2.services.LogService;
 import io.janusproject2.services.SpawnService;
 import io.janusproject2.services.SpawnServiceListener;
+import io.sarl.core.AgentKilled;
+import io.sarl.core.AgentSpawned;
+import io.sarl.core.ExternalContextAccess;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.EventSpace;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +42,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 /** Implementation of a spawning service.
  * 
@@ -45,9 +51,10 @@ import com.google.inject.Injector;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@Singleton
 class JanusSpawnService extends AbstractService implements SpawnService {
 
-	private SpawnServiceListener kernelListener = null;
+	private final SpawnServiceListener loopListener = new SpawningEventEmitter();
 	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
 	private final Map<UUID, Agent> agents = new ConcurrentHashMap<>();
 	private final AtomicBoolean isAcceptSpawns = new AtomicBoolean(false);
@@ -96,11 +103,6 @@ class JanusSpawnService extends AbstractService implements SpawnService {
 	public void addSpawnServiceListener(UUID id,
 			SpawnServiceListener agentLifecycleListener) {
 		synchronized(this.lifecycleListeners) {
-			if (id==null) {
-				if (this.kernelListener!=null)
-					throw new IllegalArgumentException("id"); //$NON-NLS-1$
-				this.kernelListener = agentLifecycleListener;
-			}
 			this.lifecycleListeners.put(id, agentLifecycleListener);
 		}
 	}
@@ -123,8 +125,7 @@ class JanusSpawnService extends AbstractService implements SpawnService {
 	 */
 	protected void fireAgentSpawned(AgentContext context, Agent agent, Object[] initializationParameters) {
 		synchronized (this.lifecycleListeners) {
-			if (this.kernelListener!=null)
-				this.kernelListener.agentSpawned(context, agent, initializationParameters);
+			this.loopListener.agentSpawned(context, agent, initializationParameters);
 			for (SpawnServiceListener l : this.lifecycleListeners.get(agent.getID())) {
 				l.agentSpawned(context, agent, initializationParameters);
 			}
@@ -137,8 +138,7 @@ class JanusSpawnService extends AbstractService implements SpawnService {
 	 */
 	protected void fireAgentDestroyed(Agent agent) {
 		synchronized (this.lifecycleListeners) {
-			if (this.kernelListener!=null)
-				this.kernelListener.agentDestroy(agent);
+			this.loopListener.agentDestroy(agent);
 			for (SpawnServiceListener l : this.lifecycleListeners.get(agent.getID())) {
 				l.agentDestroy(agent);
 			}
@@ -158,7 +158,6 @@ class JanusSpawnService extends AbstractService implements SpawnService {
 	protected void doStop() {
 		this.isAcceptSpawns.set(true);
 		this.lifecycleListeners.clear();
-		this.kernelListener = null;
 		notifyStopped();
 	}
 
@@ -200,6 +199,64 @@ class JanusSpawnService extends AbstractService implements SpawnService {
 		 */
 		public CannotSpawnException(Class<? extends Agent> agentClazz, Throwable cause) {
 			super(Locale.getString(JanusSpawnService.class, "CANNOT_INSTANCIATE_AGENT", agentClazz), cause); //$NON-NLS-1$
+		}
+
+	}
+
+	/** This class permits to catch any spawning of an agent and emit
+	 * an event in the defualt space of the corresponding context.
+	 * 
+	 * @author $Author: ngaud$
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class SpawningEventEmitter implements SpawnServiceListener {
+
+		private volatile Method skillMethod = null;
+		
+		/**
+		 */
+		public SpawningEventEmitter() {
+			//
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void agentSpawned(AgentContext parentContext, Agent agent, Object[] initializationParameters) {
+			EventSpace defSpace = parentContext.getDefaultSpace();
+			AgentSpawned event = new AgentSpawned();
+			event.setAgentID(agent.getID());
+			event.setAgentType(agent.getClass());
+			event.setSource(defSpace.getAddress(agent.getID()));
+			defSpace.emit(event);
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void agentDestroy(final Agent agent) {
+			try {
+				Method method = this.skillMethod;
+				if (method==null) {
+					method = agent.getClass().getDeclaredMethod("getSkill", Class.class); //$NON-NLS-1$
+					method.setAccessible(true);
+					this.skillMethod = method;
+				}
+				ExternalContextAccess skill = (ExternalContextAccess)method.invoke(agent, ExternalContextAccess.class);
+				for (AgentContext context : skill.getAllContexts()) {
+					EventSpace defSpace = context.getDefaultSpace();
+					AgentKilled event = new AgentKilled();
+					event.setAgentID(agent.getID());
+					event.setSource(defSpace.getAddress(agent.getID()));
+					defSpace.emit(event);
+				}
+			}
+			catch(Exception e) {
+				throw new Error(e);
+			}
 		}
 
 	}

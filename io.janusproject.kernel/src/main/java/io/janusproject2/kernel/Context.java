@@ -57,14 +57,15 @@ class Context implements AgentContext{
 	 * @param id - identifier of the context.
 	 * @param defaultSpaceID - identifier of the default space in the context.
 	 * @param repositoryImplFactory - object that is creating distributed structures.
+	 * @param startUpListener - repository listener which is added just after the creation of the repository, but before the creation of the default space.
 	 */
-	protected Context(Injector injector, UUID id, UUID defaultSpaceID, HazelcastDistributedDataStructureFactory repositoryImplFactory) {
+	protected Context(Injector injector, UUID id, UUID defaultSpaceID, HazelcastDistributedDataStructureFactory repositoryImplFactory, SpaceRepositoryListener startUpListener) {
 		this.id = id;
 		this.spaceRepository = new SpaceRepository(
 				id.toString()+"-spaces", //$NON-NLS-1$
 				repositoryImplFactory,
 				injector,
-				new SpaceListener());
+				new SpaceListener(startUpListener));
 		this.defaultSpace = createSpace(EventSpaceSpecification.class, defaultSpaceID);
 	}
 	
@@ -125,16 +126,22 @@ class Context implements AgentContext{
 	 */
 	private class SpaceListener implements SpaceRepositoryListener {
 		
+		private final SpaceRepositoryListener relay;
+		
 		/**
+		 * @param relay
 		 */
-		public SpaceListener() {
-			//
+		public SpaceListener(SpaceRepositoryListener relay) {
+			this.relay = relay;
 		}
 
 		/** {@inheritDoc}
 		 */
 		@Override
 		public void spaceCreated(Space space) {
+			// Notify the relays (other services)
+			this.relay.spaceCreated(space);
+			// Put an event in the default space
 			EventSpace defSpace = getDefaultSpace();
 			// Default space may be null if the default space was not
 			// yet created by the space repository has already received new spaces.
@@ -151,7 +158,10 @@ class Context implements AgentContext{
 		/** {@inheritDoc}
 		 */
 		@Override
-		public void spaceDetroyed(Space space) {
+		public void spaceDestroyed(Space space) {
+			// Notify the relays (other services)
+			this.relay.spaceDestroyed(space);
+			// Put an event in the default space
 			EventSpace defSpace = getDefaultSpace();
 			// Default space may be null if the default space was not
 			// yet created by the space repository has already received new spaces.
