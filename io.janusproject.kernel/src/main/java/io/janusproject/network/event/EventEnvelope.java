@@ -20,6 +20,7 @@
 package io.janusproject.network.event;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 
 /**
@@ -166,4 +167,17 @@ public class EventEnvelope implements Serializable {
 		this.scope = scope;
 	}
 	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return "EventEnvelope {\n  context="//$NON-NLS-1$
+					+ Arrays.toString(this.contextId) + "\n  scope="//$NON-NLS-1$
+					+ Arrays.toString(this.scope) + ",\n  spaceID="//$NON-NLS-1$
+					+ Arrays.toString(this.spaceId) + ",\n  headers="//$NON-NLS-1$
+					+ Arrays.toString(this.customHeaders) + ",\n  body="//$NON-NLS-1$
+					+ Arrays.toString(this.body) + "\n}";//$NON-NLS-1$
+					
+	}
+
 }

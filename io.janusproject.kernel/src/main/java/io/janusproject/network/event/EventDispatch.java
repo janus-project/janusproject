@@ -24,7 +24,6 @@ import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,10 +64,18 @@ public class EventDispatch implements Serializable {
 		this.spaceID = sid;
 		this.event = event;
 		this.scope = scope;
-		this.headers = (headers==null) ? Collections.<String,String>emptyMap() : headers;
+		this.headers = (headers==null) ? new HashMap<String,String>() : headers;
 	}
 
-	
+	/** Construct a <code>EventDispatch</code>
+	 * 
+	 * @param sid - identifier of the space in which the event occurs.
+	 * @param event - event to dispatch.
+	 * @param scope - scope of the event.
+	 */
+	public EventDispatch(SpaceID sid, Event event, Scope<?> scope) {
+		this(sid,event,scope,null);
+	}	
 	
 	/** {@inheritDoc}
 	 */
@@ -78,17 +85,6 @@ public class EventDispatch implements Serializable {
 				+ ", spaceID=" + this.spaceID + ", headers=" + this.headers + "]";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-
-
-	/** Construct a <code>EventDispatch</code>
-	 * 
-	 * @param sid - identifier of the space in which the event occurs.
-	 * @param event - event to dispatch.
-	 * @param scope - scope of the event.
-	 */
-	public EventDispatch(SpaceID sid, Event event, Scope<?> scope) {
-		this(sid,event,scope,new HashMap<String,String>());
-	}
 	
 
 	/** Replies the event to dispatch.
