@@ -19,8 +19,6 @@
  */
 package io.janusproject.network.zeromq;
 
-import java.net.URI;
-
 import io.janusproject.JanusConfig;
 import io.janusproject.network.event.EventSerializer;
 import io.janusproject.services.ExecutorService;
@@ -29,9 +27,13 @@ import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.SpaceService;
 
+import java.net.URI;
+
+import com.google.common.util.concurrent.Service;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 /**
@@ -56,6 +58,11 @@ public class ZeroMQNetworkModule extends AbstractModule {
 		requireBinding(EventSerializer.class);
 
 		bind(NetworkService.class).to(ZeroMQNetwork.class).in(Singleton.class);
+
+		// Complete the binding for: Set<Service>
+		// (This set is given to the service manager to launch the services).
+		Multibinder<Service> serviceSetBinder = Multibinder.newSetBinder(binder(), Service.class);
+		serviceSetBinder.addBinding().to(ZeroMQNetwork.class);
 	}
 
 }

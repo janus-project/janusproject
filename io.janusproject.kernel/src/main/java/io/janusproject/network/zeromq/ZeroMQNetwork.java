@@ -76,7 +76,7 @@ import com.google.inject.name.Named;
 class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkService {
 
 	private final Listener serviceListener = new Listener();
-	
+
 	@Inject
 	private LogService logger;
 
@@ -95,7 +95,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	private ZContext context;
 	private Socket publisher;
 	private Map<URI, Socket> subcribers = new ConcurrentHashMap<>();
-	
+
 	private final Map<URI,NetworkEventReceivingListener> spaces = new TreeMap<>();
 
 	// TODO Change poller that can be stopped properly.
@@ -104,10 +104,10 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	private URI uriCandidate;
 	private URI validatedURI = null;
 
-	private Collection<Triplet> bufferedConnections = new ArrayList<>();
+	private Collection<BufferedConnection> bufferedConnections = new ArrayList<>();
 
 	private final List<NetworkServiceListener> listeners = new ArrayList<>();
-	
+
 	/**
 	 * Construct a <code>ZeroMQNetwork</code>.
 	 * 
@@ -207,18 +207,6 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		}
 	}
 
-	private EventEnvelope processOutgoing(EventDispatch dispatch) throws Exception {
-		return this.serializer.serialize(dispatch);
-	}
-
-	private EventEnvelope processOutgoing(SpaceID spaceID, Event event, Scope<?> scope) throws Exception {
-		return processOutgoing(new EventDispatch(spaceID, event, scope));
-	}
-
-	private EventDispatch processIncomming(EventEnvelope envelope) throws Exception {
-		return this.serializer.deserialize(envelope);
-	}
-
 	private void send(EventEnvelope e) {
 		this.publisher.sendMore(buildFilterableHeader(e.getContextId()));
 		this.publisher.sendMore(Ints.toByteArray(e.getSpaceId().length));
@@ -241,7 +229,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	 * @return the header of the ZeroMQ message that may be used for
 	 * filtering.
 	 */
-	public static byte[] buildFilterableHeader(byte[] contextID) {
+	private static byte[] buildFilterableHeader(byte[] contextID) {
 		byte[] header = new byte[Ints.BYTES+contextID.length];
 		byte[] length = Ints.toByteArray(contextID.length);
 		System.arraycopy(length, 0, header, 0, length.length);
@@ -252,11 +240,16 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	/** {@inheritDoc}
 	 */
 	@Override
-	public void publish(SpaceID id, Scope<?> scope, Event data)
+	public synchronized void publish(SpaceID id, Scope<?> scope, Event data)
 			throws Exception {
-		EventEnvelope env = processOutgoing(id, data, scope);
-		send(env);
-		this.logger.info("PUBLISH_EVENT", id, data); //$NON-NLS-1$
+		if (this.validatedURI==null) {
+			this.logger.debug("DISCARDED_MESSAGE", id, scope, data); //$NON-NLS-1$
+		}
+		else {
+			EventEnvelope env = this.serializer.serialize(new EventDispatch(id, data, scope));
+			send(env);
+			this.logger.info("PUBLISH_EVENT", id, data); //$NON-NLS-1$
+		}
 	}
 
 	private static byte[] readBuffer(ByteBuffer buffer, int size) throws IOException {
@@ -325,7 +318,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		if (this.validatedURI==null) {
 			// Bufferizing the peerURI.
 			assert(this.bufferedConnections!=null);
-			this.bufferedConnections.add(new Triplet(peerUri, space, listener));
+			this.bufferedConnections.add(new BufferedConnection(peerUri, space, listener));
 		}
 		else {
 			Socket subscriber = this.subcribers.get(peerUri);
@@ -378,13 +371,14 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		}
 	}
 
-	/**
+	/** Extract data from a received envelope, and forwad it to the rest of the platform.
+	 * 
 	 * @param env
 	 * @throws Exception
 	 */
 	protected synchronized void receive(EventEnvelope env) throws Exception {
 		this.logger.info("ENVELOPE_RECEIVED", this.validatedURI, env); //$NON-NLS-1$
-		EventDispatch dispatch = processIncomming(env);
+		EventDispatch dispatch = this.serializer.deserialize(env);
 		this.logger.info("DISPATCH_RECEIVED", dispatch); //$NON-NLS-1$
 
 		SpaceID spaceID = dispatch.getSpaceID();
@@ -435,6 +429,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 			} catch (Throwable e) {
 				catchExceptionWithoutStopping(e, "UNEXPECTED_EXCEPTION"); //$NON-NLS-1$
 			}
+			Thread.yield(); // ensure that this thread does not take too much time.
 		}
 		// FIXME: May the poller be stopped?
 		// stopPoller();
@@ -444,7 +439,8 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		// Catch the deserialization or unencrypting exceptions
 		// Notify the default listener if one, but do not
 		// stop the thread.
-		UncaughtExceptionHandler h = Thread.getDefaultUncaughtExceptionHandler();
+		UncaughtExceptionHandler h = Thread.currentThread().getUncaughtExceptionHandler();
+		if (h == null) h = Thread.getDefaultUncaughtExceptionHandler();
 		if (h != null) {
 			try {
 				h.uncaughtException(Thread.currentThread(), e);
@@ -462,8 +458,8 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void startUp() throws Exception {
-		Collection<Triplet> connections;
+	protected synchronized void startUp() throws Exception {
+		Collection<BufferedConnection> connections;
 		synchronized(this) {
 			super.startUp();
 			// this.context = ZMQ.context(1);
@@ -485,11 +481,11 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 			connections = this.bufferedConnections;
 			this.bufferedConnections = null;
 			this.poller = new Poller(0);
-			
+
 			this.kernelService.addKernelDiscoveryServiceListener(this.serviceListener);
 			this.spaceService.addSpaceServiceListener(this.serviceListener);
 		}
-		for(Triplet t : connections) {
+		for(BufferedConnection t : connections) {
 			connectPeer(t.peerURI, t.spaceID, t.listener);
 		}
 	}
@@ -517,7 +513,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static class Triplet {
+	private static class BufferedConnection {
 
 		/** URI of the peer.
 		 */
@@ -536,7 +532,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		 * @param spaceID
 		 * @param listener
 		 */
-		public Triplet(URI peerURI, SpaceID spaceID, NetworkEventReceivingListener listener) {
+		public BufferedConnection(URI peerURI, SpaceID spaceID, NetworkEventReceivingListener listener) {
 			this.peerURI = peerURI;
 			this.spaceID = spaceID;
 			this.listener = listener;
@@ -551,19 +547,19 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	 * @mavenartifactid $ArtifactId$
 	 */
 	private class AsyncRunner implements Runnable {
-		
+
 		private final NetworkEventReceivingListener space;
 		private final SpaceID spaceID;
 		private final Scope<?> scope;
 		private final Event event;
-		
+
 		public AsyncRunner(NetworkEventReceivingListener space, SpaceID spaceID, Scope<?> scope, Event event) {
 			this.space = space;
 			this.spaceID = spaceID;
 			this.scope = scope;
 			this.event = event;
 		}
-		
+
 		@Override
 		public void run() {
 			this.space.eventReceived(this.spaceID, this.scope, this.event);
@@ -588,10 +584,11 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
-		public void spaceCreated(Space space) {
+		public synchronized void spaceCreated(Space space) {
 			try {
+				URI localUri = ZeroMQNetwork.this.getURI();
 				for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
-					if (!peer.equals(ZeroMQNetwork.this.getURI())) {
+					if (!peer.equals(localUri)) {
 						if (space instanceof DistributedSpace) {
 							connectPeer(peer, space.getID(), ((DistributedSpace)space).getNetworkProxy());
 						}
@@ -610,10 +607,11 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
-		public void spaceDestroyed(Space space) {
+		public synchronized void spaceDestroyed(Space space) {
 			try {
+				URI localUri = ZeroMQNetwork.this.getURI();
 				for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
-					if (!peer.equals(ZeroMQNetwork.this.getURI())) {
+					if (!peer.equals(localUri)) {
 						disconnectPeer(peer, space.getID());
 					}
 				}
@@ -634,9 +632,12 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
-		public void kernelDisconnected(URI peerURI) {
+		public synchronized void kernelDisconnected(URI peerURI) {
 			try {
-				disconnectPeer(peerURI);
+				URI localUri = ZeroMQNetwork.this.getURI();
+				if (!peerURI.equals(localUri)) {
+					disconnectPeer(peerURI);
+				}
 			}
 			catch (Exception e) {
 				ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
