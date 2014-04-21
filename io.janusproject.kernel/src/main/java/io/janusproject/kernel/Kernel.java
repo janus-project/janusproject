@@ -19,16 +19,27 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelAgentSpawnListener;
-import io.janusproject.services.LogService;
 import io.janusproject.services.SpawnService;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
+import com.google.common.util.concurrent.Service;
+import com.google.common.util.concurrent.Service.State;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -75,9 +86,6 @@ public class Kernel {
 	@Inject
 	private HazelcastInstance hazelcastInstance;
 	
-	@Inject
-	private LogService logger;
-
 	private final SpawnService spawnService;
 
 	/**
@@ -88,7 +96,7 @@ public class Kernel {
 	 * @param exceptionHandler is the handler of the uncaught exceptions.
 	 */
 	@Inject
-	Kernel(ServiceManager serviceManager, SpawnService spawnService, UncaughtExceptionHandler exceptionHandler) {
+	private Kernel(ServiceManager serviceManager, SpawnService spawnService, UncaughtExceptionHandler exceptionHandler) {
 		// Ensure that all the threads has a default hander.
 		Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
 		
@@ -96,9 +104,11 @@ public class Kernel {
 		this.spawnService.addKernelAgentSpawnListener(new KernelStoppingListener());
 
 		this.serviceManager = serviceManager;
+		// Start the services now to ensure that the default context and space
+		// of the Janus agent are catched by the modules;
 		this.serviceManager.startAsync().awaitHealthy();
 	}
-
+	
 	/**
 	 * Replies the default space of the Janus agent.
 	 * 
@@ -123,17 +133,14 @@ public class Kernel {
 	 * Stop the Janus kernel.
 	 */
 	private void stop() {
-		this.logger.info("STOP_KERNEL_SERVICES"); //$NON-NLS-1$
-
-		try {
-			this.serviceManager.stopAsync().awaitStopped();
-		} catch (Exception e) {
-			this.logger.error("KERNEL_STOP_ERROR", e); //$NON-NLS-1$
-		}
-
-		this.hazelcastInstance.shutdown();
 		
-		this.logger.info("KERNEL_SERVICES_STOPPED"); //$NON-NLS-1$
+		// CAUTION: EXECUTE THE STOP FUNCTION IN A THREAD THAT
+		// IS INDEPENDENT TO THE ONES FROM THE EXECUTORS
+		// CREATED BY THE EXECUTORSERVICE.
+		// THIS AVOID THE STOP FUNCTION TO BE INTERRUPTED
+		// BECAUSE THE EXECUTORSERVICE IS SHUTDOWN.
+		StopTheKernel t = new StopTheKernel();
+		t.start();
 	}
 
 	/**
@@ -177,5 +184,104 @@ public class Kernel {
 		}
 	}
 	
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class StopTheKernel implements ThreadFactory, Runnable, UncaughtExceptionHandler {
+		
+		/**
+		 */
+		public StopTheKernel() {
+			//
+		}
+		
+		/** Start the thread.
+		 */
+		public void start() {
+			Thread t = newThread(this);
+			t.start();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void run() {
+			Logger rawLogger = Logger.getAnonymousLogger();
+			
+			rawLogger.info(Locale.getString(Kernel.class, "STOP_KERNEL_SERVICES")); //$NON-NLS-1$
+
+			// Loop by hand on the services to ensure that the "execution" service
+			// is stopped after all the others.
+			{
+				List<Service> executorServices = new ArrayList<>();
+				List<Service> otherServices = new ArrayList<>();
+		
+				for(Service service : Kernel.this.serviceManager.servicesByState().values()) {
+					if (service instanceof ExecutorService) {
+						executorServices.add(service);
+					}
+					else {
+						service.stopAsync();
+						otherServices.add(service);
+					}
+				}
+				
+				boolean allStopped;
+				do {
+					allStopped = true;
+					for(Service service : otherServices) {
+						if (service.state()!=State.TERMINATED) {
+							allStopped = false;
+							break; // the inner loop
+						}
+					}
+					Thread.yield();
+				}
+				while (!allStopped);
+				
+				for(Service service : executorServices) {
+					service.stopAsync();
+				}			
+					
+				Kernel.this.serviceManager.awaitStopped();
+			}
+			
+			Kernel.this.hazelcastInstance.shutdown();
+
+			rawLogger.info(Locale.getString(Kernel.class, "KERNEL_SERVICES_STOPPED")); //$NON-NLS-1$
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread t = Executors.defaultThreadFactory().newThread(r);
+			t.setName("Janus shutdown"); //$NON-NLS-1$
+			t.setDaemon(false);
+			t.setUncaughtExceptionHandler(this);
+			return t;
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void uncaughtException(Thread t, Throwable e) {
+			assert(t!=null);
+			assert(e!=null);
+			LogRecord record = new LogRecord(Level.SEVERE, e.getLocalizedMessage());		
+			record.setThrown(e);
+			StackTraceElement elt = e.getStackTrace()[0];
+			assert(elt!=null);
+			record.setSourceClassName(elt.getClassName());
+			record.setSourceMethodName(elt.getMethodName());
+			Logger.getAnonymousLogger().log(record);
+		}
+
+	}
+
 }
 

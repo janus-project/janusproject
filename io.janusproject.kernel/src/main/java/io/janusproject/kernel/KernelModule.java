@@ -92,10 +92,11 @@ class KernelModule extends AbstractModule {
 		bind(SpawnService.class).to(JanusSpawnService.class).in(Singleton.class);
 		
 		// Create a binder for: Set<Service>
+		// (This set is given to the service manager to launch the services).
 		Multibinder<Service> serviceSetBinder = Multibinder.newSetBinder(binder(), Service.class);
 		serviceSetBinder.addBinding().to(LogService.class);
-		serviceSetBinder.addBinding().to(ContextService.class);
 		serviceSetBinder.addBinding().to(ExecutorService.class);
+		serviceSetBinder.addBinding().to(ContextService.class);
 		serviceSetBinder.addBinding().to(KernelDiscoveryService.class);
 		serviceSetBinder.addBinding().to(SpaceService.class);
 		serviceSetBinder.addBinding().to(SpawnService.class);

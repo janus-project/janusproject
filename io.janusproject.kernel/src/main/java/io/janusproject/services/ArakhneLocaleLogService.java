@@ -237,6 +237,13 @@ public class ArakhneLocaleLogService extends AbstractService implements LogServi
 	/** {@inheritDoc}
 	 */
 	@Override
+	public boolean isLoggeable(Level level) {
+		return this.logger.isLoggable(level);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
 	protected void doStart() {
 		notifyStarted();
 	}
@@ -247,5 +254,6 @@ public class ArakhneLocaleLogService extends AbstractService implements LogServi
 	protected void doStop() {
 		notifyStopped();
 	}
+
 	
 }

@@ -152,6 +152,7 @@ class Context implements AgentContext{
 			// Default space may be null if the default space was not
 			// yet created by the space repository has already received new spaces.
 			if (defSpace!=null) {
+				//FIXME: Caution -> the event should not be fired in remote kernels.
 				/*
 				SpaceCreated event = new SpaceCreated();
 				event.setSpaceID(space.getID());
@@ -172,6 +173,7 @@ class Context implements AgentContext{
 			// Default space may be null if the default space was not
 			// yet created by the space repository has already received new spaces.
 			if (defSpace!=null) {
+				//FIXME: Caution -> the event should not be fired in remote kernels.
 				/*
 				SpaceDestroyed event = new SpaceDestroyed();
 				event.setSpaceID(space.getID());

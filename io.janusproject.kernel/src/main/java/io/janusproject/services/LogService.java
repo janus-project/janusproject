@@ -20,6 +20,7 @@
 package io.janusproject.services;
 
 import java.util.logging.Filter;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -143,6 +144,15 @@ public interface LogService extends Service {
 	 * @return the filter
 	 */
 	public Filter getFilter();
+	
+	/** Check if a message of the given level would actually be logged
+     * by this logger.  This check is based on the Loggers effective level,
+     * which may be inherited from its parent.
+     *
+     * @param   level   a message logging level
+     * @return  true if the given message level is currently being logged.
+     */
+	public boolean isLoggeable(Level level);
 
 	/** Utility to put objec that us asynchronously evaluated by
 	 * the {@link LogService}.

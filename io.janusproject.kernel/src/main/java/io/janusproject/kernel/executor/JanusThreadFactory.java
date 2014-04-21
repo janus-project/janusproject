@@ -52,13 +52,12 @@ public class JanusThreadFactory implements ThreadFactory {
 
 	/** {@inheritDoc}
 	 */
-	@SuppressWarnings("static-access")
 	@Override
 	public Thread newThread(Runnable r) {
 		Thread t = this.defaultThreadFactory.newThread(r);
 		t.setDaemon(true);
 		assert(this.handler!=null);
-		t.setDefaultUncaughtExceptionHandler(this.handler);
+		t.setUncaughtExceptionHandler(this.handler);
 		return t;
 	}
 

@@ -55,7 +55,7 @@ import com.hazelcast.core.IMap;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-public class JanusContextService extends AbstractService implements ContextService {
+class JanusContextService extends AbstractService implements ContextService {
 
 	private final Collection<ContextServiceListener> listeners;
 

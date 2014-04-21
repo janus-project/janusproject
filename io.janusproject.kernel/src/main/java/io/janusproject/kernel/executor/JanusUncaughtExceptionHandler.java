@@ -24,6 +24,7 @@ import io.janusproject.services.LogService;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
@@ -64,7 +65,12 @@ public class JanusUncaughtExceptionHandler implements UncaughtExceptionHandler {
 		assert(elt!=null);
 		record.setSourceClassName(elt.getClassName());
 		record.setSourceMethodName(elt.getMethodName());
-		this.logger.log(record);
+		if (this.logger!=null) {
+			this.logger.log(record);
+		}
+		else {
+			Logger.getAnonymousLogger().log(record);
+		}
 	}
 
 }
