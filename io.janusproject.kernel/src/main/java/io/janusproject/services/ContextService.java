@@ -27,7 +27,8 @@ import java.util.UUID;
 
 import com.google.common.util.concurrent.Service;
 
-/** This service enables to store the contexts in the janus platform.
+/**
+ * This service enables to store the contexts in the janus platform.
  * 
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -37,17 +38,17 @@ import com.google.common.util.concurrent.Service;
  */
 public interface ContextService extends Service {
 
-	/** Replies the mutex that is used to synchronized the access to the service.
+	/**
+	 * Replies the mutex that is used to synchronized the access to the service.
 	 * 
 	 * @return the mutex
 	 */
 	public Object mutex();
-	
+
 	/**
 	 * Does this repository contain some context
 	 * 
-	 * @return <code>true</code> if this repository contains no context,
-	 * <code>false</code> otherwise
+	 * @return <code>true</code> if this repository contains no context, <code>false</code> otherwise
 	 */
 	public boolean isEmptyContextRepository();
 
@@ -63,18 +64,17 @@ public interface ContextService extends Service {
 	 * 
 	 * @param contextID
 	 *            - the id to test
-	 * @return <code>true</code> if this repository contains a context with
-	 * the specified id, <code>false</code> otherwise
+	 * @return <code>true</code> if this repository contains a context with the specified id, <code>false</code> otherwise
 	 */
 	public boolean containsContext(UUID contextID);
 
 	/**
-	 * Add a new context to this repository
+	 * Create a new context and add it to this repository
 	 * 
-	 * @param context
-	 *            - the context to add
+	 * @param contextID - the id of the context to create
+	 * @param defaultSpaceID - the id of the default space of the context to create
 	 */
-	public void addContext(AgentContext context);
+	public AgentContext createContext(UUID contextID, UUID defaultSpaceID);
 
 	/**
 	 * Remove the specified context from this repository
@@ -107,8 +107,7 @@ public interface ContextService extends Service {
 	/**
 	 * Returns the set of all agent context IDs stored in this repository
 	 * <p>
-	 * The replies collection is synchronized and any iteration on it
-	 * must be synchronized on the mutex replies by {@link #mutex}.
+	 * The replies collection is synchronized and any iteration on it must be synchronized on the mutex replies by {@link #mutex}.
 	 * 
 	 * @return the set of all agent context IDs stored in this repository
 	 */
@@ -117,32 +116,32 @@ public interface ContextService extends Service {
 	/**
 	 * Returns the {@link AgentContext} with the given ID
 	 * <p>
-	 * The replies collection is synchronized and any iteration on it
-	 * must be synchronized on the mutex replies by {@link #mutex}.
+	 * The replies collection is synchronized and any iteration on it must be synchronized on the mutex replies by {@link #mutex}.
 	 * 
 	 * @param contextID
 	 * @return the {@link AgentContext} with the given ID
 	 */
 	public AgentContext getContext(UUID contextID);
-	
+
 	/**
 	 * Returns the collection of {@link AgentContext} with the given IDs
 	 * <p>
-	 * The replies collection is synchronized and any iteration on it
-	 * must be synchronized on the mutex replies by {@link #mutex}.
+	 * The replies collection is synchronized and any iteration on it must be synchronized on the mutex replies by {@link #mutex}.
 	 * 
 	 * @param contextIDs
 	 * @return the collection of {@link AgentContext} with the given IDs
 	 */
 	public Collection<AgentContext> getContexts(Collection<UUID> contextIDs);
-	
-	/** Add a listener on the context service events.
+
+	/**
+	 * Add a listener on the context service events.
 	 * 
 	 * @param listener
 	 */
 	public void addContextServiceListener(ContextServiceListener listener);
 
-	/** Remove a listener on the context service events.
+	/**
+	 * Remove a listener on the context service events.
 	 * 
 	 * @param listener
 	 */

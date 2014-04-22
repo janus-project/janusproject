@@ -82,7 +82,7 @@ class Context implements AgentContext{
 	/** Destroy any associated resources.
 	 */
 	public void destroy() {
-		this.spaceRepository.destroy();
+		//this.spaceRepository.destroy();
 	}
 	
 	@Override

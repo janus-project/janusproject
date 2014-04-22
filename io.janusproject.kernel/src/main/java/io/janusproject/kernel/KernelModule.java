@@ -105,8 +105,8 @@ class KernelModule extends AbstractModule {
 	@Provides
 	@io.janusproject.kernel.annotations.Kernel
 	@Singleton
-	private static AgentContext getKernel(ContextFactory factory, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusContextID, @Named(JanusConfig.DEFAULT_SPACE_ID) UUID defaultJanusSpaceId) {
-		return factory.create(janusContextID, defaultJanusSpaceId);
+	private static AgentContext getKernel(ContextService contextService, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusContextID, @Named(JanusConfig.DEFAULT_SPACE_ID) UUID defaultJanusSpaceId) {
+		return contextService.createContext(janusContextID, defaultJanusSpaceId);
 	}
 
 	@Provides

@@ -139,12 +139,28 @@ class JanusContextService extends AbstractService implements ContextService {
 	}
 
 	/** {@inheritDoc}
-	 */
+	 
 	@Override
 	public synchronized void addContext(AgentContext context) {
 		this.defaultSpaces.put(context.getID(), context.getDefaultSpace().getID());
 		this.contexts.put(context.getID(), context);
 		fireContextCreated(context);
+	}*/
+	
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public synchronized Context createContext(UUID contextID, UUID defaultSpaceUUID) {
+		Context ctx = new Context(
+				this.injector,
+				contextID, defaultSpaceUUID,
+				this.hzInstance,
+				(SpaceRepositoryListener)this.spaceService);
+		this.contexts.put(contextID, ctx);
+		fireContextCreated(ctx);
+		ctx.createDefaultSpace();
+		return ctx;
 	}
 
 	/** {@inheritDoc}
@@ -267,14 +283,7 @@ class JanusContextService extends AbstractService implements ContextService {
 	protected synchronized void ensureDefaultSpaceDefinition(SpaceID spaceID) {
 		UUID contextID = spaceID.getContextID();
 		if (!this.contexts.containsKey(contextID)) {
-			Context ctx = new Context(
-					this.injector,
-					contextID, spaceID.getID(),
-					this.hzInstance,
-					(SpaceRepositoryListener)this.spaceService);
-			this.contexts.put(contextID, ctx);
-			fireContextCreated(ctx);
-			ctx.createDefaultSpace();
+			Context ctx = this.createContext(contextID, spaceID.getID());
 		}
 	}
 

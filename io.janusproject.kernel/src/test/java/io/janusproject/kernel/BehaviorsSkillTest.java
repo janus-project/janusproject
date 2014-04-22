@@ -22,6 +22,7 @@ package io.janusproject.kernel;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import io.janusproject.services.ContextService;
 import io.janusproject.services.LogService;
 import io.sarl.lang.core.Agent;
 import io.sarl.util.OpenEventSpace;
@@ -51,12 +52,12 @@ public class BehaviorsSkillTest {
 	public void setUp() throws Exception {
 		this.agentMock = mock(Agent.class);
 		when(this.agentMock.getID()).thenReturn(UUID.randomUUID());
-		ContextFactory factory = mock(ContextFactory.class);
+		ContextService contextService = mock(ContextService.class);
 		Context c = mock(Context.class);
 		OpenEventSpace space = mock(OpenEventSpace.class);
 		
 		when(c.getDefaultSpace()).thenReturn(space);
-		when(factory.create(any(UUID.class), any(UUID.class))).thenReturn(c);
+		when(contextService.createContext(any(UUID.class), any(UUID.class))).thenReturn(c);
 	}
 
 

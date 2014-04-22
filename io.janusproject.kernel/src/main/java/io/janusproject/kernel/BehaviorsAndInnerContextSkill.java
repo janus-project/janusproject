@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.services.ContextService;
 import io.janusproject.services.LogService;
 import io.sarl.core.Behaviors;
 import io.sarl.core.DefaultContextInteractions;
@@ -78,8 +79,8 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * @param factory - reference to the factory of context provided by the platform.
 	 */
 	@Inject
-	void createInternalContext(ContextFactory factory) {
-		this.innerContext = factory.create(getOwner().getID(), UUID.randomUUID());
+	void createInternalContext(ContextService service) {
+		this.innerContext = service.createContext(getOwner().getID(), UUID.randomUUID());
 		((EventSpaceImpl) this.innerContext.getDefaultSpace()).register(this.agentAsEventListener);
 	}
 
