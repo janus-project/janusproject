@@ -73,6 +73,7 @@ public interface ContextService extends Service {
 	 * 
 	 * @param contextID - the id of the context to create
 	 * @param defaultSpaceID - the id of the default space of the context to create
+	 * @return the context.
 	 */
 	public AgentContext createContext(UUID contextID, UUID defaultSpaceID);
 

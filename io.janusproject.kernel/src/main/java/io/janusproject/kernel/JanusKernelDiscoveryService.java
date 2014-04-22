@@ -141,6 +141,9 @@ class JanusKernelDiscoveryService extends AbstractService implements io.januspro
 			listeners = new KernelDiscoveryServiceListener[this.listeners.size()];
 			this.listeners.toArray(listeners);
 		}
+		JanusKernelDiscoveryService.this.logger.info(
+				JanusKernelDiscoveryService.class,
+				"KERNEL_DISCOVERY", uri); //$NON-NLS-1$
 		for(KernelDiscoveryServiceListener listener : listeners) {
 			listener.kernelDiscovered(uri);
 		}
@@ -156,6 +159,9 @@ class JanusKernelDiscoveryService extends AbstractService implements io.januspro
 			listeners = new KernelDiscoveryServiceListener[this.listeners.size()];
 			this.listeners.toArray(listeners);
 		}
+		JanusKernelDiscoveryService.this.logger.info(
+				JanusKernelDiscoveryService.class,
+				"KERNEL_DISCONNECTION", uri); //$NON-NLS-1$
 		for(KernelDiscoveryServiceListener listener : listeners) {
 			listener.kernelDisconnected(uri);
 		}
@@ -196,23 +202,15 @@ class JanusKernelDiscoveryService extends AbstractService implements io.januspro
 
 		/** {@inheritDoc}
 		 */
-		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemAdded(ItemEvent<URI> item) {
-			JanusKernelDiscoveryService.this.logger.debug(
-					JanusKernelDiscoveryService.class,
-					"KERNEL_DISCOVERY", item.getItem()); //$NON-NLS-1$
 			fireKernelDiscovered(item.getItem());
 		}
 
 		/** {@inheritDoc}
 		 */
-		@SuppressWarnings("synthetic-access")
 		@Override
 		public void itemRemoved(ItemEvent<URI> item) {
-			JanusKernelDiscoveryService.this.logger.debug(
-					JanusKernelDiscoveryService.class,
-					"KERNEL_DISCONNECTION", item.getItem()); //$NON-NLS-1$
 			fireKernelDisconnected(item.getItem());
 		}
 

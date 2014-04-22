@@ -324,6 +324,7 @@ class JanusSpawnService extends AbstractService implements SpawnService {
 					this.skillMethod = method;
 				}
 				ExternalContextAccess skill = (ExternalContextAccess)method.invoke(agent, ExternalContextAccess.class);
+				//FIXME: Synchronize on the backgorund mutex associated with the collection replied by skill.getAllContexts()
 				for (AgentContext context : skill.getAllContexts()) {
 					EventSpace defSpace = context.getDefaultSpace();
 					AgentKilled event = new AgentKilled();

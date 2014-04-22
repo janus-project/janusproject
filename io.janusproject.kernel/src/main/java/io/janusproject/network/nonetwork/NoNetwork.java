@@ -97,7 +97,7 @@ class NoNetwork extends AbstractService implements NetworkService {
 	/** {@inheritDoc}
 	 */
 	@Override
-	public void connectPeer(URI peerUri, SpaceID space,
+	public void connectToRemoteSpaces(URI peerUri, SpaceID space,
 			NetworkEventReceivingListener listener) throws Exception {
 		//
 	}
@@ -105,7 +105,7 @@ class NoNetwork extends AbstractService implements NetworkService {
 	/** {@inheritDoc}
 	 */
 	@Override
-	public void disconnectPeer(URI peer, SpaceID space) throws Exception {
+	public void disconnectFromRemoteSpace(URI peer, SpaceID space) throws Exception {
 		//
 	}
 

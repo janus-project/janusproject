@@ -20,6 +20,7 @@
 package io.janusproject.kernel;
 
 import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
+import io.janusproject.services.LogService;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
@@ -55,28 +56,38 @@ class Context implements AgentContext{
 	
 	/** Constructs a <code>Context</code>.
 	 * <p>
-	 * CAUTION: Do not miss to call {@link #createDefaultSpace()}.
+	 * CAUTION: Do not miss to call {@link #postConstruction()}.
 	 * 
 	 * @param injector - injector used to create the instances.
 	 * @param id - identifier of the context.
 	 * @param defaultSpaceID - identifier of the default space in the context.
+	 * @param logger - instance of the logging service.
 	 * @param hzInstance - object that is creating distributed structures.
 	 * @param startUpListener - repository listener which is added just after the creation of the repository, but before the creation of the default space.
 	 */
-	protected Context(Injector injector, UUID id, UUID defaultSpaceID, HazelcastInstance hzInstance, SpaceRepositoryListener startUpListener) {
+	protected Context(Injector injector, UUID id, UUID defaultSpaceID, LogService logger, HazelcastInstance hzInstance, SpaceRepositoryListener startUpListener) {
 		this.id = id;
 		this.defaultSpaceID = defaultSpaceID;
 		this.spaceRepository = new SpaceRepository(
 				id.toString()+"-spaces", //$NON-NLS-1$
 				hzInstance,
 				injector,
-				new SpaceListener(startUpListener));
+				new SpaceListener(logger, startUpListener));
+	}
+	
+	@Override
+	public String toString() {
+		return this.id.toString();
 	}
 	
 	/** Create the default space in this context.
+	 * 
+	 * @return the created space.
 	 */
-	void createDefaultSpace() {
+	EventSpace postConstruction() {
+		this.spaceRepository.postConstruction();
 		this.defaultSpace = createSpace(EventSpaceSpecification.class, this.defaultSpaceID);
+		return this.defaultSpace;
 	}
 	
 	/** Destroy any associated resources.
@@ -143,11 +154,16 @@ class Context implements AgentContext{
 	private class SpaceListener implements SpaceRepositoryListener {
 		
 		private final SpaceRepositoryListener relay;
+		private final LogService logger;
 		
 		/**
+		 * @param logger
 		 * @param relay
 		 */
-		public SpaceListener(SpaceRepositoryListener relay) {
+		public SpaceListener(LogService logger, SpaceRepositoryListener relay) {
+			assert(logger!=null);
+			assert(relay!=null);
+			this.logger = logger;
 			this.relay = relay;
 		}
 
@@ -155,6 +171,8 @@ class Context implements AgentContext{
 		 */
 		@Override
 		public void spaceCreated(Space space) {
+			this.logger.info(Context.class, "SPACE_CREATED", space.getID()); //$NON-NLS-1$
+			
 			// Notify the relays (other services)
 			this.relay.spaceCreated(space);
 			// Put an event in the default space
@@ -176,6 +194,8 @@ class Context implements AgentContext{
 		 */
 		@Override
 		public void spaceDestroyed(Space space) {
+			this.logger.info(Context.class, "SPACE_DESTROYED", space.getID()); //$NON-NLS-1$
+
 			// Notify the relays (other services)
 			this.relay.spaceDestroyed(space);
 			// Put an event in the default space

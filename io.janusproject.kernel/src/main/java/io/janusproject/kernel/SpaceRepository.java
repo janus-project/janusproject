@@ -90,6 +90,11 @@ class SpaceRepository {
 		Multimap<Class<? extends SpaceSpecification>, SpaceID> tmp = TreeMultimap.create(ClassComparator.SINGLETON, ObjectReferenceComparator.SINGLETON);
 		this.spacesBySpec = Multimaps.synchronizedMultimap(tmp);
 		this.spaceIDs = hzInstance.getSet(this.distributedSpaceSetName);
+	}
+	
+	/** Finalize the initialization: ensure that the events are fired outside the scope of the SpaceRepository constructor.
+	 */
+	void postConstruction() {
 		for (SpaceID id : this.spaceIDs) {
 			ensureSpaceDefinition(id);
 		}
@@ -103,6 +108,16 @@ class SpaceRepository {
 		//this.spaceIDs.destroy();
 	}
 	
+	private Space createSpaceInstance(Class<? extends SpaceSpecification> spec, SpaceID spaceID, boolean updateSpaceIDs, Object[] creationParams) {
+		Space space = this.injector.getInstance(spec).create(spaceID, creationParams);
+		SpaceID id = space.getID();
+		this.spaces.put(id, space);
+		this.spacesBySpec.put(id.getSpaceSpecification(), id);
+		if (updateSpaceIDs) this.spaceIDs.add(id);
+		fireSpaceAdded(space);
+		return space;
+	}
+
 	/** Add the existing, but not yet known, spaces into this repository. 
 	 * 
 	 * @param id - identifier of the space
@@ -110,11 +125,8 @@ class SpaceRepository {
 	protected synchronized void ensureSpaceDefinition(SpaceID id) {
 		assert(this.spaceIDs.contains(id));
 		if (!this.spaces.containsKey(id)) {
-			this.spacesBySpec.put(id.getSpaceSpecification(), id);
 			//FIXME manage the propagation of the creationParams inside the ID of the space
-			Space space = this.injector.getInstance(id.getSpaceSpecification()).create(id);
-			this.spaces.put(id, space);
-			fireSpaceAdded(space);
+			createSpaceInstance(id.getSpaceSpecification(), id, false, new Object[0]);
 		}
 	}
 
@@ -131,7 +143,7 @@ class SpaceRepository {
 			fireSpaceRemoved(space);
 		}
 	}
-
+	
 	/** Create a space.
 	 * 
 	 * @param spaceID - ID of the space.
@@ -146,12 +158,7 @@ class SpaceRepository {
 			Object... creationParams) {
 		Space space = this.spaces.get(spaceID);
 		if (space==null) {
-			space = this.injector.getInstance(spec).create(spaceID, creationParams);
-			SpaceID id = space.getID();
-			this.spaces.put(id, space);
-			this.spacesBySpec.put(id.getSpaceSpecification(), id);
-			this.spaceIDs.add(id);
-			fireSpaceAdded(space);
+			space = createSpaceInstance(spec, spaceID, true, creationParams);
 		}
 		return (S)space;
 	}
@@ -171,12 +178,7 @@ class SpaceRepository {
 		Collection<SpaceID> spaces = this.spacesBySpec.get(spec);
 		Space firstSpace;
 		if (spaces == null || spaces.isEmpty()) {
-			firstSpace = this.injector.getInstance(spec).create(spaceID, creationParams);
-			SpaceID id = firstSpace.getID();
-			this.spaces.put(id, firstSpace);
-			this.spacesBySpec.put(id.getSpaceSpecification(), id);
-			this.spaceIDs.add(id);
-			fireSpaceAdded(firstSpace);
+			firstSpace = createSpaceInstance(spec, spaceID, true, creationParams);
 		}
 		else {
 			firstSpace = this.spaces.get(spaces.iterator().next());

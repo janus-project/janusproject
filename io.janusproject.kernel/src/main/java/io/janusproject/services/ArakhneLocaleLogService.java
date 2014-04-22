@@ -62,13 +62,12 @@ import com.google.inject.Inject;
  */
 public class ArakhneLocaleLogService extends AbstractService implements LogService {
 
-	@Inject
 	private Logger logger;
 	
 	/**
 	 */
 	public ArakhneLocaleLogService() {
-		//
+		// 
 	}
 	
 	private static StackTraceElement getCaller() {
@@ -90,7 +89,7 @@ public class ArakhneLocaleLogService extends AbstractService implements LogServi
 	}
 	
 	private synchronized void log(Level level, boolean exception, String messageKey, Object... message) {
-		if (this.logger.isLoggable(level)) {
+		if (isRunning() && this.logger.isLoggable(level)) {
 			StackTraceElement elt = getCaller();
 			assert(elt!=null);
 			Class<?> callerType;
@@ -118,7 +117,7 @@ public class ArakhneLocaleLogService extends AbstractService implements LogServi
 	}
 	
 	private synchronized void log(Level level, boolean exception, Class<?> propertyType, String messageKey, Object... message) {
-		if (this.logger.isLoggable(level)) {
+		if (isRunning() && this.logger.isLoggable(level)) {
 			StackTraceElement elt = getCaller();
 			assert(elt!=null);
 			String text = Locale.getString(propertyType, messageKey, message);
@@ -143,7 +142,7 @@ public class ArakhneLocaleLogService extends AbstractService implements LogServi
 	 */
 	@Override
 	public synchronized void log(LogRecord record) {
-		this.logger.log(record);
+		if (isRunning()) this.logger.log(record);
 	}
 
 	/** {@inheritDoc}
@@ -215,9 +214,12 @@ public class ArakhneLocaleLogService extends AbstractService implements LogServi
 
 	/** {@inheritDoc}
 	 */
+	@Inject
 	@Override
 	public synchronized void setLogger(Logger logger) {
-		if (logger!=null) this.logger = logger;
+		if (logger!=null) {
+			this.logger = logger;
+		}
 	}
 
 	/** {@inheritDoc}

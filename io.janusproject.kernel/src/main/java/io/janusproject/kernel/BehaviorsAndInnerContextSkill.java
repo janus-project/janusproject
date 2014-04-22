@@ -76,7 +76,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 
 	/** Create the internal context.
 	 * 
-	 * @param factory - reference to the factory of context provided by the platform.
+	 * @param service - reference to the factory of context provided by the platform.
 	 */
 	@Inject
 	void createInternalContext(ContextService service) {

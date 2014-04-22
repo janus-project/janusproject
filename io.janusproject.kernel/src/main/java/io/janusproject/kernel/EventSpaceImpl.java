@@ -23,7 +23,6 @@ import io.janusproject.repository.UniqueAddressParticipantRepository;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
-import io.janusproject.services.NetworkService.NetworkEventReceivingListener;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -173,45 +172,12 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	public String toString() {
 		return getID().toString();
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
-	public NetworkEventReceivingListener getNetworkProxy() {
-		return new DistributedSpaceProxy();
-	}
-	
-	/** Implementation of a proxy class that permits to link the network
-	 * API and an EventSpaceImpl.
-	 * 
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	private class DistributedSpaceProxy implements NetworkEventReceivingListener {
-
-		/**
-		 */
-		public DistributedSpaceProxy() {
-			//
-		}
-
-		/** {@inheritDoc}
-		 */
-		@SuppressWarnings("synthetic-access")
-		@Override
-		public void eventReceived(SpaceID space, Scope<?> scope, Event event) {
-			EventSpaceImpl.this.doEmit(event, (Scope<Address>) scope);
-		}
-		
-		/** {@inheritDoc}
-		 */
-		@Override
-		public String toString() {
-			return EventSpaceImpl.this.toString();
-		}
-
+	public void eventReceived(SpaceID space, Scope<?> scope, Event event) {
+		EventSpaceImpl.this.doEmit(event, (Scope<Address>) scope);
 	}
 
 }

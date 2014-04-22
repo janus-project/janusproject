@@ -27,6 +27,7 @@ import io.janusproject.services.LogService;
 import io.janusproject.services.SpaceService;
 import io.janusproject.util.Collections3;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 
 import java.util.ArrayList;
@@ -110,7 +111,7 @@ class JanusContextService extends AbstractService implements ContextService {
 	 * @param hzInstance - Hazelcast instance.
 	 */
 	@Inject
-	private synchronized void initiliaze( 
+	private synchronized void initialize( 
 			@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID,
 			HazelcastInstance hzInstance) {
 		this.defaultSpaces = hzInstance.getMap(janusID.toString());
@@ -137,30 +138,26 @@ class JanusContextService extends AbstractService implements ContextService {
 	public synchronized boolean containsContext(UUID contextID) {
 		return this.contexts.containsKey(contextID);
 	}
-
-	/** {@inheritDoc}
-	 
-	@Override
-	public synchronized void addContext(AgentContext context) {
-		this.defaultSpaces.put(context.getID(), context.getDefaultSpace().getID());
-		this.contexts.put(context.getID(), context);
-		fireContextCreated(context);
-	}*/
-	
 	
 	/** {@inheritDoc}
 	 */
 	@Override
-	public synchronized Context createContext(UUID contextID, UUID defaultSpaceUUID) {
-		Context ctx = new Context(
-				this.injector,
-				contextID, defaultSpaceUUID,
-				this.hzInstance,
-				(SpaceRepositoryListener)this.spaceService);
-		this.contexts.put(contextID, ctx);
-		fireContextCreated(ctx);
-		ctx.createDefaultSpace();
-		return ctx;
+	public synchronized AgentContext createContext(UUID contextID, UUID defaultSpaceUUID) {
+		AgentContext context = this.contexts.get(contextID); 
+		if (context==null) {
+			Context ctx = new Context(
+					this.injector,
+					contextID, defaultSpaceUUID,
+					this.logger,
+					this.hzInstance,
+					(SpaceRepositoryListener)this.spaceService);
+			this.contexts.put(contextID, ctx);
+			fireContextCreated(ctx);
+			Space defaultSpace = ctx.postConstruction();
+			this.defaultSpaces.putIfAbsent(ctx.getID(), defaultSpace.getID());
+			return ctx;
+		}
+		return context;
 	}
 
 	/** {@inheritDoc}
@@ -256,6 +253,7 @@ class JanusContextService extends AbstractService implements ContextService {
 			listeners = new ContextServiceListener[this.listeners.size()];
 			this.listeners.toArray(listeners);
 		}
+		this.logger.info(JanusContextService.class, "CONTEXT_CREATED", context.getID()); //$NON-NLS-1$
 		for(ContextServiceListener listener : listeners) {
 			listener.contextCreated(context);
 		}
@@ -271,6 +269,7 @@ class JanusContextService extends AbstractService implements ContextService {
 			listeners = new ContextServiceListener[this.listeners.size()];
 			this.listeners.toArray(listeners);
 		}
+		this.logger.info(JanusContextService.class, "CONTEXT_DESTROYED", context.getID()); //$NON-NLS-1$
 		for(ContextServiceListener listener : listeners) {
 			listener.contextDestroyed(context);
 		}
@@ -282,9 +281,7 @@ class JanusContextService extends AbstractService implements ContextService {
 	 */
 	protected synchronized void ensureDefaultSpaceDefinition(SpaceID spaceID) {
 		UUID contextID = spaceID.getContextID();
-		if (!this.contexts.containsKey(contextID)) {
-			Context ctx = this.createContext(contextID, spaceID.getID());
-		}
+		createContext(contextID, spaceID.getID());
 	}
 
 	/** Update the internal data structure when a default

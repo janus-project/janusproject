@@ -39,7 +39,6 @@ import java.util.logging.Logger;
 import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.Service.State;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -230,18 +229,9 @@ public class Kernel {
 					}
 				}
 				
-				boolean allStopped;
-				do {
-					allStopped = true;
-					for(Service service : otherServices) {
-						if (service.state()!=State.TERMINATED) {
-							allStopped = false;
-							break; // the inner loop
-						}
-					}
-					Thread.yield();
+				for(Service service : otherServices) {
+					service.awaitTerminated();
 				}
-				while (!allStopped);
 				
 				for(Service service : executorServices) {
 					service.stopAsync();

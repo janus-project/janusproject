@@ -30,14 +30,6 @@ import io.sarl.lang.core.Space;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface DistributedSpace extends Space {
-
-	/** Replies the listener that may used by the network API
-	 * to notify this space that a message should be dispatch in
-	 * the local copy of the space.
-	 * 
-	 * @return the proxy
-	 */
-	public NetworkEventReceivingListener getNetworkProxy();
-	
+public interface DistributedSpace extends Space, NetworkEventReceivingListener {
+	//
 }

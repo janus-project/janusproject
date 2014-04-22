@@ -60,7 +60,7 @@ public interface NetworkService extends Service {
 	 * @param listener - listener on the receiving of the events.
 	 * @throws Exception
 	 */
-	public void connectPeer(URI peerUri, SpaceID space, NetworkEventReceivingListener listener) throws Exception;
+	public void connectToRemoteSpaces(URI peerUri, SpaceID space, NetworkEventReceivingListener listener) throws Exception;
 	
 	/** Disconnect this peer from the given peer for the given space.
 	 * 
@@ -68,7 +68,7 @@ public interface NetworkService extends Service {
 	 * @param space
 	 * @throws Exception
 	 */
-	public void disconnectPeer(URI peer, SpaceID space) throws Exception;
+	public void disconnectFromRemoteSpace(URI peer, SpaceID space) throws Exception;
 
 	/** Disconnect this peer from the given peer for all the spaces.
 	 * 

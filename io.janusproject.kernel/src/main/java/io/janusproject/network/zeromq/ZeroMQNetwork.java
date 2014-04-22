@@ -20,7 +20,6 @@
 package io.janusproject.network.zeromq;
 
 import io.janusproject.JanusConfig;
-import io.janusproject.kernel.DistributedSpace;
 import io.janusproject.network.event.EventDispatch;
 import io.janusproject.network.event.EventEnvelope;
 import io.janusproject.network.event.EventSerializer;
@@ -313,7 +312,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	 */
 	@SuppressWarnings("resource")
 	@Override
-	public synchronized void connectPeer(URI peerUri, SpaceID space,
+	public synchronized void connectToRemoteSpaces(URI peerUri, SpaceID space,
 			NetworkEventReceivingListener listener) throws Exception {
 		if (this.validatedURI==null) {
 			// Bufferizing the peerURI.
@@ -345,7 +344,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	 */
 	@SuppressWarnings("resource")
 	@Override
-	public synchronized void disconnectPeer(URI peer, SpaceID space) throws Exception {
+	public synchronized void disconnectFromRemoteSpace(URI peer, SpaceID space) throws Exception {
 		Socket s = this.subcribers.get(peer);
 		if (s!=null) {
 			this.logger.info("PEER_UNSUBSCRIPTION ", peer, space); //$NON-NLS-1$
@@ -486,7 +485,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 			this.spaceService.addSpaceServiceListener(this.serviceListener);
 		}
 		for(BufferedConnection t : connections) {
-			connectPeer(t.peerURI, t.spaceID, t.listener);
+			connectToRemoteSpaces(t.peerURI, t.spaceID, t.listener);
 		}
 	}
 
@@ -587,13 +586,15 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		public synchronized void spaceCreated(Space space) {
 			try {
 				URI localUri = ZeroMQNetwork.this.getURI();
-				for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
-					if (!peer.equals(localUri)) {
-						if (space instanceof DistributedSpace) {
-							connectPeer(peer, space.getID(), ((DistributedSpace)space).getNetworkProxy());
-						}
-						else {
-							ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "NOT_DISTRIBUTABLE_SPACE", space); //$NON-NLS-1$
+				synchronized(ZeroMQNetwork.this.kernelService.mutex()) {
+					for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
+						if (!peer.equals(localUri)) {
+							if (space instanceof NetworkEventReceivingListener) {
+								connectToRemoteSpaces(peer, space.getID(), (NetworkEventReceivingListener)space);
+							}
+							else {
+								ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "NOT_DISTRIBUTABLE_SPACE", space); //$NON-NLS-1$
+							}
 						}
 					}
 				}
@@ -610,9 +611,11 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		public synchronized void spaceDestroyed(Space space) {
 			try {
 				URI localUri = ZeroMQNetwork.this.getURI();
-				for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
-					if (!peer.equals(localUri)) {
-						disconnectPeer(peer, space.getID());
+				synchronized(ZeroMQNetwork.this.kernelService.mutex()) {
+					for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
+						if (!peer.equals(localUri)) {
+							disconnectFromRemoteSpace(peer, space.getID());
+						}
 					}
 				}
 			}
@@ -625,7 +628,7 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 		 */
 		@Override
 		public void kernelDiscovered(URI peerURI) {
-			//
+			System.err.println("KERNEL_DISCOVERED: "+peerURI);
 		}
 
 		/** {@inheritDoc}
