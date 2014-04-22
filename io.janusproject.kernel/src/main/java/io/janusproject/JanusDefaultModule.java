@@ -21,7 +21,7 @@ package io.janusproject;
 
 import io.janusproject.kernel.CoreModule;
 import io.janusproject.network.event.NetworkEventModule;
-import io.janusproject.network.nonetwork.NoNetworkModule;
+import io.janusproject.network.zeromq.ZeroMQNetworkModule;
 
 import com.google.inject.AbstractModule;
 
@@ -43,8 +43,8 @@ public class JanusDefaultModule extends AbstractModule {
 		install(new BootModule());
 		install(new CoreModule());
 		install(new NetworkEventModule());
-		//install(new ZeroMQNetworkModule());
-		install(new NoNetworkModule());
+		install(new ZeroMQNetworkModule());
+		//install(new NoNetworkModule());
 	}
 
 }

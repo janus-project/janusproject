@@ -57,7 +57,8 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 
 	/** Reference to the event bus.
 	 */
-	protected AsyncSyncEventBus eventBus;
+	private AsyncSyncEventBus eventBus;
+	
 	private AgentContext innerContext;
 
 	private AtomicBoolean running = new AtomicBoolean(false);
@@ -65,6 +66,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	private final AgentEventListener agentAsEventListener;
 
 	private LogService logger;
+	private ContextService contextService;
 
 	/**
 	 * @param agent
@@ -74,14 +76,12 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		this.agentAsEventListener = new AgentEventListener(this);
 	}
 
-	/** Create the internal context.
-	 * 
+	/**
 	 * @param service - reference to the factory of context provided by the platform.
 	 */
 	@Inject
-	private void createInternalContext(ContextService service) {
-		this.innerContext = service.createContext(getOwner().getID(), UUID.randomUUID());
-		((EventSpaceImpl) this.innerContext.getDefaultSpace()).register(this.agentAsEventListener);
+	private void setContextService(ContextService service) {
+		this.contextService = service;
 	}
 
 	/** Change the event bus inside the agent.
@@ -101,6 +101,13 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	@Inject
 	private void setLogService(LogService log) {
 		this.logger = log;
+	}
+	
+	private void ensureInnerContext() {
+		if (this.innerContext==null) {
+			this.innerContext = this.contextService.createContext(getOwner().getID(), UUID.randomUUID());
+			((EventSpaceImpl) this.innerContext.getDefaultSpace()).register(this.agentAsEventListener);
+		}
 	}
 
 	/** {@inheritDoc}
@@ -123,7 +130,8 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AgentContext getInnerContext() {
+	public synchronized AgentContext getInnerContext() {
+		ensureInnerContext();
 		return this.innerContext;
 	}
 
@@ -131,7 +139,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Behavior registerBehavior(Behavior attitude) {
+	public synchronized Behavior registerBehavior(Behavior attitude) {
 		this.eventBus.register(attitude);
 		return attitude;
 	}
@@ -140,7 +148,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Behavior unregisterBehavior(Behavior attitude) {
+	public synchronized Behavior unregisterBehavior(Behavior attitude) {
 		this.eventBus.unregister(attitude);
 		return attitude;
 	}
@@ -149,7 +157,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void wake(Event evt) {
+	public synchronized void wake(Event evt) {
 		// Use the inner space so all behaviors (even agents inside the holon
 		// running in distant kernels) are notified. The event will return into
 		// the agent via the inner default space add call internalReceiveEvent
@@ -183,7 +191,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * 
 	 * @param event
 	 */
-	void selfEvent(Event event) {
+	synchronized void selfEvent(Event event) {
 		EventSpace defSpace = getSkill(InnerContextAccess.class).getInnerContext().getDefaultSpace();
 		event.setSource(defSpace.getAddress(getOwner().getID()));				
 		if (event instanceof Initialize) {
@@ -231,11 +239,11 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 */
 	private static class AgentEventListener implements EventListener {
 
-		private Queue<Event> buffer = Queues.newConcurrentLinkedQueue();
+		private final Queue<Event> buffer = Queues.newConcurrentLinkedQueue();
 
-		private WeakReference<BehaviorsAndInnerContextSkill> skill;
+		private final WeakReference<BehaviorsAndInnerContextSkill> skill;
 
-		private WeakReference<UUID> aid;
+		private final WeakReference<UUID> aid;
 
 		@SuppressWarnings("synthetic-access")
 		public AgentEventListener(BehaviorsAndInnerContextSkill skill) {
@@ -251,22 +259,27 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void receiveEvent(Event event) {
-			if (this.skill.get().running.get() && !this.skill.get().stopping.get()) {
-
-				this.skill.get().internalReceiveEvent(event);
-			} else if (!this.skill.get().running.get() && this.skill.get().stopping.get()) {
-				// Dropping messages since agent is dying
-				this.skill.get().logger.warning(BehaviorsAndInnerContextSkill.class,
-								"EVENT_DROP_WARNING", event); //$NON-NLS-1$
-			} else {
-				this.buffer.add(event);
+			BehaviorsAndInnerContextSkill s = this.skill.get();
+			synchronized(s) {
+				if (s.running.get() && !s.stopping.get()) {
+					s.internalReceiveEvent(event);
+				} else if (!s.running.get() && s.stopping.get()) {
+					// Dropping messages since agent is dying
+					s.logger.warning(BehaviorsAndInnerContextSkill.class,
+									"EVENT_DROP_WARNING", event); //$NON-NLS-1$
+				} else {
+					this.buffer.add(event);
+				}
 			}
 		}
 
 		@SuppressWarnings("synthetic-access")
 		void agentInitialized() {
-			for (Event evt : this.buffer) {
-				this.skill.get().internalReceiveEvent(evt);
+			BehaviorsAndInnerContextSkill s = this.skill.get();
+			synchronized(s) {
+				for (Event evt : this.buffer) {
+					s.internalReceiveEvent(evt);
+				}
 			}
 		}
 
