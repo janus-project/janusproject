@@ -37,6 +37,12 @@ import com.google.common.util.concurrent.Service;
  */
 public interface ContextService extends Service {
 
+	/** Replies the mutex that is used to synchronized the access to the service.
+	 * 
+	 * @return the mutex
+	 */
+	public Object mutex();
+	
 	/**
 	 * Does this repository contain some context
 	 * 
@@ -100,6 +106,9 @@ public interface ContextService extends Service {
 
 	/**
 	 * Returns the set of all agent context IDs stored in this repository
+	 * <p>
+	 * The replies collection is synchronized and any iteration on it
+	 * must be synchronized on the mutex replies by {@link #mutex}.
 	 * 
 	 * @return the set of all agent context IDs stored in this repository
 	 */
@@ -107,6 +116,9 @@ public interface ContextService extends Service {
 
 	/**
 	 * Returns the {@link AgentContext} with the given ID
+	 * <p>
+	 * The replies collection is synchronized and any iteration on it
+	 * must be synchronized on the mutex replies by {@link #mutex}.
 	 * 
 	 * @param contextID
 	 * @return the {@link AgentContext} with the given ID
@@ -115,6 +127,10 @@ public interface ContextService extends Service {
 	
 	/**
 	 * Returns the collection of {@link AgentContext} with the given IDs
+	 * <p>
+	 * The replies collection is synchronized and any iteration on it
+	 * must be synchronized on the mutex replies by {@link #mutex}.
+	 * 
 	 * @param contextIDs
 	 * @return the collection of {@link AgentContext} with the given IDs
 	 */

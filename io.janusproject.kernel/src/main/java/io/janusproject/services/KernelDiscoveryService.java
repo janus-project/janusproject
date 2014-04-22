@@ -34,6 +34,12 @@ import com.google.common.util.concurrent.Service;
  */
 public interface KernelDiscoveryService extends Service {
 
+	/** Replies the mutex that is used to synchronized the access to the service.
+	 * 
+	 * @return the mutex
+	 */
+	public Object mutex();
+
 	/** Replies the URI of the current kernel.
 	 * 
 	 * @return the uri of the current kernel.
@@ -41,8 +47,12 @@ public interface KernelDiscoveryService extends Service {
 	public URI getCurrentKernel();
 	
 	/** Replies the URIs of the kernels, including the current kernels.
+	 * <p>
+	 * The replies collection is synchronized and any iteration on it
+	 * must be synchronized on the mutex replies by {@link #mutex}.
 	 * 
 	 * @return the uri of the kernels.
+	 * @see #mutex()
 	 */
 	public Collection<URI> getKernels();
 

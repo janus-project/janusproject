@@ -49,9 +49,13 @@ class Context implements AgentContext{
 
 	private final SpaceRepository spaceRepository;
 	
-	private final EventSpaceImpl defaultSpace;
+	private final UUID defaultSpaceID;
+	private EventSpaceImpl defaultSpace;
+	
 	
 	/** Constructs a <code>Context</code>.
+	 * <p>
+	 * CAUTION: Do not miss to call {@link #createDefaultSpace()}.
 	 * 
 	 * @param injector - injector used to create the instances.
 	 * @param id - identifier of the context.
@@ -61,12 +65,18 @@ class Context implements AgentContext{
 	 */
 	protected Context(Injector injector, UUID id, UUID defaultSpaceID, HazelcastInstance hzInstance, SpaceRepositoryListener startUpListener) {
 		this.id = id;
+		this.defaultSpaceID = defaultSpaceID;
 		this.spaceRepository = new SpaceRepository(
 				id.toString()+"-spaces", //$NON-NLS-1$
 				hzInstance,
 				injector,
 				new SpaceListener(startUpListener));
-		this.defaultSpace = createSpace(EventSpaceSpecification.class, defaultSpaceID);
+	}
+	
+	/** Create the default space in this context.
+	 */
+	void createDefaultSpace() {
+		this.defaultSpace = createSpace(EventSpaceSpecification.class, this.defaultSpaceID);
 	}
 	
 	/** Destroy any associated resources.

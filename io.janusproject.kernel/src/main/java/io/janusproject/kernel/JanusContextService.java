@@ -20,9 +20,12 @@
 package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
+import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
 import io.janusproject.services.ContextService;
 import io.janusproject.services.ContextServiceListener;
 import io.janusproject.services.LogService;
+import io.janusproject.services.SpaceService;
+import io.janusproject.util.Collections3;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.SpaceID;
 
@@ -38,6 +41,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.hazelcast.core.EntryEvent;
@@ -77,14 +81,26 @@ class JanusContextService extends AbstractService implements ContextService {
 	private LogService logger;
 	
 	@Inject
-	private ContextFactory contextFactory;
-
+	private Injector injector;
+	
+	@Inject
+	private HazelcastInstance hzInstance;
+	
+	@Inject
+	private SpaceService spaceService;
 	
 	/** Constructs <code>ContextRepository</code>.
 	 */
 	public JanusContextService() {
 		this.contexts = new TreeMap<>();
 		this.listeners = new ArrayList<>();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Object mutex() {
+		return this;
 	}
 
 	/**
@@ -167,14 +183,14 @@ class JanusContextService extends AbstractService implements ContextService {
 	 */
 	@Override
 	public synchronized Collection<AgentContext> getContexts() {
-		return Collections.synchronizedCollection(this.contexts.values());
+		return Collections.unmodifiableCollection(Collections3.synchronizedCollection(this.contexts.values(), mutex()));
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
 	public synchronized Set<UUID> getContextIDs() {
-		return Collections.synchronizedSet(this.contexts.keySet());
+		return Collections.unmodifiableSet(Collections3.synchronizedSet(this.contexts.keySet(), mutex()));
 	}
 
 	/** {@inheritDoc}
@@ -251,9 +267,14 @@ class JanusContextService extends AbstractService implements ContextService {
 	protected synchronized void ensureDefaultSpaceDefinition(SpaceID spaceID) {
 		UUID contextID = spaceID.getContextID();
 		if (!this.contexts.containsKey(contextID)) {
-			Context context = this.contextFactory.create(contextID, spaceID.getID());
-			this.contexts.put(contextID, context);
-			fireContextCreated(context);
+			Context ctx = new Context(
+					this.injector,
+					contextID, spaceID.getID(),
+					this.hzInstance,
+					(SpaceRepositoryListener)this.spaceService);
+			this.contexts.put(contextID, ctx);
+			fireContextCreated(ctx);
+			ctx.createDefaultSpace();
 		}
 	}
 
@@ -334,10 +355,9 @@ class JanusContextService extends AbstractService implements ContextService {
 
 		/** {@inheritDoc}
 		 */
-		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryEvicted(EntryEvent<UUID, SpaceID> event) {
-			JanusContextService.this.logger.warning(JanusContextService.class, "UNSUPPORTED_HAZELCAST_EVENT", event); //$NON-NLS-1$
+			removeDefaultSpaceDefinition(event.getValue());
 		}
 		
 	}

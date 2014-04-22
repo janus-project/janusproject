@@ -100,7 +100,7 @@ class SpaceRepository {
 	 */
 	public synchronized void destroy() {
 		// Unconnect the space collection from remote clusters
-		this.spaceIDs.destroy();
+		//this.spaceIDs.destroy();
 	}
 	
 	/** Add the existing, but not yet known, spaces into this repository. 

@@ -25,6 +25,7 @@ import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelDiscoveryServiceListener;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
+import io.janusproject.util.Collections3;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -92,6 +93,13 @@ class JanusKernelDiscoveryService extends AbstractService implements io.januspro
 	/** {@inheritDoc}
 	 */
 	@Override
+	public Object mutex() {
+		return this;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
 	public synchronized URI getCurrentKernel() {
 		return this.currentURI;
 	}
@@ -100,7 +108,7 @@ class JanusKernelDiscoveryService extends AbstractService implements io.januspro
 	 */
 	@Override
 	public synchronized Collection<URI> getKernels() {
-		return Collections.unmodifiableSet(this.kernels);
+		return Collections.unmodifiableSet(Collections3.synchronizedSet(this.kernels,mutex()));
 	}
 
 	/** {@inheritDoc}
