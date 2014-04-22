@@ -19,6 +19,9 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.services.AbstractPrioritizedService;
+import io.janusproject.services.ServicePriorities;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -26,7 +29,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -40,13 +42,20 @@ import com.google.inject.Singleton;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class JanusExecutorService extends AbstractService implements io.janusproject.services.ExecutorService {
+class JanusExecutorService extends AbstractPrioritizedService implements io.janusproject.services.ExecutorService {
 
 	@Inject
 	private ScheduledExecutorService schedules;
 	
 	@Inject
 	private ExecutorService exec;
+	
+	/**
+	 */
+	public JanusExecutorService() {
+		setStartPriority(ServicePriorities.START_EXECUTOR_SERVICE);
+		setStopPriority(ServicePriorities.STOP_EXECUTOR_SERVICE);
+	}
 	
 	/** {@inheritDoc}
 	 */

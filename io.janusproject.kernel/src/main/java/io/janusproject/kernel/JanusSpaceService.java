@@ -20,6 +20,8 @@
 package io.janusproject.kernel;
 
 import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
+import io.janusproject.services.AbstractPrioritizedService;
+import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpaceService;
 import io.janusproject.services.SpaceServiceListener;
 import io.sarl.lang.core.Space;
@@ -27,7 +29,6 @@ import io.sarl.lang.core.Space;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Singleton;
 
 /** Platform service that supports the space listening.
@@ -38,9 +39,16 @@ import com.google.inject.Singleton;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class JanusSpaceService extends AbstractService implements SpaceService, SpaceRepositoryListener {
+class JanusSpaceService extends AbstractPrioritizedService implements SpaceService, SpaceRepositoryListener {
 
 	private final List<SpaceServiceListener> listeners = new ArrayList<>();
+	
+	/**
+	 */
+	public JanusSpaceService() {
+		setStartPriority(ServicePriorities.START_SPACE_SERVICE);
+		setStopPriority(ServicePriorities.STOP_SPACE_SERVICE);
+	}
 	
 	/** {@inheritDoc}
 	 */

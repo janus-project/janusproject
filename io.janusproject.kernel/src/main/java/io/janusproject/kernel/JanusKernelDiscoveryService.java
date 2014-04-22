@@ -21,10 +21,12 @@
 package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
+import io.janusproject.services.AbstractPrioritizedService;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelDiscoveryServiceListener;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
+import io.janusproject.services.ServicePriorities;
 import io.janusproject.util.Collections3;
 
 import java.net.URI;
@@ -34,7 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -51,7 +52,7 @@ import com.hazelcast.core.ItemListener;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class JanusKernelDiscoveryService extends AbstractService implements io.janusproject.services.KernelDiscoveryService {
+class JanusKernelDiscoveryService extends AbstractPrioritizedService implements io.janusproject.services.KernelDiscoveryService {
 
 	private final UUID janusID;
 	private URI currentURI;
@@ -75,9 +76,12 @@ class JanusKernelDiscoveryService extends AbstractService implements io.januspro
 	 * @param janusID - injected identifier of the Janus context.
 	 */
 	@Inject
-	JanusKernelDiscoveryService(@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID) {
+	public JanusKernelDiscoveryService(@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID) {
 		this.janusID = janusID;
+		setStartPriority(ServicePriorities.START_KERNEL_DISCOVERY_SERVICE);
+		setStopPriority(ServicePriorities.STOP_KERNEL_DISCOVERY_SERVICE);
 	}
+	
 
 	@Inject
 	private void setHazelcastInstance(HazelcastInstance instance) {
@@ -141,9 +145,9 @@ class JanusKernelDiscoveryService extends AbstractService implements io.januspro
 			listeners = new KernelDiscoveryServiceListener[this.listeners.size()];
 			this.listeners.toArray(listeners);
 		}
-		JanusKernelDiscoveryService.this.logger.info(
+		this.logger.info(
 				JanusKernelDiscoveryService.class,
-				"KERNEL_DISCOVERY", uri); //$NON-NLS-1$
+				"KERNEL_DISCOVERY", uri, getCurrentKernel()); //$NON-NLS-1$
 		for(KernelDiscoveryServiceListener listener : listeners) {
 			listener.kernelDiscovered(uri);
 		}
@@ -159,9 +163,9 @@ class JanusKernelDiscoveryService extends AbstractService implements io.januspro
 			listeners = new KernelDiscoveryServiceListener[this.listeners.size()];
 			this.listeners.toArray(listeners);
 		}
-		JanusKernelDiscoveryService.this.logger.info(
+		this.logger.info(
 				JanusKernelDiscoveryService.class,
-				"KERNEL_DISCONNECTION", uri); //$NON-NLS-1$
+				"KERNEL_DISCONNECTION", uri, getCurrentKernel()); //$NON-NLS-1$
 		for(KernelDiscoveryServiceListener listener : listeners) {
 			listener.kernelDisconnected(uri);
 		}

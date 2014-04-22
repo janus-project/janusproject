@@ -59,7 +59,7 @@ public class AESEventEncrypter extends AbstractEventEncrypter {
 	 * @throws Exception
 	 */
 	@Inject
-	void setKey(@Named(NetworkConfig.AES_KEY) String key) throws Exception {
+	private void setKey(@Named(NetworkConfig.AES_KEY) String key) throws Exception {
 		// FIXME: Unify the string charset to convert from to byte array
 		byte[] raw = key.getBytes(NetworkConfig.BYTE_ARRAY_STRING_CHARSET);
 		int keySize = raw.length;

@@ -17,33 +17,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.network.nonetwork;
-
-import io.janusproject.services.NetworkService;
+package io.janusproject.services;
 
 import com.google.common.util.concurrent.Service;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.Multibinder;
 
 /**
- * Module that provides the network layer based on the NoNetwork library.
+ * This service has a priority to be launch/stop.
  * 
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class NoNetworkModule extends AbstractModule {
+public interface PrioritizedService extends Service {
 
-	@Override
-	protected void configure() {
-		bind(NetworkService.class).to(NoNetwork.class).in(Singleton.class);
+	/** Replies the launching priority.
+	 * <p>
+	 * Lower is the priority, sooner the service is started.
+	 * 
+	 * @return the launching priority. 
+	 */
+	public int getStartPriority();
 
-		// Complete the binding for: Set<Service>
-		// (This set is given to the service manager to launch the services).
-		Multibinder<Service> serviceSetBinder = Multibinder.newSetBinder(binder(), Service.class);
-		serviceSetBinder.addBinding().to(NoNetwork.class);
-	}
+	/** Replies the stopping priority.
+	 * <p>
+	 * Lower is the priority, sooner the service is stopped.
+	 * 
+	 * @return the stopping priority. 
+	 */
+	public int getStopPriority();
+
+	/** Change the launching priority.
+	 * <p>
+	 * Lower is the priority, sooner the service is started.
+	 * 
+	 * @param priority 
+	 */
+	public void setStartPriority(int priority);
+
+	/** Change the stopping priority.
+	 * <p>
+	 * Lower is the priority, sooner the service is stopped.
+	 * 
+	 * @param priority 
+	 */
+	public void setStopPriority(int priority);
 
 }

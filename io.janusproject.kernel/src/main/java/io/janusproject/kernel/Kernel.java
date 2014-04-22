@@ -19,16 +19,13 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelAgentSpawnListener;
+import io.janusproject.services.Services;
 import io.janusproject.services.SpawnService;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.EventSpace;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -38,7 +35,6 @@ import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
-import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -84,7 +80,7 @@ public class Kernel {
 
 	@Inject
 	private HazelcastInstance hazelcastInstance;
-	
+
 	private final SpawnService spawnService;
 
 	/**
@@ -98,23 +94,15 @@ public class Kernel {
 	private Kernel(ServiceManager serviceManager, SpawnService spawnService, UncaughtExceptionHandler exceptionHandler) {
 		// Ensure that all the threads has a default hander.
 		Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
-		
+
 		this.spawnService = spawnService;
 		this.spawnService.addKernelAgentSpawnListener(new KernelStoppingListener());
 
 		this.serviceManager = serviceManager;
-		// Start the services now to ensure that the default context and space
+
+		// Start the services NOW to ensure that the default context and space
 		// of the Janus agent are catched by the modules;
-		this.serviceManager.startAsync().awaitHealthy();
-	}
-	
-	/**
-	 * Replies the default space of the Janus agent.
-	 * 
-	 * @return the default space in the Janus agent.
-	 */
-	EventSpace getDefaultSpace() {
-		return this.janusContext.getDefaultSpace();
+		Services.startServices(this.serviceManager);
 	}
 
 	/**
@@ -131,13 +119,12 @@ public class Kernel {
 	/**
 	 * Stop the Janus kernel.
 	 */
-	private void stop() {
-		
+	private void stopKernel() {
 		// CAUTION: EXECUTE THE STOP FUNCTION IN A THREAD THAT
 		// IS INDEPENDENT TO THE ONES FROM THE EXECUTORS
 		// CREATED BY THE EXECUTORSERVICE.
 		// THIS AVOID THE STOP FUNCTION TO BE INTERRUPTED
-		// BECAUSE THE EXECUTORSERVICE IS SHUTDOWN.
+		// BECAUSE THE EXECUTORSERVICE WAS SHUTTED DOWN.
 		StopTheKernel t = new StopTheKernel();
 		t.start();
 	}
@@ -148,7 +135,7 @@ public class Kernel {
 	 * @param janusContext - the new janus kernel. It must be never <code>null</code>.
 	 */
 	@Inject
-	void setJanusContext(@io.janusproject.kernel.annotations.Kernel AgentContext janusContext) {
+	private void setJanusContext(@io.janusproject.kernel.annotations.Kernel AgentContext janusContext) {
 		assert (janusContext != null);
 		this.janusContext = janusContext;
 	}
@@ -160,7 +147,7 @@ public class Kernel {
 	 * @mavenartifactid $ArtifactId$
 	 */
 	private class KernelStoppingListener implements KernelAgentSpawnListener {
-		
+
 		/**
 		 */
 		public KernelStoppingListener() {
@@ -179,10 +166,10 @@ public class Kernel {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void kernelAgentDestroy() {
-			stop();
+			stopKernel();
 		}
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -190,13 +177,13 @@ public class Kernel {
 	 * @mavenartifactid $ArtifactId$
 	 */
 	private class StopTheKernel implements ThreadFactory, Runnable, UncaughtExceptionHandler {
-		
+
 		/**
 		 */
 		public StopTheKernel() {
 			//
 		}
-		
+
 		/** Start the thread.
 		 */
 		public void start() {
@@ -210,38 +197,9 @@ public class Kernel {
 		@Override
 		public void run() {
 			Logger rawLogger = Logger.getAnonymousLogger();
-			
 			rawLogger.info(Locale.getString(Kernel.class, "STOP_KERNEL_SERVICES")); //$NON-NLS-1$
-
-			// Loop by hand on the services to ensure that the "execution" service
-			// is stopped after all the others.
-			{
-				List<Service> executorServices = new ArrayList<>();
-				List<Service> otherServices = new ArrayList<>();
-		
-				for(Service service : Kernel.this.serviceManager.servicesByState().values()) {
-					if (service instanceof ExecutorService) {
-						executorServices.add(service);
-					}
-					else {
-						service.stopAsync();
-						otherServices.add(service);
-					}
-				}
-				
-				for(Service service : otherServices) {
-					service.awaitTerminated();
-				}
-				
-				for(Service service : executorServices) {
-					service.stopAsync();
-				}			
-					
-				Kernel.this.serviceManager.awaitStopped();
-			}
-			
+			Services.stopServices(Kernel.this.serviceManager);
 			Kernel.this.hazelcastInstance.shutdown();
-
 			rawLogger.info(Locale.getString(Kernel.class, "KERNEL_SERVICES_STOPPED")); //$NON-NLS-1$
 		}
 

@@ -101,7 +101,7 @@ class KernelModule extends AbstractModule {
 		serviceSetBinder.addBinding().to(SpaceService.class);
 		serviceSetBinder.addBinding().to(SpawnService.class);
 	}
-
+	
 	@Provides
 	@io.janusproject.kernel.annotations.Kernel
 	@Singleton

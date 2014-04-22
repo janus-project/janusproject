@@ -23,10 +23,12 @@ import io.janusproject.JanusConfig;
 import io.janusproject.network.event.EventDispatch;
 import io.janusproject.network.event.EventEnvelope;
 import io.janusproject.network.event.EventSerializer;
+import io.janusproject.services.AbstractPrioritizedExecutionThreadService;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelDiscoveryService;
 import io.janusproject.services.KernelDiscoveryServiceListener;
 import io.janusproject.services.LogService;
+import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.LogService.LogParam;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.NetworkServiceListener;
@@ -56,7 +58,6 @@ import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
 
 import com.google.common.primitives.Ints;
-import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -72,7 +73,7 @@ import com.google.inject.name.Named;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkService {
+class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements NetworkService {
 
 	private final Listener serviceListener = new Listener();
 
@@ -113,9 +114,11 @@ class ZeroMQNetwork extends AbstractExecutionThreadService implements NetworkSer
 	 * @param uri - injected URI of the PUB socket.
 	 */
 	@Inject
-	ZeroMQNetwork(@Named(JanusConfig.PUB_URI) URI uri) {
+	public ZeroMQNetwork(@Named(JanusConfig.PUB_URI) URI uri) {
 		assert (uri != null) : "Injected URI must be not null nor empty"; //$NON-NLS-1$
 		this.uriCandidate = uri;
+		setStartPriority(ServicePriorities.START_NETWORK_SERVICE);
+		setStopPriority(ServicePriorities.STOP_NETWORK_SERVICE);
 	}
 
 	/** {@inheritDoc}

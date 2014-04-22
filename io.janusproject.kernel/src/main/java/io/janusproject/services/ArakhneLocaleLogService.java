@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
-import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 
 /** This class enables to log information by ensuring
@@ -60,14 +59,15 @@ import com.google.inject.Inject;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class ArakhneLocaleLogService extends AbstractService implements LogService {
+public class ArakhneLocaleLogService extends AbstractPrioritizedService implements LogService {
 
 	private Logger logger;
 	
 	/**
 	 */
 	public ArakhneLocaleLogService() {
-		// 
+		setStartPriority(ServicePriorities.START_LOGGING_SERVICE);
+		setStopPriority(ServicePriorities.STOP_LOGGING_SERVICE);
 	}
 	
 	private static StackTraceElement getCaller() {

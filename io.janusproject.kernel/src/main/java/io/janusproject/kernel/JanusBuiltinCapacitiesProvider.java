@@ -119,7 +119,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	 * @param spawnService
 	 */
 	@Inject
-	void setSpawnService(SpawnService spawnService) {
+	private void setSpawnService(SpawnService spawnService) {
 		this.spawnService = spawnService;
 	}
 	
@@ -128,7 +128,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	 * @param contextRepository
 	 */
 	@Inject
-	void setContextRepository(JanusContextService contextRepository) {
+	private void setContextRepository(JanusContextService contextRepository) {
 		this.contextRepository = contextRepository;
 	}
 
@@ -137,7 +137,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	 * @param injector
 	 */
 	@Inject
-	void setInjector(Injector injector) {
+	private void setInjector(Injector injector) {
 		this.injector = injector;
 	}
 

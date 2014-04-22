@@ -79,7 +79,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * @param service - reference to the factory of context provided by the platform.
 	 */
 	@Inject
-	void createInternalContext(ContextService service) {
+	private void createInternalContext(ContextService service) {
 		this.innerContext = service.createContext(getOwner().getID(), UUID.randomUUID());
 		((EventSpaceImpl) this.innerContext.getDefaultSpace()).register(this.agentAsEventListener);
 	}
@@ -89,7 +89,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * @param bus
 	 */
 	@Inject
-	void setInternalEventBus(AsyncSyncEventBus bus) {
+	private void setInternalEventBus(AsyncSyncEventBus bus) {
 		this.eventBus = bus;
 		this.eventBus.register(this.getOwner());
 	}
@@ -99,7 +99,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * @param log
 	 */
 	@Inject
-	void setLogService(LogService log) {
+	private void setLogService(LogService log) {
 		this.logger = log;
 	}
 

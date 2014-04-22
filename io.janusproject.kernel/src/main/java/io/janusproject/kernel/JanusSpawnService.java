@@ -19,7 +19,9 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.services.AbstractPrioritizedService;
 import io.janusproject.services.KernelAgentSpawnListener;
+import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.SpawnServiceListener;
 import io.sarl.core.AgentKilled;
@@ -41,7 +43,6 @@ import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -54,7 +55,7 @@ import com.google.inject.Singleton;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class JanusSpawnService extends AbstractService implements SpawnService {
+class JanusSpawnService extends AbstractPrioritizedService implements SpawnService {
 
 	private final SpawnServiceListener loopListener = new SpawningEventEmitter();
 	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
@@ -64,6 +65,13 @@ class JanusSpawnService extends AbstractService implements SpawnService {
 	@Inject
 	private Injector injector;
 
+	/**
+	 */
+	public JanusSpawnService() {
+		setStartPriority(ServicePriorities.START_SPAWN_SERVICE);
+		setStartPriority(ServicePriorities.STOP_SPAWN_SERVICE);
+	}
+	
 	/** {@inheritDoc}
 	 */
 	@Override

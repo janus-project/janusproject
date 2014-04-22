@@ -17,33 +17,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.network.nonetwork;
+package io.janusproject.services;
 
-import io.janusproject.services.NetworkService;
+import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
-import com.google.common.util.concurrent.Service;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.Multibinder;
-
-/**
- * Module that provides the network layer based on the NoNetwork library.
+/** This service has a priority to be launch/stop.
  * 
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class NoNetworkModule extends AbstractModule {
+public abstract class AbstractPrioritizedExecutionThreadService extends AbstractExecutionThreadService implements PrioritizedService {
 
-	@Override
-	protected void configure() {
-		bind(NetworkService.class).to(NoNetwork.class).in(Singleton.class);
-
-		// Complete the binding for: Set<Service>
-		// (This set is given to the service manager to launch the services).
-		Multibinder<Service> serviceSetBinder = Multibinder.newSetBinder(binder(), Service.class);
-		serviceSetBinder.addBinding().to(NoNetwork.class);
+	private int startPriority = 0;
+	private int stopPriority = 0;
+	
+	/**
+	 */
+	public AbstractPrioritizedExecutionThreadService() {
+		// 
 	}
 
+	/** {@inheritDoc}
+	 */
+	@Override
+	public final int getStartPriority() {
+		return this.startPriority;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public final int getStopPriority() {
+		return this.stopPriority;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public final void setStartPriority(int priority) {
+		this.startPriority = priority;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public final void setStopPriority(int priority) {
+		this.stopPriority = priority;
+	}
+	
 }

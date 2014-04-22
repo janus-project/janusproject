@@ -76,7 +76,7 @@ public class EventSpaceImpl extends SpaceBase implements OpenEventSpace {
 	 * @param injector
 	 */
 	@Inject
-	void setInjector(Injector injector) {
+	private void setInjector(Injector injector) {
 		this.participants = new UniqueAddressParticipantRepository<>(getID().getID().toString() + "-participants"); //$NON-NLS-1$
 		injector.injectMembers(this.participants);
 	}

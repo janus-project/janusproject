@@ -21,9 +21,11 @@ package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
+import io.janusproject.services.AbstractPrioritizedService;
 import io.janusproject.services.ContextService;
 import io.janusproject.services.ContextServiceListener;
 import io.janusproject.services.LogService;
+import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpaceService;
 import io.janusproject.util.Collections3;
 import io.sarl.lang.core.AgentContext;
@@ -40,7 +42,6 @@ import java.util.UUID;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -60,7 +61,7 @@ import com.hazelcast.core.IMap;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class JanusContextService extends AbstractService implements ContextService {
+class JanusContextService extends AbstractPrioritizedService implements ContextService {
 
 	private final Collection<ContextServiceListener> listeners;
 
@@ -95,6 +96,8 @@ class JanusContextService extends AbstractService implements ContextService {
 	public JanusContextService() {
 		this.contexts = new TreeMap<>();
 		this.listeners = new ArrayList<>();
+		setStartPriority(ServicePriorities.START_CONTEXT_SERVICE);
+		setStopPriority(ServicePriorities.STOP_CONTEXT_SERVICE);
 	}
 
 	/** {@inheritDoc}
