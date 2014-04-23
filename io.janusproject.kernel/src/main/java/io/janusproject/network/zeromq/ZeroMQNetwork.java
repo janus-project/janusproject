@@ -329,7 +329,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 				this.logger.info("PEER_CONNECTION", peerUri, space); //$NON-NLS-1$
 				// Socket subscriber = this.context.socket(ZMQ.SUB);
 				subscriber = this.context.createSocket(ZMQ.SUB);
-
+				assert(subscriber!=null);
 				this.subcribers.put(peerUri, subscriber);
 				subscriber.connect(peerUri.toString());
 				this.poller.register(subscriber, Poller.POLLIN);

@@ -21,7 +21,9 @@ package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.JanusDefaultModule;
+import io.janusproject.kernel.executor.JanusScheduledThreadPoolExecutor;
 import io.janusproject.kernel.executor.JanusThreadFactory;
+import io.janusproject.kernel.executor.JanusThreadPoolExecutor;
 import io.janusproject.kernel.executor.JanusUncaughtExceptionHandler;
 import io.janusproject.services.ArakhneLocaleLogService;
 import io.janusproject.services.ContextService;
@@ -39,7 +41,6 @@ import io.sarl.util.OpenEventSpaceSpecification;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
@@ -78,6 +79,8 @@ class KernelModule extends AbstractModule {
 
 		bind(UncaughtExceptionHandler.class).to(JanusUncaughtExceptionHandler.class).in(Singleton.class);
 		bind(ThreadFactory.class).to(JanusThreadFactory.class).in(Singleton.class);
+		bind(java.util.concurrent.ExecutorService.class).to(JanusThreadPoolExecutor.class).in(Singleton.class);
+		bind(ScheduledExecutorService.class).to(JanusScheduledThreadPoolExecutor.class).in(Singleton.class);
 		
 		bind(BuiltinCapacitiesProvider.class).to(JanusBuiltinCapacitiesProvider.class).in(Singleton.class);
 		bind(EventSpaceSpecification.class).to(EventSpaceSpecificationImpl.class).in(Singleton.class);
@@ -115,18 +118,6 @@ class KernelModule extends AbstractModule {
 		// to be able to inject the SubscriberFindingStrategy
 		injector.injectMembers(aeb);
 		return aeb;
-	}
-
-	@Provides
-	private static java.util.concurrent.ExecutorService createThreadPoolService(ThreadFactory factory) {
-		return Executors.newCachedThreadPool(factory);
-	}
-
-	@Provides
-	private static ScheduledExecutorService createScheduledExecutorService(ThreadFactory factory) {
-		return Executors.newScheduledThreadPool(
-				JanusConfig.VALUE_NUMBER_OF_THREADS_IN_EXECUTOR,
-				factory);
 	}
 
 	@Provides
