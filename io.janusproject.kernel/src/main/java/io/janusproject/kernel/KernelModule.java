@@ -25,14 +25,13 @@ import io.janusproject.kernel.executor.JanusScheduledThreadPoolExecutor;
 import io.janusproject.kernel.executor.JanusThreadFactory;
 import io.janusproject.kernel.executor.JanusThreadPoolExecutor;
 import io.janusproject.kernel.executor.JanusUncaughtExceptionHandler;
-import io.janusproject.services.ArakhneLocaleLogService;
-import io.janusproject.services.ContextService;
+import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelDiscoveryService;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
-import io.janusproject.services.SpaceService;
 import io.janusproject.services.SpawnService;
+import io.janusproject.services.impl.ArakhneLocaleLogService;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.EventSpaceSpecification;
@@ -88,10 +87,9 @@ class KernelModule extends AbstractModule {
 
 		// Bind the services, indiviually
 		bind(LogService.class).to(ArakhneLocaleLogService.class).in(Singleton.class);
-		bind(ContextService.class).to(JanusContextService.class).in(Singleton.class);
+		bind(ContextSpaceService.class).to(JanusContextSpaceService.class).in(Singleton.class);
 		bind(ExecutorService.class).to(JanusExecutorService.class).in(Singleton.class);
 		bind(KernelDiscoveryService.class).to(JanusKernelDiscoveryService.class).in(Singleton.class);
-		bind(SpaceService.class).to(JanusSpaceService.class).in(Singleton.class);
 		bind(SpawnService.class).to(JanusSpawnService.class).in(Singleton.class);
 		
 		// Create a binder for: Set<Service>
@@ -99,16 +97,15 @@ class KernelModule extends AbstractModule {
 		Multibinder<Service> serviceSetBinder = Multibinder.newSetBinder(binder(), Service.class);
 		serviceSetBinder.addBinding().to(LogService.class);
 		serviceSetBinder.addBinding().to(ExecutorService.class);
-		serviceSetBinder.addBinding().to(ContextService.class);
+		serviceSetBinder.addBinding().to(ContextSpaceService.class);
 		serviceSetBinder.addBinding().to(KernelDiscoveryService.class);
-		serviceSetBinder.addBinding().to(SpaceService.class);
 		serviceSetBinder.addBinding().to(SpawnService.class);
 	}
 	
 	@Provides
 	@io.janusproject.kernel.annotations.Kernel
 	@Singleton
-	private static AgentContext getKernel(ContextService contextService, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusContextID, @Named(JanusConfig.DEFAULT_SPACE_ID) UUID defaultJanusSpaceId) {
+	private static AgentContext getKernel(ContextSpaceService contextService, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusContextID, @Named(JanusConfig.DEFAULT_SPACE_ID) UUID defaultJanusSpaceId) {
 		return contextService.createContext(janusContextID, defaultJanusSpaceId);
 	}
 

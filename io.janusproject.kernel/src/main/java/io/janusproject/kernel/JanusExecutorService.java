@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.AbstractPrioritizedService;
 import io.janusproject.services.ServicePriorities;
+import io.janusproject.services.impl.AbstractPrioritizedService;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;

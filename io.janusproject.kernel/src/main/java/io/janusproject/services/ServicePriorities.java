@@ -46,41 +46,33 @@ public interface ServicePriorities {
 	 */
 	public static final int START_NETWORK_SERVICE = 3;
 
-	/** Start priority for the space service.
-	 */
-	public static final int START_SPACE_SERVICE = 4;
-
 	/** Start priority for the context service.
 	 */
-	public static final int START_CONTEXT_SERVICE = 5;
+	public static final int START_CONTEXTSPACE_SERVICE = 4;
 
 	/** Start priority for the agent spawning service.
 	 */
-	public static final int START_SPAWN_SERVICE = 6;
+	public static final int START_SPAWN_SERVICE = 5;
 
 	/** Start priority for the executor service.
 	 */
-	public static final int STOP_EXECUTOR_SERVICE = 6;
+	public static final int STOP_EXECUTOR_SERVICE = 5;
 
 	/** Start priority for the logging service.
 	 */
-	public static final int STOP_LOGGING_SERVICE = 5;
+	public static final int STOP_LOGGING_SERVICE = 4;
 
 	/** Start priority for the kernel discovery service.
 	 */
-	public static final int STOP_KERNEL_DISCOVERY_SERVICE = 4;
+	public static final int STOP_KERNEL_DISCOVERY_SERVICE = 3;
 
 	/** Start priority for the network service.
 	 */
-	public static final int STOP_NETWORK_SERVICE = 3;
-
-	/** Start priority for the space service.
-	 */
-	public static final int STOP_SPACE_SERVICE = 2;
+	public static final int STOP_NETWORK_SERVICE = 2;
 
 	/** Start priority for the context service.
 	 */
-	public static final int STOP_CONTEXT_SERVICE = 1;
+	public static final int STOP_CONTEXTSPACE_SERVICE = 1;
 
 	/** Start priority for the agent spawning service.
 	 */

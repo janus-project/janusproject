@@ -51,13 +51,13 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 	private Set<UUID> contexts = Sets.newConcurrentHashSet();
 
-	private final JanusContextService contextRepository;
+	private final JanusContextSpaceService contextRepository;
 
 	/**
 	 * @param agent - owner of the skill.
 	 * @param contextRepository - repository of the contexts.
 	 */
-	public ExternalContextAccessSkill(Agent agent, JanusContextService contextRepository) {
+	public ExternalContextAccessSkill(Agent agent, JanusContextSpaceService contextRepository) {
 		super(agent);
 		this.contextRepository = contextRepository;
 	}

@@ -21,19 +21,18 @@
 package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
-import io.janusproject.services.AbstractPrioritizedService;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelDiscoveryServiceListener;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.ServicePriorities;
+import io.janusproject.services.impl.AbstractPrioritizedService;
 import io.janusproject.util.Collections3;
+import io.janusproject.util.ListenerCollection;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.inject.Inject;
@@ -69,7 +68,7 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	@Inject
 	private ExecutorService executorService;
 
-	private final List<KernelDiscoveryServiceListener> listeners = new ArrayList<>();
+	private final ListenerCollection<KernelDiscoveryServiceListener> listeners = new ListenerCollection<>();
 
 	/** Constructs a <code>KernelRepositoryService</code>.
 	 * 
@@ -118,21 +117,15 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	/** {@inheritDoc}
 	 */
 	@Override
-	public void addKernelDiscoveryServiceListener(
-			KernelDiscoveryServiceListener listener) {
-		synchronized(this.listeners) {
-			this.listeners.add(listener);
-		}
+	public void addKernelDiscoveryServiceListener(KernelDiscoveryServiceListener listener) {
+		this.listeners.add(KernelDiscoveryServiceListener.class, listener);
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
-	public void removeKernelDiscoveryServiceListener(
-			KernelDiscoveryServiceListener listener) {
-		synchronized(this.listeners) {
-			this.listeners.remove(listener);
-		}
+	public void removeKernelDiscoveryServiceListener(KernelDiscoveryServiceListener listener) {
+		this.listeners.remove(KernelDiscoveryServiceListener.class, listener);
 	}
 
 	/** Notifies the listeners about the discovering of a kernel.
@@ -140,15 +133,10 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	 * @param uri
 	 */
 	protected void fireKernelDiscovered(URI uri) {
-		KernelDiscoveryServiceListener[] listeners;
-		synchronized(this.listeners) {
-			listeners = new KernelDiscoveryServiceListener[this.listeners.size()];
-			this.listeners.toArray(listeners);
-		}
 		this.logger.info(
 				JanusKernelDiscoveryService.class,
 				"KERNEL_DISCOVERY", uri, getCurrentKernel()); //$NON-NLS-1$
-		for(KernelDiscoveryServiceListener listener : listeners) {
+		for(KernelDiscoveryServiceListener listener : this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
 			listener.kernelDiscovered(uri);
 		}
 	}
@@ -158,15 +146,10 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	 * @param uri
 	 */
 	protected void fireKernelDisconnected(URI uri) {
-		KernelDiscoveryServiceListener[] listeners;
-		synchronized(this.listeners) {
-			listeners = new KernelDiscoveryServiceListener[this.listeners.size()];
-			this.listeners.toArray(listeners);
-		}
 		this.logger.info(
 				JanusKernelDiscoveryService.class,
 				"KERNEL_DISCONNECTION", uri, getCurrentKernel()); //$NON-NLS-1$
-		for(KernelDiscoveryServiceListener listener : listeners) {
+		for(KernelDiscoveryServiceListener listener : this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
 			listener.kernelDisconnected(uri);
 		}
 	}

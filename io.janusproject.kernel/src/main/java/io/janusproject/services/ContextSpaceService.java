@@ -28,7 +28,8 @@ import java.util.UUID;
 import com.google.common.util.concurrent.Service;
 
 /**
- * This service enables to store the contexts in the janus platform.
+ * This service enables to store the contexts and to
+ * manage the spaces in the janus platform.
  * 
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -36,7 +37,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface ContextService extends Service {
+public interface ContextSpaceService extends Service {
 
 	/**
 	 * Replies the mutex that is used to synchronized the access to the service.
@@ -94,11 +95,6 @@ public interface ContextService extends Service {
 	public void removeContext(UUID contextID);
 
 	/**
-	 * Clear the context of this repository
-	 */
-	public void removeAllContexts();
-
-	/**
 	 * Returns the collection of all agent's contexts stored in this repository
 	 * 
 	 * @return the collection of all agent's contexts stored in this repository
@@ -135,17 +131,29 @@ public interface ContextService extends Service {
 	public Collection<AgentContext> getContexts(Collection<UUID> contextIDs);
 
 	/**
-	 * Add a listener on the context service events.
+	 * Add a listener on the context repository events.
 	 * 
 	 * @param listener
 	 */
-	public void addContextServiceListener(ContextServiceListener listener);
+	public void addContextRepositoryListener(ContextRepositoryListener listener);
 
 	/**
-	 * Remove a listener on the context service events.
+	 * Remove a listener on the context repository events.
 	 * 
 	 * @param listener
 	 */
-	public void removeContextServiceListener(ContextServiceListener listener);
+	public void removeContextRepositoryListener(ContextRepositoryListener listener);
+
+	/** Add a listener on the space repository events.
+	 * 
+	 * @param listener
+	 */
+	public void addSpaceRepositoryListener(SpaceRepositoryListener listener);
+
+	/** Remove a listener on the space repository events.
+	 * 
+	 * @param listener
+	 */
+	public void removeSpaceRepositoryListener(SpaceRepositoryListener listener);
 
 }

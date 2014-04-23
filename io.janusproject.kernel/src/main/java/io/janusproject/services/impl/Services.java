@@ -17,7 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
+package io.janusproject.services.impl;
+
+import io.janusproject.services.PrioritizedService;
 
 import java.util.ArrayList;
 import java.util.Comparator;

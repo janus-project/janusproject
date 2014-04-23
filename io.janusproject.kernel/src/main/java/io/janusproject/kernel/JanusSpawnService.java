@@ -19,11 +19,12 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.AbstractPrioritizedService;
 import io.janusproject.services.KernelAgentSpawnListener;
 import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.SpawnServiceListener;
+import io.janusproject.services.impl.AbstractPrioritizedService;
+import io.janusproject.util.ListenerCollection;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ExternalContextAccess;
@@ -32,9 +33,7 @@ import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -57,9 +56,9 @@ import com.google.inject.Singleton;
 @Singleton
 class JanusSpawnService extends AbstractPrioritizedService implements SpawnService {
 
+	private final ListenerCollection<?> listeners = new ListenerCollection<>();
 	private final SpawnServiceListener loopListener = new SpawningEventEmitter();
 	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
-	private final List<KernelAgentSpawnListener> kernelAgentListeners = new ArrayList<>();
 	private final Map<UUID, Agent> agents = new TreeMap<>();
 
 	@Inject
@@ -111,29 +110,20 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	 */
 	@Override
 	public void addKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
-		synchronized(this.kernelAgentListeners) {
-			this.kernelAgentListeners.add(listener);
-		}
+		this.listeners.add(KernelAgentSpawnListener.class, listener);
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
 	public void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
-		synchronized(this.kernelAgentListeners) {
-			this.kernelAgentListeners.remove(listener);
-		}
+		this.listeners.remove(KernelAgentSpawnListener.class, listener);
 	}
 
 	/** Notifies the listeners about the kernel agent creation.
 	 */
 	protected void fireKernelAgentSpawn() {
-		KernelAgentSpawnListener[] listeners;
-		synchronized (this.kernelAgentListeners) {
-			listeners = new KernelAgentSpawnListener[this.kernelAgentListeners.size()];
-			this.kernelAgentListeners.toArray(listeners);
-		}
-		for (KernelAgentSpawnListener l : listeners) {
+		for (KernelAgentSpawnListener l : this.listeners.getListeners(KernelAgentSpawnListener.class)) {
 			l.kernelAgentSpawn();
 		}
 	}
@@ -141,12 +131,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	/** Notifies the listeners about the kernel agent destruction.
 	 */
 	protected void fireKernelAgentDestroy() {
-		KernelAgentSpawnListener[] listeners;
-		synchronized (this.kernelAgentListeners) {
-			listeners = new KernelAgentSpawnListener[this.kernelAgentListeners.size()];
-			this.kernelAgentListeners.toArray(listeners);
-		}
-		for (KernelAgentSpawnListener l : listeners) {
+		for (KernelAgentSpawnListener l : this.listeners.getListeners(KernelAgentSpawnListener.class)) {
 			l.kernelAgentDestroy();
 		}
 	}

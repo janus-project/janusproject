@@ -20,8 +20,8 @@
 package io.janusproject.kernel;
 
 import io.janusproject.services.KernelAgentSpawnListener;
-import io.janusproject.services.Services;
 import io.janusproject.services.SpawnService;
+import io.janusproject.services.impl.Services;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 

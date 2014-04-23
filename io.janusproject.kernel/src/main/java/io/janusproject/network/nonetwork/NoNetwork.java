@@ -20,11 +20,11 @@
 package io.janusproject.network.nonetwork;
 
 import io.janusproject.network.NetworkUtil;
-import io.janusproject.services.AbstractPrioritizedService;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.NetworkServiceListener;
 import io.janusproject.services.ServicePriorities;
+import io.janusproject.services.impl.AbstractPrioritizedService;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;

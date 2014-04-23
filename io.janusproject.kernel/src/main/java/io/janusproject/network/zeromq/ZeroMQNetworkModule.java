@@ -21,11 +21,11 @@ package io.janusproject.network.zeromq;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.network.event.EventSerializer;
+import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelDiscoveryService;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
-import io.janusproject.services.SpaceService;
 
 import java.net.URI;
 
@@ -53,7 +53,7 @@ public class ZeroMQNetworkModule extends AbstractModule {
 
 		requireBinding(LogService.class);
 		requireBinding(KernelDiscoveryService.class);
-		requireBinding(SpaceService.class);
+		requireBinding(ContextSpaceService.class);
 		requireBinding(ExecutorService.class);
 		requireBinding(EventSerializer.class);
 

@@ -23,14 +23,14 @@ import io.sarl.lang.core.Space;
 
 import java.util.EventListener;
 
-/** Listener on events related to the space service.
+/** Listener on events related to the spaces.
  *  
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface SpaceServiceListener extends EventListener {
+public interface SpaceRepositoryListener extends EventListener {
 
 	/** Invoked when the space is added.
 	 * 

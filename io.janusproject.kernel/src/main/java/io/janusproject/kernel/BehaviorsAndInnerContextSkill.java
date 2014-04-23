@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.ContextService;
+import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.LogService;
 import io.sarl.core.Behaviors;
 import io.sarl.core.DefaultContextInteractions;
@@ -66,7 +66,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	private final AgentEventListener agentAsEventListener;
 
 	private LogService logger;
-	private ContextService contextService;
+	private ContextSpaceService contextService;
 
 	/**
 	 * @param agent
@@ -80,7 +80,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 * @param service - reference to the factory of context provided by the platform.
 	 */
 	@Inject
-	private void setContextService(ContextService service) {
+	private void setContextService(ContextSpaceService service) {
 		this.contextService = service;
 	}
 

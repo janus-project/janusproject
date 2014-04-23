@@ -17,9 +17,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
+package io.janusproject.services.impl;
 
-import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import io.janusproject.services.PrioritizedService;
+
+import com.google.common.util.concurrent.AbstractService;
 
 /** This service has a priority to be launch/stop.
  * 
@@ -28,14 +30,14 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class AbstractPrioritizedExecutionThreadService extends AbstractExecutionThreadService implements PrioritizedService {
+public abstract class AbstractPrioritizedService extends AbstractService implements PrioritizedService {
 
 	private int startPriority = 0;
 	private int stopPriority = 0;
 	
 	/**
 	 */
-	public AbstractPrioritizedExecutionThreadService() {
+	public AbstractPrioritizedService() {
 		// 
 	}
 

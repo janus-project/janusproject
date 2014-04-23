@@ -17,7 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
+package io.janusproject.services.impl;
+
+import io.janusproject.services.LogService;
+import io.janusproject.services.ServicePriorities;
 
 import java.util.logging.Filter;
 import java.util.logging.Level;

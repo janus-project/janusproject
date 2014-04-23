@@ -20,19 +20,18 @@
 package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
-import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
-import io.janusproject.services.AbstractPrioritizedService;
-import io.janusproject.services.ContextService;
-import io.janusproject.services.ContextServiceListener;
+import io.janusproject.services.ContextRepositoryListener;
+import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.LogService;
 import io.janusproject.services.ServicePriorities;
-import io.janusproject.services.SpaceService;
+import io.janusproject.services.SpaceRepositoryListener;
+import io.janusproject.services.impl.AbstractPrioritizedService;
 import io.janusproject.util.Collections3;
+import io.janusproject.util.ListenerCollection;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -52,7 +51,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 
 /**
- * A repository of Agent's Context.
+ * A repository of Agent's context and spaces.
  * 
  * @author $Author: ngaud$
  * @author $Author: srodriguez$
@@ -61,9 +60,9 @@ import com.hazelcast.core.IMap;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class JanusContextService extends AbstractPrioritizedService implements ContextService {
+class JanusContextSpaceService extends AbstractPrioritizedService implements ContextSpaceService {
 
-	private final Collection<ContextServiceListener> listeners;
+	private final ListenerCollection<?> listeners = new ListenerCollection<>();
 
 	/**
 	 * Map linking a context id to its associated default space id.
@@ -75,7 +74,7 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 	 * Map linking a context id to its related Context object This is local
 	 * non-distributed map
 	 */
-	private Map<UUID,AgentContext> contexts;
+	private Map<UUID,AgentContext> contexts = new TreeMap<>();
 	
 	private String hazelcastListener = null;
 	
@@ -88,16 +87,11 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 	@Inject
 	private HazelcastInstance hzInstance;
 	
-	@Inject
-	private SpaceService spaceService;
-	
 	/** Constructs <code>ContextRepository</code>.
 	 */
-	public JanusContextService() {
-		this.contexts = new TreeMap<>();
-		this.listeners = new ArrayList<>();
-		setStartPriority(ServicePriorities.START_CONTEXT_SERVICE);
-		setStopPriority(ServicePriorities.STOP_CONTEXT_SERVICE);
+	public JanusContextSpaceService() {
+		setStartPriority(ServicePriorities.START_CONTEXTSPACE_SERVICE);
+		setStopPriority(ServicePriorities.STOP_CONTEXTSPACE_SERVICE);
 	}
 
 	/** {@inheritDoc}
@@ -153,7 +147,7 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 					contextID, defaultSpaceUUID,
 					this.logger,
 					this.hzInstance,
-					(SpaceRepositoryListener)this.spaceService);
+					new SpaceListener());
 			this.contexts.put(contextID, ctx);
 			fireContextCreated(ctx);
 			Space defaultSpace = ctx.postConstruction();
@@ -177,19 +171,6 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 		this.defaultSpaces.remove(contextID);
 		AgentContext context = this.contexts.remove(contextID);
 		if (context!=null) {
-			((Context)context).destroy();
-			fireContextDestroyed(context);
-		}
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public synchronized void removeAllContexts() {
-		Map<UUID,AgentContext> old = this.contexts;
-		this.contexts = new TreeMap<>();
-		this.defaultSpaces.clear();
-		for(AgentContext context : old.values()) {
 			((Context)context).destroy();
 			fireContextDestroyed(context);
 		}
@@ -231,19 +212,15 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 	/** {@inheritDoc}
 	 */
 	@Override
-	public void addContextServiceListener(ContextServiceListener listener) {
-		synchronized(this.listeners) {
-			this.listeners.add(listener);
-		}
+	public void addContextRepositoryListener(ContextRepositoryListener listener) {
+		this.listeners.add(ContextRepositoryListener.class, listener);
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
-	public void removeContextServiceListener(ContextServiceListener listener) {
-		synchronized(this.listeners) {
-			this.listeners.remove(listener);
-		}
+	public void removeContextRepositoryListener(ContextRepositoryListener listener) {
+		this.listeners.remove(ContextRepositoryListener.class, listener);
 	}
 
 	/** Notifies the listeners about a context creation.
@@ -251,13 +228,9 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 	 * @param context
 	 */
 	protected void fireContextCreated(AgentContext context) {
-		ContextServiceListener[] listeners;
-		synchronized(this.listeners) {
-			listeners = new ContextServiceListener[this.listeners.size()];
-			this.listeners.toArray(listeners);
-		}
-		this.logger.info(JanusContextService.class, "CONTEXT_CREATED", context.getID()); //$NON-NLS-1$
-		for(ContextServiceListener listener : listeners) {
+		ContextRepositoryListener[] listeners = this.listeners.getListeners(ContextRepositoryListener.class);
+		this.logger.info(JanusContextSpaceService.class, "CONTEXT_CREATED", context.getID()); //$NON-NLS-1$
+		for(ContextRepositoryListener listener : listeners) {
 			listener.contextCreated(context);
 		}
 	}
@@ -267,14 +240,44 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 	 * @param context
 	 */
 	protected void fireContextDestroyed(AgentContext context) {
-		ContextServiceListener[] listeners;
-		synchronized(this.listeners) {
-			listeners = new ContextServiceListener[this.listeners.size()];
-			this.listeners.toArray(listeners);
-		}
-		this.logger.info(JanusContextService.class, "CONTEXT_DESTROYED", context.getID()); //$NON-NLS-1$
-		for(ContextServiceListener listener : listeners) {
+		ContextRepositoryListener[] listeners = this.listeners.getListeners(ContextRepositoryListener.class);
+		this.logger.info(JanusContextSpaceService.class, "CONTEXT_DESTROYED", context.getID()); //$NON-NLS-1$
+		for(ContextRepositoryListener listener : listeners) {
 			listener.contextDestroyed(context);
+		}
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void addSpaceRepositoryListener(SpaceRepositoryListener listener) {
+		this.listeners.add(SpaceRepositoryListener.class, listener);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void removeSpaceRepositoryListener(SpaceRepositoryListener listener) {
+		this.listeners.remove(SpaceRepositoryListener.class, listener);
+	}
+	
+	/** Notifies the listeners on the space creation.
+	 * 
+	 * @param space
+	 */
+	protected void fireSpaceCreated(Space space) {
+		for(SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
+			listener.spaceCreated(space);
+		}
+	}
+
+	/** Notifies the listeners on the space destruction.
+	 * 
+	 * @param space
+	 */
+	protected void fireSpaceDestroyed(Space space) {
+		for(SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
+			listener.spaceDestroyed(space);
 		}
 	}
 	
@@ -359,7 +362,7 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryUpdated(EntryEvent<UUID, SpaceID> event) {
-			JanusContextService.this.logger.warning(JanusContextService.class, "UNSUPPORTED_HAZELCAST_EVENT", event); //$NON-NLS-1$
+			JanusContextSpaceService.this.logger.warning(JanusContextSpaceService.class, "UNSUPPORTED_HAZELCAST_EVENT", event); //$NON-NLS-1$
 		}
 
 		/** {@inheritDoc}
@@ -367,6 +370,36 @@ class JanusContextService extends AbstractPrioritizedService implements ContextS
 		@Override
 		public void entryEvicted(EntryEvent<UUID, SpaceID> event) {
 			removeDefaultSpaceDefinition(event.getValue());
+		}
+		
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class SpaceListener implements SpaceRepository.SpaceRepositoryListener {
+
+		/**
+		 */
+		public SpaceListener() {
+			//
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void spaceCreated(Space space) {
+			if (isRunning()) fireSpaceCreated(space);
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void spaceDestroyed(Space space) {
+			if (isRunning()) fireSpaceDestroyed(space);
 		}
 		
 	}

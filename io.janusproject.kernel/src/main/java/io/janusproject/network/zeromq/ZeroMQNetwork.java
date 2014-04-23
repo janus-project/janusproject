@@ -23,17 +23,17 @@ import io.janusproject.JanusConfig;
 import io.janusproject.network.event.EventDispatch;
 import io.janusproject.network.event.EventEnvelope;
 import io.janusproject.network.event.EventSerializer;
-import io.janusproject.services.AbstractPrioritizedExecutionThreadService;
+import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelDiscoveryService;
 import io.janusproject.services.KernelDiscoveryServiceListener;
 import io.janusproject.services.LogService;
-import io.janusproject.services.LogService.LogParam;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.NetworkServiceListener;
 import io.janusproject.services.ServicePriorities;
-import io.janusproject.services.SpaceService;
-import io.janusproject.services.SpaceServiceListener;
+import io.janusproject.services.SpaceRepositoryListener;
+import io.janusproject.services.LogService.LogParam;
+import io.janusproject.services.impl.AbstractPrioritizedExecutionThreadService;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Space;
@@ -84,7 +84,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	private KernelDiscoveryService kernelService;
 
 	@Inject
-	private SpaceService spaceService;
+	private ContextSpaceService spaceService;
 
 	@Inject
 	private ExecutorService executorService;
@@ -491,7 +491,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 			this.poller = new Poller(0);
 
 			this.kernelService.addKernelDiscoveryServiceListener(this.serviceListener);
-			this.spaceService.addSpaceServiceListener(this.serviceListener);
+			this.spaceService.addSpaceRepositoryListener(this.serviceListener);
 		}
 		for(BufferedConnection t : connections.values()) {
 			connectToRemoteSpaces(t.peerURI, t.spaceID, t.listener);
@@ -504,7 +504,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	@Override
 	protected synchronized void shutDown() throws Exception {
 		this.kernelService.removeKernelDiscoveryServiceListener(this.serviceListener);
-		this.spaceService.removeSpaceServiceListener(this.serviceListener);
+		this.spaceService.removeSpaceRepositoryListener(this.serviceListener);
 
 		// TODO this.poller.stop();
 		// stopPoller();
@@ -607,7 +607,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class Listener implements SpaceServiceListener, KernelDiscoveryServiceListener {
+	private class Listener implements SpaceRepositoryListener, KernelDiscoveryServiceListener {
 
 		/**
 		 */

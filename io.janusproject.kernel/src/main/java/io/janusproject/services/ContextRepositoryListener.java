@@ -23,14 +23,14 @@ import io.sarl.lang.core.AgentContext;
 
 import java.util.EventListener;
 
-/** Listener on events related to the context service.
+/** Listener on events related to the contexts.
  *  
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface ContextServiceListener extends EventListener {
+public interface ContextRepositoryListener extends EventListener {
 
 	/** Invoked when the context is added.
 	 * 
