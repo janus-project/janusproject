@@ -118,6 +118,28 @@ class SchedulesSkill extends Skill implements Schedules {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public final boolean cancel(AgentTask task) {
+		return cancel(task, true);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean cancel(AgentTask task, boolean mayInterruptIfRunning) {
+		if (task!=null) {
+			ScheduledFuture<?> future = this.futures.get(task.getName());
+			if (future!=null) {
+				return future.cancel(mayInterruptIfRunning);
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public AgentTask every(long period, Procedure1<? super Agent> procedure) {
 		return every(this.task("task-" + UUID.randomUUID()), period, procedure); //$NON-NLS-1$
 	}
