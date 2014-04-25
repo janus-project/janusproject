@@ -392,14 +392,14 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 		 */
 		@Override
 		public void spaceCreated(Space space) {
-			if (isRunning()) fireSpaceCreated(space);
+			fireSpaceCreated(space);
 		}
 
 		/** {@inheritDoc}
 		 */
 		@Override
 		public void spaceDestroyed(Space space) {
-			if (isRunning()) fireSpaceDestroyed(space);
+			fireSpaceDestroyed(space);
 		}
 		
 	}
