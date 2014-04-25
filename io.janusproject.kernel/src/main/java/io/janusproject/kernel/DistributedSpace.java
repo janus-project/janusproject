@@ -19,30 +19,17 @@
  */
 package io.janusproject.kernel;
 
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
+import io.janusproject.services.NetworkService.NetworkEventReceivingListener;
+import io.sarl.lang.core.Space;
 
-/** This class defines a space that is distributed over a network.
+/**
+ * Represents an space in which the messages may be distributed other the network.
  * 
- * @author $Author: srodriguez$
- * @version $FullVersion$
+ * @author $Author: sgalland$
+ * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface DistributedSpace {
-	
-	/** Replies the identifier of the space.
-	 * 
-	 * @return the identifier of the space.
-	 */
-	public SpaceID getID();
-	
-	/** Invoked when a data is received from a distant peer.
-	 * 
-	 * @param scope - the scope of the received data.
-	 * @param envelope - the envelope with the data inside.
-	 */
-	public void recv(Scope<?> scope, Event envelope);
-	
+public interface DistributedSpace extends Space, NetworkEventReceivingListener {
+	//
 }

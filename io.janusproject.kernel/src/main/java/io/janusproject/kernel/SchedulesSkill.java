@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.services.ExecutorService;
 import io.sarl.core.AgentTask;
 import io.sarl.core.Schedules;
 import io.sarl.lang.core.Agent;
@@ -28,7 +29,6 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -49,10 +49,10 @@ import com.google.inject.Inject;
 class SchedulesSkill extends Skill implements Schedules {
 
 	@Inject
-	private ScheduledExecutorService executor;
+	private ExecutorService executorService;
 
 	private final Map<String, AgentTask> tasks = new ConcurrentHashMap<>();
-	private final Map<String, ScheduledFuture<AgentRunnableTask>> futures = new ConcurrentHashMap<>();
+	private final Map<String, ScheduledFuture<?>> futures = new ConcurrentHashMap<>();
 
 	/**
 	 * @param agent
@@ -61,6 +61,8 @@ class SchedulesSkill extends Skill implements Schedules {
 		super(agent);
 	}
 
+	/** {@inheritDoc}
+	 */
 	@Override
 	protected void install() {
 		super.install();
@@ -68,7 +70,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	
 	@Override
 	protected void uninstall() {
-		for (ScheduledFuture<AgentRunnableTask> future : this.futures.values()) {
+		for (ScheduledFuture<?> future : this.futures.values()) {
 			if(!future.isDone() && !future.isCancelled()){				
 				future.cancel(true);
 			}
@@ -84,8 +86,8 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Override
 	public AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
 		task.setProcedure((Procedure1<Agent>) procedure);
-		ScheduledFuture<AgentRunnableTask> sf = 
-				(ScheduledFuture<AgentRunnableTask>) this.executor.schedule(
+		ScheduledFuture<?> sf = 
+				this.executorService.schedule(
 				new AgentRunnableTask(task, getOwner()), delay, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
 		return task;
@@ -126,7 +128,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Override
 	public AgentTask every(AgentTask task, long period, Procedure1<? super Agent> procedure) {
 		task.setProcedure((Procedure1<Agent>) procedure);
-		ScheduledFuture<AgentRunnableTask> sf = (ScheduledFuture<AgentRunnableTask>) this.executor.scheduleAtFixedRate(
+		ScheduledFuture<?> sf = this.executorService.scheduleAtFixedRate(
 				new AgentRunnableTask(task, getOwner()), 0, period, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
 		return task;
@@ -151,14 +153,12 @@ class SchedulesSkill extends Skill implements Schedules {
 
 		@Override
 		public void run() {
-
 			if (this.agentTaskRef.get() == null) {
-				System.out.println(Locale.getString("NULL_AGENT_TASK")); //$NON-NLS-1$
-			} else {
-				AgentTask task = this.agentTaskRef.get();
-				if (task.getGuard().apply(this.agentRef.get())) {
-					task.getProcedure().apply(this.agentRef.get());
-				}
+				throw new RuntimeException(Locale.getString(SchedulesSkill.class, "NULL_AGENT_TASK")); //$NON-NLS-1$
+			}
+			AgentTask task = this.agentTaskRef.get();
+			if (task.getGuard().apply(this.agentRef.get())) {
+				task.getProcedure().apply(this.agentRef.get());
 			}
 
 		}

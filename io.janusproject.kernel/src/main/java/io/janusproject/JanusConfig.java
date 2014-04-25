@@ -30,6 +30,10 @@ package io.janusproject;
  */
 public class JanusConfig {
 	
+	/** Name of the property that contains the boolean value for offline/online.
+	 */
+	public static final String OFFLINE = "janus.network.offline"; //$NON-NLS-1$
+
 	/** Name of the property that contains the identifier of the Janus context.
 	 * @see #VALUE_DEFAULT_CONTEXT_ID
 	 */
@@ -81,5 +85,62 @@ public class JanusConfig {
 	 * @see #BOOT_DEFAULT_CONTEXT_ID
 	 */
 	public static final boolean VALUE_BOOT_DEFAULT_CONTEXT_ID = false;
+
+	/** Indicates the maximal number of threads in a thread pool.
+	 */
+	public static final int VALUE_NUMBER_OF_THREADS_IN_EXECUTOR = 20;
 	
+
+	/** Replies the value of the system property.
+	 * 
+	 * @param name - name of the property.
+	 * @return the value, or <code>null</code> if no property found.
+	 */
+	public static String getSystemProperty(String name) {
+		return getSystemProperty(name, null);
+	}
+
+	/** Replies the value of the system property.
+	 * 
+	 * @param name - name of the property.
+	 * @param defaultValue - value to reply if the these is no property found
+	 * @return the value, or <var>defaultValue</var>.
+	 */
+	public static String getSystemProperty(String name, String defaultValue) {
+		String value;
+		value = System.getProperty(name, null);
+		if (value!=null) return value;
+		value = System.getenv(name);
+		if (value!=null) return value;
+		return defaultValue;
+	}
+	
+	/** Replies the value of the boolean system property.
+	 * 
+	 * @param name - name of the property.
+	 * @return the value, or <code>false</code> if no property found.
+	 */
+	public static boolean getSystemPropertyAsBoolean(String name) {
+		return getSystemPropertyAsBoolean(name, false);
+	}
+
+	/** Replies the value of the boolean system property.
+	 * 
+	 * @param name - name of the property.
+	 * @param defaultValue - value to reply if the these is no property found
+	 * @return the value, or <var>defaultValue</var>.
+	 */
+	public static boolean getSystemPropertyAsBoolean(String name, boolean defaultValue) {
+		String value = getSystemProperty(name, null);
+		if (value!=null) {
+			try {
+				return Boolean.parseBoolean(value);
+			}
+			catch(Throwable _) {
+				//
+			}
+		}
+		return defaultValue;
+	}
+
 }

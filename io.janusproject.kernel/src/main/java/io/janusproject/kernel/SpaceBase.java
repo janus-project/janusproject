@@ -29,7 +29,7 @@ import io.sarl.lang.core.SpaceID;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class SpaceBase implements io.sarl.lang.core.Space{
+public abstract class SpaceBase implements DistributedSpace {
 
 	private SpaceID id;
 

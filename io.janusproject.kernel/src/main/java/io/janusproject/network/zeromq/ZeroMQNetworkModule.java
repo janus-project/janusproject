@@ -19,26 +19,25 @@
  */
 package io.janusproject.network.zeromq;
 
-import io.janusproject.kernel.Network;
-import io.janusproject.util.AbstractSystemPropertyProvider;
+import io.janusproject.JanusConfig;
+import io.janusproject.network.event.EventSerializer;
+import io.janusproject.services.ContextSpaceService;
+import io.janusproject.services.ExecutorService;
+import io.janusproject.services.KernelDiscoveryService;
+import io.janusproject.services.LogService;
+import io.janusproject.services.NetworkService;
 
-import java.lang.ref.WeakReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.arakhne.afc.vmutil.locale.Locale;
+import java.net.URI;
 
 import com.google.common.util.concurrent.Service;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
+import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
 
-/** Module that provides the network layer based on the ZeroMQ library.
+/**
+ * Module that provides the network layer based on the ZeroMQ library.
  * 
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -50,133 +49,20 @@ public class ZeroMQNetworkModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(Network.class).to(ZeroMQNetwork.class).in(Singleton.class);
+		requireBinding(Key.get(URI.class, Names.named(JanusConfig.PUB_URI)));
 
-		bind(EventSerializer.class).toProvider(SerializerProvider.class).in(Singleton.class);
+		requireBinding(LogService.class);
+		requireBinding(KernelDiscoveryService.class);
+		requireBinding(ContextSpaceService.class);
+		requireBinding(ExecutorService.class);
+		requireBinding(EventSerializer.class);
 
-		bind(EventEncrypter.class).toProvider(EncrypterProvider.class).in(Singleton.class);
+		bind(NetworkService.class).to(ZeroMQNetwork.class).in(Singleton.class);
 
-		Multibinder<Service> uriBinder = Multibinder.newSetBinder(binder(), Service.class);
-		uriBinder.addBinding().to(ZeroMQNetwork.class);
+		// Complete the binding for: Set<Service>
+		// (This set is given to the service manager to launch the services).
+		Multibinder<Service> serviceSetBinder = Multibinder.newSetBinder(binder(), Service.class);
+		serviceSetBinder.addBinding().to(ZeroMQNetwork.class);
 	}
-
-	@Provides
-	private static Gson createGson() {
-		return new GsonBuilder()
-		.registerTypeAdapter(Class.class, new ClassTypeAdapter())
-		.setPrettyPrinting()
-		.create();
-	}
-
-	/**
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	private static class SerializerProvider extends AbstractSystemPropertyProvider<EventSerializer> {
-
-		private WeakReference<Injector> injector;
-		
-		/**
-		 */
-		public SerializerProvider() {
-			//
-		}
-
-		@Inject
-		void initialize(Injector injector) {
-			this.injector = new WeakReference<>(injector);
-		}
-
-		/** {@inheritDoc}
-		 */
-		@Override
-		public EventSerializer get() {
-			Class<? extends EventSerializer> serializerType = GsonEventSerializer.class;
-			String serializerClassname = getSystemProperty(ZeroMQConfig.SERIALIZER_CLASSNAME);
-			try {
-				if (serializerClassname!=null && !serializerClassname.isEmpty()) {
-					Class<?> type = Class.forName(serializerClassname);
-					if (type!=null && EventSerializer.class.isAssignableFrom(type)) {
-						serializerType = type.asSubclass(EventSerializer.class);
-					}
-				}
-				assert(this.injector!=null);
-				Injector inj = this.injector.get();
-				assert(inj!=null);
-				return inj.getInstance(serializerType);
-			}
-			catch (Throwable e) {
-				Logger.getAnonymousLogger().log(Level.SEVERE,
-						Locale.getString(ZeroMQNetworkModule.class, "CANNOT_CREATE_SERIALIZER", serializerClassname, ZeroMQConfig.SERIALIZER_CLASSNAME), e); //$NON-NLS-1$
-				return null;
-			}
-		}
-
-	}	
-
-	/**
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	private static class EncrypterProvider extends AbstractSystemPropertyProvider<EventEncrypter> {
-
-		private WeakReference<Injector> injector;
-		
-		/**
-		 */
-		public EncrypterProvider() {
-			//
-		}
-
-		@Inject
-		void initialize(Injector injector) {
-			this.injector = new WeakReference<>(injector);
-		}
-
-		/** {@inheritDoc}
-		 */
-		@Override
-		public EventEncrypter get() {
-			Class<? extends EventEncrypter> encrypterType = null;
-			String encrypterClassname = getSystemProperty(ZeroMQConfig.ENCRYPTER_CLASSNAME);
-			try {
-				if (encrypterClassname!=null && !encrypterClassname.isEmpty()) {
-					try {
-						Class<?> type = Class.forName(encrypterClassname);
-						if (type!=null && EventEncrypter.class.isAssignableFrom(type)) {
-							encrypterType = type.asSubclass(EventEncrypter.class);
-						}
-					}
-					catch(Throwable e) {
-						Logger.getAnonymousLogger().log(Level.SEVERE,
-								Locale.getString("CANNOT_CREATE_ENCRYPTER", encrypterClassname, ZeroMQConfig.ENCRYPTER_CLASSNAME), e); //$NON-NLS-1$
-					}
-				}
-				if (encrypterType==null) {
-					String aesKey = getSystemProperty(ZeroMQConfig.AES_KEY);
-					if (aesKey!=null && !aesKey.isEmpty()) {
-						encrypterType = AESEventEncrypter.class;
-					}
-					else {
-						encrypterType = PlainTextEncrypter.class;
-					}
-				}
-				assert(this.injector!=null);
-				Injector inj = this.injector.get();
-				assert(inj!=null);
-				return inj.getInstance(encrypterType);
-			}
-			catch (Throwable e) {
-				Logger.getAnonymousLogger().log(Level.SEVERE,
-						Locale.getString("CANNOT_CREATE_ENCRYPTER", encrypterClassname, ZeroMQConfig.ENCRYPTER_CLASSNAME), e); //$NON-NLS-1$
-				return null;
-			}
-		}
-
-	}	
 
 }

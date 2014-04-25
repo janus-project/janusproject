@@ -19,8 +19,10 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.repository.SpaceRepository;
+import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
+import io.janusproject.services.LogService;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
@@ -31,10 +33,13 @@ import java.util.Collection;
 import java.util.UUID;
 
 import com.google.inject.Injector;
+import com.hazelcast.core.HazelcastInstance;
 
 /** Implementation of an agent context in the Janus platform.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: ngaud$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -43,28 +48,54 @@ class Context implements AgentContext{
 
 	private final UUID id;
 
-	
 	private final SpaceRepository spaceRepository;
 	
-	private final EventSpaceImpl defaultSpace;
-
-	private final Injector injector;
-
+	private final UUID defaultSpaceID;
+	private EventSpaceImpl defaultSpace;
+	
+	
 	/** Constructs a <code>Context</code>.
+	 * <p>
+	 * CAUTION: Do not miss to call {@link #postConstruction()}.
 	 * 
-	 * @param injector - reference to the injector to be used.
+	 * @param injector - injector used to create the instances.
 	 * @param id - identifier of the context.
 	 * @param defaultSpaceID - identifier of the default space in the context.
+	 * @param logger - instance of the logging service.
+	 * @param hzInstance - object that is creating distributed structures.
+	 * @param startUpListener - repository listener which is added just after the creation of the repository, but before the creation of the default space.
 	 */
-	protected Context(Injector injector, UUID id, UUID defaultSpaceID) {
+	protected Context(Injector injector, UUID id, UUID defaultSpaceID, LogService logger, HazelcastInstance hzInstance, SpaceRepositoryListener startUpListener) {
 		this.id = id;
-		this.injector = injector;
-		this.spaceRepository = new SpaceRepository(id.toString()+"-spaces"); //$NON-NLS-1$
-		this.injector.injectMembers(this.spaceRepository);
-		this.defaultSpace = createSpace(EventSpaceSpecification.class, defaultSpaceID);
-
+		this.defaultSpaceID = defaultSpaceID;
+		this.spaceRepository = new SpaceRepository(
+				id.toString()+"-spaces", //$NON-NLS-1$
+				hzInstance,
+				injector,
+				new SpaceListener(logger, startUpListener));
 	}
-
+	
+	@Override
+	public String toString() {
+		return this.id.toString();
+	}
+	
+	/** Create the default space in this context.
+	 * 
+	 * @return the created space.
+	 */
+	EventSpace postConstruction() {
+		this.spaceRepository.postConstruction();
+		this.defaultSpace = createSpace(EventSpaceSpecification.class, this.defaultSpaceID);
+		return this.defaultSpace;
+	}
+	
+	/** Destroy any associated resources.
+	 */
+	public void destroy() {
+		//this.spaceRepository.destroy();
+	}
+	
 	@Override
 	public UUID getID() {
 		return this.id;
@@ -83,24 +114,15 @@ class Context implements AgentContext{
 	@Override
 	public <S extends io.sarl.lang.core.Space> S createSpace(Class<? extends SpaceSpecification> spec,
 			UUID spaceUUID, Object... creationParams) {
-		S space = this.injector.getInstance(spec).create(
-				new SpaceID(this.id, spaceUUID,spec), creationParams);
-		this.spaceRepository.addSpace(space);
-		return space;
+		return this.spaceRepository.createSpace(new SpaceID(this.id, spaceUUID, spec), spec, creationParams);
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <S extends io.sarl.lang.core.Space> S getOrCreateSpace(
 			Class<? extends SpaceSpecification> spec, UUID spaceUUID,
 			Object... creationParams) {
-		Space s = this.spaceRepository.getFirstSpaceFromSpec(spec);
-		if (s != null) {
-			//Type safety: assume that any ClassCastException will be thrown in the caller context.
-			return (S) s;
-		}
-		return createSpace(spec, spaceUUID, creationParams);
+		return this.spaceRepository.getOrCreateSpace(spec, new SpaceID(this.id, spaceUUID, spec), creationParams);
 	}
 
 	/** {@inheritDoc}
@@ -109,7 +131,7 @@ class Context implements AgentContext{
 	@Override
 	public <S extends Space> Collection<S> getSpaces(Class<? extends SpaceSpecification> spec) {
 		//Type safety: assume that any ClassCastException will be thrown in the caller context.
-		return (Collection<S>) this.spaceRepository.getSpacesFromSpec(spec);
+		return (Collection<S>) this.spaceRepository.getSpaces(spec);
 	}
 
 	@Override
@@ -120,6 +142,77 @@ class Context implements AgentContext{
 				// could be null because it will
 				// not be used during the search.
 				new SpaceID(this.id, spaceUUID, null));
+	}
+	
+	/** Listener on the events in the space repository.
+	 * 
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class SpaceListener implements SpaceRepositoryListener {
+		
+		private final SpaceRepositoryListener relay;
+		private final LogService logger;
+		
+		/**
+		 * @param logger
+		 * @param relay
+		 */
+		public SpaceListener(LogService logger, SpaceRepositoryListener relay) {
+			assert(logger!=null);
+			assert(relay!=null);
+			this.logger = logger;
+			this.relay = relay;
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void spaceCreated(Space space) {
+			this.logger.info(Context.class, "SPACE_CREATED", space.getID()); //$NON-NLS-1$
+			
+			// Notify the relays (other services)
+			this.relay.spaceCreated(space);
+			// Put an event in the default space
+			EventSpace defSpace = getDefaultSpace();
+			// Default space may be null if the default space was not
+			// yet created by the space repository has already received new spaces.
+			if (defSpace!=null) {
+				//FIXME: Caution -> the event should not be fired in remote kernels.
+				/*
+				SpaceCreated event = new SpaceCreated();
+				event.setSpaceID(space.getID());
+				event.setSpaceSpecification(space.getID().getSpaceSpecification());
+				event.setSource(defSpace.getAddress(agent.getID()));
+				defSpace.emit(event);*/
+			}
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void spaceDestroyed(Space space) {
+			this.logger.info(Context.class, "SPACE_DESTROYED", space.getID()); //$NON-NLS-1$
+
+			// Notify the relays (other services)
+			this.relay.spaceDestroyed(space);
+			// Put an event in the default space
+			EventSpace defSpace = getDefaultSpace();
+			// Default space may be null if the default space was not
+			// yet created by the space repository has already received new spaces.
+			if (defSpace!=null) {
+				//FIXME: Caution -> the event should not be fired in remote kernels.
+				/*
+				SpaceDestroyed event = new SpaceDestroyed();
+				event.setSpaceID(space.getID());
+				event.setSpaceSpecification(space.getID().getSpaceSpecification());
+				event.setSource(defSpace.getAddress(agent.getID()));
+				defSpace.emit(event);*/
+			}
+		}
+		
 	}
 
 }

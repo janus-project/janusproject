@@ -19,7 +19,6 @@
  */
 package io.janusproject.repository;
 
-import io.janusproject.repository.impl.DistributedDataStructureFactory;
 import io.sarl.lang.core.EventListener;
 
 import java.io.Serializable;
@@ -28,19 +27,21 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.inject.Inject;
-import com.hazelcast.core.MultiMap;
 
 /** Repository that maps participants to multiple addresses.
  * <p>
  * This repository links the id of an entity to its various addresses in the
  * related space.
  * <p>
- * The repository must be distributed and synchronized all over the network.
+ * The repository must be distributed and synchronized all over the network by
+ * using data-structures that are provided by an injected
+ * {@link DistributedDataStructureFactory}.
  * 
  * @param <ADDRESS> - the generic type representing the address of a participant
  * in the related space. This type must remains small, less than M in memory and 
  * must be {@link java.io.Serializable}
  * @author $Author: ngaud$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$

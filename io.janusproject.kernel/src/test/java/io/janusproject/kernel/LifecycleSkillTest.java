@@ -22,6 +22,10 @@ package io.janusproject.kernel;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import io.janusproject.kernel.BehaviorsAndInnerContextSkill;
+import io.janusproject.kernel.ExternalContextAccessSkill;
+import io.janusproject.kernel.LifecycleSkill;
+import io.janusproject.services.SpawnService;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.Lifecycle;
@@ -44,7 +48,7 @@ import org.powermock.api.mockito.PowerMockito;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings("all")
+@SuppressWarnings({"nls","javadoc"})
 public class LifecycleSkillTest {
 
 	private Lifecycle skill;
@@ -60,8 +64,6 @@ public class LifecycleSkillTest {
 	@Mock
 	private SpawnService spawnService;
 
-	
-	private Agent agentMock;
 	
 	/**
 	 * @throws java.lang.Exception
@@ -97,7 +99,7 @@ public class LifecycleSkillTest {
 	@Test
 	public void spawn(){
 		this.skill.spawnInContext(Agent.class, this.parentContext,Collections.EMPTY_LIST.toArray());
-		verify(this.spawnService).spawn(this.parentContextID, Agent.class, Collections.EMPTY_LIST.toArray());
+		verify(this.spawnService).spawn(this.parentContext, Agent.class, Collections.EMPTY_LIST.toArray());
 	}
 
 }

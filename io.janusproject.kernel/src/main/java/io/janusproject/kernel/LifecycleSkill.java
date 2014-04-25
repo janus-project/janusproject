@@ -19,13 +19,10 @@
  */
 package io.janusproject.kernel;
 
-import io.sarl.core.AgentKilled;
-import io.sarl.core.AgentSpawned;
-import io.sarl.core.ExternalContextAccess;
+import io.janusproject.services.SpawnService;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
 
 import java.util.UUID;
@@ -35,6 +32,7 @@ import java.util.UUID;
  * 
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -55,63 +53,27 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	}
 
 	@Override
-	protected void install() {
-		super.install();
-	}
-
-	@Override
-	protected void uninstall() {
-		super.uninstall();
-	}
-
-	@Override
 	public UUID spawnInContext(Class<? extends Agent> aAgent, AgentContext context, Object[] params) {
-		UUID id = this.spawnService.spawn(context.getID(), aAgent, params);
-		fireAgentSpawned(aAgent, context);
-		return id;
-	}
-
-	/**
-	 * Fire an {@link AgentSpawned} event to inform other context members of the creation of a new agent in the specified context.
-	 * 
-	 * @param aAgent - type of the agent that was spawned.
-	 * @param parentContext - the context in which the owner agent has been spawned.
-	 */
-	protected void fireAgentSpawned(Class<? extends Agent> aAgent, AgentContext parentContext) {
-		EventSpace defSpace = parentContext.getDefaultSpace();
-		AgentSpawned event = new AgentSpawned();
-		event.setAgentID(this.getOwner().getID());
-		event.setAgentType(aAgent);
-		event.setSource(defSpace.getAddress(getOwner().getID()));
-		defSpace.emit(event);
+		return this.spawnService.spawn(context, aAgent, params);
 	}
 
 	@Override
 	public void killMe() {
-		// don't fire a destroy event here since it is not necessary to inform agent's internal behavior that will be done during the next call the killAgent
-		fireAgentKilledInAllCurrentContexts();
 		this.spawnService.killAgent(this.getOwner().getID());
 	}
-
-	/**
-	 * Fire an {@link AgentKilled} event in every single contexts to which the owner agent belongs to
+	
+	/** {@inheritDoc}
 	 */
-	protected void fireAgentKilledInAllCurrentContexts() {
-		for (AgentContext context : getSkill(ExternalContextAccess.class).getAllContexts()) {
-			fireAgentKilled(context);
-		}
+	@Override
+	protected void install() {
+		super.install();
 	}
-
-	/**
-	 * Fire an {@link AgentKilled} event to inform other context members of the death of the owner agent in the specified context.
-	 * @param leftContext - the default context of the owner agent
+	
+	/** {@inheritDoc}
 	 */
-	protected void fireAgentKilled(AgentContext leftContext) {
-		EventSpace defSpace = leftContext.getDefaultSpace();
-		AgentKilled event = new AgentKilled();
-		event.setAgentID(this.getOwner().getID());
-		event.setSource(defSpace.getAddress(getOwner().getID()));
-		defSpace.emit(event);
+	@Override
+	protected void uninstall() {
+		super.uninstall();
 	}
 
 }

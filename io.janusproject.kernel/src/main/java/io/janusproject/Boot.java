@@ -19,8 +19,6 @@
  */
 package io.janusproject;
 
-import io.janusproject.kernel.Janus;
-import io.janusproject.kernel.JanusDefaultConfigModule;
 import io.janusproject.kernel.Kernel;
 import io.sarl.lang.core.Agent;
 
@@ -84,6 +82,10 @@ public class Boot {
 				showHelp();
 			}
 			
+			if (cmd.hasOption('o')) {
+				System.setProperty(JanusConfig.OFFLINE, Boolean.TRUE.toString());
+			}
+
 			if (cmd.hasOption('R')) {
 				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
 				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID, Boolean.TRUE.toString());
@@ -172,6 +174,7 @@ public class Boot {
 		Options options = new Options();
 		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("f", "file", true, Locale.getString("CLI_HELP_F"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("o", "offline", false, Locale.getString("CLI_HELP_OFFLINE"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("B", "bootid", false, Locale.getString("CLI_HELP_SET_PROP", JanusConfig.BOOT_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("R", "randomid", false, Locale.getString("CLI_HELP_SET_PROP", JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_UNSET_PROPS", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
@@ -198,7 +201,7 @@ public class Boot {
 	}
 
 	private static void startJanus(Class<? extends Agent> agentCls, Object... params) {
-		Kernel k = Janus.create(new JanusDefaultConfigModule());
+		Kernel k = Kernel.create(new JanusDefaultModule());
 		k.spawn(agentCls, params);
 	}
 
