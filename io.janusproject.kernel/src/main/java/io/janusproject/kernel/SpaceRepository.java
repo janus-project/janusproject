@@ -74,7 +74,7 @@ class SpaceRepository {
 	/**
 	 * Map linking a a class of Space specification to its related implementations' ids Use the map <code>spaces</code> to get the Space object associated to a given id This is local non-distributed map
 	 */
-	private final Multimap<Class<? extends SpaceSpecification>, SpaceID> spacesBySpec;
+	private final Multimap<Class<? extends SpaceSpecification<?>>, SpaceID> spacesBySpec;
 
 	/**
 	 * @param distributedSpaceSetName - the name used to identify distributed map over network
@@ -87,7 +87,7 @@ class SpaceRepository {
 		this.injector = injector;
 		this.externalListener = listener;
 		this.spaces = new ConcurrentHashMap<>();
-		Multimap<Class<? extends SpaceSpecification>, SpaceID> tmp = TreeMultimap.create(ClassComparator.SINGLETON, ObjectReferenceComparator.SINGLETON);
+		Multimap<Class<? extends SpaceSpecification<?>>, SpaceID> tmp = TreeMultimap.create(ClassComparator.SINGLETON, ObjectReferenceComparator.SINGLETON);
 		this.spacesBySpec = Multimaps.synchronizedMultimap(tmp);
 		this.spaceIDs = hzInstance.getSet(this.distributedSpaceSetName);
 	}
@@ -108,8 +108,8 @@ class SpaceRepository {
 		//this.spaceIDs.destroy();
 	}
 	
-	private Space createSpaceInstance(Class<? extends SpaceSpecification> spec, SpaceID spaceID, boolean updateSpaceIDs, Object[] creationParams) {
-		Space space = this.injector.getInstance(spec).create(spaceID, creationParams);
+	private <S extends Space> S createSpaceInstance(Class<? extends SpaceSpecification<S>> spec, SpaceID spaceID, boolean updateSpaceIDs, Object[] creationParams) {
+		S space = this.injector.getInstance(spec).create(spaceID, creationParams);
 		SpaceID id = space.getID();
 		this.spaces.put(id, space);
 		this.spacesBySpec.put(id.getSpaceSpecification(), id);
@@ -122,11 +122,12 @@ class SpaceRepository {
 	 * 
 	 * @param id - identifier of the space
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized void ensureSpaceDefinition(SpaceID id) {
 		assert(this.spaceIDs.contains(id));
 		if (!this.spaces.containsKey(id)) {
 			//FIXME manage the propagation of the creationParams inside the ID of the space
-			createSpaceInstance(id.getSpaceSpecification(), id, false, new Object[0]);
+			createSpaceInstance((Class)id.getSpaceSpecification(), id, false, new Object[0]);
 		}
 	}
 
@@ -154,13 +155,13 @@ class SpaceRepository {
 	@SuppressWarnings("unchecked")
 	public synchronized <S extends io.sarl.lang.core.Space> S createSpace(
 			SpaceID spaceID, 
-			Class<? extends SpaceSpecification> spec,
+			Class<? extends SpaceSpecification<S>> spec,
 			Object... creationParams) {
-		Space space = this.spaces.get(spaceID);
+		S space = (S)this.spaces.get(spaceID);
 		if (space==null) {
 			space = createSpaceInstance(spec, spaceID, true, creationParams);
 		}
-		return (S)space;
+		return space;
 	}
 
 	/** Retrive the first space of the given specification, or create a space if none.
@@ -172,19 +173,19 @@ class SpaceRepository {
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized <S extends io.sarl.lang.core.Space> S getOrCreateSpace(
-			Class<? extends SpaceSpecification> spec,
+			Class<? extends SpaceSpecification<S>> spec,
 			SpaceID spaceID, 
 			Object... creationParams) {
 		Collection<SpaceID> spaces = this.spacesBySpec.get(spec);
-		Space firstSpace;
+		S firstSpace;
 		if (spaces == null || spaces.isEmpty()) {
 			firstSpace = createSpaceInstance(spec, spaceID, true, creationParams);
 		}
 		else {
-			firstSpace = this.spaces.get(spaces.iterator().next());
+			firstSpace = (S)this.spaces.get(spaces.iterator().next());
 		}
 		assert(firstSpace!=null);
-		return (S)firstSpace;
+		return firstSpace;
 	}
 
 	/**
@@ -213,8 +214,9 @@ class SpaceRepository {
 	 * @param spec - the specification used to filter the set of stored spaces
 	 * @return the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
 	 */
-	public synchronized Collection<Space> getSpaces(final Class<? extends SpaceSpecification> spec) {
-		return Collections2.filter(this.spaces.values(), new Predicate<Space>() {
+	@SuppressWarnings("unchecked")
+	public synchronized <S extends Space> Collection<S> getSpaces(final Class<? extends SpaceSpecification<S>> spec) {
+		return (Collection<S>)Collections2.filter(this.spaces.values(), new Predicate<Space>() {
 					@Override
 					public boolean apply(Space input) {
 						return input.getID().getSpaceSpecification().equals(spec);

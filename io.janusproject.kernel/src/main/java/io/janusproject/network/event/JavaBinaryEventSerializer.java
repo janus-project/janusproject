@@ -118,7 +118,7 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 			throw new ClassCastException(Locale.getString("INVALID_TYPE", spaceSpec)); //$NON-NLS-1$
 		}
 
-		SpaceID spaceID = new SpaceID(contextId, spaceId, spaceSpec.asSubclass(SpaceSpecification.class));
+		SpaceID spaceID = new SpaceID(contextId, spaceId, (Class<? extends SpaceSpecification<?>>)spaceSpec);
 
 		Event event = fromBytes(envelope.getBody(), Event.class);
 		assert (event != null);

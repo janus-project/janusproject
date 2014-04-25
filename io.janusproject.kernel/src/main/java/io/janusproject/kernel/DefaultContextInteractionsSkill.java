@@ -19,8 +19,6 @@
  */
 package io.janusproject.kernel;
 
-import java.util.UUID;
-
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Address;
@@ -31,6 +29,8 @@ import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Skill;
 import io.sarl.util.AddressScope;
+
+import java.util.UUID;
 
 /** Skill to access to the default interaction context.
  * 

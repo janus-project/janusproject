@@ -36,6 +36,7 @@ import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.util.OpenEventSpaceSpecification;
+import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Set;
@@ -83,7 +84,8 @@ class KernelModule extends AbstractModule {
 		
 		bind(BuiltinCapacitiesProvider.class).to(JanusBuiltinCapacitiesProvider.class).in(Singleton.class);
 		bind(EventSpaceSpecification.class).to(EventSpaceSpecificationImpl.class).in(Singleton.class);
-		bind(OpenEventSpaceSpecification.class).to(EventSpaceSpecificationImpl.class).in(Singleton.class);
+		bind(OpenEventSpaceSpecification.class).to(OpenEventSpaceSpecificationImpl.class).in(Singleton.class);
+		bind(RestrictedAccessEventSpaceSpecification.class).to(RestrictedAccessEventSpaceSpecificationImpl.class).in(Singleton.class);
 
 		// Bind the services, indiviually
 		bind(LogService.class).to(ArakhneLocaleLogService.class).in(Singleton.class);

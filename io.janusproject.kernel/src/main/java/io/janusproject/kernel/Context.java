@@ -23,11 +23,11 @@ import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
 import io.janusproject.services.LogService;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
-import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
 import io.sarl.util.OpenEventSpace;
+import io.sarl.util.OpenEventSpaceSpecification;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -51,7 +51,7 @@ class Context implements AgentContext{
 	private final SpaceRepository spaceRepository;
 	
 	private final UUID defaultSpaceID;
-	private EventSpaceImpl defaultSpace;
+	private OpenEventSpace defaultSpace;
 	
 	
 	/** Constructs a <code>Context</code>.
@@ -86,7 +86,7 @@ class Context implements AgentContext{
 	 */
 	EventSpace postConstruction() {
 		this.spaceRepository.postConstruction();
-		this.defaultSpace = createSpace(EventSpaceSpecification.class, this.defaultSpaceID);
+		this.defaultSpace = createSpace(OpenEventSpaceSpecification.class, this.defaultSpaceID);
 		return this.defaultSpace;
 	}
 	
@@ -112,7 +112,7 @@ class Context implements AgentContext{
 	}
 
 	@Override
-	public <S extends io.sarl.lang.core.Space> S createSpace(Class<? extends SpaceSpecification> spec,
+	public <S extends io.sarl.lang.core.Space> S createSpace(Class<? extends SpaceSpecification<S>> spec,
 			UUID spaceUUID, Object... creationParams) {
 		return this.spaceRepository.createSpace(new SpaceID(this.id, spaceUUID, spec), spec, creationParams);
 	}
@@ -120,20 +120,20 @@ class Context implements AgentContext{
 
 	@Override
 	public <S extends io.sarl.lang.core.Space> S getOrCreateSpace(
-			Class<? extends SpaceSpecification> spec, UUID spaceUUID,
+			Class<? extends SpaceSpecification<S>> spec, UUID spaceUUID,
 			Object... creationParams) {
 		return this.spaceRepository.getOrCreateSpace(spec, new SpaceID(this.id, spaceUUID, spec), creationParams);
 	}
 
 	/** {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public <S extends Space> Collection<S> getSpaces(Class<? extends SpaceSpecification> spec) {
+	public <S extends Space> Collection<S> getSpaces(Class<? extends SpaceSpecification<S>> spec) {
 		//Type safety: assume that any ClassCastException will be thrown in the caller context.
-		return (Collection<S>) this.spaceRepository.getSpaces(spec);
+		return this.spaceRepository.getSpaces(spec);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <S extends io.sarl.lang.core.Space> S getSpace(UUID spaceUUID) {
 		//Type safety: assume that any ClassCastException will be thrown in the caller context.

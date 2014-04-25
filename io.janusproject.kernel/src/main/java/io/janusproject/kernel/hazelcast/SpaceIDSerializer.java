@@ -63,6 +63,7 @@ public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public SpaceID read(ObjectDataInput in) throws IOException {
 		try {
@@ -72,7 +73,7 @@ public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 			if (cid != null && id != null && specCls != null) {
 				Class<?> type = Class.forName(specCls);
 				if (SpaceSpecification.class.isAssignableFrom(type)) {
-					SpaceID s = new SpaceID(cid, id, type.asSubclass(SpaceSpecification.class));
+					SpaceID s = new SpaceID(cid, id, (Class<? extends SpaceSpecification<?>>)type);
 					return s;
 				}
 			}

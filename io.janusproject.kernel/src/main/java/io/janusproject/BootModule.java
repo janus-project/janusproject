@@ -25,8 +25,8 @@ import java.io.IOError;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;

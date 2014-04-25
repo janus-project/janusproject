@@ -109,7 +109,7 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public EventDispatch deserialize(EventEnvelope envelope) throws Exception {
 		assert (this.encrypter != null) : "Invalid injection of the encrypter"; //$NON-NLS-1$
@@ -126,7 +126,7 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 		Class<? extends Event> eventClazz = extractClass("x-java-event-class", headers, Event.class); //$NON-NLS-1$
 		Class<? extends Scope> scopeClazz = extractClass("x-java-scope-class", headers, Scope.class); //$NON-NLS-1$
 
-		SpaceID spaceID = new SpaceID(contextId, spaceId, spaceSpec.asSubclass(SpaceSpecification.class));
+		SpaceID spaceID = new SpaceID(contextId, spaceId, (Class<? extends SpaceSpecification<?>>)spaceSpec);
 
 		Event event = this.gson.fromJson(new String(envelope.getBody(), NetworkConfig.BYTE_ARRAY_STRING_CHARSET), eventClazz);
 		assert (event != null);
