@@ -19,10 +19,12 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.JanusConfig;
 import io.janusproject.JanusDefaultModule;
 import io.janusproject.kernel.hazelcast.AddressSerializer;
 import io.janusproject.kernel.hazelcast.HazelcastDistributedDataStructureFactory;
 import io.janusproject.kernel.hazelcast.SpaceIDSerializer;
+import io.janusproject.network.NetworkUtil;
 import io.janusproject.repository.DistributedDataStructureFactory;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.SpaceID;
@@ -52,6 +54,7 @@ class HazelcastModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		Config hazelcastConfig = new Config();
+		
 		SerializerConfig sc = new SerializerConfig();
 		sc.setTypeClass(SpaceID.class);
 		sc.setImplementation(new SpaceIDSerializer());
@@ -63,8 +66,14 @@ class HazelcastModule extends AbstractModule {
 		hazelcastConfig.getSerializationConfig().addSerializerConfig(sc);
 		hazelcastConfig.getSerializationConfig().addSerializerConfig(sc2);
 
+		if (JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false)
+			|| NetworkUtil.getPrimaryAddress(true)==null) {
+			hazelcastConfig.setProperty("hazelcast.local.localAddress", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
+			hazelcastConfig.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+		}
+		
 		bind(Config.class).toInstance(hazelcastConfig);
-
+		
 		bind(DistributedDataStructureFactory.class).to(HazelcastDistributedDataStructureFactory.class).in(Singleton.class);
 	}
 

@@ -20,7 +20,6 @@
 package io.janusproject.network.nonetwork;
 
 import io.janusproject.network.NetworkUtil;
-import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.NetworkServiceListener;
 import io.janusproject.services.ServicePriorities;
@@ -29,9 +28,11 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 
+import java.io.IOError;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,9 +60,6 @@ class NoNetwork extends AbstractPrioritizedService implements NetworkService {
     private final List<NetworkServiceListener> listeners = new ArrayList<>();
 	
 	private URI localHost = null;
-	
-	@Inject
-	private LogService logger;
 	
 	/**
 	 */
@@ -131,10 +129,7 @@ class NoNetwork extends AbstractPrioritizedService implements NetworkService {
 	 */
 	@Override
 	protected synchronized void doStart() {
-		this.logger.warning("CAUTION"); //$NON-NLS-1$
-		
 		InetAddress adr = NetworkUtil.getPrimaryAddress(true);
-		assert(adr!=null);
 		UUID r = UUID.randomUUID();
 		byte[] p1 = Longs.toByteArray(r.getMostSignificantBits());
 		byte[] p2 = Longs.toByteArray(r.getLeastSignificantBits());
@@ -142,6 +137,13 @@ class NoNetwork extends AbstractPrioritizedService implements NetworkService {
 		System.arraycopy(p2, 0, n, p1.length, p2.length);
 		BigInteger number = new BigInteger(n);
 		int port = DYNFROM + (number.intValue() % (DYNTO-DYNFROM));
+		if (adr==null) {
+			try {
+				adr = InetAddress.getLocalHost();
+			} catch (UnknownHostException e) {
+				throw new IOError(e);
+			}
+		}
 		this.localHost = NetworkUtil.toURI(adr, port);
 		notifyStarted();
 	}
