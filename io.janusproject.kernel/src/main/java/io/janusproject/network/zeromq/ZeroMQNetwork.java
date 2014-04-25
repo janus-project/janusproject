@@ -333,18 +333,17 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 				this.subcribers.put(peerUri, subscriber);
 				subscriber.connect(peerUri.toString());
 				this.poller.register(subscriber, Poller.POLLIN);
-
 				this.logger.info("PEER_CONNECTED", peerUri); //$NON-NLS-1$
 			}
 			assert(subscriber!=null);
-			NetworkEventReceivingListener old;
-			if (listener!=null) old = this.messageRecvListeners.put(space, listener);
-			else old = null;
+			NetworkEventReceivingListener old = this.messageRecvListeners.get(space);
 			if (old==null) {
+				assert(listener!=null);
+				this.messageRecvListeners.put(space, listener);
 				byte[] header = buildFilterableHeader(
 						this.serializer.serializeContextID(space.getContextID()));
-				this.logger.info("PEER_SUBSCRIPTION", peerUri, space); //$NON-NLS-1$
 				subscriber.subscribe(header);
+				this.logger.info("PEER_SUBSCRIPTION", peerUri, space); //$NON-NLS-1$
 			}
 		}
 	}
