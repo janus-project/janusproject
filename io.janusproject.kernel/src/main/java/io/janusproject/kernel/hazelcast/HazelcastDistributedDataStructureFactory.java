@@ -44,7 +44,7 @@ import com.hazelcast.core.MultiMap;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class HazelcastDistributedDataStructureFactory implements DistributedDataStructureFactory {
+class HazelcastDistributedDataStructureFactory implements DistributedDataStructureFactory {
 
 	@Inject
 	private HazelcastInstance hazelcastInstance;

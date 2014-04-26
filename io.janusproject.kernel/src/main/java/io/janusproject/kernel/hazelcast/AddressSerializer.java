@@ -36,7 +36,7 @@ import com.hazelcast.nio.serialization.StreamSerializer;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class AddressSerializer implements StreamSerializer<Address> {
+class AddressSerializer implements StreamSerializer<Address> {
 
 	/** Unique identifier for the {@link Address} type.
 	 */
