@@ -210,24 +210,6 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		return this.agentAsEventListener;
 	}
 
-	
-	/** Register the agent from the given default space.
-	 * 
-	 * @param space
-	 */
-	void registerOnDefaultSpace(EventSpaceImpl space) {
-		space.register(asEventListener());
-	}
-
-	/** Unregister the agent from the given default space.
-	 * 
-	 * @param space
-	 */
-	void unregisterFromDefaultSpace(EventSpaceImpl space) {
-		space.unregister(asEventListener());
-	}
-
-
 	/**
 	 * @author $Author: srodriguez$
 	 * @author $Author: ngaud$

@@ -111,7 +111,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 		this.contexts.add(futureContext);
 		
 		BehaviorsAndInnerContextSkill imp = (BehaviorsAndInnerContextSkill) getSkill(Behaviors.class);
-		imp.registerOnDefaultSpace((EventSpaceImpl) ac.getDefaultSpace());
+		((EventSpaceImpl) ac.getDefaultSpace()).register(imp.asEventListener());
 
 		fireContextJoined(futureContext, futureContextDefaultSpaceID);
 		fireMemberJoined(ac);
@@ -157,7 +157,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 		fireMemberLeft(ac);
 
 		BehaviorsAndInnerContextSkill imp = (BehaviorsAndInnerContextSkill) getSkill(Behaviors.class);
-		imp.unregisterFromDefaultSpace((EventSpaceImpl) ac.getDefaultSpace());
+		((EventSpaceImpl) ac.getDefaultSpace()).unregister(imp.asEventListener());
 		this.contexts.remove(contextID);
 	}
 
