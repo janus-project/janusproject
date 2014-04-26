@@ -37,7 +37,7 @@ import io.sarl.lang.core.Skill;
 import java.lang.ref.WeakReference;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.collect.Queues;
 import com.google.common.eventbus.AsyncSyncEventBus;
@@ -49,6 +49,8 @@ import com.google.inject.Inject;
  * {@link EventSpaceImpl} allowing them to be agent's as well.
  * 
  * @author $Author: srodriguez$
+ * @author $Author: ngaud$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
@@ -56,16 +58,29 @@ import com.google.inject.Inject;
 class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerContextAccess {
 
 	/** Reference to the event bus.
+	 * The event bus is the mean of routing of the events inside
+	 * the context of the agents. The agent itself and the behaviors
+	 * are connected to the event bus.
 	 */
 	private AsyncSyncEventBus eventBus;
 	
-	private AgentContext innerContext;
+	/**
+	 * Context inside the agent. 
+	 */
+	private AgentContext innerContext = null;
 
-	private AtomicBoolean running = new AtomicBoolean(false);
-	private AtomicBoolean stopping = new AtomicBoolean(false);
+	/** State of the owner.
+	 */
+	private final AtomicReference<OwnerState> state = new AtomicReference<>(OwnerState.NEW);
+
+	/** Implementation of an EventListener linked to the owner of this skill.
+	 */
 	private final AgentEventListener agentAsEventListener;
-
+	
+	@Inject
 	private LogService logger;
+	
+	@Inject
 	private ContextSpaceService contextService;
 
 	/**
@@ -76,14 +91,6 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		this.agentAsEventListener = new AgentEventListener(this);
 	}
 
-	/**
-	 * @param service - reference to the factory of context provided by the platform.
-	 */
-	@Inject
-	private void setContextService(ContextSpaceService service) {
-		this.contextService = service;
-	}
-
 	/** Change the event bus inside the agent.
 	 * 
 	 * @param bus
@@ -92,15 +99,6 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	private void setInternalEventBus(AsyncSyncEventBus bus) {
 		this.eventBus = bus;
 		this.eventBus.register(this.getOwner());
-	}
-
-	/** Change the logger that is accessible to the inner behaviors or agents.
-	 * 
-	 * @param log
-	 */
-	@Inject
-	private void setLogService(LogService log) {
-		this.logger = log;
 	}
 	
 	private void ensureInnerContext() {
@@ -196,12 +194,11 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		event.setSource(defSpace.getAddress(getOwner().getID()));				
 		if (event instanceof Initialize) {
 			this.eventBus.fire(event);//Immediate synchronous dispatching of Initialize event
-			this.running.set(true);
+			this.state.set(OwnerState.RUNNING);
 			this.agentAsEventListener.agentInitialized();
 		} else if (event instanceof Destroy) {
 			this.eventBus.fire(event);//Immediate synchronous dispatching of Destroy event
-			this.running.set(false);
-			this.stopping.set(true);
+			this.state.set(OwnerState.DESTROYED);
 		} else {
 			internalReceiveEvent(event);//Asynchronous parallel dispatching of this event
 		}
@@ -233,6 +230,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 
 	/**
 	 * @author $Author: srodriguez$
+	 * @author $Author: ngaud$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
@@ -243,17 +241,17 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 
 		private final WeakReference<BehaviorsAndInnerContextSkill> skill;
 
-		private final WeakReference<UUID> aid;
+		private final UUID aid;
 
 		@SuppressWarnings("synthetic-access")
 		public AgentEventListener(BehaviorsAndInnerContextSkill skill) {
 			this.skill = new WeakReference<>(skill);
-			this.aid = new WeakReference<>(skill.getOwner().getID());
+			this.aid = skill.getOwner().getID();
 		}
 
 		@Override
 		public UUID getID() {
-			return this.aid.get();
+			return this.aid;
 		}
 
 		@SuppressWarnings("synthetic-access")
@@ -261,14 +259,20 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		public void receiveEvent(Event event) {
 			BehaviorsAndInnerContextSkill s = this.skill.get();
 			synchronized(s) {
-				if (s.running.get() && !s.stopping.get()) {
+				switch(s.state.get()) {
+				case NEW:
+					this.buffer.add(event);
+					break;
+				case RUNNING:
 					s.internalReceiveEvent(event);
-				} else if (!s.running.get() && s.stopping.get()) {
+					break;
+				case DESTROYED:
 					// Dropping messages since agent is dying
 					s.logger.warning(BehaviorsAndInnerContextSkill.class,
 									"EVENT_DROP_WARNING", event); //$NON-NLS-1$
-				} else {
-					this.buffer.add(event);
+					break;
+				default:
+					throw new IllegalStateException();
 				}
 			}
 		}
@@ -283,6 +287,16 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 			}
 		}
 
+	}
+	
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static enum OwnerState {
+		NEW, RUNNING, DESTROYED
 	}
 
 }
