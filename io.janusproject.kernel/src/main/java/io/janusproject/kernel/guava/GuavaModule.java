@@ -17,38 +17,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.guava;
 
-import io.janusproject.kernel.bic.BuiltInCapacityModule;
-import io.janusproject.kernel.guava.GuavaModule;
-import io.janusproject.kernel.hazelcast.HazelcastModule;
-import io.janusproject.kernel.space.SpaceModule;
+import io.janusproject.kernel.executor.EventBusSubscriberExceptionHandler;
+import io.sarl.lang.core.Percept;
 
+import com.google.common.eventbus.AnnotationModule;
+import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 
 /**
- * The Core Janus Module configures the minimum requirements
- * for Janus to run properly. If you need a standard configuration
- * use <code>JanusDefaultModule</code>
- * 
+ * This module permits to reconfigure the Guava API for its
+ * usae in the Janus kernel.
  * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class CoreModule extends AbstractModule {
+public class GuavaModule extends AbstractModule {
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	protected void configure() {
-		install(new HazelcastModule());
-		install(new GuavaModule());
-		install(new KernelModule());
-		install(new BuiltInCapacityModule());
-		install(new SpaceModule());
+		// Bus exception
+		bind(SubscriberExceptionHandler.class).to(EventBusSubscriberExceptionHandler.class).in(Singleton.class);
+
+		install(new AnnotationModule(Percept.class));
 	}
 	
 }

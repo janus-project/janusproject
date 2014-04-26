@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
 import io.janusproject.services.ExecutorService;
 import io.sarl.core.AgentTask;

@@ -17,31 +17,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
-import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.util.OpenEventSpaceSpecification;
+import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 
-/** Default implementation of the specification of an event space.
+/**
+ * This module permits to reconfigure the spaces
+ * used in the Janus kernel.
  * 
- * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class OpenEventSpaceSpecificationImpl implements OpenEventSpaceSpecification {
+public class SpaceModule extends AbstractModule {
 
-	@Inject
-	private Injector injector;
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public EventSpaceImpl create(SpaceID id, Object... params) {
-		EventSpaceImpl space = new EventSpaceImpl(id);
-		this.injector.injectMembers(space);
-		return space;
+	protected void configure() {
+		bind(EventSpaceSpecification.class).to(EventSpaceSpecificationImpl.class).in(Singleton.class);
+		bind(OpenEventSpaceSpecification.class).to(OpenEventSpaceSpecificationImpl.class).in(Singleton.class);
+		bind(RestrictedAccessEventSpaceSpecification.class).to(RestrictedAccessEventSpaceSpecificationImpl.class).in(Singleton.class);
 	}
-
+	
 }

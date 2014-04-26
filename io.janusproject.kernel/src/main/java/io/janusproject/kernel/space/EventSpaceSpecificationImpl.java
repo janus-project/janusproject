@@ -17,38 +17,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
-import io.janusproject.kernel.bic.BuiltInCapacityModule;
-import io.janusproject.kernel.guava.GuavaModule;
-import io.janusproject.kernel.hazelcast.HazelcastModule;
-import io.janusproject.kernel.space.SpaceModule;
+import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.SpaceID;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
-/**
- * The Core Janus Module configures the minimum requirements
- * for Janus to run properly. If you need a standard configuration
- * use <code>JanusDefaultModule</code>
- * 
+/** Default implementation of the specification of an event space.
  * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class CoreModule extends AbstractModule {
+class EventSpaceSpecificationImpl implements EventSpaceSpecification {
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Inject
+	private Injector injector;
+
 	@Override
-	protected void configure() {
-		install(new HazelcastModule());
-		install(new GuavaModule());
-		install(new KernelModule());
-		install(new BuiltInCapacityModule());
-		install(new SpaceModule());
+	public EventSpaceImpl create(SpaceID id, Object... params) {
+		EventSpaceImpl space = new EventSpaceImpl(id);
+		this.injector.injectMembers(space);
+		return space;
 	}
-	
+
 }

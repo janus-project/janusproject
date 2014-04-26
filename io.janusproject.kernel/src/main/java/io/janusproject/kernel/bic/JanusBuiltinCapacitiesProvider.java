@@ -17,8 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
+import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.SpawnServiceListener;
 import io.sarl.core.Behaviors;
@@ -55,7 +56,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 
 	private SpawnService spawnService;
 
-	private JanusContextSpaceService contextRepository;
+	private ContextSpaceService contextRepository;
 
 	/**
 	 * {@inheritDoc}
@@ -84,11 +85,11 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 			@Override
 			public void agentSpawned(AgentContext parent, Agent agentID,
 					Object[] initializationParameters) {
-				externalContextSkill.install();
 				behaviorsSkill.install();
 				schedulesSkill.install();
 				lifecyleSkill.install();
 				defaultContextInteractionsSkill.install();
+				externalContextSkill.install();
 				
 				Initialize init = new Initialize();
 				init.setParameters(initializationParameters);
@@ -101,11 +102,11 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 				behaviorsSkill.selfEvent(destroy);
 				
 				
+				externalContextSkill.uninstall();
 				defaultContextInteractionsSkill.uninstall();
 				lifecyleSkill.uninstall();
 				schedulesSkill.uninstall();
 				behaviorsSkill.uninstall();
-				externalContextSkill.uninstall();
 			}
 		});
 
@@ -128,7 +129,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	 * @param contextRepository
 	 */
 	@Inject
-	private void setContextRepository(JanusContextSpaceService contextRepository) {
+	private void setContextRepository(ContextSpaceService contextRepository) {
 		this.contextRepository = contextRepository;
 	}
 

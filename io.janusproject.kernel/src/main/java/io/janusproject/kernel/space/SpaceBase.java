@@ -17,31 +17,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
-import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
 
-/** Default implementation of the specification of an event space.
+/** Abstract implementation of a space.
  * 
- * @author $Author: srodriguez$
- * @version $FullVersion$
+ * @author $Author: Sebastian Rodriguez$
+ * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class EventSpaceSpecificationImpl implements EventSpaceSpecification {
+public abstract class SpaceBase implements DistributedSpace {
 
-	@Inject
-	private Injector injector;
+	private SpaceID id;
+
+	/** Constructs a space.
+	 * 
+	 * @param id - identifier of the space.
+	 */
+	public SpaceBase(SpaceID id){
+		this.id = id;
+	}
 
 	@Override
-	public EventSpaceImpl create(SpaceID id, Object... params) {
-		EventSpaceImpl space = new EventSpaceImpl(id);
-		this.injector.injectMembers(space);
-		return space;
+	public SpaceID getID() {
+		return this.id;
 	}
 
 }

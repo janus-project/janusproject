@@ -17,8 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
+import io.janusproject.kernel.space.EventSpaceImpl;
 import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.LogService;
 import io.sarl.core.Behaviors;
@@ -56,13 +57,6 @@ import com.google.inject.Inject;
  * @mavenartifactid $ArtifactId$
  */
 class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerContextAccess {
-
-	/** Reference to the event bus.
-	 * The event bus is the mean of routing of the events inside
-	 * the context of the agents. The agent itself and the behaviors
-	 * are connected to the event bus.
-	 */
-	private AsyncSyncEventBus eventBus;
 	
 	/**
 	 * Context inside the agent. 
@@ -77,6 +71,13 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	 */
 	private final AgentEventListener agentAsEventListener;
 	
+	/** Reference to the event bus.
+	 * The event bus is the mean of routing of the events inside
+	 * the context of the agents. The agent itself and the behaviors
+	 * are connected to the event bus.
+	 */
+	private AsyncSyncEventBus eventBus;
+
 	@Inject
 	private LogService logger;
 	
@@ -90,15 +91,11 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		super(agent);
 		this.agentAsEventListener = new AgentEventListener(this);
 	}
-
-	/** Change the event bus inside the agent.
-	 * 
-	 * @param bus
-	 */
+	
 	@Inject
-	private void setInternalEventBus(AsyncSyncEventBus bus) {
-		this.eventBus = bus;
-		this.eventBus.register(this.getOwner());
+	private void setEventBus(AsyncSyncEventBus eventBus) {
+		this.eventBus = eventBus;
+		this.eventBus.register(getOwner());
 	}
 	
 	private void ensureInnerContext() {
@@ -121,6 +118,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 	@Override
 	protected void uninstall() {
 		super.uninstall();
+		//this.eventBus.unregister(getOwner());
 		// TODO: dispose eventBus
 	}
 	

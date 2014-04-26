@@ -17,8 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
+import io.janusproject.kernel.space.EventSpaceImpl;
+import io.janusproject.services.ContextSpaceService;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;
@@ -51,13 +53,13 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 	private Set<UUID> contexts = Sets.newConcurrentHashSet();
 
-	private final JanusContextSpaceService contextRepository;
+	private final ContextSpaceService contextRepository;
 
 	/**
 	 * @param agent - owner of the skill.
 	 * @param contextRepository - repository of the contexts.
 	 */
-	public ExternalContextAccessSkill(Agent agent, JanusContextSpaceService contextRepository) {
+	public ExternalContextAccessSkill(Agent agent, ContextSpaceService contextRepository) {
 		super(agent);
 		this.contextRepository = contextRepository;
 	}

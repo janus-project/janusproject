@@ -17,19 +17,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
-import io.janusproject.services.NetworkService.NetworkEventReceivingListener;
-import io.sarl.lang.core.Space;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 
 /**
- * Represents an space in which the messages may be distributed other the network.
+ * This module permits to reconfigure the built-in capacities
+ * used in the Janus kernel.
  * 
  * @author $Author: sgalland$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface DistributedSpace extends Space, NetworkEventReceivingListener {
-	//
+public class BuiltInCapacityModule extends AbstractModule {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void configure() {
+		bind(BuiltinCapacitiesProvider.class).to(JanusBuiltinCapacitiesProvider.class).in(Singleton.class);
+	}
+	
 }

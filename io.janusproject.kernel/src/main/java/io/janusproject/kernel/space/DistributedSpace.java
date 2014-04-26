@@ -17,36 +17,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
-import io.janusproject.kernel.executor.EventBusSubscriberExceptionHandler;
-import io.sarl.lang.core.Percept;
-
-import com.google.common.eventbus.AnnotationModule;
-import com.google.common.eventbus.SubscriberExceptionHandler;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
+import io.janusproject.services.NetworkService.NetworkEventReceivingListener;
+import io.sarl.lang.core.Space;
 
 /**
- * This module permits to reconfigure the Guava API for its
- * usae in the Janus kernel.
+ * Represents an space in which the messages may be distributed other the network.
  * 
- * @author $Author: srodriguez$
- * @version $FullVersion$
+ * @author $Author: sgalland$
+ * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class GuavaModule extends AbstractModule {
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void configure() {
-		// Bus exception
-		bind(SubscriberExceptionHandler.class).to(EventBusSubscriberExceptionHandler.class).in(Singleton.class);
-
-		install(new AnnotationModule(Percept.class));
-	}
-	
+public interface DistributedSpace extends Space, NetworkEventReceivingListener {
+	//
 }
