@@ -85,7 +85,7 @@ class SchedulesSkill extends Skill implements Schedules {
 
 	@Override
 	public AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
-		task.setProcedure((Procedure1<Agent>) procedure);
+		task.setProcedure(procedure);
 		ScheduledFuture<?> sf = 
 				this.executorService.schedule(
 				new AgentRunnableTask(task, getOwner()), delay, TimeUnit.MILLISECONDS);
@@ -149,7 +149,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	 */
 	@Override
 	public AgentTask every(AgentTask task, long period, Procedure1<? super Agent> procedure) {
-		task.setProcedure((Procedure1<Agent>) procedure);
+		task.setProcedure(procedure);
 		ScheduledFuture<?> sf = this.executorService.scheduleAtFixedRate(
 				new AgentRunnableTask(task, getOwner()), 0, period, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
