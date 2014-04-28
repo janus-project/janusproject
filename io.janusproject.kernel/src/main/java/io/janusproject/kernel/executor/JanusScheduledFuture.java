@@ -19,46 +19,35 @@
  */
 package io.janusproject.kernel.executor;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
-import com.google.inject.Inject;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableScheduledFuture;
+import java.util.concurrent.ScheduledFuture;
 
 /**
- * A factory of threads for the Janus platform.
+ * A {@link ScheduledFuture} that is {@link Runnable}. Successful
+ * execution of the <tt>run</tt> method causes completion of the
+ * <tt>Future</tt> and allows access to its results.
  * 
+ * @param <V>
+ * @see FutureTask
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class JanusThreadFactory implements ThreadFactory {
+public interface JanusScheduledFuture<V> extends RunnableScheduledFuture<V> {
 
-	private final ThreadFactory defaultThreadFactory;
-	
-	private final UncaughtExceptionHandler handler;
-
-	/** Constructs a factory based on the
-	 * {@link Executors#defaultThreadFactory() default thread factory}.
+	/** Replies the thread that is running the task associated to this future.
 	 * 
-	 * @param handler
+	 * @return the thread, never <code>null</code>.
 	 */
-	@Inject
-	public JanusThreadFactory(UncaughtExceptionHandler handler) {
-		this.handler = handler;
-		this.defaultThreadFactory = Executors.defaultThreadFactory();
-	}
-
-	/** {@inheritDoc}
+	public Thread getThread();
+	
+	/** Replies the task associated to this future is running on the calling thread.
+	 * 
+	 * @return <code>true</code> if the current thread is running the associated
+	 * task, <code>false</code> otherwie.
 	 */
-	@Override
-	public Thread newThread(Runnable r) {
-		Thread t = this.defaultThreadFactory.newThread(r);
-		t.setDaemon(false);
-		assert(this.handler!=null);
-		t.setUncaughtExceptionHandler(this.handler);
-		return t;
-	}
+	public boolean isCurrentThread();
 
 }

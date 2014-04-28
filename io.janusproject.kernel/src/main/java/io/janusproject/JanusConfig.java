@@ -90,7 +90,13 @@ public class JanusConfig {
 	 */
 	public static final int VALUE_NUMBER_OF_THREADS_IN_EXECUTOR = 20;
 	
+	/** Indicates the numbers of seconds that the kernel is waiting
+	 * for thread terminations before timeout.
+	 */
+	public static final int VALUE_KERNEL_THREAD_TIMEOUT = 120;
 
+	
+	
 	/** Replies the value of the system property.
 	 * 
 	 * @param name - name of the property.

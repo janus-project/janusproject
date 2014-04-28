@@ -62,7 +62,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 
 	@Inject
 	private Injector injector;
-
+	
 	/**
 	 */
 	public JanusSpawnService() {
