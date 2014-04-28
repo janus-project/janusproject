@@ -57,7 +57,6 @@ import com.google.inject.Singleton;
 class JanusSpawnService extends AbstractPrioritizedService implements SpawnService {
 
 	private final ListenerCollection<?> listeners = new ListenerCollection<>();
-	private final SpawnServiceListener loopListener = new SpawningEventEmitter();
 	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
 	private final Map<UUID, Agent> agents = new TreeMap<>();
 
@@ -80,8 +79,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			try {
 				Agent agent = agentClazz.getConstructor(UUID.class).newInstance(parent.getID());
 				assert(agent!=null);
-				this.agents.put(agent.getID(), agent);
 				this.injector.injectMembers(agent);
+				this.agents.put(agent.getID(), agent);
 				fireAgentSpawned(parent, agent, params);
 				return agent.getID();
 			} catch (Throwable e) {
@@ -158,7 +157,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 
 	/** Notifies the listeners about the agent creation.
 	 * 
-	 * @param context - context in whic hthe agent is spawn.
+	 * @param context - context in which the agent is spawn.
 	 * @param agent - the spawn agent.
 	 * @param initializationParameters
 	 */
@@ -172,7 +171,13 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		for (SpawnServiceListener l : listeners) {
 			l.agentSpawned(context, agent, initializationParameters);
 		}
-		this.loopListener.agentSpawned(context, agent, initializationParameters);
+		
+		EventSpace defSpace = context.getDefaultSpace();
+		AgentSpawned event = new AgentSpawned();
+		event.setAgentID(agent.getID());
+		event.setAgentType(agent.getClass());
+		event.setSource(defSpace.getAddress(agent.getID()));
+		defSpace.emit(event);
 	}
 
 	/** Notifies the listeners about the agent destruction.
@@ -186,7 +191,34 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			listeners = new SpawnServiceListener[list.size()];
 			list.toArray(listeners);
 		}
-		this.loopListener.agentDestroy(agent);
+
+		try {
+			Method method = Agent.class.getDeclaredMethod("getSkill", Class.class); //$NON-NLS-1$
+			boolean isAccessible = method.isAccessible();
+			ExternalContextAccess skill;
+			try {
+				method.setAccessible(true);
+				skill = (ExternalContextAccess)method.invoke(agent, ExternalContextAccess.class);
+			}
+			finally {
+				method.setAccessible(isAccessible);
+			}
+			//FIXME: Synchronize on the backgorund mutex associated with the collection replied by skill.getAllContexts()
+			for (AgentContext context : skill.getAllContexts()) {
+				EventSpace defSpace = context.getDefaultSpace();
+				AgentKilled event = new AgentKilled();
+				event.setAgentID(agent.getID());
+				event.setSource(defSpace.getAddress(agent.getID()));
+				defSpace.emit(event);
+			}
+		}
+		catch(RuntimeException e) {
+			throw e;
+		}
+		catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+
 		for (SpawnServiceListener l : listeners) {
 			l.agentDestroy(agent);
 		}
@@ -270,65 +302,6 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		 */
 		public CannotSpawnException(Class<? extends Agent> agentClazz, Throwable cause) {
 			super(Locale.getString(JanusSpawnService.class, "CANNOT_INSTANCIATE_AGENT", agentClazz), cause); //$NON-NLS-1$
-		}
-
-	}
-
-	/** This class permits to catch any spawning of an agent and emit
-	 * an event in the defualt space of the corresponding context.
-	 * 
-	 * @author $Author: ngaud$
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	private class SpawningEventEmitter implements SpawnServiceListener {
-
-		private volatile Method skillMethod = null;
-		
-		/**
-		 */
-		public SpawningEventEmitter() {
-			//
-		}
-
-		/** {@inheritDoc}
-		 */
-		@Override
-		public void agentSpawned(AgentContext parentContext, Agent agent, Object[] initializationParameters) {
-			EventSpace defSpace = parentContext.getDefaultSpace();
-			AgentSpawned event = new AgentSpawned();
-			event.setAgentID(agent.getID());
-			event.setAgentType(agent.getClass());
-			event.setSource(defSpace.getAddress(agent.getID()));
-			defSpace.emit(event);
-		}
-
-		/** {@inheritDoc}
-		 */
-		@Override
-		public void agentDestroy(final Agent agent) {
-			try {
-				Method method = this.skillMethod;
-				if (method==null) {
-					method = Agent.class.getDeclaredMethod("getSkill", Class.class); //$NON-NLS-1$
-					method.setAccessible(true);
-					this.skillMethod = method;
-				}
-				ExternalContextAccess skill = (ExternalContextAccess)method.invoke(agent, ExternalContextAccess.class);
-				//FIXME: Synchronize on the backgorund mutex associated with the collection replied by skill.getAllContexts()
-				for (AgentContext context : skill.getAllContexts()) {
-					EventSpace defSpace = context.getDefaultSpace();
-					AgentKilled event = new AgentKilled();
-					event.setAgentID(agent.getID());
-					event.setSource(defSpace.getAddress(agent.getID()));
-					defSpace.emit(event);
-				}
-			}
-			catch(Exception e) {
-				throw new Error(e);
-			}
 		}
 
 	}
