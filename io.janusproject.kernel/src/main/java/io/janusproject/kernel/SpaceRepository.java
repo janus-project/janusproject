@@ -75,6 +75,10 @@ class SpaceRepository {
 	 * Map linking a a class of Space specification to its related implementations' ids Use the map <code>spaces</code> to get the Space object associated to a given id This is local non-distributed map
 	 */
 	private final Multimap<Class<? extends SpaceSpecification<?>>, SpaceID> spacesBySpec;
+	
+	/** Id of the Hazelcast listener.
+	 */
+	private String spaceIDListener;
 
 	/**
 	 * @param distributedSpaceSetName - the name used to identify distributed map over network
@@ -98,14 +102,16 @@ class SpaceRepository {
 		for (SpaceID id : this.spaceIDs) {
 			ensureSpaceDefinition(id);
 		}
-		this.spaceIDs.addItemListener(new HazelcastListener(), true);
+		this.spaceIDListener = this.spaceIDs.addItemListener(new HazelcastListener(), true);
 	}
 	
 	/** Destroy this repository and releaqse all the resources.
 	 */
 	public synchronized void destroy() {
-		// Unconnect the space collection from remote clusters
-		//this.spaceIDs.destroy();
+		// Unregister from Hazelcast layer.
+		if (this.spaceIDListener!=null) {
+			this.spaceIDs.removeItemListener(this.spaceIDListener);
+		}
 	}
 	
 	private <S extends Space> S createSpaceInstance(Class<? extends SpaceSpecification<S>> spec, SpaceID spaceID, boolean updateSpaceIDs, Object[] creationParams) {
