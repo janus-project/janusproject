@@ -72,7 +72,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Override
 	protected void uninstall() {
 		for (ScheduledFuture<?> future : this.futures.values()) {
-			if(!future.isDone() && !future.isCancelled()){				
+			if(!future.isDone() && !future.isCancelled()){
 				future.cancel(true);
 			}
 		}
@@ -129,7 +129,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	public boolean cancel(AgentTask task, boolean mayInterruptIfRunning) {
 		if (task!=null) {
 			ScheduledFuture<?> future = this.futures.get(task.getName());
-			if (future!=null) {
+			if (future!=null && !future.isDone() && !future.isCancelled()) {
 				return future.cancel(mayInterruptIfRunning);
 			}
 		}

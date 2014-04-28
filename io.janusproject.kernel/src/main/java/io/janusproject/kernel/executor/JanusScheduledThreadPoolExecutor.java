@@ -56,7 +56,7 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable,
 			RunnableScheduledFuture<V> task) {
-		return new FutureWrapper<>(super.decorateTask(callable, task));
+		return new FutureWrapper<>(super.decorateTask(callable, task), callable);
 	}
 	
 	/** {@inheritDoc}
@@ -64,7 +64,7 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable,
 			RunnableScheduledFuture<V> task) {
-		return new FutureWrapper<>(super.decorateTask(runnable, task));
+		return new FutureWrapper<>(super.decorateTask(runnable, task), runnable);
 	}
 	
 	/**
@@ -77,19 +77,23 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	private class FutureWrapper<V> implements RunnableScheduledFuture<V> {
 		
 		private final RunnableScheduledFuture<V> task;
+		private final Object nameSource;
 		
 		/**
 		 * @param task
+		 * @param nameSource
 		 */
-		public FutureWrapper(RunnableScheduledFuture<V> task) {
+		public FutureWrapper(RunnableScheduledFuture<V> task, Object nameSource) {
 			assert(task!=this);
 			this.task = task;
+			this.nameSource = nameSource;
 		}
 		
 		/** {@inheritDoc}
 		 */
 		@Override
 		public void run() {
+			// Run the task.
 			try {
 				this.task.run();
 			}
@@ -99,16 +103,24 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 					this.task.get();
 				}
 				catch(Throwable e) {
-					Thread t = Thread.currentThread();
-					UncaughtExceptionHandler h = t.getUncaughtExceptionHandler();
-					if (h==null) h = Thread.getDefaultUncaughtExceptionHandler();
+					// Get the cause of the exception
 					while (e instanceof ExecutionException) {
 						e = ((ExecutionException)e).getCause();
 					}
-					if (h!=null) h.uncaughtException(t, e);
-					else {
-						System.err.println(e.toString());
-						e.printStackTrace();
+						Thread t = Thread.currentThread();
+						// Change the thread's name
+						String threadName = t.getName();
+						t.setName(toString());
+						// Call the exception catcher
+						UncaughtExceptionHandler h = t.getUncaughtExceptionHandler();
+						if (h==null) h = Thread.getDefaultUncaughtExceptionHandler();
+						if (h!=null) h.uncaughtException(t, e);
+						else {
+							System.err.println(e.toString());
+							e.printStackTrace();
+						}
+						// Restore the thread's name
+						t.setName(threadName);
 					}
 				}
 			}
@@ -175,7 +187,7 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 		 */
 		@Override
 		public String toString() {
-			return this.task.toString();
+			return this.nameSource != null ? this.nameSource.toString() : super.toString();
 		}
 		
 		/** {@inheritDoc}

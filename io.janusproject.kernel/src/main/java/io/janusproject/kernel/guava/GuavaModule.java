@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.guava;
 
-import io.janusproject.kernel.executor.EventBusSubscriberExceptionHandler;
+import io.janusproject.kernel.executor.JanusUncaughtExceptionHandler;
 import io.sarl.lang.core.Percept;
 
 import com.google.common.eventbus.AnnotationModule;
@@ -44,7 +44,7 @@ public class GuavaModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		// Bus exception
-		bind(SubscriberExceptionHandler.class).to(EventBusSubscriberExceptionHandler.class).in(Singleton.class);
+		bind(SubscriberExceptionHandler.class).to(JanusUncaughtExceptionHandler.class).in(Singleton.class);
 
 		install(new AnnotationModule(Percept.class));
 	}
