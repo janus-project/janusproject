@@ -175,10 +175,10 @@ class SchedulesSkill extends Skill implements Schedules {
 
 		@Override
 		public void run() {
-			if (this.agentTaskRef.get() == null) {
+			AgentTask task = this.agentTaskRef.get();
+			if (task == null) {
 				throw new RuntimeException(Locale.getString(SchedulesSkill.class, "NULL_AGENT_TASK")); //$NON-NLS-1$
 			}
-			AgentTask task = this.agentTaskRef.get();
 			if (task.getGuard().apply(this.agentRef.get())) {
 				task.getProcedure().apply(this.agentRef.get());
 			}

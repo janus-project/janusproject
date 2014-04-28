@@ -85,8 +85,8 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		EventBusSkill eventBusSkill = new EventBusSkill(agent, agentAddress);		
 		InnerContextSkill innerContextSkill = new InnerContextSkill(agent, agentAddress);
 		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent);
-		LifecycleSkill lifecycleSkill = new LifecycleSkill(agent, this.spawnService);
-		ExternalContextAccessSkill externalContextSkill = new ExternalContextAccessSkill(agent, this.contextRepository);
+		LifecycleSkill lifecycleSkill = new LifecycleSkill(agent);
+		ExternalContextAccessSkill externalContextSkill = new ExternalContextAccessSkill(agent);
 		DefaultContextInteractionsSkill interactionSkill = new DefaultContextInteractionsSkill(agent, this.contextRepository.getContext(agent.getParentID()));
 		SchedulesSkill scheduleSkill = new SchedulesSkill(agent);
 

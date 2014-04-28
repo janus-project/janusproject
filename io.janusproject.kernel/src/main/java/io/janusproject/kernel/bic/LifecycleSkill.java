@@ -28,6 +28,8 @@ import io.sarl.lang.core.Skill;
 
 import java.util.UUID;
 
+import com.google.inject.Inject;
+
 /**
  * Skill that permits to manage the life cycle of the agents.
  * 
@@ -40,17 +42,16 @@ import java.util.UUID;
  */
 class LifecycleSkill extends Skill implements Lifecycle {
 
-	private final SpawnService spawnService;
+	@Inject
+	private SpawnService spawnService;
 
 	/**
 	 * Constructs the skill.
 	 * 
 	 * @param agent - owner of the skill.
-	 * @param service - reference to the spawning service to use.
 	 */
-	public LifecycleSkill(Agent agent, SpawnService service) {
+	public LifecycleSkill(Agent agent) {
 		super(agent);
-		this.spawnService = service;
 	}
 
 	@Override

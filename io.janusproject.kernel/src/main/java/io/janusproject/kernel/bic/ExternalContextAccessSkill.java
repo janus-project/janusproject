@@ -39,6 +39,7 @@ import java.util.UUID;
 import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 
 /**
  * Skill that permits to access to the context in which the agent is located.
@@ -53,15 +54,14 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 	private final Set<UUID> contexts = Sets.newConcurrentHashSet();
 
-	private final ContextSpaceService contextRepository;
+	@Inject
+	private ContextSpaceService contextRepository;
 
 	/**
 	 * @param agent - owner of the skill.
-	 * @param contextRepository - repository of the contexts.
 	 */
-	public ExternalContextAccessSkill(Agent agent, ContextSpaceService contextRepository) {
+	public ExternalContextAccessSkill(Agent agent) {
 		super(agent);
-		this.contextRepository = contextRepository;
 	}
 
 	/** {@inheritDoc}
