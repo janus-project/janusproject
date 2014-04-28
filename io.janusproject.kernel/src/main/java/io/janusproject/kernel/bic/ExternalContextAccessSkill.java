@@ -51,7 +51,7 @@ import com.google.common.collect.Sets;
  */
 class ExternalContextAccessSkill extends Skill implements ExternalContextAccess {
 
-	private Set<UUID> contexts = Sets.newConcurrentHashSet();
+	private final Set<UUID> contexts = Sets.newConcurrentHashSet();
 
 	private final ContextSpaceService contextRepository;
 
@@ -62,6 +62,14 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	public ExternalContextAccessSkill(Agent agent, ContextSpaceService contextRepository) {
 		super(agent);
 		this.contextRepository = contextRepository;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected String attributesToString() {
+		return super.attributesToString()
+				+", contexts = "+this.contextRepository.toString(); //$NON-NLS-1$
 	}
 
 	@Override

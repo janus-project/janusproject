@@ -44,7 +44,7 @@ DefaultContextInteractions {
 
 	private AgentContext parentContext;
 	private EventSpace defaultSpace;
-	private Address agentAddress = null;
+	private Address addressInParentDefaultSpace = null;
 
 
 	/** Constructs a <code>DefaultContextInteractionsImpl</code>.
@@ -55,6 +55,16 @@ DefaultContextInteractions {
 	public DefaultContextInteractionsSkill(Agent agent, AgentContext parentContext) {
 		super(agent);
 		this.parentContext = parentContext;	
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected String attributesToString() {
+		return super.attributesToString()
+				+", parentContext = "+this.parentContext //$NON-NLS-1$
+				+", defaultSpace = "+this.defaultSpace //$NON-NLS-1$
+				+", addressInDefaultspace = "+this.addressInParentDefaultSpace; //$NON-NLS-1$
 	}
 
 	@Override
@@ -76,11 +86,11 @@ DefaultContextInteractions {
 
 	@Override
 	public Address getDefaultAddress() {
-		Address adr = this.agentAddress;
+		Address adr = this.addressInParentDefaultSpace;
 		if (adr==null) {
 			adr = this.defaultSpace.getAddress(getOwner().getID());
 			assert(adr!=null) : "The agent has no address in the default space"; //$NON-NLS-1$
-			this.agentAddress = adr;
+			this.addressInParentDefaultSpace = adr;
 		}
 		return adr;
 	}

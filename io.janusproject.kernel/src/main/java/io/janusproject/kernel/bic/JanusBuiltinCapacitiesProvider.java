@@ -30,11 +30,14 @@ import io.sarl.core.Initialize;
 import io.sarl.core.InnerContextAccess;
 import io.sarl.core.Lifecycle;
 import io.sarl.core.Schedules;
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Skill;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.util.OpenEventSpaceSpecification;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -71,8 +74,16 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	public Map<Class<? extends Capacity>, Skill> getBuiltinCapacities(Agent agent) {
 		Map<Class<? extends Capacity>, Skill> result = new HashMap<>(); // no need to be synchronized
 
-		EventBusSkill eventBusSkill = new EventBusSkill(agent);		
-		InnerContextSkill innerContextSkill = new InnerContextSkill(agent);
+		UUID innerContextID = agent.getID();
+		SpaceID innerSpaceID = new SpaceID(
+				innerContextID,
+				UUID.randomUUID(),
+				OpenEventSpaceSpecification.class);
+		Address agentAddress = new Address(innerSpaceID, agent.getID());
+		
+		
+		EventBusSkill eventBusSkill = new EventBusSkill(agent, agentAddress);		
+		InnerContextSkill innerContextSkill = new InnerContextSkill(agent, agentAddress);
 		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent);
 		LifecycleSkill lifecycleSkill = new LifecycleSkill(agent, this.spawnService);
 		ExternalContextAccessSkill externalContextSkill = new ExternalContextAccessSkill(agent, this.contextRepository);

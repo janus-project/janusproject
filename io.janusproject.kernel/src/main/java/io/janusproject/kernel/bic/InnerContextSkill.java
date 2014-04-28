@@ -21,12 +21,11 @@ package io.janusproject.kernel.bic;
 
 import io.janusproject.services.ContextSpaceService;
 import io.sarl.core.InnerContextAccess;
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Skill;
 import io.sarl.util.OpenEventSpace;
-
-import java.util.UUID;
 
 import com.google.inject.Inject;
 
@@ -41,6 +40,8 @@ import com.google.inject.Inject;
  */
 class InnerContextSkill extends Skill implements InnerContextAccess {
 	
+	private final Address agentAddressInInnerDefaultSpace;
+	
 	/**
 	 * Context inside the agent. 
 	 */
@@ -51,11 +52,21 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 
 	/**
 	 * @param agent
+	 * @param agentAddress
 	 */
-	public InnerContextSkill(Agent agent) {
+	public InnerContextSkill(Agent agent, Address agentAddress) {
 		super(agent);
+		this.agentAddressInInnerDefaultSpace = agentAddress;
 	}
 	
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected String attributesToString() {
+		return super.attributesToString()
+				+", addressInDefaultspace = "+this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -74,7 +85,9 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	@Override
 	public synchronized AgentContext getInnerContext() {
 		if (this.innerContext==null) {			
-			this.innerContext = this.contextService.createContext(getOwner().getID(), UUID.randomUUID());
+			this.innerContext = this.contextService.createContext(
+					this.agentAddressInInnerDefaultSpace.getSpaceId().getContextID(),
+					this.agentAddressInInnerDefaultSpace.getSpaceId().getID());
 			((OpenEventSpace)this.innerContext.getDefaultSpace()).register(getSkill(EventBusCapacity.class).asEventListener());
 		}
 		return this.innerContext;

@@ -59,7 +59,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 	@Override
 	public void killMe() {
-		this.spawnService.killAgent(this.getOwner().getID());
+		this.spawnService.killAgent(getOwner().getID());
 	}
 	
 }

@@ -61,6 +61,14 @@ class SchedulesSkill extends Skill implements Schedules {
 		super(agent);
 	}
 
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected String attributesToString() {
+		return super.attributesToString()
+				+", tasks = "+this.tasks; //$NON-NLS-1$
+	}
+
 	@Override
 	protected void uninstall() {
 		for (ScheduledFuture<?> future : this.futures.values()) {
@@ -72,7 +80,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	
 	@Override
 	public AgentTask in(long delay, Procedure1<? super Agent> procedure) {
-		return in(this.task("task-" + UUID.randomUUID()), delay, procedure); //$NON-NLS-1$
+		return in(task("task-" + UUID.randomUUID()), delay, procedure); //$NON-NLS-1$
 	}
 
 	@Override
@@ -133,7 +141,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	 */
 	@Override
 	public AgentTask every(long period, Procedure1<? super Agent> procedure) {
-		return every(this.task("task-" + UUID.randomUUID()), period, procedure); //$NON-NLS-1$
+		return every(task("task-" + UUID.randomUUID()), period, procedure); //$NON-NLS-1$
 	}
 
 	/**

@@ -21,6 +21,7 @@ package io.janusproject.kernel.bic;
 
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -63,5 +64,11 @@ interface EventBusCapacity extends Capacity {
 	 * @return the event listener of the owner of this skill.
 	 */
 	public EventListener asEventListener();
+	
+	/** Replies the address of the agent in its inner default space.
+	 * 
+	 * @return the address of the agent in its inner default space.
+	 */
+	public Address getInnerDefaultSpaceAddress();
 
 }

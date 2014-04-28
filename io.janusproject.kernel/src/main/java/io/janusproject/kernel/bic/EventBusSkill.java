@@ -23,12 +23,10 @@ import io.janusproject.services.LogService;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
-import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
-import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
 
 import java.lang.ref.WeakReference;
@@ -71,22 +69,32 @@ class EventBusSkill extends Skill implements EventBusCapacity {
 	@Inject
 	private LogService logger;
 
-	private Address agentAddress = null;
+	/** Address of the agent in the inner space.
+	 */
+	private final Address agentAddressInInnerDefaultSpace;
 	
 	/**
 	 * @param agent
+	 * @param addressInInnerDefaultSpace
 	 */
-	public EventBusSkill(Agent agent) {
+	public EventBusSkill(Agent agent, Address addressInInnerDefaultSpace) {
 		super(agent);
 		this.agentAsEventListener = new AgentEventListener(this);
+		this.agentAddressInInnerDefaultSpace = addressInInnerDefaultSpace;
 	}
 	
-	private synchronized Address getInnerDefaultSpaceAddress() {
-		if (this.agentAddress==null) {
-			EventSpace defSpace = getSkill(InnerContextAccess.class).getInnerContext().getDefaultSpace();
-			this.agentAddress = defSpace.getAddress(getOwner().getID());				
-		}
-		return this.agentAddress;
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected String attributesToString() {
+		return super.attributesToString()
+				+", state = "+this.state //$NON-NLS-1$
+				+", addressInDefaultspace = "+this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
+	}
+
+	@Override
+	public synchronized Address getInnerDefaultSpaceAddress() {
+		return this.agentAddressInInnerDefaultSpace;
 	}
 	
 	@Override
