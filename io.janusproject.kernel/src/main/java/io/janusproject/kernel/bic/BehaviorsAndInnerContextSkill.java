@@ -157,8 +157,7 @@ class BehaviorsAndInnerContextSkill extends Skill implements Behaviors, InnerCon
 		// Use the inner space so all behaviors (even agents inside the holon
 		// running in distant kernels) are notified. The event will return into
 		// the agent via the inner default space add call internalReceiveEvent
-		// for
-		// real posting
+		// for real posting
 		EventSpace defSpace = getSkill(InnerContextAccess.class).getInnerContext().getDefaultSpace();
 		evt.setSource(defSpace.getAddress(getOwner().getID()));
 		defSpace.emit(evt);
