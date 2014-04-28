@@ -243,7 +243,7 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	 */
 	@Override
 	public boolean isLoggeable(Level level) {
-		return this.logger.isLoggable(level);
+		return isRunning() && this.logger.isLoggable(level);
 	}
 
 	/** {@inheritDoc}
