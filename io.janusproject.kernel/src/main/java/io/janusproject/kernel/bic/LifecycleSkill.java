@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
+import io.janusproject.kernel.executor.ChuckNorrisException;
 import io.janusproject.services.SpawnService;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Agent;
@@ -60,6 +61,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	@Override
 	public void killMe() {
 		this.spawnService.killAgent(getOwner().getID());
+		throw new ChuckNorrisException();
 	}
 	
 }

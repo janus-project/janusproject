@@ -97,6 +97,9 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 			try {
 				this.task.run();
 			}
+			catch(ChuckNorrisException e) {
+				// This is the "break" exception
+			}
 			finally {
 				// Test the throw of an exception
 				try {
@@ -107,6 +110,7 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 					while (e instanceof ExecutionException) {
 						e = ((ExecutionException)e).getCause();
 					}
+					if (!(e instanceof ChuckNorrisException)) {
 						Thread t = Thread.currentThread();
 						// Change the thread's name
 						String threadName = t.getName();

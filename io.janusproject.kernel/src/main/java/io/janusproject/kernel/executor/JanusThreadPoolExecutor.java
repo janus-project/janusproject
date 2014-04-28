@@ -52,7 +52,7 @@ public class JanusThreadPoolExecutor extends ThreadPoolExecutor {
 	 */
 	@Override
 	protected void afterExecute(Runnable r, Throwable t) {
-		if (t!=null) {
+		if (t!=null && (!(t instanceof ChuckNorrisException))) {
 			UncaughtExceptionHandler h = Thread.currentThread().getUncaughtExceptionHandler();
 			if (h==null) h = Thread.getDefaultUncaughtExceptionHandler();
 			if (h!=null) h.uncaughtException(Thread.currentThread(), t);
