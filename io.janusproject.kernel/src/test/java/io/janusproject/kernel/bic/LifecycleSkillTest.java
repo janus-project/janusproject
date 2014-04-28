@@ -72,7 +72,7 @@ public class LifecycleSkillTest {
 		when(this.parentContext.getID()).thenReturn(this.parentContextID);
 		when(this.agent.getID()).thenReturn(this.agentID);
 		
-		BehaviorsAndInnerContextSkill behaviorsMock = mock(BehaviorsAndInnerContextSkill.class);
+		BehaviorsSkill behaviorsMock = mock(BehaviorsSkill.class);
 		ExternalContextAccessSkill extContextMock = mock(ExternalContextAccessSkill.class);
 				
 		Lifecycle l = PowerMockito.spy(this.skill);

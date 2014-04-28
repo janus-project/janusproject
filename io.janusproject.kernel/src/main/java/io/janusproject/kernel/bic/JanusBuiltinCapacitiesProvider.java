@@ -36,8 +36,11 @@ import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Skill;
 
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.UUID;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -52,10 +55,13 @@ import com.google.inject.Injector;
  */
 class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 
+	@Inject
 	private Injector injector;
 
+	@Inject
 	private SpawnService spawnService;
 
+	@Inject
 	private ContextSpaceService contextRepository;
 
 	/**
@@ -63,100 +69,142 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	 */
 	@Override
 	public Map<Class<? extends Capacity>, Skill> getBuiltinCapacities(Agent agent) {
-		Map<Class<? extends Capacity>, Skill> result = new ConcurrentHashMap<>();
-		final BehaviorsAndInnerContextSkill behaviorsSkill = createBehaviorsSkill(agent);
-		final ExternalContextAccessSkill externalContextSkill = createExternalContextAccessSkill(agent);
-		final LifecycleSkill lifecyleSkill = new LifecycleSkill(agent, this.spawnService);
-		final DefaultContextInteractionsSkill defaultContextInteractionsSkill = new DefaultContextInteractionsSkill(agent,
-				this.contextRepository.getContext(agent.getParentID()));
+		Map<Class<? extends Capacity>, Skill> result = new HashMap<>(); // no need to be synchronized
 
+		EventBusSkill eventBusSkill = new EventBusSkill(agent);		
+		InnerContextSkill innerContextSkill = new InnerContextSkill(agent);
+		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent);
+		LifecycleSkill lifecycleSkill = new LifecycleSkill(agent, this.spawnService);
+		ExternalContextAccessSkill externalContextSkill = new ExternalContextAccessSkill(agent, this.contextRepository);
+		DefaultContextInteractionsSkill interactionSkill = new DefaultContextInteractionsSkill(agent, this.contextRepository.getContext(agent.getParentID()));
+		SchedulesSkill scheduleSkill = new SchedulesSkill(agent);
+
+		this.injector.injectMembers(eventBusSkill);
+		this.injector.injectMembers(innerContextSkill);
+		this.injector.injectMembers(behaviorSkill);
+		this.injector.injectMembers(lifecycleSkill);
+		this.injector.injectMembers(externalContextSkill);
+		this.injector.injectMembers(interactionSkill);
+		this.injector.injectMembers(scheduleSkill);
 		
-		final SchedulesSkill schedulesSkill = createSchedulesSkill(agent);
-		result.put(InnerContextAccess.class, behaviorsSkill);
-		result.put(Behaviors.class, behaviorsSkill);
-
+		result.put(EventBusCapacity.class, eventBusSkill);
+		result.put(InnerContextAccess.class, innerContextSkill);
+		result.put(Behaviors.class, behaviorSkill);
+		result.put(Lifecycle.class, lifecycleSkill);
 		result.put(ExternalContextAccess.class, externalContextSkill);
-		result.put(Lifecycle.class, lifecyleSkill);
-		result.put(DefaultContextInteractions.class, defaultContextInteractionsSkill);
-		result.put(Schedules.class,schedulesSkill);
+		result.put(DefaultContextInteractions.class, interactionSkill);
+		result.put(Schedules.class, scheduleSkill);
+		
+		this.spawnService.addSpawnServiceListener(agent.getID(),
+				new SkillInstaller(
+						agent.getID(),
+						this.spawnService,
+						eventBusSkill,
+						innerContextSkill,
+						behaviorSkill,
+						lifecycleSkill,
+						externalContextSkill,
+						interactionSkill,
+						scheduleSkill));
 
-		this.spawnService.addSpawnServiceListener(agent.getID(), new SpawnServiceListener() {
-			
-			@Override
-			public void agentSpawned(AgentContext parent, Agent agentID,
-					Object[] initializationParameters) {
-				behaviorsSkill.install();
-				schedulesSkill.install();
-				lifecyleSkill.install();
-				defaultContextInteractionsSkill.install();
-				externalContextSkill.install();
-				
-				Initialize init = new Initialize();
-				init.setParameters(initializationParameters);
-				behaviorsSkill.selfEvent(init);
-			}
-			
-			@Override
-			public void agentDestroy(Agent agent) {
-				Destroy destroy = new Destroy();
-				behaviorsSkill.selfEvent(destroy);
-				
-				
-				externalContextSkill.uninstall();
-				defaultContextInteractionsSkill.uninstall();
-				lifecyleSkill.uninstall();
-				schedulesSkill.uninstall();
-				behaviorsSkill.uninstall();
-			}
-		});
+		// Test if all the BICs are installed.
+		assert(result.get(Behaviors.class)!=null);
+		assert(result.get(DefaultContextInteractions.class)!=null);
+		assert(result.get(EventBusCapacity.class)!=null);
+		assert(result.get(ExternalContextAccess.class)!=null);
+		assert(result.get(InnerContextAccess.class)!=null);
+		assert(result.get(Lifecycle.class)!=null);
+		assert(result.get(Schedules.class)!=null);
 
 		return result;
 	}
 
-	// --- Injections
-	
-	/** Set the spawning service.
-	 * 
-	 * @param spawnService
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
 	 */
-	@Inject
-	private void setSpawnService(SpawnService spawnService) {
-		this.spawnService = spawnService;
-	}
-	
-	/** Set the context repository.
-	 * 
-	 * @param contextRepository
-	 */
-	@Inject
-	private void setContextRepository(ContextSpaceService contextRepository) {
-		this.contextRepository = contextRepository;
-	}
+	private static class SkillInstaller implements SpawnServiceListener {
 
-	/** Set the injector.
-	 * 
-	 * @param injector
-	 */
-	@Inject
-	private void setInjector(Injector injector) {
-		this.injector = injector;
-	}
+		private final UUID agentID;
+		private final WeakReference<SpawnService> spawnService;
+		private final EventBusCapacity eventBusCapacity;
+		private final Skill[] skills;
+		
+		/**
+		 * @param agentId
+		 * @param spawnService
+		 * @param eventBusCapacity
+		 * @param skills
+		 */
+		public SkillInstaller(UUID agentId, SpawnService spawnService, EventBusCapacity eventBusCapacity, Skill... skills) {
+			this.agentID = agentId;
+			this.spawnService = new WeakReference<>(spawnService);
+			this.eventBusCapacity = eventBusCapacity;
+			this.skills = skills;
+		}
 
-	private ExternalContextAccessSkill createExternalContextAccessSkill(Agent agent) {
-		return new ExternalContextAccessSkill(agent, this.contextRepository);
-	}
+		@Override
+		public void agentSpawned(AgentContext parent, Agent agentID,
+				Object[] initializationParameters) {
+			try {
+				Method m = Skill.class.getDeclaredMethod("install"); //$NON-NLS-1$
+				boolean isAccessible = m.isAccessible();
+				try {
+					m.setAccessible(true);
+					m.invoke(this.eventBusCapacity);
+					for(Skill s : this.skills) {
+						m.invoke(s);
+					}
+				}
+				finally {
+					m.setAccessible(isAccessible);
+				}
+			}
+			catch(RuntimeException e) {
+				throw e;
+			}
+			catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+			
+			Initialize init = new Initialize();
+			init.setParameters(initializationParameters);
+			this.eventBusCapacity.selfEvent(init);
+		}
 
-	private BehaviorsAndInnerContextSkill createBehaviorsSkill(Agent agent) {
-		final BehaviorsAndInnerContextSkill s = new BehaviorsAndInnerContextSkill(agent);
-		this.injector.injectMembers(s);
+		@Override
+		public void agentDestroy(Agent agent) {
+			SpawnService service = this.spawnService.get();
+			assert(service!=null);
+			service.removeSpawnServiceListener(this.agentID, this);
+			
+			Destroy destroy = new Destroy();
+			this.eventBusCapacity.selfEvent(destroy);
 
-		return s;
-	}
-
-	private SchedulesSkill createSchedulesSkill(Agent agent) {
-		final SchedulesSkill s = new SchedulesSkill(agent);
-		this.injector.injectMembers(s);
-		return s;
+			try {
+				Method m = Skill.class.getDeclaredMethod("uninstall"); //$NON-NLS-1$
+				boolean isAccessible = m.isAccessible();
+				try {
+					m.setAccessible(true);
+					for(int i=this.skills.length-1; i>=0; i--) {
+						m.invoke(this.skills[i]);
+					}
+					m.invoke(this.eventBusCapacity);
+				}
+				finally {
+					m.setAccessible(isAccessible);
+				}
+			}
+			catch(RuntimeException e) {
+				throw e;
+			}
+			catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
 	}
 
 }

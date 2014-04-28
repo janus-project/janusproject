@@ -66,18 +66,16 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 	@Override
 	protected void install() {
-		super.install();
 		AgentContext ac = this.contextRepository.getContext(getOwner().getParentID());
-		this.join(ac.getID(), ac.getDefaultSpace().getID().getID());
+		join(ac.getID(), ac.getDefaultSpace().getID().getID());
 	}
 
 	@Override
 	protected void uninstall() {
 		// Leave all contexts including the default one.
 		for (UUID contextID : this.contexts) {
-			this.leave(contextID);
+			leave(contextID);
 		}
-		super.uninstall();
 	}
 
 	@Override
@@ -112,8 +110,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 		this.contexts.add(futureContext);
 		
-		BehaviorsAndInnerContextSkill imp = (BehaviorsAndInnerContextSkill) getSkill(Behaviors.class);
-		((EventSpaceImpl) ac.getDefaultSpace()).register(imp.asEventListener());
+		((EventSpaceImpl) ac.getDefaultSpace()).register(
+				getSkill(EventBusCapacity.class).asEventListener());
 
 		fireContextJoined(futureContext, futureContextDefaultSpaceID);
 		fireMemberJoined(ac);
@@ -158,8 +156,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 		fireContextLeft(contextID);
 		fireMemberLeft(ac);
 
-		BehaviorsAndInnerContextSkill imp = (BehaviorsAndInnerContextSkill) getSkill(Behaviors.class);
-		((EventSpaceImpl) ac.getDefaultSpace()).unregister(imp.asEventListener());
+		((EventSpaceImpl) ac.getDefaultSpace()).unregister(
+				getSkill(EventBusCapacity.class).asEventListener());
 		this.contexts.remove(contextID);
 	}
 

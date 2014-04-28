@@ -40,11 +40,11 @@ import java.util.UUID;
  * @mavenartifactid $ArtifactId$
  */
 class DefaultContextInteractionsSkill extends Skill implements
-		DefaultContextInteractions {
+DefaultContextInteractions {
 
 	private AgentContext parentContext;
 	private EventSpace defaultSpace;
-	private Address agentAddress;
+	private Address agentAddress = null;
 
 
 	/** Constructs a <code>DefaultContextInteractionsImpl</code>.
@@ -54,37 +54,35 @@ class DefaultContextInteractionsSkill extends Skill implements
 	 */
 	public DefaultContextInteractionsSkill(Agent agent, AgentContext parentContext) {
 		super(agent);
-		this.parentContext = parentContext;
-		
+		this.parentContext = parentContext;	
 	}
 
 	@Override
 	protected void install() {
 		this.defaultSpace = this.parentContext.getDefaultSpace();
-		this.agentAddress = this.defaultSpace.getAddress(getOwner().getID());
-		
-	}
-	
-	@Override
-	protected void uninstall() {	
-		super.uninstall();
 	}
 
 	@Override
 	public void emit(Event event) {
-		event.setSource(this.agentAddress);
+		event.setSource(getDefaultAddress());
 		this.defaultSpace.emit(event);
 	}
 
 	@Override
 	public void emit(Event event, Scope<Address> scope) {
-		event.setSource(this.agentAddress);
+		event.setSource(getDefaultAddress());
 		this.defaultSpace.emit(event, scope);
 	}
 
 	@Override
 	public Address getDefaultAddress() {
-		return this.agentAddress;
+		Address adr = this.agentAddress;
+		if (adr==null) {
+			adr = this.defaultSpace.getAddress(getOwner().getID());
+			assert(adr!=null) : "The agent has no address in the default space"; //$NON-NLS-1$
+			this.agentAddress = adr;
+		}
+		return adr;
 	}
 
 	@Override
@@ -107,5 +105,5 @@ class DefaultContextInteractionsSkill extends Skill implements
 	public UUID spawn(Class<? extends Agent> aAgent, Object[] params) {
 		return getSkill(Lifecycle.class).spawnInContext(aAgent, this.parentContext, params);
 	}
-	
+
 }

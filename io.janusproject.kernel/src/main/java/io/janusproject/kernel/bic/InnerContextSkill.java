@@ -19,16 +19,18 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.services.SpawnService;
-import io.sarl.core.Lifecycle;
+import io.janusproject.services.ContextSpaceService;
+import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Skill;
+import io.sarl.util.OpenEventSpace;
 
 import java.util.UUID;
 
-/**
- * Skill that permits to manage the life cycle of the agents.
+import com.google.inject.Inject;
+
+/** Janus implementation of SARL's {@link InnerContextSkill} built-in capacity.
  * 
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -37,29 +39,45 @@ import java.util.UUID;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class LifecycleSkill extends Skill implements Lifecycle {
+class InnerContextSkill extends Skill implements InnerContextAccess {
+	
+	/**
+	 * Context inside the agent. 
+	 */
+	private AgentContext innerContext = null;
 
-	private final SpawnService spawnService;
+	@Inject
+	private ContextSpaceService contextService;
 
 	/**
-	 * Constructs the skill.
-	 * 
-	 * @param agent - owner of the skill.
-	 * @param service - reference to the spawning service to use.
+	 * @param agent
 	 */
-	public LifecycleSkill(Agent agent, SpawnService service) {
+	public InnerContextSkill(Agent agent) {
 		super(agent);
-		this.spawnService = service;
-	}
-
-	@Override
-	public UUID spawnInContext(Class<? extends Agent> aAgent, AgentContext context, Object[] params) {
-		return this.spawnService.spawn(context, aAgent, params);
-	}
-
-	@Override
-	public void killMe() {
-		this.spawnService.killAgent(this.getOwner().getID());
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void uninstall() {
+		AgentContext context = this.innerContext;
+		this.innerContext = null;
+		if (context!=null) {
+			this.contextService.removeContext(context);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public synchronized AgentContext getInnerContext() {
+		if (this.innerContext==null) {			
+			this.innerContext = this.contextService.createContext(getOwner().getID(), UUID.randomUUID());
+			((OpenEventSpace)this.innerContext.getDefaultSpace()).register(getSkill(EventBusCapacity.class).asEventListener());
+		}
+		return this.innerContext;
+	}
+
 }

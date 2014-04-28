@@ -61,13 +61,6 @@ class SchedulesSkill extends Skill implements Schedules {
 		super(agent);
 	}
 
-	/** {@inheritDoc}
-	 */
-	@Override
-	protected void install() {
-		super.install();
-	}
-	
 	@Override
 	protected void uninstall() {
 		for (ScheduledFuture<?> future : this.futures.values()) {
@@ -75,7 +68,6 @@ class SchedulesSkill extends Skill implements Schedules {
 				future.cancel(true);
 			}
 		}
-		super.uninstall();
 	}
 	
 	@Override
