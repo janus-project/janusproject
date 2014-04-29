@@ -30,6 +30,8 @@ import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.Skill;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,6 +75,11 @@ class EventBusSkill extends Skill implements EventBusCapacity {
 	 */
 	private final Address agentAddressInInnerDefaultSpace;
 	
+	/** Collection of objects that are listening the event bus,
+	 * except the owner of this skill.
+	 */
+	private List<Object> eventListeners = null;
+	
 	/**
 	 * @param agent
 	 * @param addressInInnerDefaultSpace
@@ -98,24 +105,41 @@ class EventBusSkill extends Skill implements EventBusCapacity {
 	}
 	
 	@Override
-	protected void install() {
+	protected synchronized void install() {
 		this.eventBus.register(getOwner());
 	}
 	
 	@Override
-	protected void uninstall() {
+	protected synchronized void uninstall() {
 		this.eventBus.unregister(getOwner());
-		// TODO: dispose eventBus => remove any registered objects
+		// TODO: dispose eventBus => remove any registered objects, but without a list in this skill
+		List<Object> list = this.eventListeners;
+		this.eventListeners = null;
+		if (list!=null) {
+			for(Object o : list) {
+				this.eventBus.unregister(o);
+			}
+		}
 	}
 	
 	@Override
-	public void registerEventListener(Object listener) {
+	public synchronized void registerEventListener(Object listener) {
 		this.eventBus.register(listener);
+		if (this.eventListeners==null) {
+			this.eventListeners = new ArrayList<>();
+		}
+		this.eventListeners.add(listener);
 	}
 
 	@Override
-	public void unregisterEventListener(Object listener) {
+	public synchronized void unregisterEventListener(Object listener) {
 		this.eventBus.unregister(listener);
+		if (this.eventListeners!=null) {
+			this.eventListeners.remove(listener);
+			if (this.eventListeners.isEmpty()) {
+				this.eventListeners = null;
+			}
+		}
 	}
 
 	/**

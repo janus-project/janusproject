@@ -26,7 +26,9 @@ import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 
-/** Capacity that provides an event bus to notify the different components of an agent. 
+/** Capacity that provides an event bus to notify the different components of an agent.
+ * <p>
+ * <strong>This capacity is private to the Janus kernel.</strong> 
  * 
  * @author $Author: sgalland$
  * @version $FullVersion$
