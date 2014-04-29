@@ -20,6 +20,7 @@
 package io.janusproject;
 
 import io.janusproject.kernel.Kernel;
+import io.janusproject.network.NetworkConfig;
 import io.sarl.lang.core.Agent;
 
 import java.io.File;
@@ -29,8 +30,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -68,8 +71,11 @@ import org.arakhne.afc.vmutil.locale.Locale;
  */
 public class Boot {
 
-	/** Main function.
+	/** Main function that is parsing the command line and launching
+	 * the first agent.
+	 * 
 	 * @param args
+	 * @see #startJanus(Class, Object...)
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
@@ -126,7 +132,7 @@ public class Boot {
 			}
 			
 			String agentToLaunch = cmd.getArgs()[0];
-			showHeader();
+			showJanusLogo();
 			Class<?> agent = Class.forName(agentToLaunch);
 
 			// The following test is needed because the
@@ -174,10 +180,10 @@ public class Boot {
 		Options options = new Options();
 		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("f", "file", true, Locale.getString("CLI_HELP_F"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		options.addOption("o", "offline", false, Locale.getString("CLI_HELP_OFFLINE"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		options.addOption("B", "bootid", false, Locale.getString("CLI_HELP_SET_PROP", JanusConfig.BOOT_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		options.addOption("R", "randomid", false, Locale.getString("CLI_HELP_SET_PROP", JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_UNSET_PROPS", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("o", "offline", false, Locale.getString("CLI_HELP_O", JanusConfig.OFFLINE));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("B", "bootid", false, Locale.getString("CLI_HELP_B", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("R", "randomid", false, Locale.getString("CLI_HELP_R", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_W", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		opt = new Option("D", true, Locale.getString("CLI_HELP_D"));  //$NON-NLS-1$//$NON-NLS-2$
 		opt.setArgs(2);
 		opt.setValueSeparator('=');
@@ -185,22 +191,52 @@ public class Boot {
 		return options;
 	}
 
+
 	/** Show the help message on the standard console.
 	 * This function never returns.
 	 */
 	public static void showHelp() {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("io.janusproject.Boot [OPTIONS] AGENT_FQN", getOptions()); //$NON-NLS-1$
+		formatter.printHelp(Boot.class.getName()+" [OPTIONS] <agent_classname>", getOptions()); //$NON-NLS-1$
+		
+		Map<String,Object> defaultValues = new TreeMap<>();
+		JanusConfig.getDefaultValues(defaultValues);
+		NetworkConfig.getDefaultValues(defaultValues);
+		String none = Locale.getString("NONE"); //$NON-NLS-1$
+		System.out.println();
+		System.out.println(Locale.getString("DEFAULT_PROPERTIES")); //$NON-NLS-1$
+		for(Entry<String,Object> entry : defaultValues.entrySet()) {
+			Object o = entry.getValue();
+			if (o!=null) {
+				o = "'"+o.toString()+"'"; //$NON-NLS-1$//$NON-NLS-2$
+			}
+			else {
+				o = none;
+			}
+			System.out.println(Locale.getString("DEFAULT_PROPERTY", entry.getKey(), o)); //$NON-NLS-1$
+		}
+		
 		System.exit(255);
 	}
 	
 	/** Show the heading logo of the Janus platform.
 	 */
-	public static void showHeader() {
+	public static void showJanusLogo() {
 		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
 	}
 
-	private static void startJanus(Class<? extends Agent> agentCls, Object... params) {
+	/** Launch the first agent of the Janus kernel.
+	 * <p>
+	 * Thus function does not parse the command line.
+	 * See {@link #main(String[])} for the command line management.
+	 * When this function is called, it is assumed that all the
+	 * system's properties are correctly set.
+	 * 
+	 * @param agentCls - type of the first agent to launch.
+	 * @param params - parameters to pass to the agent as its initliazation parameters.
+	 * @see #main(String[])
+	 */
+	public static void startJanus(Class<? extends Agent> agentCls, Object... params) {
 		Kernel k = Kernel.create(new JanusDefaultModule());
 		k.spawn(agentCls, params);
 	}

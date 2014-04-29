@@ -19,6 +19,8 @@
  */
 package io.janusproject.network.event;
 
+import java.util.Map;
+
 import io.janusproject.JanusConfig;
 import io.janusproject.network.NetworkConfig;
 
@@ -38,6 +40,15 @@ import com.google.inject.Provides;
  * @mavenartifactid $ArtifactId$
  */
 public class NetworkEventModule extends AbstractModule {
+
+	/** Replies the default values for the properties supported by Janus config.
+	 * 
+	 * @param defaultValues - filled with the default values supported by the Janus platform.
+	 */
+	public static void getDefaultValues(Map<String,Object> defaultValues) {
+		defaultValues.put(NetworkConfig.SERIALIZER_CLASSNAME, GsonEventSerializer.class.getName());
+		defaultValues.put(NetworkConfig.ENCRYPTER_CLASSNAME, PlainTextEncrypter.class.getName());
+	}
 
 	@Override
 	protected void configure() {
