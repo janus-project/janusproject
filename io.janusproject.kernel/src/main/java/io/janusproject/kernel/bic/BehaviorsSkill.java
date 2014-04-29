@@ -21,6 +21,7 @@ package io.janusproject.kernel.bic;
 
 import io.sarl.core.Behaviors;
 import io.sarl.core.InnerContextAccess;
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Behavior;
 import io.sarl.lang.core.Event;
@@ -39,11 +40,15 @@ import io.sarl.lang.core.Skill;
  */
 class BehaviorsSkill extends Skill implements Behaviors {
 	
+	private final Address agentAddressInInnerDefaultSpace;
+	
 	/**
 	 * @param agent
+	 * @param agentAddressInInnerDefaultSpace
 	 */
-	public BehaviorsSkill(Agent agent) {
+	public BehaviorsSkill(Agent agent, Address agentAddressInInnerDefaultSpace) {
 		super(agent);
+		this.agentAddressInInnerDefaultSpace = agentAddressInInnerDefaultSpace;
 	}
 	
 	/**
@@ -73,9 +78,23 @@ class BehaviorsSkill extends Skill implements Behaviors {
 		// running in distant kernels) are notified. The event will return into
 		// the agent via the inner default space add call internalReceiveEvent
 		// for real posting
-		EventSpace defSpace = getSkill(InnerContextAccess.class).getInnerContext().getDefaultSpace();
-		evt.setSource(defSpace.getAddress(getOwner().getID()));
-		defSpace.emit(evt);
+		
+		InnerContextSkill context = (InnerContextSkill)getSkill(InnerContextAccess.class);
+		
+		if (context.hasInnerContext()) {
+			EventSpace defSpace = context.getInnerContext().getDefaultSpace();
+			evt.setSource(defSpace.getAddress(getOwner().getID()));
+			defSpace.emit(evt);
+		}
+		else {
+			// Do not call getInnerContext(), which is creating the inner context automatically.
+			// In place, try to send the event inside the agent only (and its behaviors).
+			EventListener listener = getSkill(EventBusCapacity.class).asEventListener();
+			assert(listener!=null);
+			evt.setSource(this.agentAddressInInnerDefaultSpace);
+			listener.receiveEvent(evt);
+		}
+		
 	}
 
 	/** {@inheritDoc}

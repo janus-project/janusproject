@@ -79,12 +79,12 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 				innerContextID,
 				UUID.randomUUID(),
 				OpenEventSpaceSpecification.class);
-		Address agentAddress = new Address(innerSpaceID, agent.getID());
+		Address agentAddressInInnerSpace = new Address(innerSpaceID, agent.getID());
 		
 		
-		EventBusSkill eventBusSkill = new EventBusSkill(agent, agentAddress);		
-		InnerContextSkill innerContextSkill = new InnerContextSkill(agent, agentAddress);
-		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent);
+		EventBusSkill eventBusSkill = new EventBusSkill(agent, agentAddressInInnerSpace);		
+		InnerContextSkill innerContextSkill = new InnerContextSkill(agent, agentAddressInInnerSpace);
+		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent, agentAddressInInnerSpace);
 		LifecycleSkill lifecycleSkill = new LifecycleSkill(agent);
 		ExternalContextAccessSkill externalContextSkill = new ExternalContextAccessSkill(agent);
 		DefaultContextInteractionsSkill interactionSkill = new DefaultContextInteractionsSkill(agent, this.contextRepository.getContext(agent.getParentID()));
@@ -160,6 +160,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		public void agentSpawned(AgentContext parent, Agent agentID,
 				Object[] initializationParameters) {
 			try {
+				// Use reflection to ignore the "protected" access right.
 				Method m = Skill.class.getDeclaredMethod("install"); //$NON-NLS-1$
 				boolean isAccessible = m.isAccessible();
 				try {
@@ -195,6 +196,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 			this.eventBusCapacity.selfEvent(destroy);
 
 			try {
+				// Use reflection to ignore the "protected" access right.
 				Method m = Skill.class.getDeclaredMethod("uninstall"); //$NON-NLS-1$
 				boolean isAccessible = m.isAccessible();
 				try {

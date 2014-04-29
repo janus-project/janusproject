@@ -52,11 +52,21 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 
 	/**
 	 * @param agent
-	 * @param agentAddress
+	 * @param agentAddressInInnerDefaultSpace
 	 */
-	public InnerContextSkill(Agent agent, Address agentAddress) {
+	public InnerContextSkill(Agent agent, Address agentAddressInInnerDefaultSpace) {
 		super(agent);
-		this.agentAddressInInnerDefaultSpace = agentAddress;
+		this.agentAddressInInnerDefaultSpace = agentAddressInInnerDefaultSpace;
+	}
+	
+	/** Replies if the inner context was instanciated.
+	 * To create the inner context, call {@link #getInnerContext()}
+	 * 
+	 * @return <code>true</code> if an instance of inner context exists,
+	 * otherwise <code>false</code>.
+	 */
+	synchronized boolean hasInnerContext() {
+		return this.innerContext!=null;
 	}
 	
 	/** {@inheritDoc}
