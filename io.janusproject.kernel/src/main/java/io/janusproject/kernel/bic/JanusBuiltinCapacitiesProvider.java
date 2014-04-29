@@ -107,7 +107,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		result.put(Schedules.class, scheduleSkill);
 		
 		this.spawnService.addSpawnServiceListener(agent.getID(),
-				new SkillInstaller(
+				new AgentLifeCycleSupport(
 						agent.getID(),
 						this.spawnService,
 						eventBusSkill,
@@ -136,7 +136,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static class SkillInstaller implements SpawnServiceListener {
+	private static class AgentLifeCycleSupport implements SpawnServiceListener {
 
 		private final UUID agentID;
 		private final WeakReference<SpawnService> spawnService;
@@ -149,7 +149,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		 * @param eventBusCapacity
 		 * @param skills
 		 */
-		public SkillInstaller(UUID agentId, SpawnService spawnService, EventBusCapacity eventBusCapacity, Skill... skills) {
+		public AgentLifeCycleSupport(UUID agentId, SpawnService spawnService, EventBusCapacity eventBusCapacity, Skill... skills) {
 			this.agentID = agentId;
 			this.spawnService = new WeakReference<>(spawnService);
 			this.eventBusCapacity = eventBusCapacity;
