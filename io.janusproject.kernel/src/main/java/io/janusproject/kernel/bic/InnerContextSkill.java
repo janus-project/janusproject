@@ -94,11 +94,14 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	 */
 	@Override
 	public synchronized AgentContext getInnerContext() {
-		if (this.innerContext==null) {			
+		if (this.innerContext==null) {
+			// Create the inner context.
 			this.innerContext = this.contextService.createContext(
 					this.agentAddressInInnerDefaultSpace.getSpaceId().getContextID(),
 					this.agentAddressInInnerDefaultSpace.getSpaceId().getID());
-			((OpenEventSpace)this.innerContext.getDefaultSpace()).register(getSkill(EventBusCapacity.class).asEventListener());
+			// Register the agent in the default space
+			((OpenEventSpace)this.innerContext.getDefaultSpace()).register(
+					getSkill(InternalEventBusCapacity.class).asEventListener());
 		}
 		return this.innerContext;
 	}

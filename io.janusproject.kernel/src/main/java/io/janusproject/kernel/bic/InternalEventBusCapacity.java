@@ -28,14 +28,14 @@ import io.sarl.lang.core.EventListener;
 
 /** Capacity that provides an event bus to notify the different components of an agent.
  * <p>
- * <strong>This capacity is private to the Janus kernel.</strong> 
+ * <strong>This capacity is provided by the Janus kernel, not SARL.</strong> 
  * 
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-interface EventBusCapacity extends Capacity {
+public interface InternalEventBusCapacity extends Capacity {
 	
 	/** Register the given object on the event bus for receiving
 	 * any event.

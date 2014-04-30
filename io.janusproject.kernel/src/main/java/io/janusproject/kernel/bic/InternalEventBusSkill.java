@@ -50,7 +50,7 @@ import com.google.inject.Inject;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class EventBusSkill extends Skill implements EventBusCapacity {
+class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	
 	/** State of the owner.
 	 */
@@ -84,7 +84,7 @@ class EventBusSkill extends Skill implements EventBusCapacity {
 	 * @param agent
 	 * @param addressInInnerDefaultSpace
 	 */
-	public EventBusSkill(Agent agent, Address addressInInnerDefaultSpace) {
+	public InternalEventBusSkill(Agent agent, Address addressInInnerDefaultSpace) {
 		super(agent);
 		this.agentAsEventListener = new AgentEventListener(this);
 		this.agentAddressInInnerDefaultSpace = addressInInnerDefaultSpace;
@@ -190,12 +190,12 @@ class EventBusSkill extends Skill implements EventBusCapacity {
 
 		private final Queue<Event> buffer = Queues.newConcurrentLinkedQueue();
 
-		private final WeakReference<EventBusSkill> skill;
+		private final WeakReference<InternalEventBusSkill> skill;
 
 		private final UUID aid;
 
 		@SuppressWarnings("synthetic-access")
-		public AgentEventListener(EventBusSkill skill) {
+		public AgentEventListener(InternalEventBusSkill skill) {
 			this.skill = new WeakReference<>(skill);
 			this.aid = skill.getOwner().getID();
 		}
@@ -208,7 +208,7 @@ class EventBusSkill extends Skill implements EventBusCapacity {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void receiveEvent(Event event) {
-			EventBusSkill s = this.skill.get();
+			InternalEventBusSkill s = this.skill.get();
 			synchronized(s) {
 				switch(s.state.get()) {
 				case NEW:
@@ -219,7 +219,7 @@ class EventBusSkill extends Skill implements EventBusCapacity {
 					break;
 				case DESTROYED:
 					// Dropping messages since agent is dying
-					s.logger.warning(EventBusSkill.class,
+					s.logger.warning(InternalEventBusSkill.class,
 									"EVENT_DROP_WARNING", event); //$NON-NLS-1$
 					break;
 				default:
@@ -230,7 +230,7 @@ class EventBusSkill extends Skill implements EventBusCapacity {
 
 		@SuppressWarnings("synthetic-access")
 		void agentInitialized() {
-			EventBusSkill s = this.skill.get();
+			InternalEventBusSkill s = this.skill.get();
 			synchronized(s) {
 				for (Event evt : this.buffer) {
 					s.internalReceiveEvent(evt);

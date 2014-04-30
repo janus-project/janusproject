@@ -31,6 +31,7 @@ import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
+import io.sarl.util.OpenEventSpace;
 
 import java.util.Collection;
 import java.util.Set;
@@ -118,8 +119,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 		this.contexts.add(futureContext);
 		
-		((EventSpaceImpl) ac.getDefaultSpace()).register(
-				getSkill(EventBusCapacity.class).asEventListener());
+		((OpenEventSpace) ac.getDefaultSpace()).register(
+				getSkill(InternalEventBusCapacity.class).asEventListener());
 
 		fireContextJoined(futureContext, futureContextDefaultSpaceID);
 		fireMemberJoined(ac);
@@ -165,7 +166,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 		fireMemberLeft(ac);
 
 		((EventSpaceImpl) ac.getDefaultSpace()).unregister(
-				getSkill(EventBusCapacity.class).asEventListener());
+				getSkill(InternalEventBusCapacity.class).asEventListener());
 		this.contexts.remove(contextID);
 	}
 

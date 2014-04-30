@@ -56,7 +56,7 @@ class BehaviorsSkill extends Skill implements Behaviors {
 	 */
 	@Override
 	public synchronized Behavior registerBehavior(Behavior attitude) {
-		getSkill(EventBusCapacity.class).registerEventListener(attitude);
+		getSkill(InternalEventBusCapacity.class).registerEventListener(attitude);
 		return attitude;
 	}
 
@@ -65,7 +65,7 @@ class BehaviorsSkill extends Skill implements Behaviors {
 	 */
 	@Override
 	public synchronized Behavior unregisterBehavior(Behavior attitude) {
-		getSkill(EventBusCapacity.class).unregisterEventListener(attitude);
+		getSkill(InternalEventBusCapacity.class).unregisterEventListener(attitude);
 		return attitude;
 	}
 	
@@ -89,7 +89,7 @@ class BehaviorsSkill extends Skill implements Behaviors {
 		else {
 			// Do not call getInnerContext(), which is creating the inner context automatically.
 			// In place, try to send the event inside the agent only (and its behaviors).
-			EventListener listener = getSkill(EventBusCapacity.class).asEventListener();
+			EventListener listener = getSkill(InternalEventBusCapacity.class).asEventListener();
 			assert(listener!=null);
 			evt.setSource(this.agentAddressInInnerDefaultSpace);
 			listener.receiveEvent(evt);
@@ -101,7 +101,7 @@ class BehaviorsSkill extends Skill implements Behaviors {
 	 */
 	@Override
 	public EventListener asEventListener() {
-		return getSkill(EventBusCapacity.class).asEventListener();
+		return getSkill(InternalEventBusCapacity.class).asEventListener();
 	}
 
 }

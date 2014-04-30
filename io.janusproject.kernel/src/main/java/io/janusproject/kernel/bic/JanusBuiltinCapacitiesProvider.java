@@ -82,7 +82,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		Address agentAddressInInnerSpace = new Address(innerSpaceID, agent.getID());
 		
 		
-		EventBusSkill eventBusSkill = new EventBusSkill(agent, agentAddressInInnerSpace);		
+		InternalEventBusSkill eventBusSkill = new InternalEventBusSkill(agent, agentAddressInInnerSpace);		
 		InnerContextSkill innerContextSkill = new InnerContextSkill(agent, agentAddressInInnerSpace);
 		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent, agentAddressInInnerSpace);
 		LifecycleSkill lifecycleSkill = new LifecycleSkill(agent);
@@ -98,7 +98,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		this.injector.injectMembers(interactionSkill);
 		this.injector.injectMembers(scheduleSkill);
 		
-		result.put(EventBusCapacity.class, eventBusSkill);
+		result.put(InternalEventBusCapacity.class, eventBusSkill);
 		result.put(InnerContextAccess.class, innerContextSkill);
 		result.put(Behaviors.class, behaviorSkill);
 		result.put(Lifecycle.class, lifecycleSkill);
@@ -121,7 +121,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		// Test if all the BICs are installed.
 		assert(result.get(Behaviors.class)!=null);
 		assert(result.get(DefaultContextInteractions.class)!=null);
-		assert(result.get(EventBusCapacity.class)!=null);
+		assert(result.get(InternalEventBusCapacity.class)!=null);
 		assert(result.get(ExternalContextAccess.class)!=null);
 		assert(result.get(InnerContextAccess.class)!=null);
 		assert(result.get(Lifecycle.class)!=null);
@@ -140,7 +140,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 
 		private final UUID agentID;
 		private final WeakReference<SpawnService> spawnService;
-		private final EventBusCapacity eventBusCapacity;
+		private final InternalEventBusCapacity eventBusCapacity;
 		private final Skill[] skills;
 		
 		/**
@@ -149,7 +149,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		 * @param eventBusCapacity
 		 * @param skills
 		 */
-		public AgentLifeCycleSupport(UUID agentId, SpawnService spawnService, EventBusCapacity eventBusCapacity, Skill... skills) {
+		public AgentLifeCycleSupport(UUID agentId, SpawnService spawnService, InternalEventBusCapacity eventBusCapacity, Skill... skills) {
 			this.agentID = agentId;
 			this.spawnService = new WeakReference<>(spawnService);
 			this.eventBusCapacity = eventBusCapacity;
