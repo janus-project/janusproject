@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.RestrictedAccessEventSpaceSpecification;

@@ -17,36 +17,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
-import io.janusproject.kernel.executor.EventBusSubscriberExceptionHandler;
-import io.sarl.lang.core.Percept;
+import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.util.OpenEventSpaceSpecification;
+import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
-import com.google.common.eventbus.AnnotationModule;
-import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
 /**
- * This module permits to reconfigure the Guava API for its
- * usae in the Janus kernel.
+ * This module permits to reconfigure the spaces
+ * used in the Janus kernel.
  * 
- * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class GuavaModule extends AbstractModule {
+public class SpaceModule extends AbstractModule {
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	protected void configure() {
-		// Bus exception
-		bind(SubscriberExceptionHandler.class).to(EventBusSubscriberExceptionHandler.class).in(Singleton.class);
-
-		install(new AnnotationModule(Percept.class));
+		bind(EventSpaceSpecification.class).to(EventSpaceSpecificationImpl.class).in(Singleton.class);
+		bind(OpenEventSpaceSpecification.class).to(OpenEventSpaceSpecificationImpl.class).in(Singleton.class);
+		bind(RestrictedAccessEventSpaceSpecification.class).to(RestrictedAccessEventSpaceSpecificationImpl.class).in(Singleton.class);
 	}
 	
 }

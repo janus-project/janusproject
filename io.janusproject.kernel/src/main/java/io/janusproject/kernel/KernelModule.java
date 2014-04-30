@@ -33,10 +33,6 @@ import io.janusproject.services.NetworkService;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.impl.ArakhneLocaleLogService;
 import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.BuiltinCapacitiesProvider;
-import io.sarl.lang.core.EventSpaceSpecification;
-import io.sarl.util.OpenEventSpaceSpecification;
-import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Set;
@@ -82,11 +78,6 @@ class KernelModule extends AbstractModule {
 		bind(java.util.concurrent.ExecutorService.class).to(JanusThreadPoolExecutor.class).in(Singleton.class);
 		bind(ScheduledExecutorService.class).to(JanusScheduledThreadPoolExecutor.class).in(Singleton.class);
 		
-		bind(BuiltinCapacitiesProvider.class).to(JanusBuiltinCapacitiesProvider.class).in(Singleton.class);
-		bind(EventSpaceSpecification.class).to(EventSpaceSpecificationImpl.class).in(Singleton.class);
-		bind(OpenEventSpaceSpecification.class).to(OpenEventSpaceSpecificationImpl.class).in(Singleton.class);
-		bind(RestrictedAccessEventSpaceSpecification.class).to(RestrictedAccessEventSpaceSpecificationImpl.class).in(Singleton.class);
-
 		// Bind the services, indiviually
 		bind(LogService.class).to(ArakhneLocaleLogService.class).in(Singleton.class);
 		bind(ContextSpaceService.class).to(JanusContextSpaceService.class).in(Singleton.class);

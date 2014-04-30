@@ -17,31 +17,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.SpaceID;
-import io.sarl.util.OpenEventSpaceSpecification;
+import io.sarl.util.OpenEventSpace;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-
-/** Default implementation of the specification of an event space.
+/**
+ * Default implementation of an event space.
  * 
  * @author $Author: srodriguez$
- * @version $FullVersion$
+ * @author $Author: ngaud$
+ * @author $Author: sgalland$
+ * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class OpenEventSpaceSpecificationImpl implements OpenEventSpaceSpecification {
+public class EventSpaceImpl extends AbstractEventSpace implements OpenEventSpace {
 
-	@Inject
-	private Injector injector;
+	/**
+	 * Constructs an event space.
+	 * 
+	 * @param id - identifier of the space.
+	 */
+	public EventSpaceImpl(SpaceID id) {
+		super(id);
+	}
 
 	@Override
-	public EventSpaceImpl create(SpaceID id, Object... params) {
-		EventSpaceImpl space = new EventSpaceImpl(id);
-		this.injector.injectMembers(space);
-		return space;
+	public Address register(EventListener entity) {
+		Address a = new Address(getID(), entity.getID());
+		return this.participants.registerParticipant(a, entity);
+	}
+
+	@Override
+	public Address unregister(EventListener entity) {
+		return this.participants.unregisterParticipant(entity);
 	}
 
 }

@@ -17,10 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
-import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.util.OpenEventSpaceSpecification;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -32,7 +32,7 @@ import com.google.inject.Injector;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class EventSpaceSpecificationImpl implements EventSpaceSpecification {
+class OpenEventSpaceSpecificationImpl implements OpenEventSpaceSpecification {
 
 	@Inject
 	private Injector injector;

@@ -17,13 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.hazelcast;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.JanusDefaultModule;
-import io.janusproject.kernel.hazelcast.AddressSerializer;
-import io.janusproject.kernel.hazelcast.HazelcastDistributedDataStructureFactory;
-import io.janusproject.kernel.hazelcast.SpaceIDSerializer;
 import io.janusproject.network.NetworkUtil;
 import io.janusproject.repository.DistributedDataStructureFactory;
 import io.sarl.lang.core.Address;
@@ -46,7 +43,7 @@ import com.hazelcast.core.HazelcastInstance;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class HazelcastModule extends AbstractModule {
+public class HazelcastModule extends AbstractModule {
 
 	/**
 	 * {@inheritDoc}

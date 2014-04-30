@@ -39,7 +39,7 @@ import com.hazelcast.nio.serialization.StreamSerializer;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class SpaceIDSerializer implements StreamSerializer<SpaceID> {
+class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 
 	/** Unique identifier for the {@link SpaceID} type.
 	 */

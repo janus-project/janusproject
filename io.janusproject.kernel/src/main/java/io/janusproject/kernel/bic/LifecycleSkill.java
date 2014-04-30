@@ -17,8 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
+import io.janusproject.kernel.executor.ChuckNorrisException;
 import io.janusproject.services.SpawnService;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Agent;
@@ -26,6 +27,8 @@ import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Skill;
 
 import java.util.UUID;
+
+import com.google.inject.Inject;
 
 /**
  * Skill that permits to manage the life cycle of the agents.
@@ -39,17 +42,16 @@ import java.util.UUID;
  */
 class LifecycleSkill extends Skill implements Lifecycle {
 
-	private final SpawnService spawnService;
+	@Inject
+	private SpawnService spawnService;
 
 	/**
 	 * Constructs the skill.
 	 * 
 	 * @param agent - owner of the skill.
-	 * @param service - reference to the spawning service to use.
 	 */
-	public LifecycleSkill(Agent agent, SpawnService service) {
+	public LifecycleSkill(Agent agent) {
 		super(agent);
-		this.spawnService = service;
 	}
 
 	@Override
@@ -59,21 +61,8 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 	@Override
 	public void killMe() {
-		this.spawnService.killAgent(this.getOwner().getID());
+		this.spawnService.killAgent(getOwner().getID());
+		throw new ChuckNorrisException();
 	}
 	
-	/** {@inheritDoc}
-	 */
-	@Override
-	protected void install() {
-		super.install();
-	}
-	
-	/** {@inheritDoc}
-	 */
-	@Override
-	protected void uninstall() {
-		super.uninstall();
-	}
-
 }

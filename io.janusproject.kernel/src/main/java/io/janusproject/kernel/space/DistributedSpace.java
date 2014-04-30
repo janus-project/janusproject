@@ -17,38 +17,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
-import io.janusproject.kernel.bic.BuiltInCapacityModule;
-import io.janusproject.kernel.guava.GuavaModule;
-import io.janusproject.kernel.hazelcast.HazelcastModule;
-import io.janusproject.kernel.space.SpaceModule;
-
-import com.google.inject.AbstractModule;
+import io.janusproject.services.NetworkService.NetworkEventReceivingListener;
+import io.sarl.lang.core.Space;
 
 /**
- * The Core Janus Module configures the minimum requirements
- * for Janus to run properly. If you need a standard configuration
- * use <code>JanusDefaultModule</code>
+ * Represents an space in which the messages may be distributed other the network.
  * 
- * 
- * @author $Author: srodriguez$
- * @version $FullVersion$
+ * @author $Author: sgalland$
+ * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class CoreModule extends AbstractModule {
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void configure() {
-		install(new HazelcastModule());
-		install(new GuavaModule());
-		install(new KernelModule());
-		install(new BuiltInCapacityModule());
-		install(new SpaceModule());
-	}
-	
+public interface DistributedSpace extends Space, NetworkEventReceivingListener {
+	//
 }

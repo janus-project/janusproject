@@ -17,53 +17,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.hazelcast;
+package io.janusproject.kernel.space;
 
-import io.sarl.lang.core.Address;
+import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
 
-import java.io.IOException;
-import java.util.UUID;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
-import com.hazelcast.nio.ObjectDataInput;
-import com.hazelcast.nio.ObjectDataOutput;
-import com.hazelcast.nio.serialization.StreamSerializer;
-
-/** Serializer for Janus addresses.
+/** Default implementation of the specification of an event space.
  * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class AddressSerializer implements StreamSerializer<Address> {
+class EventSpaceSpecificationImpl implements EventSpaceSpecification {
 
-	/** Unique identifier for the {@link Address} type.
-	 */
-	public static final int ADDRESS_CLASS_TYPE = 19119;
-
-	@Override
-	public int getTypeId() {
-		return ADDRESS_CLASS_TYPE;
-	}
+	@Inject
+	private Injector injector;
 
 	@Override
-	public void destroy() {
-		//
-	}
-
-	@Override
-	public void write(ObjectDataOutput out, Address object) throws IOException {
-		out.writeObject(object.getUUID());
-		out.writeObject(object.getSpaceId());
-
-	}
-
-	@Override
-	public Address read(ObjectDataInput in) throws IOException {
-		UUID id = in.readObject();
-		SpaceID sid = in.readObject();
-		return new Address(sid, id);
+	public EventSpaceImpl create(SpaceID id, Object... params) {
+		EventSpaceImpl space = new EventSpaceImpl(id);
+		this.injector.injectMembers(space);
+		return space;
 	}
 
 }

@@ -19,46 +19,26 @@
  */
 package io.janusproject.kernel.executor;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
-import com.google.inject.Inject;
 
 /**
- * A factory of threads for the Janus platform.
+ * This exception is thrown when a function must never
+ * return from the point of view of an agent.
+ * It permits to never return from functions such as 
+ * {@code killMe}.
  * 
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class JanusThreadFactory implements ThreadFactory {
+public class ChuckNorrisException extends RuntimeException {
 
-	private final ThreadFactory defaultThreadFactory;
-	
-	private final UncaughtExceptionHandler handler;
+	private static final long serialVersionUID = -3212775069868589362L;
 
-	/** Constructs a factory based on the
-	 * {@link Executors#defaultThreadFactory() default thread factory}.
-	 * 
-	 * @param handler
+	/**
 	 */
-	@Inject
-	public JanusThreadFactory(UncaughtExceptionHandler handler) {
-		this.handler = handler;
-		this.defaultThreadFactory = Executors.defaultThreadFactory();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Thread newThread(Runnable r) {
-		Thread t = this.defaultThreadFactory.newThread(r);
-		t.setDaemon(false);
-		assert(this.handler!=null);
-		t.setUncaughtExceptionHandler(this.handler);
-		return t;
+	public ChuckNorrisException() {
+		//
 	}
 
 }

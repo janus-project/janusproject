@@ -19,7 +19,10 @@
  */
 package io.janusproject.network;
 
+import io.janusproject.network.event.NetworkEventModule;
+
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import com.google.common.base.Charsets;
 import com.google.inject.name.Named;
@@ -54,5 +57,14 @@ public class NetworkConfig {
 	 * This constant was introduced to enforce the values on different platforms.
 	 */
 	public static final Charset BYTE_ARRAY_STRING_CHARSET = Charsets.UTF_8;
+
+	/** Replies the default values for the properties supported by Janus config.
+	 * 
+	 * @param defaultValues - filled with the default values supported by the Janus platform.
+	 */
+	public static void getDefaultValues(Map<String,Object> defaultValues) {
+		NetworkEventModule.getDefaultValues(defaultValues);
+		defaultValues.put(AES_KEY, null);
+	}
 
 }

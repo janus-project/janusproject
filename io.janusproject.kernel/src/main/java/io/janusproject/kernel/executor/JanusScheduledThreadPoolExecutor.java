@@ -22,6 +22,7 @@ package io.janusproject.kernel.executor;
 import io.janusproject.JanusConfig;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
@@ -30,6 +31,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.inject.Inject;
 
@@ -48,15 +50,15 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	 */
 	@Inject
 	public JanusScheduledThreadPoolExecutor(ThreadFactory factory) {
-        super(JanusConfig.VALUE_NUMBER_OF_THREADS_IN_EXECUTOR, factory);
+		super(JanusConfig.VALUE_NUMBER_OF_THREADS_IN_EXECUTOR, factory);
 	}
-
+	
 	/** {@inheritDoc}
 	 */
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable,
 			RunnableScheduledFuture<V> task) {
-		return new FutureWrapper<>(super.decorateTask(callable, task));
+		return new FutureWrapper<>(task);
 	}
 	
 	/** {@inheritDoc}
@@ -64,7 +66,51 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable,
 			RunnableScheduledFuture<V> task) {
-		return new FutureWrapper<>(super.decorateTask(runnable, task));
+		return new FutureWrapper<>(task);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected void beforeExecute(Thread t, Runnable r) {
+		((FutureWrapper<?>)r).setThread(t);
+	}
+
+	@Override
+	protected void afterExecute(Runnable r, Throwable t) {
+		assert(t==null);
+		FutureWrapper<?> future = (FutureWrapper<?>)r;
+		assert(future.isDone() || future.isCancelled() || future.isPeriodic());
+		if (future.isDone() || future.isCancelled()) {
+			extractException(future);
+		}
+	}
+	
+	private static void extractException(FutureWrapper<?> future) {
+		if (!future.consume()) {
+			// Test the throw of an exception
+			try {
+				// This function should not timeout because the task should be terminated.
+				future.get(10, TimeUnit.SECONDS);
+			}
+			catch(Throwable e) {
+				// Get the cause of the exception
+				while (e instanceof ExecutionException) {
+					e = ((ExecutionException)e).getCause();
+				}
+				if (!(e instanceof ChuckNorrisException)) {
+					// Call the exception catcher
+					Thread th = future.getThread();
+					UncaughtExceptionHandler h = th.getUncaughtExceptionHandler();
+					if (h==null) h = Thread.getDefaultUncaughtExceptionHandler();
+					if (h!=null) h.uncaughtException(th, e);
+					else {
+						System.err.println(e.toString());
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -74,10 +120,12 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class FutureWrapper<V> implements RunnableScheduledFuture<V> {
-		
+	private static class FutureWrapper<V> implements JanusScheduledFuture<V> {
+
+		private final AtomicBoolean treated = new AtomicBoolean(false);
 		private final RunnableScheduledFuture<V> task;
-		
+		private WeakReference<Thread> thread = null;
+
 		/**
 		 * @param task
 		 */
@@ -86,112 +134,88 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 			this.task = task;
 		}
 		
-		/** {@inheritDoc}
+		/** Replies if this future was already treated before.
+		 * 
+		 * @return <code>true</code> or <code>false</code>.
 		 */
-		@Override
-		public void run() {
-			try {
-				this.task.run();
-			}
-			finally {
-				// Test the throw of an exception
-				try {
-					this.task.get();
-				}
-				catch(Throwable e) {
-					Thread t = Thread.currentThread();
-					UncaughtExceptionHandler h = t.getUncaughtExceptionHandler();
-					if (h==null) h = Thread.getDefaultUncaughtExceptionHandler();
-					while (e instanceof ExecutionException) {
-						e = ((ExecutionException)e).getCause();
-					}
-					if (h!=null) h.uncaughtException(t, e);
-					else {
-						System.err.println(e.toString());
-						e.printStackTrace();
-					}
-				}
-			}
+		public boolean consume() {
+			return this.treated.getAndSet(true);
 		}
 
-		/** {@inheritDoc}
+		/** Set the running thread.
+		 * 
+		 * @param thread
 		 */
+		public void setThread(Thread thread) {
+			this.thread = new WeakReference<>(thread);
+		}
+
+		@Override
+		public Thread getThread() {
+			return this.thread.get();
+		}
+		
+		@Override
+		public boolean isCurrentThread() {
+			return Thread.currentThread()==this.thread.get();
+		}
+
+		@Override
+		public void run() {
+			this.task.run();
+		}
+
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
 			return this.task.cancel(mayInterruptIfRunning);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public boolean isCancelled() {
 			return this.task.isCancelled();
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public boolean isDone() {
 			return this.task.isDone();
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public V get() throws InterruptedException, ExecutionException {
 			return this.task.get();
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public V get(long timeout, TimeUnit unit) throws InterruptedException,
-				ExecutionException, TimeoutException {
+		ExecutionException, TimeoutException {
 			return this.task.get(timeout, unit);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public long getDelay(TimeUnit unit) {
 			return this.task.getDelay(unit);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public int compareTo(Delayed o) {
 			return this.task.compareTo(o);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public boolean isPeriodic() {
 			return this.task.isPeriodic();
 		}
-		
-		/** {@inheritDoc}
-		 */
-		@Override
-		public String toString() {
-			return this.task.toString();
-		}
-		
-		/** {@inheritDoc}
-		 */
+
 		@Override
 		public boolean equals(Object obj) {
 			return this.task.equals(obj);
 		}
-		
-		/** {@inheritDoc}
-		 */
+
 		@Override
 		public int hashCode() {
 			return this.task.hashCode();
 		}
-		
+
 	}
 
 }

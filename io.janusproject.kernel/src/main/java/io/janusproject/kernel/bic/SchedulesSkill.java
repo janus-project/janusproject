@@ -17,8 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
+import io.janusproject.kernel.executor.JanusScheduledFuture;
 import io.janusproject.services.ExecutorService;
 import io.sarl.core.AgentTask;
 import io.sarl.core.Schedules;
@@ -64,28 +65,33 @@ class SchedulesSkill extends Skill implements Schedules {
 	/** {@inheritDoc}
 	 */
 	@Override
-	protected void install() {
-		super.install();
+	protected String attributesToString() {
+		return super.attributesToString()
+				+", tasks = "+this.tasks; //$NON-NLS-1$
 	}
-	
+
 	@Override
 	protected void uninstall() {
 		for (ScheduledFuture<?> future : this.futures.values()) {
-			if(!future.isDone() && !future.isCancelled()){				
-				future.cancel(true);
+			if ((future instanceof JanusScheduledFuture<?>)
+				&&((JanusScheduledFuture<?>)future).isCurrentThread()) {
+				// Ignore the cancelation of the future.
+				// It is assumed that a ChuckNorrisException will be thrown later.
+			}
+			else {
+				future.cancel(false);
 			}
 		}
-		super.uninstall();
 	}
 	
 	@Override
 	public AgentTask in(long delay, Procedure1<? super Agent> procedure) {
-		return in(this.task("task-" + UUID.randomUUID()), delay, procedure); //$NON-NLS-1$
+		return in(task("task-" + UUID.randomUUID()), delay, procedure); //$NON-NLS-1$
 	}
 
 	@Override
 	public AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
-		task.setProcedure((Procedure1<Agent>) procedure);
+		task.setProcedure(procedure);
 		ScheduledFuture<?> sf = 
 				this.executorService.schedule(
 				new AgentRunnableTask(task, getOwner()), delay, TimeUnit.MILLISECONDS);
@@ -129,7 +135,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	public boolean cancel(AgentTask task, boolean mayInterruptIfRunning) {
 		if (task!=null) {
 			ScheduledFuture<?> future = this.futures.get(task.getName());
-			if (future!=null) {
+			if (future!=null && !future.isDone() && !future.isCancelled()) {
 				return future.cancel(mayInterruptIfRunning);
 			}
 		}
@@ -141,7 +147,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	 */
 	@Override
 	public AgentTask every(long period, Procedure1<? super Agent> procedure) {
-		return every(this.task("task-" + UUID.randomUUID()), period, procedure); //$NON-NLS-1$
+		return every(task("task-" + UUID.randomUUID()), period, procedure); //$NON-NLS-1$
 	}
 
 	/**
@@ -149,7 +155,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	 */
 	@Override
 	public AgentTask every(AgentTask task, long period, Procedure1<? super Agent> procedure) {
-		task.setProcedure((Procedure1<Agent>) procedure);
+		task.setProcedure(procedure);
 		ScheduledFuture<?> sf = this.executorService.scheduleAtFixedRate(
 				new AgentRunnableTask(task, getOwner()), 0, period, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
@@ -175,10 +181,10 @@ class SchedulesSkill extends Skill implements Schedules {
 
 		@Override
 		public void run() {
-			if (this.agentTaskRef.get() == null) {
+			AgentTask task = this.agentTaskRef.get();
+			if (task == null) {
 				throw new RuntimeException(Locale.getString(SchedulesSkill.class, "NULL_AGENT_TASK")); //$NON-NLS-1$
 			}
-			AgentTask task = this.agentTaskRef.get();
 			if (task.getGuard().apply(this.agentRef.get())) {
 				task.getProcedure().apply(this.agentRef.get());
 			}

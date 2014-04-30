@@ -17,33 +17,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.guava;
 
-import io.sarl.lang.core.SpaceID;
+import io.janusproject.kernel.executor.JanusUncaughtExceptionHandler;
+import io.sarl.lang.core.Percept;
 
+import com.google.common.eventbus.AnnotationModule;
+import com.google.common.eventbus.SubscriberExceptionHandler;
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 
-/** Abstract implementation of a space.
+/**
+ * This module permits to reconfigure the Guava API for its
+ * usae in the Janus kernel.
  * 
- * @author $Author: Sebastian Rodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @author $Author: srodriguez$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class SpaceBase implements DistributedSpace {
+public class GuavaModule extends AbstractModule {
 
-	private SpaceID id;
-
-	/** Constructs a space.
-	 * 
-	 * @param id - identifier of the space.
+	/**
+	 * {@inheritDoc}
 	 */
-	public SpaceBase(SpaceID id){
-		this.id = id;
-	}
-
 	@Override
-	public SpaceID getID() {
-		return this.id;
-	}
+	protected void configure() {
+		// Bus exception
+		bind(SubscriberExceptionHandler.class).to(JanusUncaughtExceptionHandler.class).in(Singleton.class);
 
+		install(new AnnotationModule(Percept.class));
+	}
+	
 }

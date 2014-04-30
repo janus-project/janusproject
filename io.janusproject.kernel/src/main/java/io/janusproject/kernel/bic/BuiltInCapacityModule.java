@@ -17,43 +17,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.EventListener;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.util.OpenEventSpace;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 
 /**
- * Default implementation of an event space.
+ * This module permits to reconfigure the built-in capacities
+ * used in the Janus kernel.
  * 
- * @author $Author: srodriguez$
- * @author $Author: ngaud$
  * @author $Author: sgalland$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class EventSpaceImpl extends AbstractEventSpace implements OpenEventSpace {
+public class BuiltInCapacityModule extends AbstractModule {
 
 	/**
-	 * Constructs an event space.
-	 * 
-	 * @param id - identifier of the space.
+	 * {@inheritDoc}
 	 */
-	public EventSpaceImpl(SpaceID id) {
-		super(id);
-	}
-
 	@Override
-	public Address register(EventListener entity) {
-		Address a = new Address(getID(), entity.getID());
-		return this.participants.registerParticipant(a, entity);
+	protected void configure() {
+		bind(BuiltinCapacitiesProvider.class).to(JanusBuiltinCapacitiesProvider.class).in(Singleton.class);
 	}
-
-	@Override
-	public Address unregister(EventListener entity) {
-		return this.participants.unregisterParticipant(entity);
-	}
-
+	
 }

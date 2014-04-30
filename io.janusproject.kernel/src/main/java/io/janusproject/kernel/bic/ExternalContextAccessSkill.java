@@ -17,8 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.bic;
 
+import io.janusproject.kernel.space.EventSpaceImpl;
+import io.janusproject.services.ContextSpaceService;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;
@@ -29,6 +31,7 @@ import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
+import io.sarl.util.OpenEventSpace;
 
 import java.util.Collection;
 import java.util.Set;
@@ -37,6 +40,7 @@ import java.util.UUID;
 import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 
 /**
  * Skill that permits to access to the context in which the agent is located.
@@ -49,33 +53,38 @@ import com.google.common.collect.Sets;
  */
 class ExternalContextAccessSkill extends Skill implements ExternalContextAccess {
 
-	private Set<UUID> contexts = Sets.newConcurrentHashSet();
+	private final Set<UUID> contexts = Sets.newConcurrentHashSet();
 
-	private final JanusContextSpaceService contextRepository;
+	@Inject
+	private ContextSpaceService contextRepository;
 
 	/**
 	 * @param agent - owner of the skill.
-	 * @param contextRepository - repository of the contexts.
 	 */
-	public ExternalContextAccessSkill(Agent agent, JanusContextSpaceService contextRepository) {
+	public ExternalContextAccessSkill(Agent agent) {
 		super(agent);
-		this.contextRepository = contextRepository;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected String attributesToString() {
+		return super.attributesToString()
+				+", contexts = "+this.contextRepository.toString(); //$NON-NLS-1$
 	}
 
 	@Override
 	protected void install() {
-		super.install();
 		AgentContext ac = this.contextRepository.getContext(getOwner().getParentID());
-		this.join(ac.getID(), ac.getDefaultSpace().getID().getID());
+		join(ac.getID(), ac.getDefaultSpace().getID().getID());
 	}
 
 	@Override
 	protected void uninstall() {
 		// Leave all contexts including the default one.
 		for (UUID contextID : this.contexts) {
-			this.leave(contextID);
+			leave(contextID);
 		}
-		super.uninstall();
 	}
 
 	@Override
@@ -110,8 +119,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 		this.contexts.add(futureContext);
 		
-		BehaviorsAndInnerContextSkill imp = (BehaviorsAndInnerContextSkill) getSkill(Behaviors.class);
-		imp.registerOnDefaultSpace((EventSpaceImpl) ac.getDefaultSpace());
+		((OpenEventSpace) ac.getDefaultSpace()).register(
+				getSkill(InternalEventBusCapacity.class).asEventListener());
 
 		fireContextJoined(futureContext, futureContextDefaultSpaceID);
 		fireMemberJoined(ac);
@@ -156,8 +165,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 		fireContextLeft(contextID);
 		fireMemberLeft(ac);
 
-		BehaviorsAndInnerContextSkill imp = (BehaviorsAndInnerContextSkill) getSkill(Behaviors.class);
-		imp.unregisterFromDefaultSpace((EventSpaceImpl) ac.getDefaultSpace());
+		((EventSpaceImpl) ac.getDefaultSpace()).unregister(
+				getSkill(InternalEventBusCapacity.class).asEventListener());
 		this.contexts.remove(contextID);
 	}
 

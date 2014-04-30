@@ -17,19 +17,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
+package io.janusproject.kernel.space;
 
-import io.janusproject.services.NetworkService.NetworkEventReceivingListener;
-import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
 
-/**
- * Represents an space in which the messages may be distributed other the network.
+
+/** Abstract implementation of a space.
  * 
- * @author $Author: sgalland$
+ * @author $Author: Sebastian Rodriguez$
  * @version $Name$ $Revision$ $Date$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface DistributedSpace extends Space, NetworkEventReceivingListener {
-	//
+public abstract class SpaceBase implements DistributedSpace {
+
+	private SpaceID id;
+
+	/** Constructs a space.
+	 * 
+	 * @param id - identifier of the space.
+	 */
+	public SpaceBase(SpaceID id){
+		this.id = id;
+	}
+
+	@Override
+	public SpaceID getID() {
+		return this.id;
+	}
+
 }

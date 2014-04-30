@@ -19,6 +19,8 @@
  */
 package io.janusproject;
 
+import java.util.Map;
+
 
 
 /** Constants for the Janus configuration.
@@ -90,7 +92,27 @@ public class JanusConfig {
 	 */
 	public static final int VALUE_NUMBER_OF_THREADS_IN_EXECUTOR = 20;
 	
+	/** Indicates the numbers of seconds that the kernel is waiting
+	 * for thread terminations before timeout.
+	 */
+	public static final int VALUE_KERNEL_THREAD_TIMEOUT = 30;
 
+	
+	
+	/** Replies the default values for the properties supported by Janus config.
+	 * 
+	 * @param defaultValues - filled with the default values supported by the Janus platform.
+	 */
+	public static void getDefaultValues(Map<String,Object> defaultValues) {
+		defaultValues.put(BOOT_AGENT, null);
+		defaultValues.put(BOOT_DEFAULT_CONTEXT_ID, VALUE_BOOT_DEFAULT_CONTEXT_ID);
+		defaultValues.put(DEFAULT_CONTEXT_ID, VALUE_DEFAULT_CONTEXT_ID);
+		defaultValues.put(DEFAULT_SPACE_ID, VALUE_DEFAULT_SPACE_ID);
+		defaultValues.put(OFFLINE, Boolean.FALSE.toString());
+		defaultValues.put(PUB_URI, null);
+		defaultValues.put(RANDOM_DEFAULT_CONTEXT_ID, VALUE_RANDOM_DEFAULT_CONTEXT_ID);
+	}
+		
 	/** Replies the value of the system property.
 	 * 
 	 * @param name - name of the property.
