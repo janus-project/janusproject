@@ -72,6 +72,7 @@ class Context implements AgentContext{
 				id.toString()+"-spaces", //$NON-NLS-1$
 				hzInstance,
 				injector,
+				logger,
 				new SpaceListener(logger, startUpListener));
 	}
 	

@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.services.LogService;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
@@ -27,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.arakhne.afc.vmutil.ClassComparator;
@@ -38,10 +40,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import com.google.inject.Injector;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ISet;
-import com.hazelcast.core.ItemEvent;
-import com.hazelcast.core.ItemListener;
+import com.hazelcast.core.IMap;
 
 /**
  * A repository of spaces specific to a given context.
@@ -53,9 +55,12 @@ import com.hazelcast.core.ItemListener;
  * @mavenartifactid $ArtifactId$
  */
 class SpaceRepository {
+	
+	private static final Object[] NO_PARAMETERS = new Object[0]; 
 
 	private final String distributedSpaceSetName;
 	private final Injector injector;
+	private final LogService logService;
 
 	/** Listener on the events in this repository (basically somewhere in the Context).
 	 */
@@ -64,7 +69,7 @@ class SpaceRepository {
 	/**
 	 * The set of the id of all spaces stored in this repository This set must be distributed and synchronized all over the network
 	 */
-	private final ISet<SpaceID> spaceIDs;
+	private final IMap<SpaceID,Object[]> spaceIDs;
 
 	/**
 	 * Map linking a space id to its related Space object This is local non-distributed map
@@ -84,25 +89,27 @@ class SpaceRepository {
 	 * @param distributedSpaceSetName - the name used to identify distributed map over network
 	 * @param hzInstance - factory for creating Hazelcast data structures
 	 * @param injector - injector to used for creating new spaces.
+	 * @param logService - logging service
 	 * @param listener - listener on the events in the space repository.
 	 */
-	public SpaceRepository(String distributedSpaceSetName, HazelcastInstance hzInstance, Injector injector, SpaceRepositoryListener listener) {
+	public SpaceRepository(String distributedSpaceSetName, HazelcastInstance hzInstance, Injector injector, LogService logService, SpaceRepositoryListener listener) {
 		this.distributedSpaceSetName = distributedSpaceSetName;
 		this.injector = injector;
+		this.logService = logService;
 		this.externalListener = listener;
 		this.spaces = new ConcurrentHashMap<>();
 		Multimap<Class<? extends SpaceSpecification<?>>, SpaceID> tmp = TreeMultimap.create(ClassComparator.SINGLETON, ObjectReferenceComparator.SINGLETON);
 		this.spacesBySpec = Multimaps.synchronizedMultimap(tmp);
-		this.spaceIDs = hzInstance.getSet(this.distributedSpaceSetName);
+		this.spaceIDs = hzInstance.getMap(this.distributedSpaceSetName);
 	}
 	
 	/** Finalize the initialization: ensure that the events are fired outside the scope of the SpaceRepository constructor.
 	 */
-	void postConstruction() {
-		for (SpaceID id : this.spaceIDs) {
-			ensureSpaceDefinition(id);
+	synchronized void postConstruction() {
+		for (Entry<SpaceID,Object[]> e : this.spaceIDs.entrySet()) {
+			ensureSpaceDefinition(e.getKey(), e.getValue());
 		}
-		this.spaceIDListener = this.spaceIDs.addItemListener(new HazelcastListener(), true);
+		this.spaceIDListener = this.spaceIDs.addEntryListener(new HazelcastListener(), true);
 	}
 	
 	/** Destroy this repository and releaqse all the resources.
@@ -110,16 +117,28 @@ class SpaceRepository {
 	public synchronized void destroy() {
 		// Unregister from Hazelcast layer.
 		if (this.spaceIDListener!=null) {
-			this.spaceIDs.removeItemListener(this.spaceIDListener);
+			this.spaceIDs.removeEntryListener(this.spaceIDListener);
 		}
 	}
 	
-	private <S extends Space> S createSpaceInstance(Class<? extends SpaceSpecification<S>> spec, SpaceID spaceID, boolean updateSpaceIDs, Object[] creationParams) {
-		S space = this.injector.getInstance(spec).create(spaceID, creationParams);
+	private synchronized <S extends Space> S createSpaceInstance(Class<? extends SpaceSpecification<S>> spec, SpaceID spaceID, boolean updateHazelcast, Object[] creationParams) {
+		S space;
+		// Split the call to create() to let the JVM to create the "empty" array for creation parameters.
+		if (creationParams!=null) {
+			space = this.injector.getInstance(spec).create(spaceID, creationParams);
+		}
+		else {
+			space = this.injector.getInstance(spec).create(spaceID);
+		}
+		assert(space!=null);
 		SpaceID id = space.getID();
+		assert(id!=null);
 		this.spaces.put(id, space);
 		this.spacesBySpec.put(id.getSpaceSpecification(), id);
-		if (updateSpaceIDs) this.spaceIDs.add(id);
+		if (updateHazelcast) {
+			this.spaceIDs.putIfAbsent(id,
+					(creationParams!=null && creationParams.length>0) ? creationParams : NO_PARAMETERS);
+		}
 		fireSpaceAdded(space);
 		return space;
 	}
@@ -127,13 +146,13 @@ class SpaceRepository {
 	/** Add the existing, but not yet known, spaces into this repository. 
 	 * 
 	 * @param id - identifier of the space
+	 * @param initializationParameters - parameters for initialization.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected synchronized void ensureSpaceDefinition(SpaceID id) {
-		assert(this.spaceIDs.contains(id));
+	protected synchronized void ensureSpaceDefinition(SpaceID id, Object[] initializationParameters) {
+		assert(this.spaceIDs.containsKey(id));
 		if (!this.spaces.containsKey(id)) {
-			//FIXME manage the propagation of the creationParams inside the ID of the space
-			createSpaceInstance((Class)id.getSpaceSpecification(), id, false, new Object[0]);
+			createSpaceInstance((Class)id.getSpaceSpecification(), id, false, initializationParameters);
 		}
 	}
 
@@ -142,7 +161,7 @@ class SpaceRepository {
 	 * @param id - identifier of the space
 	 */
 	protected synchronized void removeSpaceDefinition(SpaceID id) {
-		assert(!this.spaceIDs.contains(id));
+		assert(!this.spaceIDs.containsKey(id));
 		Space space = this.spaces.remove(id);
 		if (space!=null) {
 			assert(space.getParticipants().isEmpty());
@@ -257,26 +276,42 @@ class SpaceRepository {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class HazelcastListener implements ItemListener<SpaceID> {
+	private class HazelcastListener implements EntryListener<SpaceID,Object[]> {
 
 		/**
 		 */
 		public HazelcastListener() {
-			
+			//
 		}
 
 		/** {@inheritDoc}
 		 */
 		@Override
-		public void itemAdded(ItemEvent<SpaceID> item) {
-			ensureSpaceDefinition(item.getItem());
+		public void entryAdded(EntryEvent<SpaceID, Object[]> event) {
+			ensureSpaceDefinition(event.getKey(), event.getValue());
 		}
 
 		/** {@inheritDoc}
 		 */
 		@Override
-		public void itemRemoved(ItemEvent<SpaceID> item) {
-			removeSpaceDefinition(item.getItem());
+		public void entryRemoved(EntryEvent<SpaceID, Object[]> event) {
+			removeSpaceDefinition(event.getKey());
+		}
+
+		/** {@inheritDoc}
+		 */
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void entryUpdated(EntryEvent<SpaceID, Object[]> event) {
+			SpaceRepository.this.logService.warning(
+					SpaceRepository.class, "UNSUPPORTED_HAZELCAST_EVENT", event); //$NON-NLS-1$
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void entryEvicted(EntryEvent<SpaceID, Object[]> event) {
+			removeSpaceDefinition(event.getKey());
 		}
 
 	}
