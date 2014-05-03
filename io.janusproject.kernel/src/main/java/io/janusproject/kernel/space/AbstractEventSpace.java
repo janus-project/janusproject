@@ -187,9 +187,15 @@ public abstract class AbstractEventSpace extends SpaceBase {
 
 	/** {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void eventReceived(SpaceID space, Scope<?> scope, Event event) {
-		AbstractEventSpace.this.doEmit(event, (Scope<Address>) scope);
+		try {
+			AbstractEventSpace.this.doEmit(event, (Scope<Address>) scope);
+		}
+		catch(Exception e) {
+			this.logger.error(AbstractEventSpace.class,  "INVALID_EMIT", e); //$NON-NLS-1$
+		}
 	}
 
 }
