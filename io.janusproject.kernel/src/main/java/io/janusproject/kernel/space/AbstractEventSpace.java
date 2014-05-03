@@ -118,7 +118,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		assert this.getID().equals(event.getSource().getSpaceId()) : "The source address must belong to this space"; //$NON-NLS-1$
 
 		try {
-			this.network.publish(this.getID(), scope, event);
+			this.network.publish(scope, event);
 			doEmit(event, scope);
 		} catch (Throwable e) {
 			this.logger.error("CANNOT_EMIT_EVENT", event, scope, e); //$NON-NLS-1$

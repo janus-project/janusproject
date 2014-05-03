@@ -41,12 +41,11 @@ public interface NetworkService extends Service {
 
 	/** Publish a data over the network.
 	 * 
-	 * @param id - identifier of the space in which the data was published.
 	 * @param scope - scope of the published data.
 	 * @param data - data to propage over the network.
 	 * @throws Exception
 	 */
-	void publish(SpaceID id, Scope<?> scope, Event data) throws Exception;
+	void publish(Scope<?> scope, Event data) throws Exception;
 	
 	/** Connect this instance of kernel to the given peer over the network
 	 * and for the given space.

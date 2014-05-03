@@ -243,15 +243,16 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	/** {@inheritDoc}
 	 */
 	@Override
-	public synchronized void publish(SpaceID id, Scope<?> scope, Event data)
+	public synchronized void publish(Scope<?> scope, Event data)
 			throws Exception {
 		if (this.validatedURI==null) {
-			this.logger.debug("DISCARDED_MESSAGE", id, scope, data); //$NON-NLS-1$
+			this.logger.debug("DISCARDED_MESSAGE", data.getSource().getSpaceId(), scope, data); //$NON-NLS-1$
 		}
 		else if (!this.subcribers.isEmpty()) {
-			EventEnvelope env = this.serializer.serialize(new EventDispatch(id, data, scope));
+			SpaceID spaceID = data.getSource().getSpaceId();
+			EventEnvelope env = this.serializer.serialize(new EventDispatch(spaceID, data, scope));
 			send(env);
-			this.logger.info("PUBLISH_EVENT", id, data); //$NON-NLS-1$
+			this.logger.info("PUBLISH_EVENT", spaceID, data); //$NON-NLS-1$
 		}
 	}
 

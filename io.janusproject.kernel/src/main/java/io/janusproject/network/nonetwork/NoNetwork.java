@@ -98,7 +98,7 @@ class NoNetwork extends AbstractPrioritizedService implements NetworkService {
 	/** {@inheritDoc}
 	 */
 	@Override
-	public void publish(SpaceID id, Scope<?> scope, Event data)
+	public void publish(Scope<?> scope, Event data)
 			throws Exception {
 		//
 	}
