@@ -58,6 +58,10 @@ public class JanusUncaughtExceptionHandler implements UncaughtExceptionHandler, 
 	private void log(Throwable e, String taskId, String taskName) {
 		assert(e!=null);
 		LogRecord record;
+		if (e instanceof ChuckNorrisException) {
+			// Chuck Norris cannot be catched!
+			return;
+		}
 		if (e instanceof CancellationException) {
 			// Avoid too much processing if the error is not loggeable
 			if (!this.logger.isLoggeable(Level.FINEST)) return;
