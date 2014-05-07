@@ -172,13 +172,13 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	 * @param initializationParameters
 	 */
 	protected void fireAgentSpawned(AgentContext context, Agent agent, Object[] initializationParameters) {
-		SpawnServiceListener[] listeners;
+		SpawnServiceListener[] ilisteners;
 		synchronized (this.lifecycleListeners) {
 			Collection<SpawnServiceListener> list = this.lifecycleListeners.get(agent.getID());
-			listeners = new SpawnServiceListener[list.size()];
-			list.toArray(listeners);
+			ilisteners = new SpawnServiceListener[list.size()];
+			list.toArray(ilisteners);
 		}
-		for (SpawnServiceListener l : listeners) {
+		for (SpawnServiceListener l : ilisteners) {
 			l.agentSpawned(context, agent, initializationParameters);
 		}
 
@@ -196,11 +196,11 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	 * @param agent
 	 */
 	protected void fireAgentDestroyed(Agent agent) {
-		SpawnServiceListener[] listeners;
+		SpawnServiceListener[] ilisteners;
 		synchronized (this.lifecycleListeners) {
 			Collection<SpawnServiceListener> list = this.lifecycleListeners.get(agent.getID());
-			listeners = new SpawnServiceListener[list.size()];
-			list.toArray(listeners);
+			ilisteners = new SpawnServiceListener[list.size()];
+			list.toArray(ilisteners);
 		}
 
 		try {
@@ -213,7 +213,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			} finally {
 				method.setAccessible(isAccessible);
 			}
-			// FIXME: Synchronize on the background mutex associated with the collection replied by skill.getAllContexts()
+
 			SynchronizedCollection<AgentContext> sc = skill.getAllContexts();
 			synchronized (sc.mutex()) {
 				for (AgentContext context : sc) {
@@ -230,7 +230,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			throw new RuntimeException(e);
 		}
 
-		for (SpawnServiceListener l : listeners) {
+		for (SpawnServiceListener l : ilisteners) {
 			l.agentDestroy(agent);
 		}
 	}

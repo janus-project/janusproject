@@ -201,13 +201,13 @@ class SpaceRepository {
 			Class<? extends SpaceSpecification<S>> spec,
 			SpaceID spaceID, 
 			Object... creationParams) {
-		Collection<SpaceID> spaces = this.spacesBySpec.get(spec);
+		Collection<SpaceID> ispaces = this.spacesBySpec.get(spec);
 		S firstSpace;
-		if (spaces == null || spaces.isEmpty()) {
+		if (ispaces == null || ispaces.isEmpty()) {
 			firstSpace = createSpaceInstance(spec, spaceID, true, creationParams);
 		}
 		else {
-			firstSpace = (S)this.spaces.get(spaces.iterator().next());
+			firstSpace = (S)this.spaces.get(ispaces.iterator().next());
 		}
 		assert(firstSpace!=null);
 		return firstSpace;

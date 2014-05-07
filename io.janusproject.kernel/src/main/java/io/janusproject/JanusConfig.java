@@ -80,13 +80,13 @@ public class JanusConfig {
 	/** Indicates if the default context id has a random value or not at each boot time.
 	 * @see #RANDOM_DEFAULT_CONTEXT_ID
 	 */
-	public static final boolean VALUE_RANDOM_DEFAULT_CONTEXT_ID = false;
+	public static final Boolean VALUE_RANDOM_DEFAULT_CONTEXT_ID = Boolean.FALSE;
 
 	/** Indicates if the default context id has a value computed
 	 * from the boot agent type.
 	 * @see #BOOT_DEFAULT_CONTEXT_ID
 	 */
-	public static final boolean VALUE_BOOT_DEFAULT_CONTEXT_ID = false;
+	public static final Boolean VALUE_BOOT_DEFAULT_CONTEXT_ID = Boolean.FALSE;
 
 	/** Indicates the maximal number of threads in a thread pool.
 	 */

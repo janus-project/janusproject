@@ -157,7 +157,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		}
 
 		@Override
-		public void agentSpawned(AgentContext parent, Agent agentID,
+		public void agentSpawned(AgentContext parent, Agent iAgentID,
 				Object[] initializationParameters) {
 			try {
 				// Use reflection to ignore the "protected" access right.

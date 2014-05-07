@@ -79,7 +79,7 @@ public class BootModule extends AbstractModule {
 			// From boot agent type
 			defaultContextID = JanusConfig.getSystemProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID);
 			if (defaultContextID == null) {
-				v = Boolean.valueOf(JanusConfig.VALUE_BOOT_DEFAULT_CONTEXT_ID);
+				v = JanusConfig.VALUE_BOOT_DEFAULT_CONTEXT_ID;
 			} else {
 				v = Boolean.valueOf(Boolean.parseBoolean(defaultContextID));
 			}
@@ -97,7 +97,7 @@ public class BootModule extends AbstractModule {
 				// Random
 				defaultContextID = JanusConfig.getSystemProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID);
 				if (defaultContextID == null) {
-					v = Boolean.valueOf(JanusConfig.VALUE_RANDOM_DEFAULT_CONTEXT_ID);
+					v = JanusConfig.VALUE_RANDOM_DEFAULT_CONTEXT_ID;
 				} else {
 					v = Boolean.valueOf(Boolean.parseBoolean(defaultContextID));
 				}

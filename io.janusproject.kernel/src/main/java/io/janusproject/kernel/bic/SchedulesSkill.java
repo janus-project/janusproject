@@ -112,8 +112,8 @@ class SchedulesSkill extends Skill implements Schedules {
 		t.setGuard(new Function1<Agent, Boolean>() {
 
 			@Override
-			public Boolean apply(Agent arg0) {
-				return true;
+			public Boolean apply(Agent arg0) {				
+				return Boolean.TRUE;
 			}
 		});
 		this.tasks.put(name, t);
@@ -185,7 +185,7 @@ class SchedulesSkill extends Skill implements Schedules {
 			if (task == null) {
 				throw new RuntimeException(Locale.getString(SchedulesSkill.class, "NULL_AGENT_TASK")); //$NON-NLS-1$
 			}
-			if (task.getGuard().apply(this.agentRef.get())) {
+			if (task.getGuard().apply(this.agentRef.get()).booleanValue()) {
 				task.getProcedure().apply(this.agentRef.get());
 			}
 

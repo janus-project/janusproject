@@ -56,7 +56,7 @@ public class Services {
 				new Comparator<Integer>() {
 					@Override
 					public int compare(Integer o1, Integer o2) {
-						return Integer.compare(o1, o2);
+						return Integer.compare(o1.intValue(), o2.intValue());
 					}
 				},
 				ObjectReferenceComparator.SINGLETON);
@@ -67,7 +67,7 @@ public class Services {
 				if (entry.getKey()==State.NEW) {
 					service = entry.getValue();
 					if (service instanceof PrioritizedService) {
-						priorServices.put(((PrioritizedService)service).getStartPriority(), service);
+						priorServices.put(new Integer(((PrioritizedService)service).getStartPriority()), service);
 					}
 					else {
 						otherServices.add(service);
@@ -99,7 +99,7 @@ public class Services {
 				new Comparator<Integer>() {
 					@Override
 					public int compare(Integer o1, Integer o2) {
-						return Integer.compare(o1, o2);
+						return Integer.compare(o1.intValue(), o2.intValue());
 					}
 				},
 				ObjectReferenceComparator.SINGLETON);
@@ -110,7 +110,7 @@ public class Services {
 				if (entry.getKey()!=State.TERMINATED && entry.getKey()!=State.STOPPING) {
 					service = entry.getValue();
 					if (service instanceof PrioritizedService) {
-						priorServices.put(((PrioritizedService)service).getStopPriority(), service);
+						priorServices.put(new Integer(((PrioritizedService)service).getStopPriority()), service);
 					}
 					else {
 						otherServices.add(service);

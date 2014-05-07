@@ -154,12 +154,12 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	 * @param space
 	 */
 	protected void firePeerConnected(URI peerURI, SpaceID space) {
-		NetworkServiceListener[] listeners;
+		NetworkServiceListener[] ilisteners;
 		synchronized (this.listeners) {
-			listeners = new NetworkServiceListener[this.listeners.size()];
-			this.listeners.toArray(listeners);
+			ilisteners = new NetworkServiceListener[this.listeners.size()];
+			this.listeners.toArray(ilisteners);
 		}
-		for(NetworkServiceListener listener : listeners) {
+		for(NetworkServiceListener listener : ilisteners) {
 			listener.peerConnected(peerURI, space);
 		}
 	}
@@ -170,12 +170,12 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	 * @param space
 	 */
 	protected void firePeerDisconnected(URI peerURI, SpaceID space) {
-		NetworkServiceListener[] listeners;
+		NetworkServiceListener[] ilisteners;
 		synchronized (this.listeners) {
-			listeners = new NetworkServiceListener[this.listeners.size()];
-			this.listeners.toArray(listeners);
+			ilisteners = new NetworkServiceListener[this.listeners.size()];
+			this.listeners.toArray(ilisteners);
 		}
-		for(NetworkServiceListener listener : listeners) {
+		for(NetworkServiceListener listener : ilisteners) {
 			listener.peerDisconnected(peerURI, space);
 		}
 	}
@@ -185,12 +185,12 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	 * @param peerURI
 	 */
 	protected void firePeerDiscovered(URI peerURI) {
-		NetworkServiceListener[] listeners;
+		NetworkServiceListener[] ilisteners;
 		synchronized (this.listeners) {
-			listeners = new NetworkServiceListener[this.listeners.size()];
-			this.listeners.toArray(listeners);
+			ilisteners = new NetworkServiceListener[this.listeners.size()];
+			this.listeners.toArray(ilisteners);
 		}
-		for(NetworkServiceListener listener : listeners) {
+		for(NetworkServiceListener listener : ilisteners) {
 			listener.peerDiscovered(peerURI);
 		}
 	}
@@ -200,12 +200,12 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	 * @param peerURI
 	 */
 	protected void firePeerDisconnected(URI peerURI) {
-		NetworkServiceListener[] listeners;
+		NetworkServiceListener[] ilisteners;
 		synchronized (this.listeners) {
-			listeners = new NetworkServiceListener[this.listeners.size()];
-			this.listeners.toArray(listeners);
+			ilisteners = new NetworkServiceListener[this.listeners.size()];
+			this.listeners.toArray(ilisteners);
 		}
-		for(NetworkServiceListener listener : listeners) {
+		for(NetworkServiceListener listener : ilisteners) {
 			listener.peerDisconnected(peerURI);
 		}
 	}
@@ -412,7 +412,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 					if (signaled > 0) {
 						for (int i = 0; i < this.poller.getSize(); i++) {
 							if (this.poller.pollin(i)) {
-								this.logger.debug("POLLING", i); //$NON-NLS-1$
+								this.logger.debug("POLLING", new Integer(i)); //$NON-NLS-1$
 								EventEnvelope ev = extractEnvelope(this.poller.getSocket(i));
 								assert (ev != null);
 
@@ -616,7 +616,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 		}
 		
 		@SuppressWarnings("synthetic-access")
-		private void magicConnect(URI peer, Collection<SpaceID> spaceIDs, Collection<BufferedSpace> bufferedSpaces, Space space) {
+		private void magicConnect(URI peer, Collection<SpaceID> spaceIDs, Collection<BufferedSpace> ibufferedSpaces, Space space) {
 			if (space!=null) {
 				try {
 					connectToRemoteSpaces(peer, space.getID(), (NetworkEventReceivingListener)space);
@@ -633,7 +633,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 					ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 				}
 			}
-			for(BufferedSpace sp : bufferedSpaces) {
+			for(BufferedSpace sp : ibufferedSpaces) {
 				try {
 					connectToRemoteSpaces(peer, sp.spaceID, sp.listener);
 				}

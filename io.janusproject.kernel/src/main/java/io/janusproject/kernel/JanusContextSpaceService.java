@@ -105,13 +105,13 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	 * Initialize this service with injected objects
 	 * 
 	 * @param janusID - injected identifier.
-	 * @param hzInstance - Hazelcast instance.
+	 * @param ihzInstance - Hazelcast instance.
 	 */
 	@Inject
 	private synchronized void initialize( 
 			@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID,
-			HazelcastInstance hzInstance) {
-		this.defaultSpaces = hzInstance.getMap(janusID.toString());
+			HazelcastInstance ihzInstance) {
+		this.defaultSpaces = ihzInstance.getMap(janusID.toString());
 	}
 
 
@@ -228,9 +228,9 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	 * @param context
 	 */
 	protected void fireContextCreated(AgentContext context) {
-		ContextRepositoryListener[] listeners = this.listeners.getListeners(ContextRepositoryListener.class);
+		ContextRepositoryListener[] ilisteners = this.listeners.getListeners(ContextRepositoryListener.class);
 		this.logger.info(JanusContextSpaceService.class, "CONTEXT_CREATED", context.getID()); //$NON-NLS-1$
-		for(ContextRepositoryListener listener : listeners) {
+		for(ContextRepositoryListener listener : ilisteners) {
 			listener.contextCreated(context);
 		}
 	}
@@ -240,9 +240,9 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	 * @param context
 	 */
 	protected void fireContextDestroyed(AgentContext context) {
-		ContextRepositoryListener[] listeners = this.listeners.getListeners(ContextRepositoryListener.class);
+		ContextRepositoryListener[] ilisteners = this.listeners.getListeners(ContextRepositoryListener.class);
 		this.logger.info(JanusContextSpaceService.class, "CONTEXT_DESTROYED", context.getID()); //$NON-NLS-1$
-		for(ContextRepositoryListener listener : listeners) {
+		for(ContextRepositoryListener listener : ilisteners) {
 			listener.contextDestroyed(context);
 		}
 	}
