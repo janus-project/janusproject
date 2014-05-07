@@ -45,7 +45,7 @@ public class Collections3 {
 	 * @mavenartifactid $ArtifactId$
 	 * @param <E>
 	 */
-    private static class SynchronizedCollection<E> implements Collection<E>, Serializable {
+    private static class SynchronizedCollection<E> implements Serializable, io.sarl.core.SynchronizedCollection<E> {
 
 		private static final long serialVersionUID = -7369575596119505391L;
 		
@@ -123,6 +123,14 @@ public class Collections3 {
         private void writeObject(ObjectOutputStream s) throws IOException {
             synchronized (this.mutex) {s.defaultWriteObject();}
         }
+		/* (non-Javadoc)
+		 * @see io.sarl.core.SynchronizedCollection#mutex()
+		 */
+		@Override
+		public Object mutex() {
+			
+			return this.mutex;
+		}
     }
 
     /** Copied from Collections.
@@ -216,7 +224,7 @@ public class Collections3 {
      * @param mutex is the mutex to use for synchronizing.
      * @return a synchronized view of the specified collection.
      */
-    public static <T> Collection<T> synchronizedCollection(Collection<T> c, Object mutex) {
+    public static <T> SynchronizedCollection<T> synchronizedCollection(Collection<T> c, Object mutex) {
         return new SynchronizedCollection<>(c, mutex);
     }
     

@@ -21,19 +21,21 @@ package io.janusproject.kernel.bic;
 
 import io.janusproject.kernel.space.EventSpaceImpl;
 import io.janusproject.services.ContextSpaceService;
+import io.janusproject.util.Collections3;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.MemberJoined;
 import io.sarl.core.MemberLeft;
+import io.sarl.core.SynchronizedCollection;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
 import io.sarl.util.OpenEventSpace;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -88,8 +90,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	}
 
 	@Override
-	public Collection<AgentContext> getAllContexts() {
-		return this.contextRepository.getContexts(this.contexts);
+	public SynchronizedCollection<AgentContext> getAllContexts() {
+		return Collections3.synchronizedCollection(Collections.unmodifiableCollection(this.contextRepository.getContexts(this.contexts)), this.contextRepository.mutex());
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import io.janusproject.util.ListenerCollection;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ExternalContextAccess;
+import io.sarl.core.SynchronizedCollection;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
@@ -46,7 +47,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-/** Implementation of a spawning service.
+/**
+ * Implementation of a spawning service.
  * 
  * @author $Author: srodriguez$
  * @version $FullVersion$
@@ -62,23 +64,23 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 
 	@Inject
 	private Injector injector;
-	
+
 	/**
 	 */
 	public JanusSpawnService() {
 		setStartPriority(ServicePriorities.START_SPAWN_SERVICE);
 		setStartPriority(ServicePriorities.STOP_SPAWN_SERVICE);
 	}
-	
-	/** {@inheritDoc}
+
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized UUID spawn(AgentContext parent, Class<? extends Agent> agentClazz,
-			Object... params) {
+	public synchronized UUID spawn(AgentContext parent, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
 			try {
 				Agent agent = agentClazz.getConstructor(UUID.class).newInstance(parent.getID());
-				assert(agent!=null);
+				assert (agent != null);
 				this.injector.injectMembers(agent);
 				this.agents.put(agent.getID(), agent);
 				fireAgentSpawned(parent, agent, params);
@@ -90,13 +92,16 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		throw new SpawnDisabledException(parent.getID(), agentClazz);
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	public synchronized void killAgent(UUID agentID) {
 		boolean error = !isRunning();
 		Agent agent = this.agents.remove(agentID);
-		fireAgentDestroyed(agent);
+		if (agent != null) {
+			fireAgentDestroyed(agent);
+		}
 		if (this.agents.isEmpty()) {
 			fireKernelAgentDestroy();
 		}
@@ -105,21 +110,24 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		}
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void addKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
 		this.listeners.add(KernelAgentSpawnListener.class, listener);
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
 		this.listeners.remove(KernelAgentSpawnListener.class, listener);
 	}
 
-	/** Notifies the listeners about the kernel agent creation.
+	/**
+	 * Notifies the listeners about the kernel agent creation.
 	 */
 	protected void fireKernelAgentSpawn() {
 		for (KernelAgentSpawnListener l : this.listeners.getListeners(KernelAgentSpawnListener.class)) {
@@ -127,7 +135,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		}
 	}
 
-	/** Notifies the listeners about the kernel agent destruction.
+	/**
+	 * Notifies the listeners about the kernel agent destruction.
 	 */
 	protected void fireKernelAgentDestroy() {
 		for (KernelAgentSpawnListener l : this.listeners.getListeners(KernelAgentSpawnListener.class)) {
@@ -135,27 +144,28 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		}
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
-	public void addSpawnServiceListener(UUID id,
-			SpawnServiceListener agentLifecycleListener) {
-		synchronized(this.lifecycleListeners) {
+	public void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener) {
+		synchronized (this.lifecycleListeners) {
 			this.lifecycleListeners.put(id, agentLifecycleListener);
 		}
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
-	public void removeSpawnServiceListener(UUID id,
-			SpawnServiceListener agentLifecycleListener) {
-		synchronized(this.lifecycleListeners) {
+	public void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener) {
+		synchronized (this.lifecycleListeners) {
 			this.lifecycleListeners.remove(id, agentLifecycleListener);
 		}
 	}
 
-	/** Notifies the listeners about the agent creation.
+	/**
+	 * Notifies the listeners about the agent creation.
 	 * 
 	 * @param context - context in which the agent is spawn.
 	 * @param agent - the spawn agent.
@@ -171,7 +181,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		for (SpawnServiceListener l : listeners) {
 			l.agentSpawned(context, agent, initializationParameters);
 		}
-		
+
 		EventSpace defSpace = context.getDefaultSpace();
 		AgentSpawned event = new AgentSpawned();
 		event.setAgentID(agent.getID());
@@ -180,7 +190,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		defSpace.emit(event);
 	}
 
-	/** Notifies the listeners about the agent destruction.
+	/**
+	 * Notifies the listeners about the agent destruction.
 	 * 
 	 * @param agent
 	 */
@@ -198,24 +209,24 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			ExternalContextAccess skill;
 			try {
 				method.setAccessible(true);
-				skill = (ExternalContextAccess)method.invoke(agent, ExternalContextAccess.class);
-			}
-			finally {
+				skill = (ExternalContextAccess) method.invoke(agent, ExternalContextAccess.class);
+			} finally {
 				method.setAccessible(isAccessible);
 			}
-			//FIXME: Synchronize on the backgorund mutex associated with the collection replied by skill.getAllContexts()
-			for (AgentContext context : skill.getAllContexts()) {
-				EventSpace defSpace = context.getDefaultSpace();
-				AgentKilled event = new AgentKilled();
-				event.setAgentID(agent.getID());
-				event.setSource(defSpace.getAddress(agent.getID()));
-				defSpace.emit(event);
+			// FIXME: Synchronize on the background mutex associated with the collection replied by skill.getAllContexts()
+			SynchronizedCollection<AgentContext> sc = skill.getAllContexts();
+			synchronized (sc.mutex()) {
+				for (AgentContext context : sc) {
+					EventSpace defSpace = context.getDefaultSpace();
+					AgentKilled event = new AgentKilled();
+					event.setAgentID(agent.getID());
+					event.setSource(defSpace.getAddress(agent.getID()));
+					defSpace.emit(event);
+				}
 			}
-		}
-		catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			throw e;
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
@@ -224,7 +235,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		}
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected synchronized void doStart() {
@@ -233,17 +245,19 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		notifyStarted();
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected synchronized void doStop() {
-		synchronized(this.lifecycleListeners) {
+		synchronized (this.lifecycleListeners) {
 			this.lifecycleListeners.clear();
 		}
 		notifyStopped();
 	}
 
-	/** This exception is thrown when the spawning service of agents is disabled.
+	/**
+	 * This exception is thrown when the spawning service of agents is disabled.
 	 * 
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -264,8 +278,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 
 	}
 
-	/** This exception is thrown when the spawning service is not running when
-	 * the killing function on an agent is called.
+	/**
+	 * This exception is thrown when the spawning service is not running when the killing function on an agent is called.
 	 * 
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -285,7 +299,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 
 	}
 
-	/** This exception is thrown when an agent cannot be spawned.
+	/**
+	 * This exception is thrown when an agent cannot be spawned.
 	 * 
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
