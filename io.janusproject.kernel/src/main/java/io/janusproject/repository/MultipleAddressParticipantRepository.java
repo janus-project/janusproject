@@ -98,11 +98,6 @@ public final class MultipleAddressParticipantRepository<ADDRESS extends Serializ
 		return a;
 	}
 
-	@Override
-	public EventListener getListener(ADDRESS a) {
-		return this.getListener(a);
-	}
-
 	/** Replies all the addresses of the participant with the given identifier.
 	 * 
 	 * @param participant
