@@ -21,8 +21,6 @@ package io.janusproject.network.event;
 
 import java.util.UUID;
 
-import com.google.inject.Inject;
-
 /**
  * Abstract implementation of an event serializer.
  * 
@@ -34,8 +32,17 @@ import com.google.inject.Inject;
  */
 public abstract class AbstractEventSerializer implements EventSerializer {
 
-	@Inject
-	private EventEncrypter encrypter;
+	/** Encrypter for events.
+	 */
+	protected final EventEncrypter encrypter;
+	
+	/** Constructs an AbstractEventSerializer.
+	 * 
+	 * @param encrypter
+	 */
+	public AbstractEventSerializer(	EventEncrypter encrypter) {
+		this.encrypter = encrypter;
+	}
 
 	/**
 	 * {@inheritDoc}

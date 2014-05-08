@@ -58,11 +58,22 @@ import com.google.inject.Inject;
  */
 public class GsonEventSerializer extends AbstractEventSerializer {
 
-	@Inject
-	private Gson gson;
+	/** Gson serializer.
+	 */
+	protected final Gson gson;
 
+	/** Constructs an GsonEventSerializer.
+	 * The {@link Gson} is injected.
+	 * The {@link EventEncrypter} is injected.
+	 * 
+	 * @param gson
+	 * @param encrypter
+	 */
 	@Inject
-	private EventEncrypter encrypter;
+	public GsonEventSerializer(	Gson gson, EventEncrypter encrypter) {
+		super(encrypter);
+		this.gson = gson;
+	}
 
 	@Override
 	public EventEnvelope serialize(EventDispatch dispatch) throws Exception {

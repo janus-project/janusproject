@@ -51,8 +51,15 @@ import com.google.inject.Inject;
  */
 public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 
+	/** Constructs an GsonEventSerializer.
+	 * The {@link EventEncrypter} is injected.
+	 * 
+	 * @param encrypter
+	 */
 	@Inject
-	private EventEncrypter encrypter;
+	public JavaBinaryEventSerializer(EventEncrypter encrypter) {
+		super(encrypter);
+	}
 
 	@Override
 	public EventEnvelope serialize(EventDispatch dispatch) throws Exception {
