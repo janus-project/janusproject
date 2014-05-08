@@ -125,7 +125,7 @@ public class Kernel {
 	public <S extends Service> S getService(Class<S> type) {
 		for(Service serv : this.serviceManager.servicesByState().values()) {
 			if (serv.isRunning() && type.isInstance(serv)) {
-				return type.cast(type);
+				return type.cast(serv);
 			}
 		}
 		return null;
