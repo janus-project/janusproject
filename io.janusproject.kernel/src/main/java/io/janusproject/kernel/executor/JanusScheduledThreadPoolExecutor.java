@@ -83,6 +83,7 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	protected void fireTaskFinished(Thread thread, Runnable task) {
 		TaskListener[] listeners;
 		synchronized(this) {
+			if (this.listeners==null) return;
 			listeners = this.listeners.getListeners(TaskListener.class);
 		}
 		for(TaskListener listener : listeners) {
