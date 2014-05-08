@@ -34,7 +34,7 @@ package io.janusproject.network.event;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class PlainTextEncrypter extends AbstractEventEncrypter {
+public class PlainTextEventEncrypter extends AbstractEventEncrypter {
 
 	@Override
 	public void encrypt(EventEnvelope envelope) {

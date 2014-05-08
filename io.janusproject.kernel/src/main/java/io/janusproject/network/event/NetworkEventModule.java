@@ -47,7 +47,7 @@ public class NetworkEventModule extends AbstractModule {
 	 */
 	public static void getDefaultValues(Map<String,Object> defaultValues) {
 		defaultValues.put(NetworkConfig.SERIALIZER_CLASSNAME, GsonEventSerializer.class.getName());
-		defaultValues.put(NetworkConfig.ENCRYPTER_CLASSNAME, PlainTextEncrypter.class.getName());
+		defaultValues.put(NetworkConfig.ENCRYPTER_CLASSNAME, PlainTextEventEncrypter.class.getName());
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class NetworkEventModule extends AbstractModule {
 			if (aesKey != null && !aesKey.isEmpty()) {
 				encrypterType = AESEventEncrypter.class;
 			} else {
-				encrypterType = PlainTextEncrypter.class;
+				encrypterType = PlainTextEventEncrypter.class;
 			}
 		}
 		assert(injector!=null);
