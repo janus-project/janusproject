@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
+import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -114,6 +115,20 @@ public class Kernel {
 	 */
 	public UUID spawn(Class<? extends Agent> agent, Object... params) {
 		return this.spawnService.spawn(this.janusContext, agent, params);
+	}
+	
+	/** Replies a kernel service that is alive.
+	 * 
+	 * @param type
+	 * @return the service, or <code>null</code>.
+	 */
+	public <S extends Service> S getService(Class<S> type) {
+		for(Service serv : this.serviceManager.servicesByState().values()) {
+			if (serv.isRunning() && type.isInstance(serv)) {
+				return type.cast(type);
+			}
+		}
+		return null;
 	}
 
 	/**

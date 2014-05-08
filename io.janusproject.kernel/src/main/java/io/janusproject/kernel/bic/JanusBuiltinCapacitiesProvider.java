@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
+import io.janusproject.kernel.Kernel;
 import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.SpawnServiceListener;
@@ -80,8 +81,9 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 				UUID.randomUUID(),
 				OpenEventSpaceSpecification.class);
 		Address agentAddressInInnerSpace = new Address(innerSpaceID, agent.getID());
-		
-		
+		Kernel k = this.injector.getInstance(Kernel.class);
+				
+		MicroKernelSkill microKernelSkill = new MicroKernelSkill(agent, k);
 		InternalEventBusSkill eventBusSkill = new InternalEventBusSkill(agent, agentAddressInInnerSpace);		
 		InnerContextSkill innerContextSkill = new InnerContextSkill(agent, agentAddressInInnerSpace);
 		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent, agentAddressInInnerSpace);
@@ -89,7 +91,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		ExternalContextAccessSkill externalContextSkill = new ExternalContextAccessSkill(agent);
 		DefaultContextInteractionsSkill interactionSkill = new DefaultContextInteractionsSkill(agent, this.contextRepository.getContext(agent.getParentID()));
 		SchedulesSkill scheduleSkill = new SchedulesSkill(agent);
-
+		
 		this.injector.injectMembers(eventBusSkill);
 		this.injector.injectMembers(innerContextSkill);
 		this.injector.injectMembers(behaviorSkill);
@@ -98,6 +100,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		this.injector.injectMembers(interactionSkill);
 		this.injector.injectMembers(scheduleSkill);
 		
+		result.put(MicroKernelCapacity.class, microKernelSkill);
 		result.put(InternalEventBusCapacity.class, eventBusSkill);
 		result.put(InnerContextAccess.class, innerContextSkill);
 		result.put(Behaviors.class, behaviorSkill);
@@ -111,6 +114,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 						agent.getID(),
 						this.spawnService,
 						eventBusSkill,
+						microKernelSkill,
 						innerContextSkill,
 						behaviorSkill,
 						lifecycleSkill,
@@ -126,6 +130,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		assert(result.get(InnerContextAccess.class)!=null);
 		assert(result.get(Lifecycle.class)!=null);
 		assert(result.get(Schedules.class)!=null);
+		assert(result.get(MicroKernelCapacity.class)!=null);
 
 		return result;
 	}
