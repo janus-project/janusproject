@@ -138,7 +138,9 @@ public class NetworkUtil {
 	/** Extract an Inet address from an URI.
 	 * 
 	 * @param uri - the address.
-	 * @return the URI.
+	 * @return the address.
+	 * @throws IllegalArgumentException if the URI has not the scheme "tcp" nor "udp".
+	 * @throws IOError is the host cannot be resolve.
 	 */
 	public static InetAddress toInetAddress(URI uri) {
 		try {
@@ -157,7 +159,9 @@ public class NetworkUtil {
 	/** Extract an Inet address from an URI.
 	 * 
 	 * @param uri - the address.
-	 * @return the URI.
+	 * @return the address.
+	 * @throws IllegalArgumentException if the URI has not the scheme "tcp" nor "udp"; or the port is negative or nul.
+	 * @throws IOError is the host cannot be resolve.
 	 */
 	public static InetSocketAddress toInetSocketAddress(URI uri) {
 		InetAddress adr = toInetAddress(uri);
