@@ -50,8 +50,6 @@ public class AESEventEncrypter extends AbstractEventEncrypter {
 
 	private SecretKeySpec skeySpec;
 
-	// private Cipher cipher;
-
 	/**
 	 * Change the encryption key.
 	 * 
@@ -59,8 +57,7 @@ public class AESEventEncrypter extends AbstractEventEncrypter {
 	 * @throws Exception
 	 */
 	@Inject
-	private void setKey(@Named(NetworkConfig.AES_KEY) String key) throws Exception {
-		// FIXME: Unify the string charset to convert from to byte array
+	public void setKey(@Named(NetworkConfig.AES_KEY) String key) throws Exception {
 		byte[] raw = key.getBytes(NetworkConfig.BYTE_ARRAY_STRING_CHARSET);
 		int keySize = raw.length;
 		if ((keySize % 16) == 0 || (keySize % 24) == 0 || (keySize % 32) == 0) {
