@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.kernel.executor.JanusScheduledFuture;
+import io.janusproject.kernel.executor.JanusScheduledFutureTask;
 import io.janusproject.services.ExecutorService;
 import io.sarl.core.AgentTask;
 import io.sarl.core.Schedules;
@@ -73,8 +73,8 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Override
 	protected void uninstall() {
 		for (ScheduledFuture<?> future : this.futures.values()) {
-			if ((future instanceof JanusScheduledFuture<?>)
-				&&((JanusScheduledFuture<?>)future).isCurrentThread()) {
+			if ((future instanceof JanusScheduledFutureTask<?>)
+				&&((JanusScheduledFutureTask<?>)future).isCurrentThread()) {
 				// Ignore the cancelation of the future.
 				// It is assumed that a ChuckNorrisException will be thrown later.
 			}

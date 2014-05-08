@@ -20,18 +20,14 @@
 package io.janusproject.kernel.executor;
 
 import io.janusproject.JanusConfig;
+import io.janusproject.util.ListenerCollection;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.ref.WeakReference;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.inject.Inject;
 
@@ -45,6 +41,8 @@ import com.google.inject.Inject;
  */
 public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor {
 
+	private ListenerCollection<TaskListener> listeners = null;
+
 	/**
 	 * @param factory
 	 */
@@ -52,170 +50,129 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	public JanusScheduledThreadPoolExecutor(ThreadFactory factory) {
 		super(JanusConfig.VALUE_NUMBER_OF_THREADS_IN_EXECUTOR, factory);
 	}
-	
+
+	/** Add a listener on tasks.
+	 * 
+	 * @param listener
+	 */
+	public synchronized void addTaskListener(TaskListener listener) {
+		if (this.listeners==null) {
+			this.listeners = new ListenerCollection<>();
+		}
+		this.listeners.add(TaskListener.class, listener);
+	}
+
+	/** Remove a listener on tasks.
+	 * 
+	 * @param listener
+	 */
+	public synchronized void removeTaskListener(TaskListener listener) {
+		if (this.listeners!=null) {
+			this.listeners.remove(TaskListener.class, listener);
+			if (this.listeners.isEmpty()) {
+				this.listeners = null;
+			}
+		}
+	}
+
+	/** Notify the listeners about a task termination.
+	 * 
+	 * @param thread
+	 * @param task
+	 */
+	protected void fireTaskFinished(Thread thread, Runnable task) {
+		TaskListener[] listeners;
+		synchronized(this) {
+			listeners = this.listeners.getListeners(TaskListener.class);
+		}
+		for(TaskListener listener : listeners) {
+			listener.taskFinished(thread, task);
+		}
+	}
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable,
 			RunnableScheduledFuture<V> task) {
-		return new FutureWrapper<>(task);
+		return new JanusScheduledFutureTask<>(task);
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable,
 			RunnableScheduledFuture<V> task) {
-		return new FutureWrapper<>(task);
+		return new JanusScheduledFutureTask<>(task);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public <T> Future<T> submit(Runnable task, T result) {
+        return schedule(
+        		new ResultRunnable<>(task, result),
+                0, TimeUnit.NANOSECONDS);
 	}
 	
 	/** {@inheritDoc}
 	 */
 	@Override
 	protected void beforeExecute(Thread t, Runnable r) {
-		((FutureWrapper<?>)r).setThread(t);
+		// Was the task submitted (if future task) or executed?
+		if (r instanceof JanusScheduledFutureTask<?>) {
+			((JanusScheduledFutureTask<?>)r).setThread(t);
+		}
 	}
 
+	/** {@inheritDoc}
+	 */
 	@Override
 	protected void afterExecute(Runnable r, Throwable t) {
 		assert(t==null);
-		FutureWrapper<?> future = (FutureWrapper<?>)r;
-		assert(future.isDone() || future.isCancelled() || future.isPeriodic());
-		if (future.isDone() || future.isCancelled()) {
-			extractException(future);
-		}
-	}
-	
-	private static void extractException(FutureWrapper<?> future) {
-		if (!future.consume()) {
-			// Test the throw of an exception
-			try {
-				// This function should not timeout because the task should be terminated.
-				future.get(10, TimeUnit.SECONDS);
-			}
-			catch(Throwable e) {
-				// Get the cause of the exception
-				while (e instanceof ExecutionException) {
-					e = ((ExecutionException)e).getCause();
-				}
-				if (!(e instanceof ChuckNorrisException)) {
-					// Call the exception catcher
-					Thread th = future.getThread();
-					UncaughtExceptionHandler h = th.getUncaughtExceptionHandler();
-					if (h==null) h = Thread.getDefaultUncaughtExceptionHandler();
-					if (h!=null) h.uncaughtException(th, e);
-					else {
-						System.err.println(e.toString());
-						e.printStackTrace();
-					}
-				}
-			}
+		assert(r instanceof JanusScheduledFutureTask<?>);
+		JanusScheduledFutureTask<?> task = (JanusScheduledFutureTask<?>)r;
+		assert(task.isDone() || task.isCancelled() || task.isPeriodic());
+		if (task.isDone() || task.isCancelled()) {
+			task.reportException(task.getThread());
+			fireTaskFinished(task.getThread(), task);
 		}
 	}
 	
 	/**
-	 * @param <V>
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
+	 * @param <V>
 	 */
-	private static class FutureWrapper<V> implements JanusScheduledFuture<V> {
-
-		private final AtomicBoolean treated = new AtomicBoolean(false);
-		private final RunnableScheduledFuture<V> task;
-		private WeakReference<Thread> thread = null;
-
+	private static class ResultRunnable<V> implements Callable<V> {
+		
+		public final Runnable runnable;
+		public final V result;
+		
 		/**
-		 * @param task
+		 * @param runnable
+		 * @param result
 		 */
-		public FutureWrapper(RunnableScheduledFuture<V> task) {
-			assert(task!=this);
-			this.task = task;
+		public ResultRunnable(Runnable runnable, V result) {
+			this.runnable = runnable;
+			this.result = result;
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public V call() throws Exception {
+			try {
+				this.runnable.run();
+			}
+			catch(ChuckNorrisException _) {
+				//
+			}
+			return this.result;
 		}
 		
-		/** Replies if this future was already treated before.
-		 * 
-		 * @return <code>true</code> or <code>false</code>.
-		 */
-		public boolean consume() {
-			return this.treated.getAndSet(true);
-		}
-
-		/** Set the running thread.
-		 * 
-		 * @param thread
-		 */
-		public void setThread(Thread thread) {
-			this.thread = new WeakReference<>(thread);
-		}
-
-		@Override
-		public Thread getThread() {
-			return this.thread.get();
-		}
-		
-		@Override
-		public boolean isCurrentThread() {
-			return Thread.currentThread()==this.thread.get();
-		}
-
-		@Override
-		public void run() {
-			this.task.run();
-		}
-
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			return this.task.cancel(mayInterruptIfRunning);
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return this.task.isCancelled();
-		}
-
-		@Override
-		public boolean isDone() {
-			return this.task.isDone();
-		}
-
-		@Override
-		public V get() throws InterruptedException, ExecutionException {
-			return this.task.get();
-		}
-
-		@Override
-		public V get(long timeout, TimeUnit unit) throws InterruptedException,
-		ExecutionException, TimeoutException {
-			return this.task.get(timeout, unit);
-		}
-
-		@Override
-		public long getDelay(TimeUnit unit) {
-			return this.task.getDelay(unit);
-		}
-
-		@Override
-		public int compareTo(Delayed o) {
-			return this.task.compareTo(o);
-		}
-
-		@Override
-		public boolean isPeriodic() {
-			return this.task.isPeriodic();
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return this.task.equals(obj);
-		}
-
-		@Override
-		public int hashCode() {
-			return this.task.hashCode();
-		}
-
 	}
-
+	
 }

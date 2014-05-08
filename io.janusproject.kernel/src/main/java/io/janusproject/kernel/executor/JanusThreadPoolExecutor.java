@@ -19,7 +19,10 @@
  */
 package io.janusproject.kernel.executor;
 
-import java.lang.Thread.UncaughtExceptionHandler;
+import io.janusproject.util.ListenerCollection;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -37,6 +40,8 @@ import com.google.inject.Inject;
  */
 public class JanusThreadPoolExecutor extends ThreadPoolExecutor {
 
+	private ListenerCollection<TaskListener> listeners = null;
+
 	/**
 	 * @param factory
 	 */
@@ -48,19 +53,90 @@ public class JanusThreadPoolExecutor extends ThreadPoolExecutor {
         		factory);
 	}
 	
+	/** Add a listener on tasks.
+	 * 
+	 * @param listener
+	 */
+	public synchronized void addTaskListener(TaskListener listener) {
+		if (this.listeners==null) {
+			this.listeners = new ListenerCollection<>();
+		}
+		this.listeners.add(TaskListener.class, listener);
+	}
+	
+	/** Remove a listener on tasks.
+	 * 
+	 * @param listener
+	 */
+	public synchronized void removeTaskListener(TaskListener listener) {
+		if (this.listeners!=null) {
+			this.listeners.remove(TaskListener.class, listener);
+			if (this.listeners.isEmpty()) {
+				this.listeners = null;
+			}
+		}
+	}
+	
+	/** Notify the listeners about a task termination.
+	 * 
+	 * @param thread
+	 * @param task
+	 */
+	protected void fireTaskFinished(Thread thread, Runnable task) {
+		TaskListener[] listeners;
+		synchronized(this) {
+			listeners = this.listeners.getListeners(TaskListener.class);
+		}
+		for(TaskListener listener : listeners) {
+			listener.taskFinished(thread, task);
+		}
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
+		// This function is invoked when the task was submited
+		return new JanusFutureTask<>(callable);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
+		// This function is invoked when the task was submited
+		return new JanusFutureTask<>(runnable, value);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected void beforeExecute(Thread t, Runnable r) {
+		// Was the task submitted (if future task) or executed?
+		if (r instanceof JanusFutureTask<?>) {
+			((JanusFutureTask<?>)r).setThread(t);
+		}
+	}
+	
 	/** {@inheritDoc}
 	 */
 	@Override
 	protected void afterExecute(Runnable r, Throwable t) {
-		if (t!=null && (!(t instanceof ChuckNorrisException))) {
-			UncaughtExceptionHandler h = Thread.currentThread().getUncaughtExceptionHandler();
-			if (h==null) h = Thread.getDefaultUncaughtExceptionHandler();
-			if (h!=null) h.uncaughtException(Thread.currentThread(), t);
-			else {
-				System.err.println(t.toString());
-				t.printStackTrace();
-			}
+		Thread th;
+		JanusFutureTask<?> task;
+		if (r instanceof JanusFutureTask<?>) {
+			task = (JanusFutureTask<?>)r;
+			th = task.getThread(); 
 		}
+		else {
+			task = null;
+			th = Thread.currentThread();
+		}
+		if (t!=null && task!=null) {
+			// Was the task submitted (if future task) or executed?
+			ExecutorUtil.log(th, t);
+		}
+		fireTaskFinished(th, r);
 	}
 
 }
