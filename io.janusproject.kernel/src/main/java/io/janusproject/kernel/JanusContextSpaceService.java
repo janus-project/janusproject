@@ -26,7 +26,7 @@ import io.janusproject.services.LogService;
 import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.services.impl.AbstractPrioritizedService;
-import io.janusproject.util.Collections3;
+import io.sarl.util.Collections3;
 import io.janusproject.util.ListenerCollection;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Space;

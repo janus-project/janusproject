@@ -21,7 +21,7 @@ package io.janusproject.kernel.bic;
 
 import io.janusproject.kernel.space.EventSpaceImpl;
 import io.janusproject.services.ContextSpaceService;
-import io.janusproject.util.Collections3;
+import io.sarl.util.Collections3;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;

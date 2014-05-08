@@ -27,7 +27,7 @@ import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.impl.AbstractPrioritizedService;
-import io.janusproject.util.Collections3;
+import io.sarl.util.Collections3;
 import io.janusproject.util.ListenerCollection;
 
 import java.net.URI;
