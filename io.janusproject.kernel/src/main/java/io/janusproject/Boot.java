@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -71,15 +72,7 @@ import org.arakhne.afc.vmutil.locale.Locale;
  */
 public class Boot {
 
-	/** Main function that is parsing the command line and launching
-	 * the first agent.
-	 * 
-	 * @param args
-	 * @see #startJanus(Class, Object...)
-	 */
-	@SuppressWarnings("unchecked")
-	public static void main(String[] args) {
-
+	private static String[] parseCommandLine(String[] args, List<URL> propertyFiles) {
 		CommandLineParser parser = new GnuParser();
 
 		try {
@@ -87,7 +80,7 @@ public class Boot {
 			if (cmd.hasOption('h') || cmd.getArgs().length == 0) {
 				showHelp();
 			}
-			
+
 			if (cmd.hasOption('o')) {
 				System.setProperty(JanusConfig.OFFLINE, Boolean.TRUE.toString());
 			}
@@ -115,8 +108,29 @@ public class Boot {
 				}
 			}
 
+			// Define the verbosity.
+			// The order of the options is important.
+			if (cmd.hasOption('v') || cmd.hasOption('q')) {
+				@SuppressWarnings("unchecked")
+				Iterator<Option> optIterator = cmd.iterator();
+				int verbose = 0;
+				while (optIterator.hasNext()) {
+					Option opt = optIterator.next();
+					switch(opt.getOpt()) {
+					case "q": //$NON-NLS-1$
+						verbose = 0;
+						break;
+					case "v": //$NON-NLS-1$
+						verbose++;
+						break;
+					default:
+					}
+				}
+				System.setProperty(JanusConfig.VERBOSE_LEVEL,
+						Integer.toString(Math.min(0, Math.max(6, verbose))));
+			}
+
 			// Retreive the list of the property files given on CLI
-			List<URL> propertyFiles = new ArrayList<>();
 			if (cmd.hasOption('f')) {
 				for(String rawFilename : cmd.getOptionValues('f')) {
 					if (rawFilename==null || "".equals(rawFilename)) { //$NON-NLS-1$
@@ -130,9 +144,31 @@ public class Boot {
 					propertyFiles.add(file.toURI().toURL());
 				}
 			}
+
+			return cmd.getArgs();
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+			showHelp();
+			throw new Error(); // Only to avoid compilation errors
+		}
+	}
+	
+	/** Main function that is parsing the command line and launching
+	 * the first agent.
+	 * 
+	 * @param args
+	 * @see #startJanus(Class, Object...)
+	 */
+	@SuppressWarnings("unchecked")
+	public static void main(String[] args) {
+		try {
+			List<URL> propertyFiles = new ArrayList<>();
 			
-			String agentToLaunch = cmd.getArgs()[0];
+			String[] freeArgs = parseCommandLine(args, propertyFiles);
+			String agentToLaunch = freeArgs[0];
+			
 			showJanusLogo();
+			
 			Class<?> agent = Class.forName(agentToLaunch);
 
 			// The following test is needed because the
@@ -140,7 +176,7 @@ public class Boot {
 			// the Agent type (it is a generic type, not
 			// tested at runtime).
 			if (Agent.class.isAssignableFrom(agent)) {
-				
+
 				// Load property files
 				Properties systemProperties = System.getProperties();
 				for(URL url : propertyFiles) {
@@ -156,15 +192,15 @@ public class Boot {
 				startJanus(
 						(Class<? extends Agent>)agent,
 						Arrays.copyOfRange(
-								cmd.getArgs(),
-								1, cmd.getArgs().length,
+								freeArgs,
+								1, freeArgs.length,
 								Object[].class));
 			}
 			else {
 				throw new ClassCastException(
 						Locale.getString("INVALID_AGENT_TYPE", agentToLaunch)); //$NON-NLS-1$
 			}
-		} catch (IOException | ParseException | ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 			showHelp();
 		}
@@ -178,16 +214,22 @@ public class Boot {
 	public static Options getOptions() {
 		Option opt;
 		Options options = new Options();
+
 		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("f", "file", true, Locale.getString("CLI_HELP_F"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("o", "offline", false, Locale.getString("CLI_HELP_O", JanusConfig.OFFLINE));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("B", "bootid", false, Locale.getString("CLI_HELP_B", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("R", "randomid", false, Locale.getString("CLI_HELP_R", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_W", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("q", "quiet", false, Locale.getString("CLI_HELP_Q"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("v", "verbose", false, Locale.getString("CLI_HELP_V"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+
 		opt = new Option("D", true, Locale.getString("CLI_HELP_D"));  //$NON-NLS-1$//$NON-NLS-2$
 		opt.setArgs(2);
 		opt.setValueSeparator('=');
+		opt.setArgName(Locale.getString("CLI_HELP_D_ARGNAME")); //$NON-NLS-1$
 		options.addOption(opt);
+
 		return options;
 	}
 
@@ -198,7 +240,7 @@ public class Boot {
 	public static void showHelp() {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(Boot.class.getName()+" [OPTIONS] <agent_classname>", getOptions()); //$NON-NLS-1$
-		
+
 		Map<String,Object> defaultValues = new TreeMap<>();
 		JanusConfig.getDefaultValues(defaultValues);
 		NetworkConfig.getDefaultValues(defaultValues);
@@ -215,10 +257,10 @@ public class Boot {
 			}
 			System.out.println(Locale.getString("DEFAULT_PROPERTY", entry.getKey(), o)); //$NON-NLS-1$
 		}
-		
+
 		System.exit(255);
 	}
-	
+
 	/** Show the heading logo of the Janus platform.
 	 */
 	public static void showJanusLogo() {
