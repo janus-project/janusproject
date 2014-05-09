@@ -23,6 +23,7 @@ import io.janusproject.JanusConfig;
 import io.janusproject.JanusDefaultModule;
 import io.janusproject.network.NetworkUtil;
 import io.janusproject.repository.DistributedDataStructureFactory;
+import io.janusproject.services.LogService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.SpaceID;
 
@@ -50,6 +51,8 @@ public class HazelcastModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
+		requireBinding(LogService.class);
+
 		Config hazelcastConfig = new Config();
 		
 		SerializerConfig sc = new SerializerConfig();
@@ -72,11 +75,17 @@ public class HazelcastModule extends AbstractModule {
 		bind(Config.class).toInstance(hazelcastConfig);
 		
 		bind(DistributedDataStructureFactory.class).to(HazelcastDistributedDataStructureFactory.class).in(Singleton.class);
+
+		// Ensure the system property for the hazelcast logger factory
+		String factory = JanusConfig.getSystemProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY, JanusConfig.VALUE_HAZELCAST_LOGGER_FACTORY);
+		assert(factory!=null && !factory.isEmpty());
+		System.setProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY, factory);
 	}
 
 	@Provides
 	@Singleton
-	private static HazelcastInstance createHazelcastInstance(Config config) {
+	private static HazelcastInstance createHazelcastInstance(Config config, LogService logService) {
+		HzKernelLoggerFactory.setLogService(logService);
 		return Hazelcast.newHazelcastInstance(config);
 	}
 	
