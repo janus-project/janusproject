@@ -72,7 +72,13 @@ import org.arakhne.afc.vmutil.locale.Locale;
  */
 public class Boot {
 
-	private static String[] parseCommandLine(String[] args, List<URL> propertyFiles) {
+	/** Parse the command line.
+	 * 
+	 * @param args - the CLI arguments given to the program.
+	 * @param propertyFiles - files that may be filled with the filenames given on the CLI.
+	 * @return the arguments that are not recognized as CLI options.
+	 */
+	public static String[] parseCommandLine(String[] args, List<URL> propertyFiles) {
 		CommandLineParser parser = new GnuParser();
 
 		try {
@@ -110,26 +116,30 @@ public class Boot {
 
 			// Define the verbosity.
 			// The order of the options is important.
-			if (cmd.hasOption('v') || cmd.hasOption('q')) {
+			if (cmd.hasOption('v') || cmd.hasOption('q') || cmd.hasOption('l')) {
 				@SuppressWarnings("unchecked")
 				Iterator<Option> optIterator = cmd.iterator();
-				int verbose = 0;
+				int verbose = JanusConfig.VALUE_VERBOSE_LEVEL;
 				while (optIterator.hasNext()) {
 					Option opt = optIterator.next();
 					switch(opt.getOpt()) {
+					case "l": //$NON-NLS-1$
+						verbose = Integer.parseInt(opt.getValue());
+						break;
 					case "q": //$NON-NLS-1$
-						verbose = 0;
+						--verbose;
 						break;
 					case "v": //$NON-NLS-1$
-						verbose++;
+						++verbose;
 						break;
 					default:
 					}
 				}
-				System.setProperty(JanusConfig.VERBOSE_LEVEL,
-						Integer.toString(Math.min(0, Math.max(6, verbose))));
+				System.setProperty(
+						JanusConfig.VERBOSE_LEVEL,
+						Integer.toString(verbose));
 			}
-
+			
 			// Retreive the list of the property files given on CLI
 			if (cmd.hasOption('f')) {
 				for(String rawFilename : cmd.getOptionValues('f')) {
@@ -223,6 +233,11 @@ public class Boot {
 		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_W", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("q", "quiet", false, Locale.getString("CLI_HELP_Q"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("v", "verbose", false, Locale.getString("CLI_HELP_V"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+
+		opt = new Option("l", "log", true, Locale.getString("CLI_HELP_L",  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					JanusConfig.VALUE_VERBOSE_LEVEL));
+		opt.setArgs(1);
+		options.addOption(opt);
 
 		opt = new Option("D", true, Locale.getString("CLI_HELP_D"));  //$NON-NLS-1$//$NON-NLS-2$
 		opt.setArgs(2);
