@@ -48,6 +48,14 @@ class HazelcastDistributedDataStructureFactory implements DistributedDataStructu
 
 	@Inject
 	private HazelcastInstance hazelcastInstance;
+	
+	/** Change the hazelcast instance used by this factory.
+	 * 
+	 * @param hazelcastInstance
+	 */
+	void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
+		this.hazelcastInstance = hazelcastInstance;
+	}
 
 	@Override
 	public <K, V> IMap<K, V> getMap(String name) {
@@ -57,7 +65,7 @@ class HazelcastDistributedDataStructureFactory implements DistributedDataStructu
 	@Override
 	public <K, V> io.janusproject.repository.MultiMap<K, V> getMultiMap(String name) {
 		MultiMap<K,V> m = this.hazelcastInstance.getMultiMap(name);
-		if (m==null) return new MultiMapWrapper<>(m);
+		if (m!=null) return new MultiMapWrapper<>(m);
 		return null;
 	}
 
