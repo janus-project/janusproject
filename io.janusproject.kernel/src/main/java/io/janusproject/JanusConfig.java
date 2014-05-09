@@ -32,9 +32,17 @@ import java.util.Map;
  */
 public class JanusConfig {
 	
+	/** Name of the property that contains the logger factory for hazelcast.
+	 */
+	public static final String HAZELCAST_LOGGER_FACTORY = "hazelcast.logging.class"; //$NON-NLS-1$
+
 	/** Name of the property that contains the verbosity level of Janus.
 	 */
 	public static final String VERBOSE_LEVEL = "janus.verbose.level"; //$NON-NLS-1$
+
+	/** Name of the property that contains the verbosity level of Janus.
+	 */
+	public static final String LOGGING_PROPERTY_FILE = "java.util.logging.config.file"; //$NON-NLS-1$
 
 	/** Name of the property that contains the boolean value for offline/online.
 	 */
@@ -71,10 +79,20 @@ public class JanusConfig {
 	 */
 	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
 
+	/** The default name of the hazelcast logger factory of Janus.
+	 * @see #HAZELCAST_LOGGER_FACTORY
+	 */
+	public static final String VALUE_HAZELCAST_LOGGER_FACTORY = "io.janusproject.kernel.hazelcast.HzKernelLoggerFactory"; //$NON-NLS-1$
+
+	/** The default name of the logging property file of Janus.
+	 * @see #LOGGING_PROPERTY_FILE
+	 */
+	public static final String VALUE_LOGGING_PROPERTY_FILE = "resource:io/janusproject/logging.properties"; //$NON-NLS-1$
+
 	/** The default verbosity level of Janus.
 	 * @see #VERBOSE_LEVEL
 	 */
-	public static final byte VALUE_VERBOSE_LEVEL = 3;
+	public static final int VALUE_VERBOSE_LEVEL = 3;
 
 	/** The default value for the Janus context identifier.
 	 * @see #DEFAULT_CONTEXT_ID
@@ -105,7 +123,6 @@ public class JanusConfig {
 	 * for thread terminations before timeout.
 	 */
 	public static final int VALUE_KERNEL_THREAD_TIMEOUT = 30;
-
 	
 	
 	/** Replies the default values for the properties supported by Janus config.
@@ -121,6 +138,8 @@ public class JanusConfig {
 		defaultValues.put(PUB_URI, null);
 		defaultValues.put(RANDOM_DEFAULT_CONTEXT_ID, VALUE_RANDOM_DEFAULT_CONTEXT_ID);
 		defaultValues.put(VERBOSE_LEVEL, VALUE_VERBOSE_LEVEL);
+		defaultValues.put(LOGGING_PROPERTY_FILE, VALUE_LOGGING_PROPERTY_FILE);
+		defaultValues.put(HAZELCAST_LOGGER_FACTORY, VALUE_HAZELCAST_LOGGER_FACTORY);
 	}
 		
 	/** Replies the value of the system property.
@@ -167,6 +186,34 @@ public class JanusConfig {
 		if (value!=null) {
 			try {
 				return Boolean.parseBoolean(value);
+			}
+			catch(Throwable _) {
+				//
+			}
+		}
+		return defaultValue;
+	}
+
+	/** Replies the value of the integer system property.
+	 * 
+	 * @param name - name of the property.
+	 * @return the value, or <code>0</code> if no property found.
+	 */
+	public static int getSystemPropertyAsInteger(String name) {
+		return getSystemPropertyAsInteger(name, 0);
+	}
+
+	/** Replies the value of the integer system property.
+	 * 
+	 * @param name - name of the property.
+	 * @param defaultValue - value to reply if the these is no property found
+	 * @return the value, or <var>defaultValue</var>.
+	 */
+	public static int getSystemPropertyAsInteger(String name, int defaultValue) {
+		String value = getSystemProperty(name, null);
+		if (value!=null) {
+			try {
+				return Integer.parseInt(value);
 			}
 			catch(Throwable _) {
 				//

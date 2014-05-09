@@ -196,6 +196,19 @@ public interface LogService extends Service {
      */
 	public boolean isLoggeable(Level level);
 
+	/** Replies the level of logging.
+     *
+     * @return  the level of logging.
+     */
+	public Level getLevel();
+
+
+	/** Change the level of logging.
+     *
+     * @param level
+     */
+	public void setLevel(Level level);
+
 	/** Utility to put objec that us asynchronously evaluated by
 	 * the {@link LogService}.
 	 * 

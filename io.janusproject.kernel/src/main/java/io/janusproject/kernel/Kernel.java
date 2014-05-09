@@ -22,6 +22,7 @@ package io.janusproject.kernel;
 import io.janusproject.services.KernelAgentSpawnListener;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.impl.Services;
+import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 
@@ -193,6 +194,8 @@ public class Kernel {
 	 */
 	private class StopTheKernel implements ThreadFactory, Runnable, UncaughtExceptionHandler {
 
+		private final Logger rawLogger = LoggerCreator.createLogger(Kernel.class.getName());
+		
 		/**
 		 */
 		public StopTheKernel() {
@@ -211,11 +214,10 @@ public class Kernel {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void run() {
-			Logger rawLogger = Logger.getAnonymousLogger();
-			rawLogger.info(Locale.getString(Kernel.class, "STOP_KERNEL_SERVICES")); //$NON-NLS-1$
+			this.rawLogger.info(Locale.getString(Kernel.class, "STOP_KERNEL_SERVICES")); //$NON-NLS-1$
 			Services.stopServices(Kernel.this.serviceManager);
 			Kernel.this.hazelcastInstance.shutdown();
-			rawLogger.info(Locale.getString(Kernel.class, "KERNEL_SERVICES_STOPPED")); //$NON-NLS-1$
+			this.rawLogger.info(Locale.getString(Kernel.class, "KERNEL_SERVICES_STOPPED")); //$NON-NLS-1$
 		}
 
 		/** {@inheritDoc}
@@ -241,7 +243,7 @@ public class Kernel {
 			assert(elt!=null);
 			record.setSourceClassName(elt.getClassName());
 			record.setSourceMethodName(elt.getMethodName());
-			Logger.getAnonymousLogger().log(record);
+			this.rawLogger.log(record);
 		}
 
 	}

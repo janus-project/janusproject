@@ -20,20 +20,35 @@
 package io.janusproject;
 
 import io.janusproject.network.NetworkUtil;
+import io.janusproject.util.LoggerCreator;
 
 import java.io.IOError;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
+import org.arakhne.afc.vmutil.FileSystem;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
+import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
 
 /**
  * The module configures the minimum requirements for 
@@ -51,6 +66,10 @@ public class BootModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
+		// Custom logger
+		bindListener(Matchers.any(), new LoggerMemberListener());
+		
+		// Treat the PUB_URI
 		boolean foundPubUri = false;
 		String name;
 		for(Entry<Object,Object> entry : System.getProperties().entrySet()) {
@@ -125,7 +144,7 @@ public class BootModule extends AbstractModule {
 		String v = JanusConfig.getSystemProperty(JanusConfig.DEFAULT_SPACE_ID, JanusConfig.VALUE_DEFAULT_SPACE_ID);
 		return UUID.fromString(v);
 	}
-	
+
 	/**
 	 * @return the spaceID
 	 */
@@ -152,7 +171,7 @@ public class BootModule extends AbstractModule {
 		}
 		return pubUri;
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -168,6 +187,92 @@ public class BootModule extends AbstractModule {
 		@Override
 		public String get() {
 			return getDefaultPubUri();
+		}
+
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static final class LoggerMemberListener implements TypeListener {
+
+		private static void init() {
+			String propertyFileName = JanusConfig.getSystemProperty(JanusConfig.LOGGING_PROPERTY_FILE, JanusConfig.VALUE_LOGGING_PROPERTY_FILE);
+			if (propertyFileName!=null && !propertyFileName.isEmpty()) {
+				URL url = FileSystem.convertStringToURL(propertyFileName, true);
+				if (url!=null) {
+					try(InputStream is = url.openStream()) {
+						LogManager.getLogManager().readConfiguration(is);
+					}
+					catch(IOException e) {
+						throw new IOError(e);
+					}
+				}
+			}
+		}
+		
+		private final AtomicBoolean isInit = new AtomicBoolean(false);
+
+		/**
+		 */
+		public LoggerMemberListener() {
+			//
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+			for (Field field : type.getRawType().getDeclaredFields()) {
+				if (field.getType() == Logger.class) {
+					if (!this.isInit.getAndSet(true)) {
+						init();
+					}
+					encounter.register(new LoggerMemberInjector<I>(field));
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * @param <T>
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static final class LoggerMemberInjector<T> implements MembersInjector<T> {
+
+		private final Field field;
+
+		/**
+		 * @param field
+		 */
+		public LoggerMemberInjector(Field field) {
+			this.field = field;
+		}
+		
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void injectMembers(T instance) {
+			Logger logger = LoggerCreator.createLogger(this.field.getDeclaringClass().getName());
+			
+			boolean accessible = this.field.isAccessible();
+			try {
+				this.field.setAccessible(true);
+				this.field.set(instance, logger);
+			}
+			catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+			finally {
+				this.field.setAccessible(accessible);
+			}
 		}
 
 	}

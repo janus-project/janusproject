@@ -91,8 +91,17 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 		return null;
 	}
 	
+	/** Replies if this service permits to log the messages.
+	 * 
+	 * @return <code>true</code> if the messages are loggeable,
+	 * <code>false</code> otherwise.
+	 */
+	protected boolean isLogEnabled() {
+		return state().ordinal() <= State.RUNNING.ordinal();
+	}
+	
 	private synchronized void log(Level level, boolean exception, String messageKey, Object... message) {
-		if (isRunning() && this.logger.isLoggable(level)) {
+		if (isLogEnabled() && this.logger.isLoggable(level)) {
 			StackTraceElement elt = getCaller();
 			assert(elt!=null);
 			Class<?> callerType;
@@ -120,7 +129,7 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	}
 	
 	private synchronized void log(Level level, boolean exception, Class<?> propertyType, String messageKey, Object... message) {
-		if (isRunning() && this.logger.isLoggable(level)) {
+		if (isLogEnabled() && this.logger.isLoggable(level)) {
 			StackTraceElement elt = getCaller();
 			assert(elt!=null);
 			String text = Locale.getString(propertyType, messageKey, message);
@@ -145,7 +154,7 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	 */
 	@Override
 	public synchronized void log(LogRecord record) {
-		if (isRunning()) this.logger.log(record);
+		if (isLogEnabled()) this.logger.log(record);
 	}
 
 	/** {@inheritDoc}
@@ -273,7 +282,21 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	 */
 	@Override
 	public boolean isLoggeable(Level level) {
-		return isRunning() && this.logger.isLoggable(level);
+		return isLogEnabled() && this.logger.isLoggable(level);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Level getLevel() {
+		return this.logger.getLevel();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void setLevel(Level level) {
+		this.logger.setLevel(level);
 	}
 
 	/** {@inheritDoc}
