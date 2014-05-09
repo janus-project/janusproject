@@ -32,6 +32,10 @@ import java.util.Map;
  */
 public class JanusConfig {
 	
+	/** Name of the property that contains the verbosity level of Janus.
+	 */
+	public static final String VERBOSE_LEVEL = "janus.verbose.level"; //$NON-NLS-1$
+
 	/** Name of the property that contains the boolean value for offline/online.
 	 */
 	public static final String OFFLINE = "janus.network.offline"; //$NON-NLS-1$
@@ -66,6 +70,11 @@ public class JanusConfig {
 	/** Name of the property that contains the public network URI.
 	 */
 	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
+
+	/** The default verbosity level of Janus.
+	 * @see #VERBOSE_LEVEL
+	 */
+	public static final byte VALUE_VERBOSE_LEVEL = 3;
 
 	/** The default value for the Janus context identifier.
 	 * @see #DEFAULT_CONTEXT_ID
@@ -111,6 +120,7 @@ public class JanusConfig {
 		defaultValues.put(OFFLINE, Boolean.FALSE.toString());
 		defaultValues.put(PUB_URI, null);
 		defaultValues.put(RANDOM_DEFAULT_CONTEXT_ID, VALUE_RANDOM_DEFAULT_CONTEXT_ID);
+		defaultValues.put(VERBOSE_LEVEL, VALUE_VERBOSE_LEVEL);
 	}
 		
 	/** Replies the value of the system property.
