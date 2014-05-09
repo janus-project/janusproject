@@ -59,6 +59,8 @@ public interface LogService extends Service {
 	 * 
 	 * @param messageKey - key of the message in the properties.
 	 * @param message
+	 * @see #fineInfo(String, Object...)
+	 * @see #finerInfo(String, Object...)
 	 */
 	public void info(String messageKey, Object... message);
 
@@ -67,8 +69,48 @@ public interface LogService extends Service {
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message
+	 * @see #fineInfo(Class, String, Object...)
+	 * @see #finerInfo(Class, String, Object...)
 	 */
 	public void info(Class<?> propertyType, String messageKey, Object... message);
+
+	/** Log a fine information message.
+	 * 
+	 * @param messageKey - key of the message in the properties.
+	 * @param message
+	 * @see #info(String, Object...)
+	 * @see #finerInfo(String, Object...)
+	 */
+	public void fineInfo(String messageKey, Object... message);
+
+	/** Log an information message.
+	 * 
+	 * @param propertyType - type that is used to retreive the property file.
+	 * @param messageKey - key of the message in the properties.
+	 * @param message
+	 * @see #info(Class, String, Object...)
+	 * @see #finerInfo(Class, String, Object...)
+	 */
+	public void fineInfo(Class<?> propertyType, String messageKey, Object... message);
+
+	/** Log a finer information message.
+	 * 
+	 * @param messageKey - key of the message in the properties.
+	 * @param message
+	 * @see #info(String, Object...)
+	 * @see #fineInfo(String, Object...)
+	 */
+	public void finerInfo(String messageKey, Object... message);
+
+	/** Log a finer information message.
+	 * 
+	 * @param propertyType - type that is used to retreive the property file.
+	 * @param messageKey - key of the message in the properties.
+	 * @param message
+	 * @see #info(Class, String, Object...)
+	 * @see #fineInfo(Class, String, Object...)
+	 */
+	public void finerInfo(Class<?> propertyType, String messageKey, Object... message);
 
 	/** Log a debug message.
 	 * 

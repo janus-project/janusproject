@@ -166,8 +166,38 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	/** {@inheritDoc}
 	 */
 	@Override
+	public void fineInfo(String messageKey, Object... message) {
+		log(Level.FINE, false, messageKey, message);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void fineInfo(Class<?> propertyType, String messageKey,
+			Object... message) {
+		log(Level.FINE, false, propertyType, messageKey, message);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void finerInfo(String messageKey, Object... message) {
+		log(Level.FINER, false, messageKey, message);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void finerInfo(Class<?> propertyType, String messageKey,
+			Object... message) {
+		log(Level.FINER, false, propertyType, messageKey, message);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
 	public void debug(String messageKey, Object... message) {
-		log(Level.FINE, true, messageKey, message);
+		log(Level.FINEST, true, messageKey, message);
 	}
 
 	/** {@inheritDoc}
@@ -175,7 +205,7 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	@Override
 	public void debug(Class<?> propertyType, String messageKey,
 			Object... message) {
-		log(Level.FINE, true, propertyType, messageKey, message);
+		log(Level.FINEST, true, propertyType, messageKey, message);
 	}
 
 	/** {@inheritDoc}
@@ -259,6 +289,5 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	protected void doStop() {
 		notifyStopped();
 	}
-
 	
 }

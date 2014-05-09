@@ -252,7 +252,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 			SpaceID spaceID = data.getSource().getSpaceId();
 			EventEnvelope env = this.serializer.serialize(new EventDispatch(spaceID, data, scope));
 			send(env);
-			this.logger.info("PUBLISH_EVENT", spaceID, data); //$NON-NLS-1$
+			this.logger.debug("PUBLISH_EVENT", spaceID, data); //$NON-NLS-1$
 		}
 	}
 
@@ -327,14 +327,14 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 		else {
 			Socket subscriber = this.subcribers.get(peerUri);
 			if (subscriber==null) {
-				this.logger.info("PEER_CONNECTION", peerUri, space); //$NON-NLS-1$
+				this.logger.debug("PEER_CONNECTION", peerUri, space); //$NON-NLS-1$
 				// Socket subscriber = this.context.socket(ZMQ.SUB);
 				subscriber = this.context.createSocket(ZMQ.SUB);
 				assert(subscriber!=null);
 				this.subcribers.put(peerUri, subscriber);
 				subscriber.connect(peerUri.toString());
 				this.poller.register(subscriber, Poller.POLLIN);
-				this.logger.info("PEER_CONNECTED", peerUri); //$NON-NLS-1$
+				this.logger.debug("PEER_CONNECTED", peerUri); //$NON-NLS-1$
 			}
 			assert(subscriber!=null);
 			NetworkEventReceivingListener old = this.messageRecvListeners.get(space);
@@ -344,7 +344,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 				byte[] header = buildFilterableHeader(
 						this.serializer.serializeContextID(space.getContextID()));
 				subscriber.subscribe(header);
-				this.logger.info("PEER_SUBSCRIPTION", peerUri, space); //$NON-NLS-1$
+				this.logger.debug("PEER_SUBSCRIPTION", peerUri, space); //$NON-NLS-1$
 			}
 		}
 	}
@@ -356,7 +356,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	public synchronized void disconnectFromRemoteSpace(URI peer, SpaceID space) throws Exception {
 		Socket s = this.subcribers.get(peer);
 		if (s!=null) {
-			this.logger.info("PEER_UNSUBSCRIPTION ", peer, space); //$NON-NLS-1$
+			this.logger.debug("PEER_UNSUBSCRIPTION ", peer, space); //$NON-NLS-1$
 			byte[] header = buildFilterableHeader(
 					this.serializer.serializeContextID(space.getContextID()));
 			s.unsubscribe(header);
@@ -370,12 +370,12 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	public synchronized void disconnectPeer(URI peer) throws Exception {
 		Socket s = this.subcribers.remove(peer);
 		if (s!=null) {
-			this.logger.info("PEER_DISCONNECTION", peer); //$NON-NLS-1$
+			this.logger.debug("PEER_DISCONNECTION", peer); //$NON-NLS-1$
 			this.poller.unregister(s);
 			//FIXME: are the two following lines needed?
 			s.close();
 			this.context.destroySocket(s);
-			this.logger.info("PEER_DISCONNECTED", peer); //$NON-NLS-1$
+			this.logger.debug("PEER_DISCONNECTED", peer); //$NON-NLS-1$
 		}
 	}
 
@@ -385,9 +385,9 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	 * @throws Exception
 	 */
 	protected synchronized void receive(EventEnvelope env) throws Exception {
-		this.logger.info("ENVELOPE_RECEIVED", this.validatedURI, env); //$NON-NLS-1$
+		this.logger.debug("ENVELOPE_RECEIVED", this.validatedURI, env); //$NON-NLS-1$
 		EventDispatch dispatch = this.serializer.deserialize(env);
-		this.logger.info("DISPATCH_RECEIVED", dispatch); //$NON-NLS-1$
+		this.logger.debug("DISPATCH_RECEIVED", dispatch); //$NON-NLS-1$
 
 		SpaceID spaceID = dispatch.getSpaceID();
 		NetworkEventReceivingListener space = this.messageRecvListeners.get(spaceID);
@@ -484,7 +484,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 				this.validatedURI = this.uriCandidate;
 			}
 			System.setProperty(JanusConfig.PUB_URI, this.validatedURI.toString());
-			this.logger.info("ZEROMQ_BINDED", this.validatedURI); //$NON-NLS-1$
+			this.logger.debug("ZEROMQ_BINDED", this.validatedURI); //$NON-NLS-1$
 			this.uriCandidate = null;
 			connections = this.bufferedConnections;
 			this.bufferedConnections = null;
@@ -512,7 +512,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 		// this.publisher.close();
 
 		this.context.destroy();
-		this.logger.info("ZEROMQ_SHUTDOWN"); //$NON-NLS-1$
+		this.logger.fineInfo("ZEROMQ_SHUTDOWN"); //$NON-NLS-1$
 	}
 
 	/**

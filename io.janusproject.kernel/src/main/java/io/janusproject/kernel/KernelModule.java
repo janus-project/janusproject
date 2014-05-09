@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Logger;
 
 import com.google.common.eventbus.AsyncSyncEventBus;
 import com.google.common.eventbus.SubscriberExceptionHandler;
@@ -72,6 +73,7 @@ class KernelModule extends AbstractModule {
 		requireBinding(Key.get(UUID.class, Names.named(JanusConfig.DEFAULT_CONTEXT_ID)));
 		requireBinding(Key.get(UUID.class, Names.named(JanusConfig.DEFAULT_SPACE_ID)));
 		requireBinding(NetworkService.class);
+		requireBinding(Logger.class);
 
 		bind(UncaughtExceptionHandler.class).to(JanusUncaughtExceptionHandler.class).in(Singleton.class);
 		bind(ThreadFactory.class).to(JanusThreadFactory.class).in(Singleton.class);
