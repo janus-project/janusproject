@@ -26,8 +26,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.inject.Inject;
-
 /** Repository that maps participants to multiple addresses.
  * <p>
  * This repository links the id of an entity to its various addresses in the
@@ -52,25 +50,18 @@ public final class MultipleAddressParticipantRepository<ADDRESS extends Serializ
 	 * Map linking the id of an entity to its various addresses in the related space
 	 * This map must be distributed and synchronized all over the network
 	 */
-	private MultiMap<UUID, ADDRESS> participants;
+	private final MultiMap<UUID, ADDRESS> participants;
 
-	private String distributedParticipantMapName;
+	private final String distributedParticipantMapName;
 
 	/** Constructs a <code>MultipleAddressParticipantRepository</code>.
 	 * 
-	 * @param distributedParticipantMapName - name of the multimap over the network. 
+	 * @param distributedParticipantMapName - name of the multimap over the network.
+	 * @param repositoryImplFactory - factory that will be used to create the internal data structures.
 	 */
-	public MultipleAddressParticipantRepository(String distributedParticipantMapName) {
+	public MultipleAddressParticipantRepository(String distributedParticipantMapName, DistributedDataStructureFactory repositoryImplFactory) {
 		super();
 		this.distributedParticipantMapName = distributedParticipantMapName;
-	}
-
-	/** Change the repository factory associated to this repository.
-	 * 
-	 * @param repositoryImplFactory
-	 */
-	@Inject
-	void setFactory(DistributedDataStructureFactory repositoryImplFactory){
 		this.participants = repositoryImplFactory.getMultiMap(this.distributedParticipantMapName);
 	}
 

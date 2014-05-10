@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.inject.Inject;
-
 /**
  * A repository of participants specific to a given space.
  * <p>
@@ -55,25 +53,18 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * Map linking the id of an entity to its unique address in the related space
 	 * This map must be distributed and synchronized all over the network
 	 */
-	private Map<UUID, ADDRESS> participants;
-	private String distributedParticipantMapName;	
+	private final Map<UUID, ADDRESS> participants;
+	private final String distributedParticipantMapName;	
 
 	
 	/** Constructs a <code>UniqueAddressParticipantRepository</code>.
 	 * 
-	 * @param distributedParticipantMapName - name of the multimap over the network. 
+	 * @param distributedParticipantMapName - name of the multimap over the network.
+	 * @param repositoryImplFactory - factory that will be used to create the internal data structures.
 	 */
-	public UniqueAddressParticipantRepository(String distributedParticipantMapName) {
+	public UniqueAddressParticipantRepository(String distributedParticipantMapName, DistributedDataStructureFactory repositoryImplFactory) {
 		super();
 		this.distributedParticipantMapName = distributedParticipantMapName;
-	}
-	
-	/** Change the repository factory associated to this repository.
-	 * 
-	 * @param repositoryImplFactory
-	 */
-	@Inject
-	void setFactory(DistributedDataStructureFactory repositoryImplFactory){
 		this.participants = repositoryImplFactory.getMap(this.distributedParticipantMapName);
 	}
 	

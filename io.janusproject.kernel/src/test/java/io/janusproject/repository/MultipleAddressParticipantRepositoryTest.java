@@ -54,8 +54,7 @@ public class MultipleAddressParticipantRepositoryTest extends Assert {
 		this.factory = Mockito.mock(DistributedDataStructureFactory.class);
 		Mockito.when(this.factory.getMultiMap(this.distributedName)).thenReturn(new MultiMapMock<>());
 		//
-		this.repository = new MultipleAddressParticipantRepository<>(this.distributedName);
-		this.repository.setFactory(this.factory);
+		this.repository = new MultipleAddressParticipantRepository<>(this.distributedName, this.factory);
 		//
 		this.id1 = UUID.randomUUID();
 		this.id2 = UUID.randomUUID();

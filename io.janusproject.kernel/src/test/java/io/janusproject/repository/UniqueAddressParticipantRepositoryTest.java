@@ -53,8 +53,7 @@ public class UniqueAddressParticipantRepositoryTest extends Assert {
 		this.distributedName = getClass().getName()+UUID.randomUUID().toString();
 		this.factory = Mockito.mock(DistributedDataStructureFactory.class);
 		Mockito.when(this.factory.getMap(this.distributedName)).thenReturn(new HashMap<>());
-		this.repository = new UniqueAddressParticipantRepository<>(this.distributedName);
-		this.repository.setFactory(this.factory);
+		this.repository = new UniqueAddressParticipantRepository<>(this.distributedName, this.factory);
 		this.id1 = UUID.randomUUID();
 		this.id2 = UUID.randomUUID();
 		this.listener1 = Mockito.mock(EventListener.class);
