@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel.space;
 
+import io.janusproject.repository.DistributedDataStructureFactory;
 import io.janusproject.repository.UniqueAddressParticipantRepository;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.LogService;
@@ -36,7 +37,6 @@ import java.util.UUID;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 /**
  * Abstract implementation of an event space.
@@ -52,7 +52,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 
 	/** List of participants in this space.
 	 */
-	protected UniqueAddressParticipantRepository<Address> participants;
+	protected final UniqueAddressParticipantRepository<Address> participants;
 
 	/** Network service.
 	 */
@@ -73,19 +73,13 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * Constructs an event space.
 	 * 
 	 * @param id - identifier of the space.
+	 * @param factory - factory that is used to create the internal data structure.
 	 */
-	public AbstractEventSpace(SpaceID id) {
+	public AbstractEventSpace(SpaceID id, DistributedDataStructureFactory factory) {
 		super(id);
-	}
-
-	/**
-	 * 
-	 * @param injector
-	 */
-	@Inject
-	private void setInjector(Injector injector) {
-		this.participants = new UniqueAddressParticipantRepository<>(getID().getID().toString() + "-participants"); //$NON-NLS-1$
-		injector.injectMembers(this.participants);
+		this.participants = new UniqueAddressParticipantRepository<>(
+				getID().getID().toString() + "-participants", //$NON-NLS-1$
+				factory);
 	}
 
 	/**
@@ -131,7 +125,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @param event
 	 */
 	public void emit(Event event) {
-		this.emit(event, Scopes.<Address> allParticipants());
+		emit(event, Scopes.<Address>allParticipants());
 	}
 
 	/** Do the emission of the event.
@@ -139,10 +133,9 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @param event
 	 * @param scope
 	 */
-	protected void doEmit(final Event event, final Scope<? super Address> scope) {
-
+	protected void doEmit(final Event event, Scope<? super Address> scope) {
 		for (final EventListener agent : this.participants.getListeners()) {
-			if (scope.matches(this.getAddress(agent))) {
+			if (scope.matches(getAddress(agent))) {
 				// TODO Verify the agent is still alive and running
 				this.executorService.submit(new Runnable() {
 					@Override

@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel.space;
 
+import io.janusproject.repository.DistributedDataStructureFactory;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
@@ -59,7 +60,8 @@ class RestrictedAccessEventSpaceSpecificationImpl implements RestrictedAccessEve
 		}
 		if (acl!=null) {
 			if (p==null) p = new RegistrationPermission();
-			RestrictedAccessEventSpaceImpl space = new RestrictedAccessEventSpaceImpl(id, acl, p);
+			RestrictedAccessEventSpaceImpl space = new RestrictedAccessEventSpaceImpl(id, acl, p,
+					this.injector.getInstance(DistributedDataStructureFactory.class));
 			this.injector.injectMembers(space);
 			return space;
 		}

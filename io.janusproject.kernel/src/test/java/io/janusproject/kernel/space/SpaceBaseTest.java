@@ -19,31 +19,45 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
-import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.util.OpenEventSpaceSpecification;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import java.util.Set;
+import java.util.UUID;
 
-/** Default implementation of the specification of an event space.
- * 
- * @author $Author: srodriguez$
+import org.junit.Assert;
+import org.junit.Test;
+
+
+/**
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class EventSpaceSpecificationImpl implements EventSpaceSpecification {
+@SuppressWarnings({"javadoc","static-method"})
+public class SpaceBaseTest extends Assert {
 
-	@Inject
-	private Injector injector;
-
-	@Override
-	public EventSpaceImpl create(SpaceID id, Object... params) {
-		EventSpaceImpl space = new EventSpaceImpl(id,
-				this.injector.getInstance(DistributedDataStructureFactory.class));
-		this.injector.injectMembers(space);
-		return space;
+	@Test
+	public void getID() {
+		SpaceID spaceId = new SpaceID(
+				UUID.randomUUID(),
+				UUID.randomUUID(),
+				OpenEventSpaceSpecification.class);
+		SpaceBase base = new SpaceBase(spaceId) {
+			@Override
+			public void eventReceived(SpaceID space, Scope<?> scope, Event event) {
+				throw new UnsupportedOperationException();
+			}
+			
+			@Override
+			public Set<UUID> getParticipants() {
+				throw new UnsupportedOperationException();
+			}
+		};
+		assertEquals(spaceId, base.getID());
 	}
 
 }

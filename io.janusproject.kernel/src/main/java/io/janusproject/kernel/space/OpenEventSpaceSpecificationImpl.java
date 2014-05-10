@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel.space;
 
+import io.janusproject.repository.DistributedDataStructureFactory;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpaceSpecification;
 
@@ -39,7 +40,8 @@ class OpenEventSpaceSpecificationImpl implements OpenEventSpaceSpecification {
 
 	@Override
 	public EventSpaceImpl create(SpaceID id, Object... params) {
-		EventSpaceImpl space = new EventSpaceImpl(id);
+		EventSpaceImpl space = new EventSpaceImpl(id,
+				this.injector.getInstance(DistributedDataStructureFactory.class));
 		this.injector.injectMembers(space);
 		return space;
 	}
