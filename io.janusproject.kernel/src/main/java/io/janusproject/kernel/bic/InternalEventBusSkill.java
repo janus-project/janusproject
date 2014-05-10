@@ -175,7 +175,7 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	}
 
 	@Override
-	public EventListener asEventListener() {
+	public synchronized EventListener asEventListener() {
 		return this.agentAsEventListener;
 	}
 

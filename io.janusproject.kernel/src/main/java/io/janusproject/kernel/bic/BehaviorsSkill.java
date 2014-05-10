@@ -79,9 +79,9 @@ class BehaviorsSkill extends Skill implements Behaviors {
 		// the agent via the inner default space add call internalReceiveEvent
 		// for real posting
 		
-		InnerContextSkill context = (InnerContextSkill)getSkill(InnerContextAccess.class);
+		InnerContextAccess context = getSkill(InnerContextAccess.class);
 		
-		if (context.hasInnerContext()) {
+		if ((!(context instanceof InnerContextSkill)) || ((InnerContextSkill)context).hasInnerContext()) {
 			EventSpace defSpace = context.getInnerContext().getDefaultSpace();
 			evt.setSource(defSpace.getAddress(getOwner().getID()));
 			defSpace.emit(evt);

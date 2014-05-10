@@ -69,6 +69,17 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		return this.innerContext!=null;
 	}
 	
+	/** Force to reset the inner context.
+	 * This function does not update the context repository.
+	 * <p>
+	 * Do not call this function, exception if you are sure
+	 * that the setting of the inner context to <code>null</code>
+	 * only does not introduce problems.
+	 */
+	synchronized void resetInnerContext() {
+		this.innerContext = null;
+	}
+
 	/** {@inheritDoc}
 	 */
 	@Override
@@ -105,5 +116,5 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		}
 		return this.innerContext;
 	}
-
+	
 }

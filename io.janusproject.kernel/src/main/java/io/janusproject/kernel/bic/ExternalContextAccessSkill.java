@@ -19,9 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.kernel.space.EventSpaceImpl;
 import io.janusproject.services.ContextSpaceService;
-import io.sarl.util.Collections3;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;
@@ -33,6 +31,7 @@ import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
+import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 
 import java.util.Collections;
@@ -167,8 +166,9 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 		fireContextLeft(contextID);
 		fireMemberLeft(ac);
 
-		((EventSpaceImpl) ac.getDefaultSpace()).unregister(
+		((OpenEventSpace)ac.getDefaultSpace()).unregister(
 				getSkill(InternalEventBusCapacity.class).asEventListener());
+		
 		this.contexts.remove(contextID);
 	}
 

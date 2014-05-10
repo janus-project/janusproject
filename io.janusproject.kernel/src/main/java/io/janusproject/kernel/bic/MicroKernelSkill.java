@@ -60,7 +60,7 @@ class MicroKernelSkill extends Skill implements MicroKernelCapacity {
 	 * @return the kernel, or <code>null</code>.
 	 */
 	protected Kernel getKernel() {
-		return this.kernel.get();
+		return this.kernel==null ? null : this.kernel.get();
 	}
 
 	/** {@inheritDoc}

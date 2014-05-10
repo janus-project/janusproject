@@ -27,9 +27,11 @@ import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Skill;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -52,8 +54,8 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Inject
 	private ExecutorService executorService;
 
-	private final Map<String, AgentTask> tasks = new ConcurrentHashMap<>();
-	private final Map<String, ScheduledFuture<?>> futures = new ConcurrentHashMap<>();
+	private final Map<String, AgentTask> tasks = new HashMap<>();
+	private final Map<String, ScheduledFuture<?>> futures = new HashMap<>();
 
 	/**
 	 * @param agent
@@ -69,32 +71,59 @@ class SchedulesSkill extends Skill implements Schedules {
 		return super.attributesToString()
 				+", tasks = "+this.tasks; //$NON-NLS-1$
 	}
+	
+	/** Remove any reference to the given task.
+	 * 
+	 * @param name - name of the task.
+	 */
+	private synchronized void finishTask(String name) {
+		this.tasks.remove(name);
+		this.futures.remove(name);
+	}
+	
+	/** Replies the names of the active tasks.
+	 * 
+	 * @return the names of the active tasks.
+	 */
+	synchronized Collection<String> getActiveTasks() {
+		return new ArrayList<>(this.tasks.keySet());
+	}
+
+	/** Replies the names of the active futures.
+	 * 
+	 * @return the names of the active futures.
+	 */
+	synchronized Collection<ScheduledFuture<?>> getActiveFutures() {
+		return new ArrayList<>(this.futures.values());
+	}
 
 	@Override
-	protected void uninstall() {
+	protected synchronized void uninstall() {
 		for (ScheduledFuture<?> future : this.futures.values()) {
 			if ((future instanceof JanusScheduledFutureTask<?>)
-				&&((JanusScheduledFutureTask<?>)future).isCurrentThread()) {
+					&&((JanusScheduledFutureTask<?>)future).isCurrentThread()) {
 				// Ignore the cancelation of the future.
 				// It is assumed that a ChuckNorrisException will be thrown later.
 			}
 			else {
-				future.cancel(false);
+				future.cancel(true);
 			}
 		}
+		this.futures.clear();
+		this.tasks.clear();
 	}
-	
+
 	@Override
 	public AgentTask in(long delay, Procedure1<? super Agent> procedure) {
 		return in(task("task-" + UUID.randomUUID()), delay, procedure); //$NON-NLS-1$
 	}
 
 	@Override
-	public AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
+	public synchronized AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
 		task.setProcedure(procedure);
 		ScheduledFuture<?> sf = 
 				this.executorService.schedule(
-				new AgentRunnableTask(task, getOwner()), delay, TimeUnit.MILLISECONDS);
+						new AgentRunnableTask(task, false), delay, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
 		return task;
 	}
@@ -103,7 +132,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AgentTask task(String name) {
+	public synchronized AgentTask task(String name) {
 		if (this.tasks.containsKey(name)) {
 			return this.tasks.get(name);
 		}
@@ -132,11 +161,15 @@ class SchedulesSkill extends Skill implements Schedules {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean cancel(AgentTask task, boolean mayInterruptIfRunning) {
+	public synchronized boolean cancel(AgentTask task, boolean mayInterruptIfRunning) {
 		if (task!=null) {
-			ScheduledFuture<?> future = this.futures.get(task.getName());
-			if (future!=null && !future.isDone() && !future.isCancelled()) {
-				return future.cancel(mayInterruptIfRunning);
+			String name = task.getName();
+			ScheduledFuture<?> future = this.futures.get(name);
+			if (future!=null
+				&& !future.isDone()
+				&& !future.isCancelled()
+				&& future.cancel(mayInterruptIfRunning)) {
+				finishTask(name);
 			}
 		}
 		return false;
@@ -154,10 +187,10 @@ class SchedulesSkill extends Skill implements Schedules {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AgentTask every(AgentTask task, long period, Procedure1<? super Agent> procedure) {
+	public synchronized AgentTask every(AgentTask task, long period, Procedure1<? super Agent> procedure) {
 		task.setProcedure(procedure);
 		ScheduledFuture<?> sf = this.executorService.scheduleAtFixedRate(
-				new AgentRunnableTask(task, getOwner()), 0, period, TimeUnit.MILLISECONDS);
+				new AgentRunnableTask(task, true), 0, period, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
 		return task;
 	}
@@ -170,13 +203,13 @@ class SchedulesSkill extends Skill implements Schedules {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static class AgentRunnableTask implements Runnable {
+	@SuppressWarnings("synthetic-access")
+	private class AgentRunnableTask implements Runnable {
 		private WeakReference<AgentTask> agentTaskRef;
-		private WeakReference<Agent> agentRef;
-
-		public AgentRunnableTask(AgentTask task, Agent agent) {
+		private final boolean isPeriodic;
+		public AgentRunnableTask(AgentTask task, boolean isPeriodic) {
 			this.agentTaskRef = new WeakReference<>(task);
-			this.agentRef = new WeakReference<>(agent);
+			this.isPeriodic = isPeriodic;
 		}
 
 		@Override
@@ -185,10 +218,17 @@ class SchedulesSkill extends Skill implements Schedules {
 			if (task == null) {
 				throw new RuntimeException(Locale.getString(SchedulesSkill.class, "NULL_AGENT_TASK")); //$NON-NLS-1$
 			}
-			if (task.getGuard().apply(this.agentRef.get()).booleanValue()) {
-				task.getProcedure().apply(this.agentRef.get());
+			try {
+				Agent owner = getOwner();
+				if (task.getGuard().apply(owner).booleanValue()) {
+					task.getProcedure().apply(owner);
+				}
 			}
-
+			finally {
+				if (!this.isPeriodic) {
+					finishTask(task.getName());
+				}
+			}
 		}
 
 		/**
@@ -198,7 +238,7 @@ class SchedulesSkill extends Skill implements Schedules {
 		public String toString() {
 			return Objects.toStringHelper(this).add(
 					"name", this.agentTaskRef.get().getName()) //$NON-NLS-1$
-					.add("agent", this.agentRef.get().getID()).toString(); //$NON-NLS-1$
+					.add("agent", getOwner().getID()).toString(); //$NON-NLS-1$
 		}
 
 	}

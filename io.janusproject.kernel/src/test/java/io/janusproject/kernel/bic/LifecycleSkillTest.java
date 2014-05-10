@@ -19,82 +19,92 @@
  */
 package io.janusproject.kernel.bic;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import io.janusproject.kernel.executor.ChuckNorrisException;
 import io.janusproject.services.SpawnService;
-import io.sarl.core.Behaviors;
-import io.sarl.core.ExternalContextAccess;
-import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
-import io.sarl.util.OpenEventSpace;
 
-import java.util.Collections;
 import java.util.UUID;
 
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.internal.verification.Times;
 
 /**
  * @author $Author: srodriguez$
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"nls","javadoc"})
-public class LifecycleSkillTest {
+@SuppressWarnings({"javadoc","rawtypes","unchecked"})
+public class LifecycleSkillTest extends Assert {
 
-	private Lifecycle skill;
-	private UUID agentID = UUID.randomUUID();
-	private UUID parentContextID = UUID.randomUUID();
-	
-	@Mock
-	private AgentContext parentContext;
-	
-	@Mock 
-	private Agent agent;
+	private UUID agentId;
 	
 	@Mock
 	private SpawnService spawnService;
-
 	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	//@Before
+	@Mock
+	private Agent agent;
+
+	@InjectMocks
+	private LifecycleSkill skill;
+	
+	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
-		this.skill = new LifecycleSkill(this.agent);
-		when(this.parentContext.getID()).thenReturn(this.parentContextID);
-		when(this.agent.getID()).thenReturn(this.agentID);
-		
-		BehaviorsSkill behaviorsMock = mock(BehaviorsSkill.class);
-		ExternalContextAccessSkill extContextMock = mock(ExternalContextAccessSkill.class);
-				
-		Lifecycle l = PowerMockito.spy(this.skill);
-		PowerMockito.when(l,"getSkill",Behaviors.class).thenReturn(behaviorsMock);		
-		PowerMockito.when(l,"getSkill",ExternalContextAccess.class).thenReturn(extContextMock);
-				
-		Agent agentMock = mock(Agent.class);
-		PowerMockito.when(l,"getOwner").thenReturn(agentMock);
-		
-		OpenEventSpace spaceMock = mock(OpenEventSpace.class);
-		when(this.parentContext.getDefaultSpace()).thenReturn(spaceMock);
-		
+		this.agentId = UUID.randomUUID();
+		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
 	}
 
-	//@Test
-	public void killMe() {
-		this.skill.killMe();
-		verify(this.spawnService).killAgent(this.agentID);
+	@After
+	public void tearDown() throws Exception {
+		this.spawnService = null;
+		this.agent = null;
+		this.skill = null;
+		this.agentId = null;
 	}
-	
-	//@Test
-	public void spawn(){
-		this.skill.spawnInContext(Agent.class, this.parentContext,Collections.EMPTY_LIST.toArray());
-		verify(this.spawnService).spawn(this.parentContext, Agent.class, Collections.EMPTY_LIST.toArray());
+
+	@Test
+	public void spawnInContext() {
+		Class type = Agent.class;
+		AgentContext context = Mockito.mock(AgentContext.class);
+		Object[] params = new Object[] {1,"String"}; //$NON-NLS-1$
+		this.skill.spawnInContext(type, context, params);
+		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
+		ArgumentCaptor<Class> argument2 = ArgumentCaptor.forClass(Class.class);
+		ArgumentCaptor<Integer> argument3 = ArgumentCaptor.forClass(Integer.class);
+		ArgumentCaptor<String> argument4 = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(this.spawnService, new Times(1)).spawn(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture());
+		assertSame(context, argument1.getValue());
+		assertEquals(Agent.class, argument2.getValue());
+		assertEquals(1, argument3.getValue().intValue());
+		assertEquals("String", argument4.getValue()); //$NON-NLS-1$
+	}
+
+	@Test
+	public void killMe() throws Exception {
+		try {
+			this.skill.killMe();
+			fail("killMe() msut never return!"); //$NON-NLS-1$
+		}
+		catch(ChuckNorrisException _) {
+			// Expected exception
+		}
+		catch(Exception e) {
+			throw e;
+		}
+		ArgumentCaptor<UUID> argument = ArgumentCaptor.forClass(UUID.class);
+		Mockito.verify(this.spawnService, new Times(1)).killAgent(argument.capture());
+		assertSame(this.agentId, argument.getValue());
 	}
 
 }
