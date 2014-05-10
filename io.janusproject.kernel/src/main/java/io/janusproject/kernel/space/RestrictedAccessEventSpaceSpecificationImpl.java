@@ -21,6 +21,7 @@ package io.janusproject.kernel.space;
 
 import io.janusproject.repository.DistributedDataStructureFactory;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.util.RestrictedAccessEventSpace;
 import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
 import java.security.acl.Acl;
@@ -47,7 +48,7 @@ class RestrictedAccessEventSpaceSpecificationImpl implements RestrictedAccessEve
 	private Injector injector;
 
 	@Override
-	public RestrictedAccessEventSpaceImpl create(SpaceID id, Object... params) {
+	public RestrictedAccessEventSpace create(SpaceID id, Object... params) {
 		Acl acl = null;
 		Permission p = null;
 		for(Object o : params) {
