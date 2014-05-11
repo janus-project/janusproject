@@ -123,6 +123,7 @@ class SpaceRepository {
 	
 	private synchronized <S extends Space> S createSpaceInstance(Class<? extends SpaceSpecification<S>> spec, SpaceID spaceID, boolean updateHazelcast, Object[] creationParams) {
 		S space;
+		assert(spaceID.getSpaceSpecification()==null || spaceID.getSpaceSpecification().equals(spec)) : "The specification type in the space id does not corresponds to the given specification type (as parameter)"; //$NON-NLS-1$
 		// Split the call to create() to let the JVM to create the "empty" array for creation parameters.
 		if (creationParams!=null) {
 			space = this.injector.getInstance(spec).create(spaceID, creationParams);
@@ -265,7 +266,7 @@ class SpaceRepository {
 	 */
 	protected void fireSpaceRemoved(Space space) {
 		if (this.externalListener!=null) {
-			this.externalListener.spaceCreated(space);
+			this.externalListener.spaceDestroyed(space);
 		}
 	}
 

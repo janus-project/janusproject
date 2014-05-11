@@ -55,18 +55,30 @@ public interface SpawnService extends Service {
 
 	/** Add a listener on the changes in the current state of an agent.
 	 * 
-	 * @param id - identifier of the context.
+	 * @param id - identifier of the agent.
 	 * @param agentLifecycleListener
 	 */
 	public void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
 
 	/** Remove a listener on the changes in the current state of an agent.
 	 * 
-	 * @param id - identifier of the context.
+	 * @param id - identifier of the agent.
 	 * @param agentLifecycleListener
 	 */
 	public void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
 	
+	/** Add a listener on the changes in the current state of an agent.
+	 * 
+	 * @param agentLifecycleListener
+	 */
+	public void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
+
+	/** Remove a listener on the changes in the current state of an agent.
+	 * 
+	 * @param agentLifecycleListener
+	 */
+	public void removeSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
+
 	/** Add a listener on the changes related to the kernel agent.
 	 * 
 	 * @param listener

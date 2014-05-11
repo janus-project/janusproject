@@ -29,9 +29,11 @@ import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.SynchronizedCollection;
+import io.sarl.core.SynchronizedSet;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
+import io.sarl.util.Collections3;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -61,6 +63,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	private final ListenerCollection<?> listeners = new ListenerCollection<>();
 	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
 	private final Map<UUID, Agent> agents = new TreeMap<>();
+	
+	private AgentFactory agentFactory = new DefaultAgentFactory();
 
 	@Inject
 	private Injector injector;
@@ -71,6 +75,23 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		setStartPriority(ServicePriorities.START_SPAWN_SERVICE);
 		setStartPriority(ServicePriorities.STOP_SPAWN_SERVICE);
 	}
+	
+	/** Change the agent factory.
+	 * 
+	 * @param factory
+	 */
+	public synchronized void setAgentFactory(AgentFactory factory) {
+		assert(factory!=null);
+		this.agentFactory = factory;
+	}
+
+	/** Replies the agent factory.
+	 * 
+	 * @return the agent factory.
+	 */
+	public synchronized AgentFactory getAgentFactory() {
+		return this.agentFactory;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -79,9 +100,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	public synchronized UUID spawn(AgentContext parent, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
 			try {
-				Agent agent = agentClazz.getConstructor(UUID.class).newInstance(parent.getID());
+				Agent agent = this.agentFactory.newInstance(agentClazz, parent.getID(), this.injector);
 				assert (agent != null);
-				this.injector.injectMembers(agent);
 				this.agents.put(agent.getID(), agent);
 				fireAgentSpawned(parent, agent, params);
 				return agent.getID();
@@ -108,6 +128,24 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		if (error) {
 			throw new SpawnServiceStopException(agentID);
 		}
+	}
+	
+	/** Replies the registered agents.
+	 * 
+	 * @return the registered agents.
+	 */
+	public synchronized SynchronizedSet<UUID> getAgents() {
+		return Collections3.synchronizedSet(this.agents.keySet(), this);
+	}
+
+	/** Replies the registered agent.
+	 * 
+	 * @param id is the identifier of the agent.
+	 * @return the registered agent, or <code>null</code>.
+	 */
+	synchronized Agent getAgent(UUID id) {
+		assert(id!=null);
+		return this.agents.get(id);
 	}
 
 	/**
@@ -165,6 +203,22 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
+		this.listeners.add(SpawnServiceListener.class, agentLifecycleListener);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
+		this.listeners.remove(SpawnServiceListener.class, agentLifecycleListener);
+	}
+
+	/**
 	 * Notifies the listeners about the agent creation.
 	 * 
 	 * @param context - context in which the agent is spawn.
@@ -178,6 +232,13 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			ilisteners = new SpawnServiceListener[list.size()];
 			list.toArray(ilisteners);
 		}
+		
+		SpawnServiceListener[] ilisteners2 = this.listeners.getListeners(SpawnServiceListener.class);
+
+		for (SpawnServiceListener l : ilisteners2) {
+			l.agentSpawned(context, agent, initializationParameters);
+		}
+
 		for (SpawnServiceListener l : ilisteners) {
 			l.agentSpawned(context, agent, initializationParameters);
 		}
@@ -202,6 +263,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			ilisteners = new SpawnServiceListener[list.size()];
 			list.toArray(ilisteners);
 		}
+		
+		SpawnServiceListener[] ilisteners2 = this.listeners.getListeners(SpawnServiceListener.class);
 
 		try {
 			Method method = Agent.class.getDeclaredMethod("getSkill", Class.class); //$NON-NLS-1$
@@ -231,6 +294,9 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		}
 
 		for (SpawnServiceListener l : ilisteners) {
+			l.agentDestroy(agent);
+		}
+		for (SpawnServiceListener l : ilisteners2) {
 			l.agentDestroy(agent);
 		}
 	}
@@ -319,6 +385,52 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			super(Locale.getString(JanusSpawnService.class, "CANNOT_INSTANCIATE_AGENT", agentClazz), cause); //$NON-NLS-1$
 		}
 
+	}
+	
+	/** Create of agent instance.
+	 * 
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static interface AgentFactory {
+
+		/** Create an instance of agent, and inject the
+		 * fields.
+		 * 
+		 * @param type - type of the agent to create.
+		 * @param contextID - id of the parent context.
+		 * @param injector - used for injection.
+		 * @return the agent.
+		 * @throws Exception
+		 */
+		public <T extends Agent> T newInstance(Class<T> type, UUID contextID, Injector injector) throws Exception;
+		
+	}
+	
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class DefaultAgentFactory implements AgentFactory {
+
+		/**
+		 */
+		public DefaultAgentFactory() {
+			//
+		}
+
+		@Override
+		public <T extends Agent> T newInstance(Class<T> type, UUID contextID, Injector injector) throws Exception {
+			Agent agent = type.getConstructor(UUID.class).newInstance(contextID);
+			assert (agent != null);
+			injector.injectMembers(agent);
+			return type.cast(agent);
+		}
+		
 	}
 
 }

@@ -62,10 +62,8 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 
 	private NetworkService network;
 
-	@Inject
 	private LogService logger;
 
-	@Inject
 	private ExecutorService executorService;
 
 	private final ListenerCollection<KernelDiscoveryServiceListener> listeners = new ListenerCollection<>();
@@ -82,14 +80,19 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	}
 	
 
+	/** Do the post initialization.
+	 * 
+	 * @param instance
+	 * @param networkService
+	 * @param executorService
+	 * @param logger
+	 */
 	@Inject
-	private void setHazelcastInstance(HazelcastInstance instance) {
+	void postConstruction(HazelcastInstance instance, NetworkService networkService, ExecutorService executorService, LogService logger) {
+		this.executorService = executorService;
+		this.logger = logger;
+		this.network = networkService;
 		this.kernels = instance.getSet(this.janusID.toString() + "-kernels"); //$NON-NLS-1$
-	}
-
-	@Inject
-	private void setNetwork(NetworkService service) {
-		this.network = service;
 		this.network.addListener(new NetworkStartListener(), this.executorService.getExecutorService());
 	}
 
@@ -111,7 +114,7 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	 */
 	@Override
 	public synchronized Collection<URI> getKernels() {
-		return Collections.unmodifiableSet(Collections3.synchronizedSet(this.kernels,mutex()));
+		return Collections3.synchronizedSet(Collections.unmodifiableSet(this.kernels),mutex());
 	}
 
 	/** {@inheritDoc}
@@ -223,7 +226,6 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void running() {
-			super.running();
 			synchronized(JanusKernelDiscoveryService.this) {
 				if (JanusKernelDiscoveryService.this.currentURI==null) {
 					URI uri = JanusKernelDiscoveryService.this.network.getURI();
