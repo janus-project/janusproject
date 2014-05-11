@@ -20,7 +20,6 @@
 package io.janusproject.services.impl;
 
 import io.janusproject.services.PrioritizedService;
-import io.janusproject.services.impl.Services.IServiceManager;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -21,6 +21,7 @@ package io.janusproject.kernel;
 
 import io.janusproject.services.KernelAgentSpawnListener;
 import io.janusproject.services.SpawnService;
+import io.janusproject.services.impl.IServiceManager;
 import io.janusproject.services.impl.Services;
 import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
@@ -37,7 +38,6 @@ import java.util.logging.Logger;
 import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -78,10 +78,9 @@ public class Kernel {
 
 	private AgentContext janusContext;
 
-	private final ServiceManager serviceManager;
+	private final IServiceManager serviceManager;
 
-	@Inject
-	private HazelcastInstance hazelcastInstance;
+	private final HazelcastInstance hazelcastInstance;
 
 	private final SpawnService spawnService;
 
@@ -90,17 +89,17 @@ public class Kernel {
 	 * 
 	 * @param serviceManager is the instance of the service manager that must be used by the kernel.
 	 * @param spawnService is the instance of the spawn service.
+	 * @param hazelcastInstance is the instance of the Hazelcast tools.
 	 * @param exceptionHandler is the handler of the uncaught exceptions.
 	 */
 	@Inject
-	private Kernel(ServiceManager serviceManager, SpawnService spawnService, UncaughtExceptionHandler exceptionHandler) {
+	Kernel(IServiceManager serviceManager, SpawnService spawnService, HazelcastInstance hazelcastInstance, UncaughtExceptionHandler exceptionHandler) {
 		// Ensure that all the threads has a default hander.
 		Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
-
+		this.hazelcastInstance = hazelcastInstance;
+		this.serviceManager = serviceManager;
 		this.spawnService = spawnService;
 		this.spawnService.addKernelAgentSpawnListener(new KernelStoppingListener());
-
-		this.serviceManager = serviceManager;
 
 		// Start the services NOW to ensure that the default context and space
 		// of the Janus agent are catched by the modules;
@@ -151,7 +150,7 @@ public class Kernel {
 	 * @param janusContext - the new janus kernel. It must be never <code>null</code>.
 	 */
 	@Inject
-	private void setJanusContext(@io.janusproject.kernel.annotations.Kernel AgentContext janusContext) {
+	void setJanusContext(@io.janusproject.kernel.annotations.Kernel AgentContext janusContext) {
 		assert (janusContext != null);
 		this.janusContext = janusContext;
 	}

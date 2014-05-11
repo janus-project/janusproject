@@ -51,7 +51,7 @@ public class Services {
 	 * @param manager
 	 */
 	public static void startServices(ServiceManager manager) {
-		startServices(new GServiceManager(manager));
+		startServices(new GoogleServiceManager(manager));
 	}
 	
 	/** Start the services associated to the given service manager.
@@ -60,7 +60,7 @@ public class Services {
 	 * 
 	 * @param manager
 	 */
-	static void startServices(IServiceManager manager) {
+	public static void startServices(IServiceManager manager) {
 		List<Service> otherServices = new ArrayList<>();
 		Multimap<Integer,Service> priorServices = TreeMultimap.create(
 				new Comparator<Integer>() {
@@ -104,7 +104,7 @@ public class Services {
 	 * @param manager
 	 */
 	public static void stopServices(ServiceManager manager) {
-		stopServices(new GServiceManager(manager));
+		stopServices(new GoogleServiceManager(manager));
 	}
 
 	/** Stop the services associated to the given service manager.
@@ -113,7 +113,7 @@ public class Services {
 	 * 
 	 * @param manager
 	 */
-	static void stopServices(IServiceManager manager) {
+	public static void stopServices(IServiceManager manager) {
 		List<Service> otherServices = new ArrayList<>();
 		Multimap<Integer,Service> priorServices = TreeMultimap.create(
 				new Comparator<Integer>() {
@@ -148,66 +148,6 @@ public class Services {
 		}
 		
 		manager.awaitStopped();
-	}
-
-	/** Manager of services.
-	 * 
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	static interface IServiceManager {
-
-		/** Replies the services by state.
-		 * 
-		 * @return the services.
-		 */
-		public Multimap<State,Service> servicesByState();
-		
-		/** Wait for all the services are started.
-		 */
-		public void awaitHealthy();
-
-		/** Wait for all the services are stopped.
-		 */
-		public void awaitStopped();
-
-	}
-	
-	/** Manager of services.
-	 * 
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	static class GServiceManager implements IServiceManager {
-
-		private final ServiceManager sm;
-		
-		/**
-		 * @param sm
-		 */
-		public GServiceManager(ServiceManager sm) {
-			this.sm = sm;
-		}
-
-		@Override
-		public Multimap<State,Service> servicesByState() {
-			return this.sm.servicesByState();
-		}
-		
-		@Override
-		public void awaitHealthy() {
-			this.sm.awaitHealthy();
-		}
-
-		@Override
-		public void awaitStopped() {
-			this.sm.awaitStopped();
-		}
-
 	}
 
 }

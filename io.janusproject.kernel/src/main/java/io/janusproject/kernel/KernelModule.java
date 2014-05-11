@@ -32,6 +32,8 @@ import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.impl.ArakhneLocaleLogService;
+import io.janusproject.services.impl.GoogleServiceManager;
+import io.janusproject.services.impl.IServiceManager;
 import io.sarl.lang.core.AgentContext;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -44,7 +46,6 @@ import java.util.logging.Logger;
 import com.google.common.eventbus.AsyncSyncEventBus;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -114,8 +115,8 @@ class KernelModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	private static ServiceManager createServiceManager(Set<Service> services) {
-		return new ServiceManager(services);
+	private static IServiceManager createServiceManager(Set<Service> services) {
+		return new GoogleServiceManager(services);
 	}
 
 }
