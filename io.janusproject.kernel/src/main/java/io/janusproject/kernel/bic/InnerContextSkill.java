@@ -24,6 +24,7 @@ import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.Skill;
 import io.sarl.util.OpenEventSpace;
 
@@ -96,6 +97,10 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		AgentContext context = this.innerContext;
 		this.innerContext = null;
 		if (context!=null) {
+			// Unregister the agent from the default space
+			EventListener listener = getSkill(InternalEventBusCapacity.class).asEventListener();
+			((OpenEventSpace)context.getDefaultSpace()).unregister(listener);
+			// Destroy the context
 			this.contextService.removeContext(context);
 		}
 	}
@@ -111,8 +116,8 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 					this.agentAddressInInnerDefaultSpace.getSpaceId().getContextID(),
 					this.agentAddressInInnerDefaultSpace.getSpaceId().getID());
 			// Register the agent in the default space
-			((OpenEventSpace)this.innerContext.getDefaultSpace()).register(
-					getSkill(InternalEventBusCapacity.class).asEventListener());
+			EventListener listener = getSkill(InternalEventBusCapacity.class).asEventListener();
+			((OpenEventSpace)this.innerContext.getDefaultSpace()).register(listener);
 		}
 		return this.innerContext;
 	}
