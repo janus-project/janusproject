@@ -19,7 +19,7 @@
  */
 package io.janusproject;
 
-import java.util.Map;
+import java.util.Properties;
 
 
 
@@ -129,15 +129,15 @@ public class JanusConfig {
 	 * 
 	 * @param defaultValues - filled with the default values supported by the Janus platform.
 	 */
-	public static void getDefaultValues(Map<String,Object> defaultValues) {
-		defaultValues.put(BOOT_AGENT, null);
-		defaultValues.put(BOOT_DEFAULT_CONTEXT_ID, VALUE_BOOT_DEFAULT_CONTEXT_ID);
+	public static void getDefaultValues(Properties defaultValues) {
+		defaultValues.put(BOOT_AGENT, ""); //$NON-NLS-1$
+		defaultValues.put(BOOT_DEFAULT_CONTEXT_ID, VALUE_BOOT_DEFAULT_CONTEXT_ID.toString());
 		defaultValues.put(DEFAULT_CONTEXT_ID, VALUE_DEFAULT_CONTEXT_ID);
 		defaultValues.put(DEFAULT_SPACE_ID, VALUE_DEFAULT_SPACE_ID);
 		defaultValues.put(OFFLINE, Boolean.FALSE.toString());
-		defaultValues.put(PUB_URI, null);
-		defaultValues.put(RANDOM_DEFAULT_CONTEXT_ID, VALUE_RANDOM_DEFAULT_CONTEXT_ID);
-		defaultValues.put(VERBOSE_LEVEL, VALUE_VERBOSE_LEVEL);
+		defaultValues.put(PUB_URI, ""); //$NON-NLS-1$
+		defaultValues.put(RANDOM_DEFAULT_CONTEXT_ID, VALUE_RANDOM_DEFAULT_CONTEXT_ID.toString());
+		defaultValues.put(VERBOSE_LEVEL, Integer.toString(VALUE_VERBOSE_LEVEL));
 		defaultValues.put(LOGGING_PROPERTY_FILE, VALUE_LOGGING_PROPERTY_FILE);
 		defaultValues.put(HAZELCAST_LOGGER_FACTORY, VALUE_HAZELCAST_LOGGER_FACTORY);
 	}

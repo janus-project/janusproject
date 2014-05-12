@@ -31,10 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.TreeMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -85,6 +83,10 @@ public class Boot {
 			CommandLine cmd = parser.parse(getOptions(), args);
 			if (cmd.hasOption('h') || cmd.getArgs().length == 0) {
 				showHelp();
+			}
+
+			if (cmd.hasOption('s')) {
+				showDefaults();
 			}
 
 			if (cmd.hasOption('o')) {
@@ -233,6 +235,7 @@ public class Boot {
 		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_W", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("q", "quiet", false, Locale.getString("CLI_HELP_Q"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("v", "verbose", false, Locale.getString("CLI_HELP_V"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("s", "showdefaults", false, Locale.getString("CLI_HELP_S"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 
 		opt = new Option("l", "log", true, Locale.getString("CLI_HELP_L",  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 					JanusConfig.VALUE_VERBOSE_LEVEL));
@@ -255,22 +258,23 @@ public class Boot {
 	public static void showHelp() {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(Boot.class.getName()+" [OPTIONS] <agent_classname>", getOptions()); //$NON-NLS-1$
+		System.exit(255);
+	}
 
-		Map<String,Object> defaultValues = new TreeMap<>();
+	/** Show the default values of the system properties.
+	 * This function never returns.
+	 */
+	public static void showDefaults() {
+		Properties defaultValues = new Properties();
+		
 		JanusConfig.getDefaultValues(defaultValues);
 		NetworkConfig.getDefaultValues(defaultValues);
-		String none = Locale.getString("NONE"); //$NON-NLS-1$
-		System.out.println();
-		System.out.println(Locale.getString("DEFAULT_PROPERTIES")); //$NON-NLS-1$
-		for(Entry<String,Object> entry : defaultValues.entrySet()) {
-			Object o = entry.getValue();
-			if (o!=null) {
-				o = "'"+o.toString()+"'"; //$NON-NLS-1$//$NON-NLS-2$
-			}
-			else {
-				o = none;
-			}
-			System.out.println(Locale.getString("DEFAULT_PROPERTY", entry.getKey(), o)); //$NON-NLS-1$
+		
+		try {
+			defaultValues.storeToXML(System.out, null);
+		}
+		catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		System.exit(255);

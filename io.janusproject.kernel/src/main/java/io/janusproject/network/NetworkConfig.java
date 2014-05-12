@@ -22,7 +22,7 @@ package io.janusproject.network;
 import io.janusproject.network.event.NetworkEventModule;
 
 import java.nio.charset.Charset;
-import java.util.Map;
+import java.util.Properties;
 
 import com.google.common.base.Charsets;
 import com.google.inject.name.Named;
@@ -62,9 +62,9 @@ public class NetworkConfig {
 	 * 
 	 * @param defaultValues - filled with the default values supported by the Janus platform.
 	 */
-	public static void getDefaultValues(Map<String,Object> defaultValues) {
+	public static void getDefaultValues(Properties defaultValues) {
 		NetworkEventModule.getDefaultValues(defaultValues);
-		defaultValues.put(AES_KEY, null);
+		defaultValues.put(AES_KEY, ""); //$NON-NLS-1$
 	}
 
 }

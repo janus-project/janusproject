@@ -19,8 +19,7 @@
  */
 package io.janusproject.network;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,7 +35,7 @@ public class NetworkConfigTest extends Assert {
 
 	@Test
 	public void getDefaultValues() {
-		Map<String,Object> defs = new HashMap<>();
+		Properties defs = new Properties();
 		NetworkConfig.getDefaultValues(defs);
 		
 		// Use hard-coded string to ensure retro compatibility
