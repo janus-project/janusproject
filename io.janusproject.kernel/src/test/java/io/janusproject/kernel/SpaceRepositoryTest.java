@@ -33,6 +33,8 @@ import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.UUID;
 
 import javassist.Modifier;
@@ -107,6 +109,7 @@ public class SpaceRepositoryTest extends Assert {
 	
 	private void initMocks() {
 		Mockito.when(this.spaceIDs.containsKey(this.spaceID)).thenReturn(true);
+		Mockito.when(this.spaceIDs.keySet()).thenReturn(new HashSet<>(Collections.singleton(this.spaceID)));
 		this.spaceSpecification = Mockito.mock(OpenEventSpaceSpecification.class);
 		Mockito.when(this.injector.getInstance(OpenEventSpaceSpecification.class)).thenReturn(this.spaceSpecification);
 		this.space = Mockito.mock(OpenEventSpace.class);
@@ -124,19 +127,14 @@ public class SpaceRepositoryTest extends Assert {
 
 	private void initRepository() {
 		initMocks();
-		this.repository.ensureSpaceDefinition(this.spaceID, this.params);
-	}
-
-	@Test(expected=AssertionError.class)
-	public void ensureSpaceDefinition_nospaceid() {
-		this.repository.ensureSpaceDefinition(this.spaceID, this.params);
+		this.repository.ensureLocalSpaceDefinition(this.spaceID, this.params);
 	}
 
 	@Test
-	public void ensureSpaceDefinition_spaceid() {
+	public void ensureSpaceDefinition() {
 		initMocks();
 		//
-		this.repository.ensureSpaceDefinition(this.spaceID, this.params);
+		this.repository.ensureLocalSpaceDefinition(this.spaceID, this.params);
 		//
 		ArgumentCaptor<SpaceID> argument1 = ArgumentCaptor.forClass(SpaceID.class);
 		ArgumentCaptor<Object[]> argument2 = ArgumentCaptor.forClass(Object[].class);
@@ -148,15 +146,30 @@ public class SpaceRepositoryTest extends Assert {
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
 		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
 		assertSame(this.space, argument3.getValue());
+	}
+
+	@Test
+	public void twoStepConstruction() throws Exception {
+		TwoStepConstruction annotation = SpaceRepository.class.getAnnotation(TwoStepConstruction.class);
+		assertNotNull(annotation);
+		for(String name : annotation.names()) {
+			for(Method method : SpaceRepository.class.getMethods()) {
+				if (name.equals(method.getName())) {
+					assertTrue(Modifier.isPackage(method.getModifiers())
+							||Modifier.isPublic(method.getModifiers()));
+					break;
+				}
+			}
+		}
 	}
 
 	@Test
 	public void ensureSpaceDefinition_recall() {
 		initMocks();
 		//
-		this.repository.ensureSpaceDefinition(this.spaceID, this.params);
+		this.repository.ensureLocalSpaceDefinition(this.spaceID, this.params);
 		//
-		this.repository.ensureSpaceDefinition(this.spaceID, this.params);
+		this.repository.ensureLocalSpaceDefinition(this.spaceID, this.params);
 		//
 		ArgumentCaptor<SpaceID> argument1 = ArgumentCaptor.forClass(SpaceID.class);
 		ArgumentCaptor<Object[]> argument2 = ArgumentCaptor.forClass(Object[].class);
@@ -170,19 +183,12 @@ public class SpaceRepositoryTest extends Assert {
 		assertSame(this.space, argument3.getValue());
 	}
 
-	@Test(expected=AssertionError.class)
-	public void removeSpaceDefinition_spaceid() {
-		initMocks();
-		//
-		this.repository.removeSpaceDefinition(this.spaceID);
-	}
-
 	@Test
-	public void removeSpaceDefinition_nospaceid() {
+	public void removeSpaceDefinition() {
 		initRepository();
 		Mockito.when(this.spaceIDs.containsKey(this.spaceID)).thenReturn(false);
 		//
-		this.repository.removeSpaceDefinition(this.spaceID);
+		this.repository.removeLocalSpaceDefinition(this.spaceID);
 		//
 		assertNull(this.repository.getSpace(this.spaceID));
 		//
@@ -323,20 +329,41 @@ public class SpaceRepositoryTest extends Assert {
 		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
 		assertSame(this.space, argument3.getValue());
 	}
+
+	@Test
+	public void destroy_notinit() {
+		this.repository.destroy();
+		Mockito.verifyZeroInteractions(this.listener);
+	}
 	
 	@Test
-	public void twoStepConstruction() throws Exception {
-		TwoStepConstruction annotation = SpaceRepository.class.getAnnotation(TwoStepConstruction.class);
-		assertNotNull(annotation);
-		for(String name : annotation.names()) {
-			for(Method method : SpaceRepository.class.getMethods()) {
-				if (name.equals(method.getName())) {
-					assertTrue(Modifier.isPackage(method.getModifiers())
-							||Modifier.isPublic(method.getModifiers()));
-					break;
-				}
-			}
-		}
+	public void destroy_baseinit() {
+		baseInit();
+		this.repository.destroy();
+		Mockito.verifyZeroInteractions(this.listener);
+	}
+
+	@Test
+	public void destroy_initmocks() {
+		initMocks();
+		this.repository.destroy();
+		Mockito.verifyZeroInteractions(this.listener);
+	}
+
+	@Test
+	public void destroy_initrepository() {
+		initRepository();
+		this.repository.destroy();
+		ArgumentCaptor<Space> argument = ArgumentCaptor.forClass(Space.class);
+		Mockito.verify(this.listener, new Times(1)).spaceDestroyed(argument.capture());
+		assertSame(this.space, argument.getValue());
+	}
+
+	@Test(expected=AssertionError.class)
+	public void destroy_hasparticipant() {
+		initRepository();
+		Mockito.when(this.space.getParticipants()).thenReturn(Collections.singleton(UUID.randomUUID()));
+		this.repository.destroy();
 	}
 
 }

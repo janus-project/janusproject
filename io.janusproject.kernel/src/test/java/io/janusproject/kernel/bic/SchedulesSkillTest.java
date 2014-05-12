@@ -20,6 +20,7 @@
 package io.janusproject.kernel.bic;
 
 import io.janusproject.services.ExecutorService;
+import io.janusproject.services.LogService;
 import io.sarl.core.AgentTask;
 import io.sarl.lang.core.Agent;
 
@@ -60,9 +61,12 @@ public class SchedulesSkillTest extends Assert {
 	@Mock
 	private Agent agent;
 
+	@Mock
+	private LogService logger;
+
 	@InjectMocks
 	private SchedulesSkill skill;
-	
+		
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
@@ -101,6 +105,7 @@ public class SchedulesSkillTest extends Assert {
 
 	@After
 	public void tearDown() throws Exception {
+		this.logger = null;
 		this.skill = null;
 		this.agent = null;
 		this.agentId = null;

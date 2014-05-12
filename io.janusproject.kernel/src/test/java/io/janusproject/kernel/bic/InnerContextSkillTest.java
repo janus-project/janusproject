@@ -129,9 +129,14 @@ public class InnerContextSkillTest extends Assert {
 		//
 		this.skill.uninstall();
 		assertFalse(this.skill.hasInnerContext());
-		ArgumentCaptor<AgentContext> argument = ArgumentCaptor.forClass(AgentContext.class);
-		Mockito.verify(this.contextService, new Times(1)).removeContext(argument.capture());
-		assertSame(this.innerContext, argument.getValue());
+		//
+		ArgumentCaptor<EventListener> argument = ArgumentCaptor.forClass(EventListener.class);
+		Mockito.verify(this.innerSpace, new Times(1)).unregister(argument.capture());
+		assertSame(this.eventListener, argument.getValue());
+		//
+		ArgumentCaptor<AgentContext> argument2 = ArgumentCaptor.forClass(AgentContext.class);
+		Mockito.verify(this.contextService, new Times(1)).removeContext(argument2.capture());
+		assertSame(this.innerContext, argument2.getValue());
 	}
 
 }
