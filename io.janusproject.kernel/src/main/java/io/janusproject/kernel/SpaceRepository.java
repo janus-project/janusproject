@@ -28,6 +28,7 @@ import io.sarl.lang.core.SpaceSpecification;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EventListener;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -109,7 +110,8 @@ class SpaceRepository {
 	 */
 	synchronized void postConstruction() {
 		for (Entry<SpaceID,Object[]> e : this.spaceIDs.entrySet()) {
-			ensureSpaceDefinition(e.getKey(), e.getValue());
+			assert(this.spaceIDs.containsKey(e.getKey()));
+			ensureLocalSpaceDefinition(e.getKey(), e.getValue());
 		}
 		this.spaceIDListener = this.spaceIDs.addEntryListener(new HazelcastListener(), true);
 	}
@@ -120,6 +122,15 @@ class SpaceRepository {
 		// Unregister from Hazelcast layer.
 		if (this.spaceIDListener!=null) {
 			this.spaceIDs.removeEntryListener(this.spaceIDListener);
+		}
+		// Delete the spaces. If this function is called, it
+		// means that the spaces seems to have no more participant.
+		// The process cannot be done through hazelcast.
+		Iterator<SpaceID> iterator = this.spaceIDs.keySet().iterator();
+		while (iterator.hasNext()) {
+			SpaceID spaceId = iterator.next();
+			iterator.remove();
+			removeLocalSpaceDefinition(spaceId);
 		}
 	}
 	
@@ -152,8 +163,7 @@ class SpaceRepository {
 	 * @param initializationParameters - parameters for initialization.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected synchronized void ensureSpaceDefinition(SpaceID id, Object[] initializationParameters) {
-		assert(this.spaceIDs.containsKey(id));
+	protected synchronized void ensureLocalSpaceDefinition(SpaceID id, Object[] initializationParameters) {
 		if (!this.spaces.containsKey(id)) {
 			createSpaceInstance((Class)id.getSpaceSpecification(), id, false, initializationParameters);
 		}
@@ -163,8 +173,7 @@ class SpaceRepository {
 	 * 
 	 * @param id - identifier of the space
 	 */
-	protected synchronized void removeSpaceDefinition(SpaceID id) {
-		assert(!this.spaceIDs.containsKey(id));
+	protected synchronized void removeLocalSpaceDefinition(SpaceID id) {
 		Space space = this.spaces.remove(id);
 		if (space!=null) {
 			assert(space.getParticipants().isEmpty());
@@ -289,16 +298,20 @@ class SpaceRepository {
 
 		/** {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryAdded(EntryEvent<SpaceID, Object[]> event) {
-			ensureSpaceDefinition(event.getKey(), event.getValue());
+			assert(SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
+			ensureLocalSpaceDefinition(event.getKey(), event.getValue());
 		}
 
 		/** {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryRemoved(EntryEvent<SpaceID, Object[]> event) {
-			removeSpaceDefinition(event.getKey());
+			assert(!SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
+			removeLocalSpaceDefinition(event.getKey());
 		}
 
 		/** {@inheritDoc}
@@ -312,9 +325,11 @@ class SpaceRepository {
 
 		/** {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryEvicted(EntryEvent<SpaceID, Object[]> event) {
-			removeSpaceDefinition(event.getKey());
+			assert(!SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
+			removeLocalSpaceDefinition(event.getKey());
 		}
 
 	}
