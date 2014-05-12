@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.kernel.bic.BuiltinCapacityUtil;
 import io.janusproject.services.KernelAgentSpawnListener;
 import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpawnService;
@@ -27,7 +28,6 @@ import io.janusproject.services.impl.AbstractPrioritizedService;
 import io.janusproject.util.ListenerCollection;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
-import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.SynchronizedCollection;
 import io.sarl.core.SynchronizedSet;
 import io.sarl.lang.core.Agent;
@@ -35,9 +35,9 @@ import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.util.Collections3;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -118,15 +118,22 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	@Override
 	public synchronized void killAgent(UUID agentID) throws AgentKillException {
 		boolean error = !isRunning();
-		Agent agent = this.agents.remove(agentID);
-		if (agent != null) {
-			fireAgentDestroyed(agent);
-		}
-		if (this.agents.isEmpty()) {
-			fireKernelAgentDestroy();
-		}
-		if (error) {
-			throw new SpawnServiceStopException(agentID);
+		// We should check if it is possible to kill the agent BEFORE killing it.
+		Agent agent = this.agents.get(agentID);
+		if (agent!=null) {
+			if (canKillAgent(agent)) {
+				this.agents.remove(agentID);
+				fireAgentDestroyed(agent);
+				if (this.agents.isEmpty()) {
+					fireKernelAgentDestroy();
+				}
+				if (error) {
+					throw new SpawnServiceStopException(agentID);
+				}
+			}
+			else {
+				throw new AgentKillException(agentID);
+			}
 		}
 	}
 	
@@ -250,7 +257,32 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		event.setSource(defSpace.getAddress(agent.getID()));
 		defSpace.emit(event);
 	}
-
+	
+	/** Replies if the given agent can be killed.
+	 * 
+	 * @param agent - agent to test.
+	 * @return <code>true</code> if the given agent can be killed,
+	 * otherwise <code>false</code>.
+	 */
+	@SuppressWarnings("static-method")
+	public synchronized boolean canKillAgent(Agent agent) {
+		try {
+			AgentContext ac = BuiltinCapacityUtil.getContextIn(agent);
+			if (ac!=null) {
+				//FIXME: Is is sufficient to check the default space? May the other spaces be checked also?
+				Set<UUID> participants = ac.getDefaultSpace().getParticipants();
+				if (participants!=null &&
+					(participants.size()>1 ||
+					 (participants.size()==1 && !participants.contains(agent.getID())))) {
+					return false;
+				}
+			}
+			return true;
+		} catch (Throwable _) {
+			return false;
+		}
+	}
+	
 	/**
 	 * Notifies the listeners about the agent destruction.
 	 * 
@@ -267,17 +299,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		SpawnServiceListener[] ilisteners2 = this.listeners.getListeners(SpawnServiceListener.class);
 
 		try {
-			Method method = Agent.class.getDeclaredMethod("getSkill", Class.class); //$NON-NLS-1$
-			boolean isAccessible = method.isAccessible();
-			ExternalContextAccess skill;
-			try {
-				method.setAccessible(true);
-				skill = (ExternalContextAccess) method.invoke(agent, ExternalContextAccess.class);
-			} finally {
-				method.setAccessible(isAccessible);
-			}
-
-			SynchronizedCollection<AgentContext> sc = skill.getAllContexts();
+			SynchronizedCollection<AgentContext> sc = BuiltinCapacityUtil.getContextsOf(agent);
 			synchronized (sc.mutex()) {
 				for (AgentContext context : sc) {
 					EventSpace defSpace = context.getDefaultSpace();
