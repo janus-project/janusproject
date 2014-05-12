@@ -192,22 +192,8 @@ class Context implements AgentContext{
 		@Override
 		public void spaceCreated(Space space) {
 			this.logger.info(Context.class, "SPACE_CREATED", space.getID()); //$NON-NLS-1$
-			
 			// Notify the relays (other services)
 			this.relay.spaceCreated(space);
-			// Put an event in the default space
-			EventSpace defSpace = getDefaultSpace();
-			// Default space may be null if the default space was not
-			// yet created by the space repository has already received new spaces.
-			if (defSpace!=null) {
-				//FIXME: Caution -> the event should not be fired in remote kernels.
-				/*
-				SpaceCreated event = new SpaceCreated();
-				event.setSpaceID(space.getID());
-				event.setSpaceSpecification(space.getID().getSpaceSpecification());
-				event.setSource(defSpace.getAddress(agent.getID()));
-				defSpace.emit(event);*/
-			}
 		}
 
 		/** {@inheritDoc}
@@ -215,22 +201,8 @@ class Context implements AgentContext{
 		@Override
 		public void spaceDestroyed(Space space) {
 			this.logger.info(Context.class, "SPACE_DESTROYED", space.getID()); //$NON-NLS-1$
-
 			// Notify the relays (other services)
 			this.relay.spaceDestroyed(space);
-			// Put an event in the default space
-			EventSpace defSpace = getDefaultSpace();
-			// Default space may be null if the default space was not
-			// yet created by the space repository has already received new spaces.
-			if (defSpace!=null) {
-				//FIXME: Caution -> the event should not be fired in remote kernels.
-				/*
-				SpaceDestroyed event = new SpaceDestroyed();
-				event.setSpaceID(space.getID());
-				event.setSpaceSpecification(space.getID().getSpaceSpecification());
-				event.setSource(defSpace.getAddress(agent.getID()));
-				defSpace.emit(event);*/
-			}
 		}
 		
 	}
