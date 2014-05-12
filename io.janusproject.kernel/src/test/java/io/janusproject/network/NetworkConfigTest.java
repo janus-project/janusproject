@@ -39,7 +39,7 @@ public class NetworkConfigTest extends Assert {
 		NetworkConfig.getDefaultValues(defs);
 		
 		// Use hard-coded string to ensure retro compatibility
-		assertNull(defs.get("network.encrypter.aes.key")); //$NON-NLS-1$
+		assertEquals("", defs.get("network.encrypter.aes.key")); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("io.janusproject.network.event.GsonEventSerializer", defs.get("network.serializer.class")); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("io.janusproject.network.event.PlainTextEventEncrypter", defs.get("network.encrypter.class")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
