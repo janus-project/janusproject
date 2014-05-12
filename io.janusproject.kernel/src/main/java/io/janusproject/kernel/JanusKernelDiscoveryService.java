@@ -29,6 +29,7 @@ import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.impl.AbstractPrioritizedService;
 import io.sarl.util.Collections3;
 import io.janusproject.util.ListenerCollection;
+import io.janusproject.util.TwoStepConstruction;
 
 import java.net.URI;
 import java.util.Collection;
@@ -51,6 +52,7 @@ import com.hazelcast.core.ItemListener;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
+@TwoStepConstruction
 class JanusKernelDiscoveryService extends AbstractPrioritizedService implements io.janusproject.services.KernelDiscoveryService {
 
 	private final UUID janusID;

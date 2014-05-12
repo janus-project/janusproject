@@ -190,6 +190,7 @@ public class JanusSpawnServiceTest extends Assert {
 	public void doStart() {
 		try {
 			this.spawnService.doStart();
+			fail("Expecting IllegalStateException"); //$NON-NLS-1$
 		}
 		catch(IllegalStateException _) {
 			// Expected excpetion fired by notifyStarted()

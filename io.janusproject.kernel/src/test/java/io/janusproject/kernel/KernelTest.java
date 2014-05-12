@@ -23,11 +23,15 @@ import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.IServiceManager;
 import io.janusproject.services.SpawnService;
+import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.reflect.Method;
 import java.util.UUID;
+
+import javassist.Modifier;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -49,7 +53,7 @@ import com.hazelcast.core.HazelcastInstance;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked","rawtypes"})
+@SuppressWarnings({"javadoc","unchecked","rawtypes","static-method"})
 public class KernelTest extends Assert {
 
 	private ImmutableMultimap<State,Service> services;
@@ -129,6 +133,21 @@ public class KernelTest extends Assert {
 		assertEquals(Agent.class, argument2.getValue());
 		assertEquals("a", argument3.getValue()); //$NON-NLS-1$
 		assertEquals("b", argument4.getValue()); //$NON-NLS-1$
+	}
+
+	@Test
+	public void twoStepConstruction() throws Exception {
+		TwoStepConstruction annotation = Kernel.class.getAnnotation(TwoStepConstruction.class);
+		assertNotNull(annotation);
+		for(String name : annotation.names()) {
+			for(Method method : Kernel.class.getMethods()) {
+				if (name.equals(method.getName())) {
+					assertTrue(Modifier.isPackage(method.getModifiers())
+							||Modifier.isPublic(method.getModifiers()));
+					break;
+				}
+			}
+		}
 	}
 
 }

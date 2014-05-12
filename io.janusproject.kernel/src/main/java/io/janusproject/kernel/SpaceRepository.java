@@ -20,6 +20,7 @@
 package io.janusproject.kernel;
 
 import io.janusproject.services.LogService;
+import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
@@ -54,6 +55,7 @@ import com.hazelcast.core.IMap;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@TwoStepConstruction
 class SpaceRepository {
 	
 	private static final Object[] NO_PARAMETERS = new Object[0]; 
@@ -219,7 +221,7 @@ class SpaceRepository {
 	 * 
 	 * @return the collection of all spaces stored in this repository
 	 */
-	public synchronized Collection<Space> getSpaces() {
+	public synchronized Collection<? extends Space> getSpaces() {
 		return Collections.unmodifiableCollection(this.spaces.values());
 	}
 

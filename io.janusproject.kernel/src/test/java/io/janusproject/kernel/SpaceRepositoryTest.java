@@ -21,6 +21,7 @@ package io.janusproject.kernel;
 
 import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
 import io.janusproject.services.LogService;
+import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.Space;
@@ -30,8 +31,11 @@ import io.sarl.util.OpenEventSpaceSpecification;
 import io.sarl.util.RestrictedAccessEventSpace;
 import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.UUID;
+
+import javassist.Modifier;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -53,7 +57,7 @@ import com.hazelcast.core.IMap;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked"})
+@SuppressWarnings({"javadoc","unchecked","static-method"})
 public class SpaceRepositoryTest extends Assert {
 
 	private IMap<SpaceID,Object[]> spaceIDs;
@@ -191,7 +195,7 @@ public class SpaceRepositoryTest extends Assert {
 	public void getSpaces() {
 		initRepository();
 		//
-		Collection<Space> spaces = this.repository.getSpaces();
+		Collection<? extends Space> spaces = this.repository.getSpaces();
 		assertNotNull(spaces);
 		assertEquals(1, spaces.size());
 		assertTrue(spaces.contains(this.space));
@@ -318,6 +322,21 @@ public class SpaceRepositoryTest extends Assert {
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
 		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
 		assertSame(this.space, argument3.getValue());
+	}
+	
+	@Test
+	public void twoStepConstruction() throws Exception {
+		TwoStepConstruction annotation = SpaceRepository.class.getAnnotation(TwoStepConstruction.class);
+		assertNotNull(annotation);
+		for(String name : annotation.names()) {
+			for(Method method : SpaceRepository.class.getMethods()) {
+				if (name.equals(method.getName())) {
+					assertTrue(Modifier.isPackage(method.getModifiers())
+							||Modifier.isPublic(method.getModifiers()));
+					break;
+				}
+			}
+		}
 	}
 
 }

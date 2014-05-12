@@ -21,6 +21,7 @@ package io.janusproject.kernel;
 
 import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
 import io.janusproject.services.LogService;
+import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Space;
@@ -44,6 +45,7 @@ import com.hazelcast.core.HazelcastInstance;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@TwoStepConstruction
 class Context implements AgentContext{
 
 	private final UUID id;
@@ -76,6 +78,24 @@ class Context implements AgentContext{
 				new SpaceListener(logger, startUpListener));
 	}
 	
+	/** Constructs a <code>Context</code>.
+	 * <p>
+	 * <strong>You should call {@link #Context(Injector, UUID, UUID, LogService, HazelcastInstance, SpaceRepositoryListener)}
+	 * prior to this constructor.</strong>
+	 * This constructor is given for convenience writing of unit tests.
+	 * <p>
+	 * CAUTION: Do not miss to call {@link #postConstruction()}.
+	 * 
+	 * @param id - identifier of the context.
+	 * @param defaultSpaceID - identifier of the default space in the context.
+	 * @param spaceRepository - reference to the repository of spaces that is used by this context.
+	 */
+	Context(UUID id, UUID defaultSpaceID, SpaceRepository spaceRepository) {
+		this.id = id;
+		this.defaultSpaceID = defaultSpaceID;
+		this.spaceRepository = spaceRepository;
+	}
+
 	@Override
 	public String toString() {
 		return this.id.toString();
@@ -108,7 +128,7 @@ class Context implements AgentContext{
 	}
 
 	@Override
-	public Collection<io.sarl.lang.core.Space> getSpaces() {
+	public Collection<? extends io.sarl.lang.core.Space> getSpaces() {
 		return this.spaceRepository.getSpaces();
 	}
 
@@ -130,7 +150,6 @@ class Context implements AgentContext{
 	 */
 	@Override
 	public <S extends Space> Collection<S> getSpaces(Class<? extends SpaceSpecification<S>> spec) {
-		//Type safety: assume that any ClassCastException will be thrown in the caller context.
 		return this.spaceRepository.getSpaces(spec);
 	}
 

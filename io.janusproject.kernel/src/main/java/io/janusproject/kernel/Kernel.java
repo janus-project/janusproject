@@ -24,6 +24,7 @@ import io.janusproject.services.KernelAgentSpawnListener;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.impl.Services;
 import io.janusproject.util.LoggerCreator;
+import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 
@@ -63,6 +64,7 @@ import com.hazelcast.core.HazelcastInstance;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
+@TwoStepConstruction(names={"setJanusContext"})
 public class Kernel {
 
 	/** Create an instance of {@link Kernel}.

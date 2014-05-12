@@ -22,11 +22,15 @@ package io.janusproject.kernel;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
+import io.janusproject.util.TwoStepConstruction;
 
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
+
+import javassist.Modifier;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -49,7 +53,7 @@ import com.hazelcast.core.ItemListener;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({"javadoc","static-method"})
 public class JanusKernelDiscoveryServiceTest extends Assert {
 
 	private URI kernelURI;
@@ -134,6 +138,21 @@ public class JanusKernelDiscoveryServiceTest extends Assert {
 		assertNotNull(c);
 		assertEquals(1, c.size());
 		assertTrue(c.contains(this.kernelURI));
+	}
+
+	@Test
+	public void twoStepConstruction() throws Exception {
+		TwoStepConstruction annotation = JanusKernelDiscoveryService.class.getAnnotation(TwoStepConstruction.class);
+		assertNotNull(annotation);
+		for(String name : annotation.names()) {
+			for(Method method : JanusKernelDiscoveryService.class.getMethods()) {
+				if (name.equals(method.getName())) {
+					assertTrue(Modifier.isPackage(method.getModifiers())
+							||Modifier.isPublic(method.getModifiers()));
+					break;
+				}
+			}
+		}
 	}
 
 	/**
