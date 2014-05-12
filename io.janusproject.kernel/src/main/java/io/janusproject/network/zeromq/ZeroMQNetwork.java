@@ -699,7 +699,9 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 					}
 					// Ensure that the space becomes unknown
 					ZeroMQNetwork.this.messageRecvListeners.remove(space.getID());
-					ZeroMQNetwork.this.bufferedConnections.remove(space.getID());
+					if (ZeroMQNetwork.this.bufferedConnections!=null) {
+						ZeroMQNetwork.this.bufferedConnections.remove(space.getID());
+					}
 					ZeroMQNetwork.this.bufferedSpaces.remove(space.getID());
 				}
 				catch (Exception e) {
