@@ -57,18 +57,22 @@ public class JanusUncaughtExceptionHandler implements UncaughtExceptionHandler, 
 	
 	private void log(Throwable e, String taskId, String taskName) {
 		assert(e!=null);
+		Throwable cause = e;
+		while (cause.getCause()!=null && cause.getCause()!=cause) {
+			cause = cause.getCause();
+		}
 		LogRecord record;
-		if (e instanceof ChuckNorrisException) {
+		if (cause instanceof ChuckNorrisException || e instanceof ChuckNorrisException) {
 			// Chuck Norris cannot be catched!
 			return;
 		}
-		if (e instanceof CancellationException) {
+		if (cause instanceof CancellationException || e instanceof CancellationException) {
 			// Avoid too much processing if the error is not loggeable
 			if (!this.logger.isLoggeable(Level.FINEST)) return;
 			record = new LogRecord(Level.FINEST,
 					Locale.getString("CANCEL_TASK", taskId, taskName)); //$NON-NLS-1$
 		}
-		else if (e instanceof InterruptedException) {
+		else if (cause instanceof InterruptedException || e instanceof InterruptedException) {
 			// Avoid too much processing if the error is not loggeable
 			if (!this.logger.isLoggeable(Level.FINEST)) return;
 			record = new LogRecord(Level.FINEST,
@@ -78,19 +82,17 @@ public class JanusUncaughtExceptionHandler implements UncaughtExceptionHandler, 
 			// Avoid too much processing if the error is not loggeable
 			if (!this.logger.isLoggeable(Level.SEVERE)) return;
 			record = new LogRecord(Level.SEVERE,
-					Locale.getString("UNCAUGHT_EXCEPTION", e.getLocalizedMessage(), taskId, taskName)); //$NON-NLS-1$		
+					Locale.getString("UNCAUGHT_EXCEPTION", cause.getLocalizedMessage(), taskId, taskName)); //$NON-NLS-1$		
 		}
 		
-		Throwable cause = e;
-		while (cause.getCause()!=null) {
-			cause = cause.getCause();
-		}
 		record.setThrown(cause);
-		StackTraceElement elt = cause.getStackTrace()[0];
-		assert(elt!=null);
-		record.setSourceClassName(elt.getClassName());
-		record.setSourceMethodName(elt.getMethodName());
-
+		StackTraceElement[] trace = cause.getStackTrace();
+		if (trace!=null && trace.length>0) {
+			StackTraceElement elt = trace[0];
+			assert(elt!=null);
+			record.setSourceClassName(elt.getClassName());
+			record.setSourceMethodName(elt.getMethodName());
+		}
 		this.logger.log(record);
 	}
 
