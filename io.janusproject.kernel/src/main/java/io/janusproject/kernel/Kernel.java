@@ -19,9 +19,9 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.services.IServiceManager;
 import io.janusproject.services.KernelAgentSpawnListener;
 import io.janusproject.services.SpawnService;
-import io.janusproject.services.impl.IServiceManager;
 import io.janusproject.services.impl.Services;
 import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;

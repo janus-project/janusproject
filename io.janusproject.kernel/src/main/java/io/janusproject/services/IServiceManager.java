@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.impl;
+package io.janusproject.services;
 
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.Service;

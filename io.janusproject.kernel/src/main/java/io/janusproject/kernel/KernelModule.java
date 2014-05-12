@@ -27,13 +27,13 @@ import io.janusproject.kernel.executor.JanusThreadPoolExecutor;
 import io.janusproject.kernel.executor.JanusUncaughtExceptionHandler;
 import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.ExecutorService;
+import io.janusproject.services.IServiceManager;
 import io.janusproject.services.KernelDiscoveryService;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.impl.ArakhneLocaleLogService;
 import io.janusproject.services.impl.GoogleServiceManager;
-import io.janusproject.services.impl.IServiceManager;
 import io.sarl.lang.core.AgentContext;
 
 import java.lang.Thread.UncaughtExceptionHandler;

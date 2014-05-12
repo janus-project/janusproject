@@ -19,6 +19,8 @@
  */
 package io.janusproject.services.impl;
 
+import io.janusproject.services.IServiceManager;
+
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.State;
