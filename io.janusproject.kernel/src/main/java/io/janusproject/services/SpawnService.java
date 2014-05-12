@@ -24,6 +24,8 @@ import io.sarl.lang.core.AgentContext;
 
 import java.util.UUID;
 
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.common.util.concurrent.Service;
 
 /** This service provides the tools to manage
@@ -50,8 +52,9 @@ public interface SpawnService extends Service {
 	/** Kill the agent with the given identifier.
 	 * 
 	 * @param agentID - the identifier of the agent to kill.
+	 * @throws AgentKillException - thrown when the agent cannot be killed.
 	 */
-	public void killAgent(UUID agentID);
+	public void killAgent(UUID agentID) throws AgentKillException;
 
 	/** Add a listener on the changes in the current state of an agent.
 	 * 
@@ -90,5 +93,47 @@ public interface SpawnService extends Service {
 	 * @param listener
 	 */
 	public void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener);
+
+
+	/** Exception occurs when an agent cannot be killed.
+	 * 
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class AgentKillException extends Exception {
+		
+		private static final long serialVersionUID = -7911946040378324212L;
+
+		private final UUID agent;
+		
+		/**
+		 * @param agent - id of the agent that cannot be killed.
+		 */
+		public AgentKillException(UUID agent) {
+			super(Locale.getString(SpawnService.class, "AGENT_KILL_EXCEPTION",  agent)); //$NON-NLS-1$
+			this.agent = agent;
+			fillInStackTrace();
+		}
+		
+		/**
+		 * @param agent - id of the agent that cannot be killed.
+		 * @param cause - the exception that is the cause of the killing discarding.
+		 */
+		public AgentKillException(UUID agent, Throwable cause) {
+			super(Locale.getString(SpawnService.class, "AGENT_KILL_EXCEPTION_WITH_CAUSE",  agent, cause), cause); //$NON-NLS-1$
+			this.agent = agent;
+		}
+
+		/** Replies the id of the agent that cannot be skilled.
+		 * 
+		 * @return the agent id.
+		 */
+		public UUID getAgent() {
+			return this.agent;
+		}
+		
+	}
 
 }

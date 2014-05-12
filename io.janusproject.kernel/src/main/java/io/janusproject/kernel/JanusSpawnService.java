@@ -116,7 +116,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void killAgent(UUID agentID) {
+	public synchronized void killAgent(UUID agentID) throws AgentKillException {
 		boolean error = !isRunning();
 		Agent agent = this.agents.remove(agentID);
 		if (agent != null) {

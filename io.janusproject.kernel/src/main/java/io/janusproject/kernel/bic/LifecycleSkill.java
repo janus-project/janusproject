@@ -61,8 +61,41 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 	@Override
 	public void killMe() {
-		this.spawnService.killAgent(getOwner().getID());
-		throw new ChuckNorrisException();
+		try {
+			this.spawnService.killAgent(getOwner().getID());
+			throw new ChuckNorrisException();
+		}
+		catch(io.janusproject.services.SpawnService.AgentKillException e) {
+			throw new AgentKillException(e);			
+		}
+	}
+	
+	/** This runtie exception is thrown when an agent cannot be killed.
+	 * 
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class AgentKillException extends RuntimeException {
+		
+		private static final long serialVersionUID = 3186824315988212481L;
+		
+		/**
+		 * @param e - cause
+		 */
+		AgentKillException(io.janusproject.services.SpawnService.AgentKillException e) {
+			super(e.getMessage(), e);
+		}
+		
+		/** Replies the agent that cannot be killed.
+		 * 
+		 * @return the agent.
+		 */
+		public UUID getAgent() {
+			return ((io.janusproject.services.SpawnService.AgentKillException)getCause()).getAgent();
+		}
+		
 	}
 	
 }
