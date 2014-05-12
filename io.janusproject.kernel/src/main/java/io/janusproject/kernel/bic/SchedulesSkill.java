@@ -21,6 +21,7 @@ package io.janusproject.kernel.bic;
 
 import io.janusproject.kernel.executor.JanusScheduledFutureTask;
 import io.janusproject.services.ExecutorService;
+import io.janusproject.services.LogService;
 import io.sarl.core.AgentTask;
 import io.sarl.core.Schedules;
 import io.sarl.lang.core.Agent;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +55,9 @@ class SchedulesSkill extends Skill implements Schedules {
 
 	@Inject
 	private ExecutorService executorService;
+
+	@Inject
+	private LogService logger;
 
 	private final Map<String, AgentTask> tasks = new HashMap<>();
 	private final Map<String, ScheduledFuture<?>> futures = new HashMap<>();
@@ -99,14 +104,18 @@ class SchedulesSkill extends Skill implements Schedules {
 
 	@Override
 	protected synchronized void uninstall() {
-		for (ScheduledFuture<?> future : this.futures.values()) {
+		ScheduledFuture<?> future;
+		for (Entry<String,ScheduledFuture<?>> futureDescription : this.futures.entrySet()) {
+			future = futureDescription.getValue();
 			if ((future instanceof JanusScheduledFutureTask<?>)
 					&&((JanusScheduledFutureTask<?>)future).isCurrentThread()) {
 				// Ignore the cancelation of the future.
 				// It is assumed that a ChuckNorrisException will be thrown later.
+				this.logger.fineInfo("SKIP_CANCELED_TASK_ON_CURRENT_THREAD", futureDescription.getKey(), future); //$NON-NLS-1$
 			}
 			else {
 				future.cancel(true);
+				this.logger.fineInfo("CANCELED_TASK", futureDescription.getKey(), future); //$NON-NLS-1$
 			}
 		}
 		this.futures.clear();

@@ -43,6 +43,7 @@ public class JanusFutureTask<V> extends FutureTask<V> {
 
 	private final AtomicBoolean treated = new AtomicBoolean(false);
 	private WeakReference<Thread> thread = null;
+	private final WeakReference<Object> subruntime;
 
 	/**
      * Creates a {@code FutureTask} that will, upon running, execute the
@@ -58,6 +59,7 @@ public class JanusFutureTask<V> extends FutureTask<V> {
      */
 	JanusFutureTask(Runnable runnable, V result) {
 		super(runnable, result);
+		this.subruntime = new WeakReference<Object>(runnable);
 	}
 	
     /**
@@ -69,6 +71,14 @@ public class JanusFutureTask<V> extends FutureTask<V> {
      */
 	JanusFutureTask(Callable<V> callable) {
 		super(callable);
+		this.subruntime = new WeakReference<Object>(callable);
+	}
+	
+	@Override
+	public String toString() {
+		Object o = this.subruntime.get();
+		if (o!=null) o = o.toString();
+		return "[ "+o+" ] ON [ " + getThread() + " ]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	/** {@inheritDoc}

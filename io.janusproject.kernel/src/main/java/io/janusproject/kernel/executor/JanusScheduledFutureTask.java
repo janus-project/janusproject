@@ -55,6 +55,11 @@ public class JanusScheduledFutureTask<V> implements RunnableScheduledFuture<V> {
 		this.task = task;
 	}
 	
+	@Override
+	public String toString() {
+		return "[ "+this.task+" ] ON [ " + getThread() + " ]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
 	/** Set the running thread.
 	 * 
 	 * @param thread
