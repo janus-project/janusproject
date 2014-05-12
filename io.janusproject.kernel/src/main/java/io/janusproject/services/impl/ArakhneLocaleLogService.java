@@ -110,21 +110,7 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 			} catch (ClassNotFoundException e1) {
 				throw new Error(e1);
 			}
-			String text = Locale.getString(callerType, messageKey, message);
-			Throwable e = null;
-			if (exception) {
-				for(Object m : message) {
-					if (m instanceof Throwable) {
-						e = (Throwable)m;
-						break;
-					}
-				}
-			}
-			LogRecord record = new LogRecord(level, text);
-			if (e!=null) record.setThrown(e);
-			record.setSourceClassName(elt.getClassName());
-			record.setSourceMethodName(elt.getMethodName());
-			this.logger.log(record);
+			log(level, exception, callerType, messageKey, message);
 		}
 	}
 	
