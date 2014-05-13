@@ -253,7 +253,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		EventSpace defSpace = context.getDefaultSpace();
 		AgentSpawned event = new AgentSpawned();
 		event.setAgentID(agent.getID());
-		event.setAgentType(agent.getClass());
+		event.setAgentType(agent.getClass().getName());
 		event.setSource(defSpace.getAddress(agent.getID()));
 		defSpace.emit(event);
 	}
