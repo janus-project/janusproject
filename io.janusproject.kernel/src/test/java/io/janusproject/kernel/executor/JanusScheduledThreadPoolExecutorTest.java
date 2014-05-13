@@ -140,7 +140,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof CancellationException);
+		assertThrowables(InterruptedException.class, CancellationException.class, argument2.getValue());
 	}
 
 	@Test
@@ -156,7 +156,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof CancellationException);
+		assertThrowables(InterruptedException.class, CancellationException.class, argument2.getValue());
 	}
 
 	@Test
@@ -253,7 +253,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof MockitoException);
+		assertThrowable(MockitoException.class, argument2.getValue());
 	}
 
 	@Test
@@ -268,7 +268,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof MockitoException);
+		assertThrowable(MockitoException.class, argument2.getValue());
 	}
 
 	@Test
@@ -283,7 +283,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof MockitoException);
+		assertThrowable(MockitoException.class, argument2.getValue());
 	}
 
 	@Test
@@ -295,7 +295,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof MockitoException);
+		assertThrowable(MockitoException.class, argument2.getValue());
 	}
 
 	@Test
@@ -310,7 +310,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof MockitoException);
+		assertThrowable(MockitoException.class, argument2.getValue());
 	}
 
 	@Test
@@ -325,7 +325,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof MockitoException);
+		assertThrowable(MockitoException.class, argument2.getValue());
 	}
 
 	@Test
@@ -341,7 +341,7 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof MockitoException);
+		assertThrowable(MockitoException.class, argument2.getValue());
 	}
 
 	@Test
@@ -357,7 +357,22 @@ public class JanusScheduledThreadPoolExecutorTest extends Assert {
 		ArgumentCaptor<Thread> argument1 = ArgumentCaptor.forClass(Thread.class);
 		ArgumentCaptor<Throwable> argument2 = ArgumentCaptor.forClass(Throwable.class);
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
-		assertTrue(argument2.getValue() instanceof MockitoException);
+		assertThrowable(MockitoException.class, argument2.getValue());
+	}
+	
+	private static void assertThrowable(Class<? extends Throwable> expectedType, Object actual) {
+		if (!expectedType.isInstance(actual)) {
+			fail("An exception of type '"+expectedType //$NON-NLS-1$
+					+"' is expected; but the actual value is of type: "+actual); //$NON-NLS-1$
+		}
+	}
+
+	private static void assertThrowables(Class<? extends Throwable> expectedType1, Class<? extends Throwable> expectedType2, Object actual) {
+		if (!expectedType1.isInstance(actual) && !expectedType2.isInstance(actual)) {
+			fail("An exception of type '"+expectedType1 //$NON-NLS-1$
+					+"' or of type '"+expectedType2 //$NON-NLS-1$
+					+"' is expected; but the actual value is of type: "+actual); //$NON-NLS-1$
+		}
 	}
 
 	private void waitTaskTermination() throws Exception {
