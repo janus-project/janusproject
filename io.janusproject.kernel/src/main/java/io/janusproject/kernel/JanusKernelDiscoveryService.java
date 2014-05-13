@@ -25,11 +25,11 @@ import io.janusproject.services.ExecutorService;
 import io.janusproject.services.KernelDiscoveryServiceListener;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
-import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.impl.AbstractPrioritizedService;
-import io.sarl.util.Collections3;
+import io.janusproject.services.impl.Services;
 import io.janusproject.util.ListenerCollection;
 import io.janusproject.util.TwoStepConstruction;
+import io.sarl.util.Collections3;
 
 import java.net.URI;
 import java.util.Collection;
@@ -77,8 +77,8 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	@Inject
 	public JanusKernelDiscoveryService(@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusID) {
 		this.janusID = janusID;
-		setStartPriority(ServicePriorities.START_KERNEL_DISCOVERY_SERVICE);
-		setStopPriority(ServicePriorities.STOP_KERNEL_DISCOVERY_SERVICE);
+		setStartPriority(Services.START_KERNEL_DISCOVERY_SERVICE);
+		setStopPriority(Services.STOP_KERNEL_DISCOVERY_SERVICE);
 	}
 	
 

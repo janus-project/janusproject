@@ -20,7 +20,6 @@
 package io.janusproject.services.impl;
 
 import io.janusproject.services.LogService;
-import io.janusproject.services.ServicePriorities;
 
 import java.util.logging.Filter;
 import java.util.logging.Level;
@@ -69,8 +68,8 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	/**
 	 */
 	public ArakhneLocaleLogService() {
-		setStartPriority(ServicePriorities.START_LOGGING_SERVICE);
-		setStopPriority(ServicePriorities.STOP_LOGGING_SERVICE);
+		setStartPriority(Services.START_LOGGING_SERVICE);
+		setStopPriority(Services.STOP_LOGGING_SERVICE);
 	}
 	
 	private static StackTraceElement getCaller() {

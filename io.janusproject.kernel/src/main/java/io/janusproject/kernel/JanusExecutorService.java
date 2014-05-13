@@ -20,8 +20,8 @@
 package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
-import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.impl.AbstractPrioritizedService;
+import io.janusproject.services.impl.Services;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -54,8 +54,8 @@ class JanusExecutorService extends AbstractPrioritizedService implements io.janu
 	/**
 	 */
 	public JanusExecutorService() {
-		setStartPriority(ServicePriorities.START_EXECUTOR_SERVICE);
-		setStopPriority(ServicePriorities.STOP_EXECUTOR_SERVICE);
+		setStartPriority(Services.START_EXECUTOR_SERVICE);
+		setStopPriority(Services.STOP_EXECUTOR_SERVICE);
 	}
 	
 	/** {@inheritDoc}

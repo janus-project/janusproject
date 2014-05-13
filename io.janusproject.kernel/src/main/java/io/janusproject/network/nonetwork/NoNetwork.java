@@ -22,8 +22,8 @@ package io.janusproject.network.nonetwork;
 import io.janusproject.network.NetworkUtil;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.NetworkServiceListener;
-import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.impl.AbstractPrioritizedService;
+import io.janusproject.services.impl.Services;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
@@ -65,8 +65,8 @@ class NoNetwork extends AbstractPrioritizedService implements NetworkService {
 	 */
 	@Inject
 	public NoNetwork() {
-		setStartPriority(ServicePriorities.START_NETWORK_SERVICE);
-		setStopPriority(ServicePriorities.STOP_NETWORK_SERVICE);
+		setStartPriority(Services.START_NETWORK_SERVICE);
+		setStopPriority(Services.STOP_NETWORK_SERVICE);
 	}
 
 	/** {@inheritDoc}

@@ -45,6 +45,54 @@ import com.google.common.util.concurrent.ServiceManager;
  */
 public class Services {
 
+	/** Start priority for the executor service.
+	 */
+	public static final int START_EXECUTOR_SERVICE = 0;
+
+	/** Start priority for the logging service.
+	 */
+	public static final int START_LOGGING_SERVICE = 1;
+
+	/** Start priority for the kernel discovery service.
+	 */
+	public static final int START_KERNEL_DISCOVERY_SERVICE = 2;
+
+	/** Start priority for the network service.
+	 */
+	public static final int START_NETWORK_SERVICE = 3;
+
+	/** Start priority for the context service.
+	 */
+	public static final int START_CONTEXTSPACE_SERVICE = 4;
+
+	/** Start priority for the agent spawning service.
+	 */
+	public static final int START_SPAWN_SERVICE = 5;
+
+	/** Start priority for the executor service.
+	 */
+	public static final int STOP_EXECUTOR_SERVICE = 5;
+
+	/** Start priority for the logging service.
+	 */
+	public static final int STOP_LOGGING_SERVICE = 4;
+
+	/** Start priority for the kernel discovery service.
+	 */
+	public static final int STOP_KERNEL_DISCOVERY_SERVICE = 3;
+
+	/** Start priority for the network service.
+	 */
+	public static final int STOP_NETWORK_SERVICE = 2;
+
+	/** Start priority for the context service.
+	 */
+	public static final int STOP_CONTEXTSPACE_SERVICE = 1;
+
+	/** Start priority for the agent spawning service.
+	 */
+	public static final int STOP_SPAWN_SERVICE = 0;
+
 	/** Start the services associated to the given service manager.
 	 * <p>
 	 * This starting function supports the {@link PrioritizedService prioritized services}.

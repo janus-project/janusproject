@@ -23,15 +23,15 @@ import io.janusproject.JanusConfig;
 import io.janusproject.services.ContextRepositoryListener;
 import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.LogService;
-import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.services.impl.AbstractPrioritizedService;
-import io.sarl.util.Collections3;
+import io.janusproject.services.impl.Services;
 import io.janusproject.util.ListenerCollection;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.util.Collections3;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -93,8 +93,8 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	/** Constructs <code>ContextRepository</code>.
 	 */
 	public JanusContextSpaceService() {
-		setStartPriority(ServicePriorities.START_CONTEXTSPACE_SERVICE);
-		setStopPriority(ServicePriorities.STOP_CONTEXTSPACE_SERVICE);
+		setStartPriority(Services.START_CONTEXTSPACE_SERVICE);
+		setStopPriority(Services.STOP_CONTEXTSPACE_SERVICE);
 	}
 	
 	/** Replies the factory used to create contexts.

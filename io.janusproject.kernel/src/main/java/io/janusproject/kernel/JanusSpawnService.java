@@ -21,10 +21,10 @@ package io.janusproject.kernel;
 
 import io.janusproject.kernel.bic.BuiltinCapacityUtil;
 import io.janusproject.services.KernelAgentSpawnListener;
-import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.SpawnServiceListener;
 import io.janusproject.services.impl.AbstractPrioritizedService;
+import io.janusproject.services.impl.Services;
 import io.janusproject.util.ListenerCollection;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
@@ -72,8 +72,8 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	/**
 	 */
 	public JanusSpawnService() {
-		setStartPriority(ServicePriorities.START_SPAWN_SERVICE);
-		setStartPriority(ServicePriorities.STOP_SPAWN_SERVICE);
+		setStartPriority(Services.START_SPAWN_SERVICE);
+		setStartPriority(Services.STOP_SPAWN_SERVICE);
 	}
 	
 	/** Change the agent factory.

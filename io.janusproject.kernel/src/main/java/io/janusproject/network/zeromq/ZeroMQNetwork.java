@@ -31,9 +31,9 @@ import io.janusproject.services.LogService;
 import io.janusproject.services.LogService.LogParam;
 import io.janusproject.services.NetworkService;
 import io.janusproject.services.NetworkServiceListener;
-import io.janusproject.services.ServicePriorities;
 import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.services.impl.AbstractPrioritizedExecutionThreadService;
+import io.janusproject.services.impl.Services;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Space;
@@ -118,8 +118,8 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	public ZeroMQNetwork(@Named(JanusConfig.PUB_URI) URI uri) {
 		assert (uri != null) : "Injected URI must be not null nor empty"; //$NON-NLS-1$
 		this.uriCandidate = uri;
-		setStartPriority(ServicePriorities.START_NETWORK_SERVICE);
-		setStopPriority(ServicePriorities.STOP_NETWORK_SERVICE);
+		setStartPriority(Services.START_NETWORK_SERVICE);
+		setStopPriority(Services.STOP_NETWORK_SERVICE);
 	}
 
 	/** {@inheritDoc}
