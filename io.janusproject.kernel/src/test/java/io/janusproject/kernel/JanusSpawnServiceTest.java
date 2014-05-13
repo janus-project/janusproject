@@ -180,7 +180,7 @@ public class JanusSpawnServiceTest extends Assert {
 		Mockito.verify(this.defaultSpace, new Times(1)).emit(argument4.capture());
 		assertTrue(argument4.getValue() instanceof AgentSpawned);
 		assertSame(agentId, ((AgentSpawned)argument4.getValue()).getAgentID());
-		assertEquals(ag.getClass(), ((AgentSpawned)argument4.getValue()).getAgentType());
+		assertEquals(ag.getClass().getName(), ((AgentSpawned)argument4.getValue()).getAgentType());
 	}
 
 	@Test
