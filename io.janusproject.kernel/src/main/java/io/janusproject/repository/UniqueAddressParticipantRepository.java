@@ -21,11 +21,12 @@ package io.janusproject.repository;
 
 
 import io.sarl.lang.core.EventListener;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -74,9 +75,11 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @param entity - the entity associated to the specified address
 	 * @return the address of the participant
 	 */
-	public ADDRESS registerParticipant(ADDRESS a, EventListener entity) {	
-		this.addListener(a, entity);
-		this.participants.put(entity.getID(), a);
+	public ADDRESS registerParticipant(ADDRESS a, EventListener entity) {
+		synchronized(mutex()) {
+			addListener(a, entity);
+			this.participants.put(entity.getID(), a);
+		}
 		return a;
 	}
 
@@ -86,7 +89,7 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @return the address that was mapped to the given participant.
 	 */
 	public ADDRESS unregisterParticipant(EventListener entity) {
-		return this.unregisterParticipant(entity.getID());
+		return unregisterParticipant(entity.getID());
 	}
 	
 	/** Remove a participant with the given ID from this repository.
@@ -95,8 +98,10 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @return the address that was mapped to the given participant.
 	 */
 	public ADDRESS unregisterParticipant(UUID entityID) {
-		this.removeListener(this.participants.get(entityID));
-		return this.participants.remove(entityID);
+		synchronized(mutex()) {
+			removeListener(this.participants.get(entityID));
+			return this.participants.remove(entityID);
+		}
 	}
 	
 	/** Replies the address associated to the given participant.
@@ -114,23 +119,31 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @return the address of the participant with the given id.
 	 */
 	public ADDRESS getAddress(UUID id) {
-		return this.participants.get(id);
+		synchronized(mutex()) {
+			return this.participants.get(id);
+		}
 	}
 
 	/** Replies all the addresses of the participants that ar einside this repository.
 	 * 
 	 * @return all the addresses.
 	 */
-	public Collection<ADDRESS> getParticipantAddresses() {
-		return this.participants.values();
+	public SynchronizedCollection<ADDRESS> getParticipantAddresses() {
+		Object m = mutex();
+		synchronized(m) {
+			return Collections3.synchronizedCollection(this.participants.values(), m);
+		}
 	}
 	
 	/** Replies the identifiers of all the participants in this repository.
 	 * 
 	 * @return all the identifiers.
 	 */
-	public Set<UUID> getParticipantIDs() {
-		return this.participants.keySet();
+	public SynchronizedSet<UUID> getParticipantIDs() {
+		Object m = mutex();
+		synchronized(m) {
+			return Collections3.synchronizedSet(this.participants.keySet(), m);
+		}
 	}
 	
 }

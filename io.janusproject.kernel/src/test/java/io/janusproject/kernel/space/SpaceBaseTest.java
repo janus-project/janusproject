@@ -22,9 +22,9 @@ package io.janusproject.kernel.space;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.OpenEventSpaceSpecification;
 
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -53,7 +53,7 @@ public class SpaceBaseTest extends Assert {
 			}
 			
 			@Override
-			public Set<UUID> getParticipants() {
+			public SynchronizedSet<UUID> getParticipants() {
 				throw new UnsupportedOperationException();
 			}
 		};

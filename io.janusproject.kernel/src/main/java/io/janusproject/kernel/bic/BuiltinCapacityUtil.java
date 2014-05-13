@@ -21,9 +21,9 @@ package io.janusproject.kernel.bic;
 
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.InnerContextAccess;
-import io.sarl.core.SynchronizedCollection;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.util.SynchronizedCollection;
 
 import java.lang.reflect.Method;
 

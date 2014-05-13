@@ -26,11 +26,11 @@ import io.sarl.core.ContextLeft;
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.MemberJoined;
 import io.sarl.core.MemberLeft;
-import io.sarl.core.SynchronizedCollection;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
+import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 

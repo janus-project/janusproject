@@ -27,8 +27,12 @@ import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.UUID;
 
 import org.junit.After;
@@ -52,6 +56,8 @@ import org.mockito.internal.verification.Times;
 @SuppressWarnings({"javadoc","synthetic-access"})
 public class InnerContextSkillTest extends Assert {
 
+	private UUID agentId;
+	
 	@Mock
 	private EventListener eventListener;
 	
@@ -72,14 +78,14 @@ public class InnerContextSkillTest extends Assert {
 	
 	@Before
 	public void setUp() throws Exception {
-		UUID agentId = UUID.randomUUID();
+		this.agentId = UUID.randomUUID();
 		Address address = new Address(
 				new SpaceID(
 						UUID.randomUUID(),
 						UUID.randomUUID(),
 						EventSpaceSpecification.class),
-				agentId);
-		Agent agent = new Agent(agentId) {
+				this.agentId);
+		Agent agent = new Agent(this.agentId) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				return capacity.cast(InnerContextSkillTest.this.busCapacity);
@@ -89,14 +95,18 @@ public class InnerContextSkillTest extends Assert {
 		address = Mockito.spy(address);
 		this.skill = new InnerContextSkill(agent, address);
 		MockitoAnnotations.initMocks(this);
+		Mockito.when(agent.getID()).thenReturn(this.agentId);
 		Mockito.when(this.contextService.createContext(Matchers.any(UUID.class), 
 				Matchers.any(UUID.class))).thenReturn(this.innerContext);
 		Mockito.when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
 		Mockito.when(this.busCapacity.asEventListener()).thenReturn(this.eventListener);
+		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+				Collections3.<UUID>synchronizedSingleton(this.agentId));
 	}
 
 	@After
 	public void tearDown() throws Exception {
+		this.agentId = null;
 		this.skill = null;
 		this.contextService = null;
 		this.innerContext = null;
@@ -137,6 +147,49 @@ public class InnerContextSkillTest extends Assert {
 		ArgumentCaptor<AgentContext> argument2 = ArgumentCaptor.forClass(AgentContext.class);
 		Mockito.verify(this.contextService, new Times(1)).removeContext(argument2.capture());
 		assertSame(this.innerContext, argument2.getValue());
+	}
+	
+	@Test
+	public void hasMemberAgent_nomember() {
+		assertFalse(this.skill.hasMemberAgent());
+	}
+
+	@Test
+	public void hasMemberAgent_member() {
+		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())), this));
+		assertTrue(this.skill.hasMemberAgent());
+	}
+
+	@Test
+	public void getMemberAgentCount_nomember() {
+		assertEquals(0, this.skill.getMemberAgentCount());
+	}
+	
+	@Test
+	public void getMemberAgentCount_member() {
+		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())), this));
+		assertEquals(1, this.skill.getMemberAgentCount());
+	}
+	
+	@Test
+	public void getMemberAgents_nomember() {
+		SynchronizedSet<UUID> set = this.skill.getMemberAgents();
+		assertNotNull(set);
+		assertTrue(set.isEmpty());
+	}
+
+	@Test
+	public void getMemberAgents_member() {
+		UUID otherAgent = UUID.randomUUID();
+		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, otherAgent)), this));
+		SynchronizedSet<UUID> set = this.skill.getMemberAgents();
+		assertNotNull(set);
+		assertFalse(set.isEmpty());
+		assertEquals(1, set.size());
+		assertTrue(set.contains(otherAgent));
 	}
 
 }

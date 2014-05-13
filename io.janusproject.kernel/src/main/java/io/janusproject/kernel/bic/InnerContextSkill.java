@@ -26,7 +26,13 @@ import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.Skill;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import com.google.inject.Inject;
 
@@ -121,5 +127,54 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		}
 		return this.innerContext;
 	}
-	
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public synchronized boolean hasMemberAgent() {
+		if (this.innerContext!=null) {
+			Set<UUID> participants = this.innerContext.getDefaultSpace().getParticipants();
+			assert(participants!=null);
+			return ((participants.size()>1) ||
+					 ((participants.size()==1)
+					  && (!participants.contains(getOwner().getID()))));
+		}
+		return false;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public synchronized int getMemberAgentCount() {
+		if (this.innerContext!=null) {
+			SynchronizedSet<UUID> participants = this.innerContext.getDefaultSpace().getParticipants();
+			assert(participants!=null);
+			int count = participants.size();
+			if (participants.contains(getOwner().getID())) {
+				--count;
+			}
+			return count;
+		}
+		return 0;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public synchronized SynchronizedSet<UUID> getMemberAgents() {
+		if (this.innerContext!=null) {
+			SynchronizedSet<UUID> participants = this.innerContext.getDefaultSpace().getParticipants();
+			assert(participants!=null);
+			Set<UUID> members = new HashSet<>();
+			UUID myId = getOwner().getID();
+			for(UUID id : participants) {
+				if (!id.equals(myId)) {
+					members.add(id);
+				}
+			}
+			return Collections3.synchronizedSet(members, members);
+		}
+		return Collections3.emptySynchronizedSet();
+	}
+
 }

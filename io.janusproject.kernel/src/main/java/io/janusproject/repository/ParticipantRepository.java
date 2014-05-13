@@ -20,13 +20,15 @@
 package io.janusproject.repository;
 
 import io.sarl.lang.core.EventListener;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.TreeMap;
 
 /**
  * An abstract repository providing the basic support of storage a 
@@ -51,7 +53,7 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	/** Construct a <code>ParticipantRepository</code>.
 	 */
 	protected ParticipantRepository() {
-		this.listeners = new ConcurrentHashMap<>();
+		this.listeners = new TreeMap<>();
 	}
 
 	/** Replies the numbers of participants registered in this repository.
@@ -59,7 +61,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * @return the number of listeners.
 	 */
 	public int listenerCount() {
-		return this.listeners.size();
+		synchronized(mutex()) {
+			return this.listeners.size();
+		}
 	}
 
 	/** Replies if there is no participant registered in this repository.
@@ -68,7 +72,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * if there is a least one participant.
 	 */
 	protected boolean isListenerEmpty() {
-		return this.listeners.isEmpty();
+		synchronized(mutex()) {
+			return this.listeners.isEmpty();
+		}
 	}
 
 	/** Replies if the given address is present inside this repository.
@@ -78,7 +84,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * <code>false</code> if the key is not present or <code>null</code>.
 	 */
 	protected boolean containsAddress(ADDRESS key) {
-		return this.listeners.containsKey(key);
+		synchronized(mutex()) {
+			return this.listeners.containsKey(key);
+		}
 	}
 
 	/** Replies if the given participant is present inside this repository.
@@ -88,7 +96,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * <code>false</code> if the participant is not present or <code>null</code>.
 	 */
 	protected boolean containsListener(EventListener value) {
-		return this.listeners.containsValue(value);
+		synchronized(mutex()) {
+			return this.listeners.containsValue(value);
+		}
 	}
 
 	/** Replies the participant with the given address.
@@ -98,7 +108,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * if there is no participant with the given address.
 	 */
 	protected EventListener getListener(ADDRESS key) {
-		return this.listeners.get(key);
+		synchronized(mutex()) {
+			return this.listeners.get(key);
+		}
 	}
 
 	/** Add a participant with the given address in this repository.
@@ -108,7 +120,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * @return the participant that was previously associated to the given address.
 	 */
 	protected EventListener addListener(ADDRESS key, EventListener value) {
-		return this.listeners.put(key, value);
+		synchronized(mutex()) {
+			return this.listeners.put(key, value);
+		}
 	}
 
 	/** Remove the mapping from the given address to the associated participant.
@@ -118,29 +132,39 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * if the given address was not found.
 	 */
 	protected EventListener removeListener(ADDRESS key) {
-		return this.listeners.remove(key);
+		synchronized(mutex()) {
+			return this.listeners.remove(key);
+		}
 	}
 
 	/** Remove all the participants in this repository.
 	 */
 	protected void clearListeners() {
-		this.listeners.clear();
+		synchronized(mutex()) {
+			this.listeners.clear();
+		}
 	}
 
 	/** Replies all the addresses from the inside of this repository.
 	 * 
 	 * @return the addresses in this repository.
 	 */
-	protected Set<ADDRESS> getAdresses() {
-		return this.listeners.keySet();
+	protected SynchronizedSet<ADDRESS> getAdresses() {
+		Object m = mutex();
+		synchronized(m) {
+			return Collections3.synchronizedSet(this.listeners.keySet(), m);
+		}
 	}
 
 	/** Replies all the participants from the inside of this repository.
 	 * 
 	 * @return the participants.
 	 */
-	public Collection<EventListener> getListeners() {
-		return this.listeners.values();
+	public SynchronizedCollection<EventListener> getListeners() {
+		Object m = mutex();
+		synchronized(m) {
+			return Collections3.synchronizedCollection(this.listeners.values(), m);
+		}
 	}
 
 	/** Replies the pairs of addresses and participants in this repository.
@@ -148,7 +172,18 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * @return the pairs of addresses and participants
 	 */
 	protected Set<Entry<ADDRESS, EventListener>> listenersEntrySet() {
-		return this.listeners.entrySet();
+		Object m = mutex();
+		synchronized(m) {
+			return Collections3.synchronizedSet(this.listeners.entrySet(), m);
+		}
+	}
+	
+	/** Replies the mutex to synchronize on this repository.
+	 * 
+	 * @return the mutex.
+	 */
+	public final Object mutex() {
+		return this;
 	}
 	
 }

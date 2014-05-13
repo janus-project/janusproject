@@ -28,11 +28,11 @@ import io.janusproject.services.impl.Services;
 import io.janusproject.util.ListenerCollection;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
-import io.sarl.core.SynchronizedCollection;
-import io.sarl.core.SynchronizedSet;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 
 import java.util.Collection;

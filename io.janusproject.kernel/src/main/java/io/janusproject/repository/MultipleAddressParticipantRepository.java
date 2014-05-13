@@ -20,10 +20,11 @@
 package io.janusproject.repository;
 
 import io.sarl.lang.core.EventListener;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Set;
 import java.util.UUID;
 
 /** Repository that maps participants to multiple addresses.
@@ -71,9 +72,11 @@ public final class MultipleAddressParticipantRepository<ADDRESS extends Serializ
 	 * @param entity - participant to map to the given address.
 	 * @return <var>a</var>.
 	 */
-	public ADDRESS registerParticipant(ADDRESS a, EventListener entity) {				
-		this.addListener(a, entity);
-		this.participants.put(entity.getID(), a);
+	public ADDRESS registerParticipant(ADDRESS a, EventListener entity) {
+		synchronized(mutex()) {
+			addListener(a, entity);
+			this.participants.put(entity.getID(), a);
+		}
 		return a;
 	}
 
@@ -84,8 +87,10 @@ public final class MultipleAddressParticipantRepository<ADDRESS extends Serializ
 	 * @return <var>a</var>.
 	 */
 	public ADDRESS unregisterParticipant(ADDRESS a, EventListener entity) {
-		this.removeListener(a);
-		this.participants.remove(entity.getID(),a);		
+		synchronized(mutex()) {
+			removeListener(a);
+			this.participants.remove(entity.getID(),a);
+		}
 		return a;
 	}
 
@@ -95,8 +100,11 @@ public final class MultipleAddressParticipantRepository<ADDRESS extends Serializ
 	 * @return the collection of addresses. It may be <code>null</code> if
 	 * the participant is unknown.
 	 */
-	public Collection<ADDRESS> getAddresses(UUID participant) {
-		return this.participants.get(participant);
+	public SynchronizedCollection<ADDRESS> getAddresses(UUID participant) {
+		Object m = mutex();
+		synchronized(m) {
+			return Collections3.synchronizedCollection(this.participants.get(participant), m);
+		}
 	}
 
 
@@ -104,16 +112,22 @@ public final class MultipleAddressParticipantRepository<ADDRESS extends Serializ
 	 * 
 	 * @return the collection of addresses.
 	 */
-	public Collection<ADDRESS> getParticipantAddresses() {
-		return this.participants.values();
+	public SynchronizedCollection<ADDRESS> getParticipantAddresses() {
+		Object m = mutex();
+		synchronized(m) {
+			return Collections3.synchronizedCollection(this.participants.values(), m);
+		}
 	}
 
 	/** Replies all the participants in this repository.
 	 * 
 	 * @return the collection of identifiers.
 	 */
-	public Set<UUID> getParticipantIDs() {
-		return this.participants.keySet();
+	public SynchronizedSet<UUID> getParticipantIDs() {
+		Object m = mutex();
+		synchronized(m) {
+			return Collections3.synchronizedSet(this.participants.keySet(), m);
+		}
 	}
 
 }

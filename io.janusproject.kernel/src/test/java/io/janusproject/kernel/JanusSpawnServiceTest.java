@@ -27,13 +27,13 @@ import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.InnerContextAccess;
-import io.sarl.core.SynchronizedSet;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
+import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 
@@ -118,7 +118,8 @@ public class JanusSpawnServiceTest extends Assert {
 		Mockito.when(this.contextAccess.getAllContexts()).thenReturn(Collections3.synchronizedCollection(Collections.singleton(this.agentContext), this));
 		Mockito.when(this.innerAccess.getInnerContext()).thenReturn(this.innerContext);
 		this.innerSpace = Mockito.mock(OpenEventSpace.class);
-		Mockito.when(this.innerSpace.getParticipants()).thenReturn(Collections.singleton(this.agentId));
+		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+				Collections3.synchronizedSingleton(this.agentId));
 		Mockito.when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
 		Mockito.when(this.agentContext.getDefaultSpace()).thenReturn(this.defaultSpace);
 		Mockito.when(this.defaultSpace.getAddress(Matchers.any(UUID.class))).thenReturn(Mockito.mock(Address.class));
@@ -186,7 +187,8 @@ public class JanusSpawnServiceTest extends Assert {
 	@Test
 	public void canKillAgent_oneagentinsideinnercontext() {
 		Set<UUID> agIds = new HashSet<>();
-		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(agIds);
+		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(
+				Collections3.synchronizedSet(agIds, agIds));
 		this.spawnService.startAsync().awaitRunning();
 		UUID agentId = this.spawnService.spawn(this.agentContext, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		agIds.add(agentId);
@@ -200,9 +202,12 @@ public class JanusSpawnServiceTest extends Assert {
 	@Test
 	public void canKillAgent_twoagentsinsideinnercontext() {
 		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
-				new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())));
+				Collections3.synchronizedSet(
+						new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())),
+						this));
 		Set<UUID> agIds = new HashSet<>();
-		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(agIds);
+		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(
+				Collections3.synchronizedSet(agIds,agIds));
 		this.spawnService.startAsync().awaitRunning();
 		UUID agentId = this.spawnService.spawn(this.agentContext, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		agIds.add(agentId);

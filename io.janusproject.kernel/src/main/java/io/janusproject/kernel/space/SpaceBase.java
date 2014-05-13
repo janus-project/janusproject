@@ -31,7 +31,7 @@ import io.sarl.lang.core.SpaceID;
  */
 public abstract class SpaceBase implements DistributedSpace {
 
-	private SpaceID id;
+	private final SpaceID id;
 
 	/** Constructs a space.
 	 * 
@@ -42,7 +42,7 @@ public abstract class SpaceBase implements DistributedSpace {
 	}
 
 	@Override
-	public SpaceID getID() {
+	public final SpaceID getID() {
 		return this.id;
 	}
 

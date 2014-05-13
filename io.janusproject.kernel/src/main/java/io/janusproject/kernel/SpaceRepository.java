@@ -24,6 +24,8 @@ import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.util.Collections3;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -31,7 +33,7 @@ import java.util.EventListener;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.TreeMap;
 
 import org.arakhne.afc.vmutil.ClassComparator;
 import org.arakhne.afc.vmutil.ObjectReferenceComparator;
@@ -39,7 +41,6 @@ import org.arakhne.afc.vmutil.ObjectReferenceComparator;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import com.google.inject.Injector;
 import com.hazelcast.core.EntryEvent;
@@ -100,9 +101,8 @@ class SpaceRepository {
 		this.injector = injector;
 		this.logService = logService;
 		this.externalListener = listener;
-		this.spaces = new ConcurrentHashMap<>();
-		Multimap<Class<? extends SpaceSpecification<?>>, SpaceID> tmp = TreeMultimap.create(ClassComparator.SINGLETON, ObjectReferenceComparator.SINGLETON);
-		this.spacesBySpec = Multimaps.synchronizedMultimap(tmp);
+		this.spaces = new TreeMap<>();
+		this.spacesBySpec = TreeMultimap.create(ClassComparator.SINGLETON, ObjectReferenceComparator.SINGLETON);
 		this.spaceIDs = hzInstance.getMap(this.distributedSpaceSetName);
 	}
 	
@@ -230,8 +230,10 @@ class SpaceRepository {
 	 * 
 	 * @return the collection of all spaces stored in this repository
 	 */
-	public synchronized Collection<? extends Space> getSpaces() {
-		return Collections.unmodifiableCollection(this.spaces.values());
+	public synchronized SynchronizedCollection<? extends Space> getSpaces() {
+		return Collections3.synchronizedCollection(
+				Collections.unmodifiableCollection(this.spaces.values()),
+				this);
 	}
 
 	/**
@@ -252,13 +254,15 @@ class SpaceRepository {
 	 * @return the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized <S extends Space> Collection<S> getSpaces(final Class<? extends SpaceSpecification<S>> spec) {
-		return (Collection<S>)Collections2.filter(this.spaces.values(), new Predicate<Space>() {
+	public synchronized <S extends Space> SynchronizedCollection<S> getSpaces(final Class<? extends SpaceSpecification<S>> spec) {
+		return Collections3.synchronizedCollection(
+				(Collection<S>)Collections2.filter(this.spaces.values(), new Predicate<Space>() {
 					@Override
 					public boolean apply(Space input) {
 						return input.getID().getSpaceSpecification().equals(spec);
 					}
-				});
+				}),
+				this);
 	}
 	
 	/** Notifies the listeners on the space creation.

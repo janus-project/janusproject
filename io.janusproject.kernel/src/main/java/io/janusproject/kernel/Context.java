@@ -27,10 +27,10 @@ import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
+import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.util.OpenEventSpace;
 import io.sarl.util.OpenEventSpaceSpecification;
 
-import java.util.Collection;
 import java.util.UUID;
 
 import com.google.inject.Injector;
@@ -128,7 +128,7 @@ class Context implements AgentContext{
 	}
 
 	@Override
-	public Collection<? extends io.sarl.lang.core.Space> getSpaces() {
+	public SynchronizedCollection<? extends io.sarl.lang.core.Space> getSpaces() {
 		return this.spaceRepository.getSpaces();
 	}
 
@@ -149,7 +149,7 @@ class Context implements AgentContext{
 	/** {@inheritDoc}
 	 */
 	@Override
-	public <S extends Space> Collection<S> getSpaces(Class<? extends SpaceSpecification<S>> spec) {
+	public <S extends Space> SynchronizedCollection<S> getSpaces(Class<? extends SpaceSpecification<S>> spec) {
 		return this.spaceRepository.getSpaces(spec);
 	}
 

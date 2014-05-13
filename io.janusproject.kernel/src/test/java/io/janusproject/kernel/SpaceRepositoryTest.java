@@ -26,6 +26,7 @@ import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 import io.sarl.util.OpenEventSpaceSpecification;
 import io.sarl.util.RestrictedAccessEventSpace;
@@ -186,6 +187,7 @@ public class SpaceRepositoryTest extends Assert {
 	@Test
 	public void removeSpaceDefinition() {
 		initRepository();
+		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.<UUID>emptySynchronizedSet());
 		Mockito.when(this.spaceIDs.containsKey(this.spaceID)).thenReturn(false);
 		//
 		this.repository.removeLocalSpaceDefinition(this.spaceID);
@@ -353,6 +355,7 @@ public class SpaceRepositoryTest extends Assert {
 	@Test
 	public void destroy_initrepository() {
 		initRepository();
+		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.<UUID>emptySynchronizedSet());
 		this.repository.destroy();
 		ArgumentCaptor<Space> argument = ArgumentCaptor.forClass(Space.class);
 		Mockito.verify(this.listener, new Times(1)).spaceDestroyed(argument.capture());
@@ -362,7 +365,8 @@ public class SpaceRepositoryTest extends Assert {
 	@Test(expected=AssertionError.class)
 	public void destroy_hasparticipant() {
 		initRepository();
-		Mockito.when(this.space.getParticipants()).thenReturn(Collections.singleton(UUID.randomUUID()));
+		Mockito.when(this.space.getParticipants()).thenReturn(
+				Collections3.synchronizedSingleton(UUID.randomUUID()));
 		this.repository.destroy();
 	}
 

@@ -22,6 +22,8 @@ package io.janusproject.kernel;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 import io.sarl.util.OpenEventSpaceSpecification;
 
@@ -95,9 +97,9 @@ public class ContextTest extends Assert {
 				}
 			});
 		Mockito.when(this.spaceRepository.getSpaces(Matchers.any(Class.class)))
-		.thenAnswer(new Answer<Collection<? extends Space>>() {
+		.thenAnswer(new Answer<SynchronizedCollection<? extends Space>>() {
 			@Override
-			public Collection<? extends Space> answer(InvocationOnMock invocation)
+			public SynchronizedCollection<? extends Space> answer(InvocationOnMock invocation)
 					throws Throwable {
 				Collection<Space> c = new ArrayList<>();
 				for(OpenEventSpace space : ContextTest.this.spaces) {
@@ -105,7 +107,7 @@ public class ContextTest extends Assert {
 						c.add(space);
 					}
 				}
-				return c;
+				return Collections3.synchronizedCollection(c, c);
 			}
 		});
 		Mockito.when(this.spaceRepository.getSpace(Matchers.any(SpaceID.class)))
@@ -121,7 +123,8 @@ public class ContextTest extends Assert {
 				return null;
 			}
 		});
-		Mockito.when(this.spaceRepository.getSpaces()).thenReturn((Collection)this.spaces);
+		Mockito.when(this.spaceRepository.getSpaces()).thenReturn(
+				Collections3.synchronizedCollection((Collection)this.spaces,this.spaces));
 		this.context = new Context(this.contextId, this.spaceId, this.spaceRepository);
 		this.context.postConstruction();
 	}

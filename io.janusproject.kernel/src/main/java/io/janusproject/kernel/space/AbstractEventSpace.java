@@ -29,9 +29,10 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
 import io.sarl.util.Scopes;
 
-import java.util.Set;
 import java.util.UUID;
 
 import com.google.common.eventbus.DeadEvent;
@@ -106,7 +107,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @param event
 	 * @param scope
 	 */
-	public void emit(Event event, Scope<Address> scope) {
+	public final void emit(Event event, Scope<Address> scope) {
 		assert (event != null);
 		assert (event.getSource() != null) : "Every event must have a source"; //$NON-NLS-1$
 		assert this.getID().equals(event.getSource().getSpaceId()) : "The source address must belong to this space"; //$NON-NLS-1$
@@ -124,7 +125,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * 
 	 * @param event
 	 */
-	public void emit(Event event) {
+	public final void emit(Event event) {
 		emit(event, Scopes.<Address>allParticipants());
 	}
 
@@ -133,21 +134,11 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @param event
 	 * @param scope
 	 */
-	protected void doEmit(final Event event, Scope<? super Address> scope) {
-		for (final EventListener agent : this.participants.getListeners()) {
+	protected void doEmit(Event event, Scope<? super Address> scope) {
+		for (EventListener agent : this.participants.getListeners()) {
 			if (scope.matches(getAddress(agent))) {
 				// TODO Verify the agent is still alive and running
-				this.executorService.submit(new Runnable() {
-					@Override
-					public void run() {
-						agent.receiveEvent(event);
-					}
-					@Override
-					public String toString() {
-						return "[agent="+agent+"; event="+event+"]"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-					}
-				});
-
+				this.executorService.submit(new AsyncRunner(agent, event));
 			}
 		}
 	}
@@ -156,8 +147,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Set<UUID> getParticipants() {
-		return this.participants.getParticipantIDs();
+	public SynchronizedSet<UUID> getParticipants() {
+		return Collections3.unmodifiableSynchronizedSet(this.participants.getParticipantIDs());
 	}
 
 	/**
@@ -189,6 +180,38 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		catch(Exception e) {
 			this.logger.error(AbstractEventSpace.class,  "INVALID_EMIT", e); //$NON-NLS-1$
 		}
+	}
+	
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class AsyncRunner implements Runnable {
+
+		private final EventListener agent;
+		private final Event event;
+		
+		/**
+		 * @param agent
+		 * @param event
+		 */
+		public AsyncRunner(EventListener agent, Event event) {
+			this.agent = agent;
+			this.event = event;
+		}
+		
+		@Override
+		public void run() {
+			this.agent.receiveEvent(this.event);
+		}
+		
+		@Override
+		public String toString() {
+			return "[agent="+this.agent+"; event="+this.event+"]"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		}
+
 	}
 
 }
