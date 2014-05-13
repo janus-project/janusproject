@@ -82,4 +82,75 @@ public class JanusConfigTest {
 		}
 	}
 
+	@Test
+	public void testGetSystemPropertyAsInteger() throws Exception {
+		System.setProperty("janus.unit.test.enum", Integer.toString(234)); //$NON-NLS-1$
+		for(Object k : System.getProperties().keySet()) {
+			String sv = JanusConfig.getSystemProperty(k.toString(), ""); //$NON-NLS-1$
+			int v = JanusConfig.getSystemPropertyAsInteger(k.toString(), 567);
+			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
+				assertEquals(234, v);
+			}
+			else {
+				int rv;
+				try {
+					rv = Integer.parseInt(sv);
+				}
+				catch(Throwable _) {
+					rv = 567;
+				}
+				assertEquals(rv, v);
+			}
+		}
+		int v = JanusConfig.getSystemPropertyAsInteger(
+				"janus.unit.test.enum2", 789); //$NON-NLS-1$
+		assertEquals(789, v);
+	}
+
+	@Test
+	public void testGetSystemPropertyAsBoolean() throws Exception {
+		System.setProperty("janus.unit.test.enum", Boolean.TRUE.toString()); //$NON-NLS-1$
+		for(Object k : System.getProperties().keySet()) {
+			String sv = JanusConfig.getSystemProperty(k.toString(), ""); //$NON-NLS-1$
+			boolean v = JanusConfig.getSystemPropertyAsBoolean(k.toString(), true);
+			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
+				assertEquals(true, v);
+			}
+			else {
+				assertSame(Boolean.parseBoolean(sv), v);
+			}
+		}
+		boolean v = JanusConfig.getSystemPropertyAsBoolean(
+				"janus.unit.test.enum2", true); //$NON-NLS-1$
+		assertEquals(true, v);
+	}
+
+	@Test
+	public void testGetSystemPropertyAsEnum() throws Exception {
+		System.setProperty("janus.unit.test.enum", UnitTestEnum.UNIT_TEST_ENUM_DEF.name()); //$NON-NLS-1$
+		for(Object k : System.getProperties().keySet()) {
+			UnitTestEnum v = JanusConfig.getSystemPropertyAsEnum(
+					UnitTestEnum.class, k.toString(), UnitTestEnum.UNIT_TEST_ENUM_ABC);
+			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
+				assertSame(UnitTestEnum.UNIT_TEST_ENUM_DEF, v);
+			}
+			else {
+				assertSame(UnitTestEnum.UNIT_TEST_ENUM_ABC, v);
+			}
+		}
+		UnitTestEnum v = JanusConfig.getSystemPropertyAsEnum(
+				UnitTestEnum.class, "janus.unit.test.enum2", UnitTestEnum.UNIT_TEST_ENUM_ABC); //$NON-NLS-1$
+		assertSame(UnitTestEnum.UNIT_TEST_ENUM_ABC, v);
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static enum UnitTestEnum {
+		UNIT_TEST_ENUM_ABC, UNIT_TEST_ENUM_DEF;
+	}
+
 }
