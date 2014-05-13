@@ -19,6 +19,7 @@
  */
 package io.janusproject.network;
 
+import io.janusproject.JanusConfig;
 import io.janusproject.network.event.NetworkEventModule;
 
 import java.nio.charset.Charset;
@@ -51,12 +52,18 @@ public class NetworkConfig {
 	 */
 	public static final String ENCRYPTER_CLASSNAME = "network.encrypter.class"; //$NON-NLS-1$
 
+	/** Name of the property for charset that must be used for string encoding.
+	 * @see #BYTE_ARRAY_STRING_CHARSET_VALUE
+	 */
+	public static final String BYTE_ARRAY_STRING_CHARSET_NAME = "network.serializer.charset"; //$NON-NLS-1$
+
 	/** Charset that should be used for converting String to byte array or
 	 * byte array to String.
 	 * <p>
 	 * This constant was introduced to enforce the values on different platforms.
+	 * @see #BYTE_ARRAY_STRING_CHARSET_NAME
 	 */
-	public static final Charset BYTE_ARRAY_STRING_CHARSET = Charsets.UTF_8;
+	public static final Charset BYTE_ARRAY_STRING_CHARSET_VALUE = Charsets.UTF_8;
 
 	/** Replies the default values for the properties supported by Janus config.
 	 * 
@@ -65,6 +72,34 @@ public class NetworkConfig {
 	public static void getDefaultValues(Properties defaultValues) {
 		NetworkEventModule.getDefaultValues(defaultValues);
 		defaultValues.put(AES_KEY, ""); //$NON-NLS-1$
+		defaultValues.put(BYTE_ARRAY_STRING_CHARSET_NAME, BYTE_ARRAY_STRING_CHARSET_VALUE.name());
 	}
+		
+	/** Replies the charset that must be used for encoding the strings.
+	 * 
+	 * @return the encoding charset.
+	 */
+	public static Charset getStringEncodingCharset() {
+		if (currentStringEncoding==null) {
+			String value = JanusConfig.getSystemProperty(BYTE_ARRAY_STRING_CHARSET_NAME, null);
+			if (value!=null) {
+				try {
+					currentStringEncoding = Charset.forName(value);
+					if (currentStringEncoding==null) {
+						currentStringEncoding = BYTE_ARRAY_STRING_CHARSET_VALUE;
+					}
+				}
+				catch(Throwable _) {
+					currentStringEncoding = BYTE_ARRAY_STRING_CHARSET_VALUE;
+				}
+			}
+			else {
+				currentStringEncoding = BYTE_ARRAY_STRING_CHARSET_VALUE;
+			}
+		}
+		return currentStringEncoding;
+	}
+
+	private static Charset currentStringEncoding = null;
 
 }

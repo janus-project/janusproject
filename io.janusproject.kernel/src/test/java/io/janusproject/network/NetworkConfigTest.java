@@ -24,6 +24,8 @@ import java.util.Properties;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.common.base.Charsets;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -42,6 +44,7 @@ public class NetworkConfigTest extends Assert {
 		assertEquals("", defs.get("network.encrypter.aes.key")); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("io.janusproject.network.event.GsonEventSerializer", defs.get("network.serializer.class")); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("io.janusproject.network.event.PlainTextEventEncrypter", defs.get("network.encrypter.class")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals(Charsets.UTF_8.name(), defs.get("network.serializer.charset")); //$NON-NLS-1$
 	}
 	
 }

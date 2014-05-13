@@ -72,12 +72,15 @@ class JanusExecutorService extends AbstractPrioritizedService implements io.janu
 		this.exec.shutdown();
 		this.schedules.shutdown();
 		try {
-			this.schedules.awaitTermination(JanusConfig.VALUE_KERNEL_THREAD_TIMEOUT, TimeUnit.SECONDS);
-			this.exec.awaitTermination(JanusConfig.VALUE_KERNEL_THREAD_TIMEOUT, TimeUnit.SECONDS);
+			int timeout = JanusConfig.getSystemPropertyAsInteger(
+					JanusConfig.KERNEL_THREAD_TIMEOUT_NAME,
+					JanusConfig.KERNEL_THREAD_TIMEOUT_VALUE);
+			this.schedules.awaitTermination(timeout, TimeUnit.SECONDS);
+			this.exec.awaitTermination(timeout, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			// This error may occur when the thread is killed before this
 			// function is waiting for its termination.
-		} finally{
+		} finally {
 			this.schedules.shutdownNow();
 			this.exec.shutdownNow();
 			notifyStopped();

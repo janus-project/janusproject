@@ -101,9 +101,9 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 		EventEnvelope envelope = new EventEnvelope(
 				NetworkUtil.toByteArray(spaceID.getContextID()),
 				NetworkUtil.toByteArray(spaceID.getID()),
-				this.gson.toJson(scope).getBytes(NetworkConfig.BYTE_ARRAY_STRING_CHARSET),
-				this.gson.toJson(dispatch.getCustomHeaders()).getBytes(NetworkConfig.BYTE_ARRAY_STRING_CHARSET),
-				this.gson.toJson(event).getBytes(NetworkConfig.BYTE_ARRAY_STRING_CHARSET));
+				this.gson.toJson(scope).getBytes(NetworkConfig.getStringEncodingCharset()),
+				this.gson.toJson(dispatch.getCustomHeaders()).getBytes(NetworkConfig.getStringEncodingCharset()),
+				this.gson.toJson(event).getBytes(NetworkConfig.getStringEncodingCharset()));
 
 		this.encrypter.encrypt(envelope);
 		
@@ -139,9 +139,9 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 
 		SpaceID spaceID = new SpaceID(contextId, spaceId, (Class<? extends SpaceSpecification<?>>)spaceSpec);
 
-		Event event = this.gson.fromJson(new String(envelope.getBody(), NetworkConfig.BYTE_ARRAY_STRING_CHARSET), eventClazz);
+		Event event = this.gson.fromJson(new String(envelope.getBody(), NetworkConfig.getStringEncodingCharset()), eventClazz);
 		assert (event != null);
-		Scope scope = this.gson.fromJson(new String(envelope.getScope(), NetworkConfig.BYTE_ARRAY_STRING_CHARSET), scopeClazz);
+		Scope scope = this.gson.fromJson(new String(envelope.getScope(), NetworkConfig.getStringEncodingCharset()), scopeClazz);
 		assert (scope != null);
 
 		return new EventDispatch(spaceID, event, scope, headers);

@@ -71,8 +71,8 @@ class KernelModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
-		requireBinding(Key.get(UUID.class, Names.named(JanusConfig.DEFAULT_CONTEXT_ID)));
-		requireBinding(Key.get(UUID.class, Names.named(JanusConfig.DEFAULT_SPACE_ID)));
+		requireBinding(Key.get(UUID.class, Names.named(JanusConfig.DEFAULT_CONTEXT_ID_NAME)));
+		requireBinding(Key.get(UUID.class, Names.named(JanusConfig.DEFAULT_SPACE_ID_NAME)));
 		requireBinding(NetworkService.class);
 		requireBinding(Logger.class);
 
@@ -101,7 +101,7 @@ class KernelModule extends AbstractModule {
 	@Provides
 	@io.janusproject.kernel.annotations.Kernel
 	@Singleton
-	private static AgentContext getKernel(ContextSpaceService contextService, @Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusContextID, @Named(JanusConfig.DEFAULT_SPACE_ID) UUID defaultJanusSpaceId) {
+	private static AgentContext getKernel(ContextSpaceService contextService, @Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusContextID, @Named(JanusConfig.DEFAULT_SPACE_ID_NAME) UUID defaultJanusSpaceId) {
 		return contextService.createContext(janusContextID, defaultJanusSpaceId);
 	}
 

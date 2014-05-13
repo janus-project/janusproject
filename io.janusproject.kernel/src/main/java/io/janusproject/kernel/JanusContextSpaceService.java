@@ -130,7 +130,7 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	 */
 	@Inject
 	synchronized void postConstruction( 
-			@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID,
+			@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusID,
 			HazelcastInstance ihzInstance,
 			LogService logService,
 			Injector injector) {

@@ -82,7 +82,7 @@ public class NetworkUtil {
 	 * @return the byte-array representation.
 	 */
 	public static byte[] toByteArray(UUID id) {
-		return id.toString().getBytes(NetworkConfig.BYTE_ARRAY_STRING_CHARSET);
+		return id.toString().getBytes(NetworkConfig.getStringEncodingCharset());
 	}
 
 	/** Replies the id from the given byte-array representation.
@@ -91,7 +91,7 @@ public class NetworkUtil {
 	 * @return the UUID.
 	 */
 	public static UUID fromByteArray(byte[] id) {
-		return UUID.fromString(new String(id, NetworkConfig.BYTE_ARRAY_STRING_CHARSET));
+		return UUID.fromString(new String(id, NetworkConfig.getStringEncodingCharset()));
 	}
 
 	/** Convert an inet address to an URI.

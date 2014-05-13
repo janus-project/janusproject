@@ -77,9 +77,9 @@ public class HazelcastModule extends AbstractModule {
 		bind(DistributedDataStructureFactory.class).to(HazelcastDistributedDataStructureFactory.class).in(Singleton.class);
 
 		// Ensure the system property for the hazelcast logger factory
-		String factory = JanusConfig.getSystemProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY, JanusConfig.VALUE_HAZELCAST_LOGGER_FACTORY);
+		String factory = JanusConfig.getSystemProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY_NAME, JanusConfig.HAZELCAST_LOGGER_FACTORY_VALUE);
 		assert(factory!=null && !factory.isEmpty());
-		System.setProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY, factory);
+		System.setProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY_NAME, factory);
 	}
 
 	@Provides

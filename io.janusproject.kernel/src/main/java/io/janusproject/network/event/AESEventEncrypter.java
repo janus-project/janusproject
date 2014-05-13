@@ -58,7 +58,7 @@ public class AESEventEncrypter extends AbstractEventEncrypter {
 	 */
 	@Inject
 	public void setKey(@Named(NetworkConfig.AES_KEY) String key) throws Exception {
-		byte[] raw = key.getBytes(NetworkConfig.BYTE_ARRAY_STRING_CHARSET);
+		byte[] raw = key.getBytes(NetworkConfig.getStringEncodingCharset());
 		int keySize = raw.length;
 		if ((keySize % 16) == 0 || (keySize % 24) == 0 || (keySize % 32) == 0) {
 			this.skeySpec = new SecretKeySpec(raw, "AES"); //$NON-NLS-1$

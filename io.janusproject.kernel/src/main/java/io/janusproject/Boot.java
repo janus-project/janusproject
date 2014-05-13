@@ -21,6 +21,7 @@ package io.janusproject;
 
 import io.janusproject.kernel.Kernel;
 import io.janusproject.network.NetworkConfig;
+import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
 
 import java.io.File;
@@ -94,16 +95,16 @@ public class Boot {
 			}
 
 			if (cmd.hasOption('R')) {
-				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
-				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID, Boolean.TRUE.toString());
+				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
+				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.TRUE.toString());
 			}
 			else if (cmd.hasOption('B')) {
-				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID, Boolean.TRUE.toString());
-				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
+				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.TRUE.toString());
+				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
 			}
 			else if (cmd.hasOption('W')) {
-				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
-				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID, Boolean.FALSE.toString());
+				System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
+				System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
 			}
 
 			// Define the system properties, if not already done by the JRE.
@@ -121,12 +122,12 @@ public class Boot {
 			if (cmd.hasOption('v') || cmd.hasOption('q') || cmd.hasOption('l')) {
 				@SuppressWarnings("unchecked")
 				Iterator<Option> optIterator = cmd.iterator();
-				int verbose = JanusConfig.VALUE_VERBOSE_LEVEL;
+				int verbose = LoggerCreator.toInt(JanusConfig.VERBOSE_LEVEL_VALUE);
 				while (optIterator.hasNext()) {
 					Option opt = optIterator.next();
 					switch(opt.getOpt()) {
 					case "l": //$NON-NLS-1$
-						verbose = Integer.parseInt(opt.getValue());
+						verbose = LoggerCreator.toInt(opt.getValue());
 						break;
 					case "q": //$NON-NLS-1$
 						--verbose;
@@ -138,7 +139,7 @@ public class Boot {
 					}
 				}
 				System.setProperty(
-						JanusConfig.VERBOSE_LEVEL,
+						JanusConfig.VERBOSE_LEVEL_NAME,
 						Integer.toString(verbose));
 			}
 			
@@ -230,15 +231,25 @@ public class Boot {
 		options.addOption("h", "help", false, Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("f", "file", true, Locale.getString("CLI_HELP_F"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("o", "offline", false, Locale.getString("CLI_HELP_O", JanusConfig.OFFLINE));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		options.addOption("B", "bootid", false, Locale.getString("CLI_HELP_B", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		options.addOption("R", "randomid", false, Locale.getString("CLI_HELP_R", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_W", JanusConfig.BOOT_DEFAULT_CONTEXT_ID, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("B", "bootid", false, Locale.getString("CLI_HELP_B", JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("R", "randomid", false, Locale.getString("CLI_HELP_R", JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		options.addOption("W", "worldid", false, Locale.getString("CLI_HELP_W", JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("q", "quiet", false, Locale.getString("CLI_HELP_Q"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("v", "verbose", false, Locale.getString("CLI_HELP_V"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		options.addOption("s", "showdefaults", false, Locale.getString("CLI_HELP_S"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 
+		StringBuilder b = new StringBuilder();
+		int l = 0;
+		for(String logLevel : LoggerCreator.getLevelStrings()) {
+			if (b.length()>0) b.append(", "); //$NON-NLS-1$
+			b.append(logLevel);
+			b.append(" ("); //$NON-NLS-1$
+			b.append(l);
+			b.append(")"); //$NON-NLS-1$
+			++l;
+		}
 		opt = new Option("l", "log", true, Locale.getString("CLI_HELP_L",  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					JanusConfig.VALUE_VERBOSE_LEVEL));
+					JanusConfig.VERBOSE_LEVEL_VALUE, b));
 		opt.setArgs(1);
 		options.addOption(opt);
 

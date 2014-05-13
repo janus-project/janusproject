@@ -75,7 +75,7 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	 * @param janusID - injected identifier of the Janus context.
 	 */
 	@Inject
-	public JanusKernelDiscoveryService(@Named(JanusConfig.DEFAULT_CONTEXT_ID) UUID janusID) {
+	public JanusKernelDiscoveryService(@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusID) {
 		this.janusID = janusID;
 		setStartPriority(ServicePriorities.START_KERNEL_DISCOVERY_SERVICE);
 		setStopPriority(ServicePriorities.STOP_KERNEL_DISCOVERY_SERVICE);

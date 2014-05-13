@@ -89,16 +89,16 @@ public class BootModule extends AbstractModule {
 	 * @return the contextID
 	 */
 	@Provides
-	@Named(JanusConfig.DEFAULT_CONTEXT_ID)
+	@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME)
 	private static UUID getContextID() {
-		String defaultContextID = JanusConfig.getSystemProperty(JanusConfig.DEFAULT_CONTEXT_ID);
+		String defaultContextID = JanusConfig.getSystemProperty(JanusConfig.DEFAULT_CONTEXT_ID_NAME);
 		if (defaultContextID == null || "".equals(defaultContextID)) { //$NON-NLS-1$
 			Boolean v;
 
 			// From boot agent type
-			defaultContextID = JanusConfig.getSystemProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID);
+			defaultContextID = JanusConfig.getSystemProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME);
 			if (defaultContextID == null) {
-				v = JanusConfig.VALUE_BOOT_DEFAULT_CONTEXT_ID;
+				v = JanusConfig.BOOT_DEFAULT_CONTEXT_ID_VALUE;
 			} else {
 				v = Boolean.valueOf(Boolean.parseBoolean(defaultContextID));
 			}
@@ -114,21 +114,21 @@ public class BootModule extends AbstractModule {
 				defaultContextID = UUID.nameUUIDFromBytes(bootClass.getCanonicalName().getBytes()).toString();
 			} else {
 				// Random
-				defaultContextID = JanusConfig.getSystemProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID);
+				defaultContextID = JanusConfig.getSystemProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME);
 				if (defaultContextID == null) {
-					v = JanusConfig.VALUE_RANDOM_DEFAULT_CONTEXT_ID;
+					v = JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_VALUE;
 				} else {
 					v = Boolean.valueOf(Boolean.parseBoolean(defaultContextID));
 				}
 				if (v.booleanValue()) {
 					defaultContextID = UUID.randomUUID().toString();
 				} else {
-					defaultContextID = JanusConfig.VALUE_DEFAULT_CONTEXT_ID;
+					defaultContextID = JanusConfig.DEFAULT_CONTEXT_ID_VALUE;
 				}
 			}
 
 			// Force the global value of the property to prevent to re-generate the UUID at the next call.
-			System.setProperty(JanusConfig.DEFAULT_CONTEXT_ID, defaultContextID);
+			System.setProperty(JanusConfig.DEFAULT_CONTEXT_ID_NAME, defaultContextID);
 		}
 
 		assert (defaultContextID != null && !defaultContextID.isEmpty());
@@ -139,9 +139,9 @@ public class BootModule extends AbstractModule {
 	 * @return the spaceID
 	 */
 	@Provides
-	@Named(JanusConfig.DEFAULT_SPACE_ID)
+	@Named(JanusConfig.DEFAULT_SPACE_ID_NAME)
 	private static UUID getSpaceID() {
-		String v = JanusConfig.getSystemProperty(JanusConfig.DEFAULT_SPACE_ID, JanusConfig.VALUE_DEFAULT_SPACE_ID);
+		String v = JanusConfig.getSystemProperty(JanusConfig.DEFAULT_SPACE_ID_NAME, JanusConfig.DEFAULT_SPACE_ID_VALUE);
 		return UUID.fromString(v);
 	}
 
@@ -200,7 +200,7 @@ public class BootModule extends AbstractModule {
 	private static final class LoggerMemberListener implements TypeListener {
 
 		private static void init() {
-			String propertyFileName = JanusConfig.getSystemProperty(JanusConfig.LOGGING_PROPERTY_FILE, JanusConfig.VALUE_LOGGING_PROPERTY_FILE);
+			String propertyFileName = JanusConfig.getSystemProperty(JanusConfig.LOGGING_PROPERTY_FILE_NAME, JanusConfig.LOGGING_PROPERTY_FILE_VALUE);
 			if (propertyFileName!=null && !propertyFileName.isEmpty()) {
 				URL url = FileSystem.convertStringToURL(propertyFileName, true);
 				if (url!=null) {
