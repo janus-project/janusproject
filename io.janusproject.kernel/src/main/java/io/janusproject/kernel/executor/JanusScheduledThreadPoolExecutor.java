@@ -49,8 +49,8 @@ public class JanusScheduledThreadPoolExecutor extends ScheduledThreadPoolExecuto
 	@Inject
 	public JanusScheduledThreadPoolExecutor(ThreadFactory factory) {
 		super(JanusConfig.getSystemPropertyAsInteger(
-				JanusConfig.NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
-				JanusConfig.NUMBER_OF_THREADS_IN_EXECUTOR_VALUE),
+				JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
+				JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE),
 				factory);
 	}
 

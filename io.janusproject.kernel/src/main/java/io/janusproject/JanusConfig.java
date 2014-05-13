@@ -120,16 +120,17 @@ public class JanusConfig {
 	 */
 	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
 
-	/** Name of the property that contains the number of threads per executor service.
-	 * @see #NUMBER_OF_THREADS_IN_EXECUTOR_VALUE
+	/** Name of the property that contains the maximal number of threads in the pool.
+	 * @see #MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE
 	 */
-	public static final String NUMBER_OF_THREADS_IN_EXECUTOR_NAME = "janus.executors.threads"; //$NON-NLS-1$
+	public static final String MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME = "janus.executors.threads.max"; //$NON-NLS-1$
 
-	/** Indicates the maximal number of threads in a thread pool.
-	 * @see #NUMBER_OF_THREADS_IN_EXECUTOR_NAME
+	/** Indicates the maximal number of threads to keep in the pool, even
+     * if they are idle, unless {@code allowCoreThreadTimeOut} is set.
+	 * @see #MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME
 	 */
-	public static final int NUMBER_OF_THREADS_IN_EXECUTOR_VALUE = 50;
-	
+	public static final int MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE = 50;
+
 	/** Name of the property that contains the numbers of seconds that the kernel is waiting
 	 * for thread terminations before timeout.
 	 * @see #KERNEL_THREAD_TIMEOUT_VALUE
@@ -160,7 +161,7 @@ public class JanusConfig {
 		defaultValues.put(VERBOSE_LEVEL_NAME, VERBOSE_LEVEL_VALUE);
 		defaultValues.put(LOGGING_PROPERTY_FILE_NAME, LOGGING_PROPERTY_FILE_VALUE);
 		defaultValues.put(HAZELCAST_LOGGER_FACTORY_NAME, HAZELCAST_LOGGER_FACTORY_VALUE);
-		defaultValues.put(NUMBER_OF_THREADS_IN_EXECUTOR_NAME, Integer.toString(NUMBER_OF_THREADS_IN_EXECUTOR_VALUE));
+		defaultValues.put(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME, Integer.toString(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE));
 		defaultValues.put(KERNEL_THREAD_TIMEOUT_NAME, Integer.toString(KERNEL_THREAD_TIMEOUT_VALUE));
 	}
 		

@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel.executor;
 
+import io.janusproject.JanusConfig;
 import io.janusproject.util.ListenerCollection;
 
 import java.util.concurrent.Callable;
@@ -47,12 +48,25 @@ public class JanusThreadPoolExecutor extends ThreadPoolExecutor {
 	 */
 	@Inject
 	public JanusThreadPoolExecutor(ThreadFactory factory) {
-        super(	0, Integer.MAX_VALUE,
+        this(	JanusConfig.getSystemPropertyAsInteger(
+					JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
+					JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE),
+				factory);
+	}
+	
+	/**
+	 * @param poolSize - maximal number of threads in the pool.
+	 * @param factory - thread factory.
+	 */
+	@Inject
+	public JanusThreadPoolExecutor(int poolSize, ThreadFactory factory) {
+        super(	poolSize,
+				Integer.MAX_VALUE,
         		60L, TimeUnit.SECONDS,
         		new SynchronousQueue<Runnable>(),
         		factory);
 	}
-	
+
 	/** Add a listener on tasks.
 	 * 
 	 * @param listener
