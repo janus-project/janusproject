@@ -163,6 +163,23 @@ public interface LogService extends Service {
 	 */
 	public void log(LogRecord record);
 	
+	/** Log a message.
+	 * 
+	 * @param level - level of logging for the message.
+	 * @param propertyType - type that is used to retreive the property file.
+	 * @param messageKey - key of the message in the properties.
+	 * @param message
+	 */
+	public void log(Level level, Class<?> propertyType, String messageKey, Object... message);
+
+	/** Log a warning message.
+	 * 
+	 * @param level - level of logging for the message.
+	 * @param messageKey - key of the message in the properties.
+	 * @param message
+	 */
+	public void log(Level level, String messageKey, Object... message);
+
 	/** Replies the logger.
 	 * 
 	 * @return the logger.

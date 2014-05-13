@@ -41,7 +41,6 @@ import io.sarl.lang.core.SpaceID;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -51,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
@@ -419,7 +419,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 								try {
 									receive(ev);
 								} catch (Throwable e) {
-									catchExceptionWithoutStopping(e, "CANNOT_RECEIVE_EVENT"); //$NON-NLS-1$
+									this.logger.log(Level.FINE, ZeroMQNetwork.class, "CANNOT_RECEIVE_EVENT", e); //$NON-NLS-1$
 								}
 							} else if (this.poller.pollerr(i)) {
 								final int poolerIdx = i;
@@ -435,31 +435,12 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 					}
 				}
 			} catch (Throwable e) {
-				catchExceptionWithoutStopping(e, "UNEXPECTED_EXCEPTION"); //$NON-NLS-1$
+				this.logger.log(Level.SEVERE, ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 			}
 			Thread.yield(); // ensure that this thread does not take too much time.
 		}
 		// FIXME: May the poller be stopped?
 		// stopPoller();
-	}
-
-	private void catchExceptionWithoutStopping(Throwable e, String errorMessageKey) {
-		// Catch the deserialization or unencrypting exceptions
-		// Notify the default listener if one, but do not
-		// stop the thread.
-		UncaughtExceptionHandler h = Thread.currentThread().getUncaughtExceptionHandler();
-		if (h == null) h = Thread.getDefaultUncaughtExceptionHandler();
-		if (h != null) {
-			try {
-				h.uncaughtException(Thread.currentThread(), e);
-			} catch (Throwable _) {
-				// Ignore the exception according to the
-				// document of the function
-				// UncaughtExceptionHandler.uncaughtException()
-			}
-		} else {
-			this.logger.warning(errorMessageKey, e);
-		}
 	}
 
 	/**

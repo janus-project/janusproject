@@ -145,6 +145,21 @@ public class ArakhneLocaleLogService extends AbstractPrioritizedService implemen
 	/** {@inheritDoc}
 	 */
 	@Override
+	public void log(Level level, Class<?> propertyType, String messageKey,
+			Object... message) {
+		log(level, true, propertyType, messageKey, message);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void log(Level level, String messageKey, Object... message) {
+		log(level, true, messageKey, message);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
 	public void info(String messageKey, Object... message) {
 		log(Level.INFO, false, messageKey, message);
 	}
