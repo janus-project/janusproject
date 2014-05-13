@@ -58,7 +58,6 @@ public class JanusThreadPoolExecutor extends ThreadPoolExecutor {
 	 * @param poolSize - maximal number of threads in the pool.
 	 * @param factory - thread factory.
 	 */
-	@Inject
 	public JanusThreadPoolExecutor(int poolSize, ThreadFactory factory) {
         super(	poolSize,
 				Integer.MAX_VALUE,
