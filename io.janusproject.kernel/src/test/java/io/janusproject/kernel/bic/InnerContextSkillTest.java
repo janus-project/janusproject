@@ -76,6 +76,9 @@ public class InnerContextSkillTest extends Assert {
 	@InjectMocks
 	private InnerContextSkill skill;
 	
+	// It is an attribute to avoid to loose the weak references (eg. in AgentTraits).
+	private Agent agent;
+	
 	@Before
 	public void setUp() throws Exception {
 		this.agentId = UUID.randomUUID();
@@ -85,17 +88,17 @@ public class InnerContextSkillTest extends Assert {
 						UUID.randomUUID(),
 						EventSpaceSpecification.class),
 				this.agentId);
-		Agent agent = new Agent(this.agentId) {
+		this.agent = new Agent(this.agentId) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				return capacity.cast(InnerContextSkillTest.this.busCapacity);
 			}
 		};
-		agent = Mockito.spy(agent);
+		this.agent = Mockito.spy(this.agent);
 		address = Mockito.spy(address);
-		this.skill = new InnerContextSkill(agent, address);
+		this.skill = new InnerContextSkill(this.agent, address);
 		MockitoAnnotations.initMocks(this);
-		Mockito.when(agent.getID()).thenReturn(this.agentId);
+		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
 		Mockito.when(this.contextService.createContext(Matchers.any(UUID.class), 
 				Matchers.any(UUID.class))).thenReturn(this.innerContext);
 		Mockito.when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
@@ -113,6 +116,7 @@ public class InnerContextSkillTest extends Assert {
 		this.innerSpace = null;
 		this.eventListener = null;
 		this.busCapacity = null;
+		this.agent = null;
 	}
 	
 	@Test

@@ -22,6 +22,9 @@ package io.janusproject.kernel;
 import io.janusproject.services.LogService;
 import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
+import io.sarl.core.SpaceCreated;
+import io.sarl.core.SpaceDestroyed;
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Space;
@@ -177,6 +180,16 @@ class Context implements AgentContext{
 			this.logger.info(Context.class, "SPACE_CREATED", space.getID()); //$NON-NLS-1$
 			// Notify the relays (other services)
 			this.relay.spaceCreated(space, isLocalCreation);
+			// Send the event in the default space of the context.
+			if (isLocalCreation) {
+				EventSpace defSpace = this.context.getDefaultSpace();
+				if (defSpace!=null) { // May be null if the created space is the default space.
+					SpaceCreated creationEvent = new SpaceCreated();
+					creationEvent.setSpaceID(space.getID());
+					creationEvent.setSource(new Address(defSpace.getID(), this.context.getID()));
+					defSpace.emit(creationEvent);
+				}
+			}
 		}
 
 		/** {@inheritDoc}
@@ -184,6 +197,16 @@ class Context implements AgentContext{
 		@Override
 		public void spaceDestroyed(Space space, boolean isLocalDestruction) {
 			this.logger.info(Context.class, "SPACE_DESTROYED", space.getID()); //$NON-NLS-1$
+			// Send the event in the default space of the context.
+			if (isLocalDestruction) {
+				EventSpace defSpace = this.context.getDefaultSpace();
+				if (defSpace!=null) { // May be null if the created space is the default space.
+					SpaceDestroyed destructionEvent = new SpaceDestroyed();
+					destructionEvent.setSpaceID(space.getID());
+					destructionEvent.setSource(new Address(defSpace.getID(), this.context.getID()));
+					defSpace.emit(destructionEvent);
+				}
+			}
 			// Notify the relays (other services)
 			this.relay.spaceDestroyed(space, isLocalDestruction);
 		}
@@ -213,15 +236,39 @@ class Context implements AgentContext{
 			this.injector = injector;
 			this.logger = logger;
 		}
-		
+
+		/**
+		 * {@inheritDoc}
+		 * <p>
+		 * In opposite to {@link #newInstanceWithPrivateSpaceListener(Context, String, SpaceRepositoryListener)},
+		 * this function wraps the <var>listener</var> into a private space listener proxy
+		 * before giving this wrapper to the space repository.
+		 */
 		@Override
-		public SpaceRepository newInstance(Context context, String distributedSpaceSetName, SpaceRepositoryListener listener) {
+		public final SpaceRepository newInstance(Context context, String distributedSpaceSetName, SpaceRepositoryListener listener) {
+			return newInstanceWithPrivateSpaceListener(
+					context, distributedSpaceSetName,
+					new SpaceListener(context, this.logger, listener));
+		}
+		
+		/** Create an instance of the space repository.
+		 * <p>
+		 * In opposite to {@link #newInstance(Context, String, SpaceRepositoryListener)},
+		 * this function gives the <var>listener</var> to the space repository,
+		 * without wrapping it into the private space listener proxy.
+		 * 
+		 * @param context
+		 * @param distributedSpaceSetName
+		 * @param listener
+		 * @return the space repository
+		 */
+		protected SpaceRepository newInstanceWithPrivateSpaceListener(Context context, String distributedSpaceSetName, SpaceRepositoryListener listener) {
 			return new SpaceRepository(
 					distributedSpaceSetName,
 					this.hzInstance,
 					this.injector,
 					this.logger,
-					new SpaceListener(context, this.logger, listener));
+					listener);
 		}
 		
 	}
