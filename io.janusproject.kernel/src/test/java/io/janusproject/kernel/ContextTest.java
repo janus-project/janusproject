@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
@@ -63,11 +64,14 @@ public class ContextTest extends Assert {
 	
 	private Context context;
 	
+	private SpaceRepositoryListener spaceListener;
+	
 	@Before
 	public void setUp() {
 		this.contextId = UUID.randomUUID();
 		this.spaceId = UUID.randomUUID();
 		this.spaces = new ArrayList<>();
+		this.spaceListener = Mockito.mock(SpaceRepositoryListener.class);
 		this.spaceRepository = Mockito.mock(SpaceRepository.class);
 		Mockito.when(this.spaceRepository.createSpace(Matchers.any(SpaceID.class), Matchers.any(Class.class)))
 			.thenAnswer(new Answer<Space>() {
@@ -125,7 +129,12 @@ public class ContextTest extends Assert {
 		});
 		Mockito.when(this.spaceRepository.getSpaces()).thenReturn(
 				Collections3.synchronizedCollection((Collection)this.spaces,this.spaces));
-		this.context = new Context(this.contextId, this.spaceId, this.spaceRepository);
+
+		SpaceRepositoryFactory spaceRepoFactory = Mockito.mock(SpaceRepositoryFactory.class);
+		Mockito.when(spaceRepoFactory.newInstance(Matchers.any(Context.class), Matchers.anyString(), Matchers.any(SpaceRepositoryListener.class))).thenReturn(this.spaceRepository);
+
+		this.context = new Context(
+				this.contextId, this.spaceId, spaceRepoFactory, this.spaceListener);
 		this.context.postConstruction();
 	}
 	

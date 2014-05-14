@@ -68,8 +68,12 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 
 	/** Factory of contexts.
 	 */
-	private ContextFactory contextFactory = new DefaultContextFactory();
+	private ContextFactory contextFactory;
 	
+	/** Factory of space repositories.
+	 */
+	private SpaceRepositoryFactory spaceRepositoryFactory;
+
 	/**
 	 * Map linking a context id to its associated default space id.
 	 * This map must be distributed and synchronized all over the network
@@ -86,10 +90,6 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	
 	private LogService logger;
 	
-	private Injector injector;
-	
-	private HazelcastInstance hzInstance;
-	
 	/** Constructs <code>ContextRepository</code>.
 	 */
 	public JanusContextSpaceService() {
@@ -101,7 +101,7 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	 * 
 	 * @return the context factory.
 	 */
-	public ContextFactory getContextFactory() {
+	ContextFactory getContextFactory() {
 		return this.contextFactory;
 	}
 
@@ -109,8 +109,24 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	 * 
 	 * @param factory - the context factory.
 	 */
-	public void setContextFactory(ContextFactory factory) {
+	void setContextFactory(ContextFactory factory) {
 		if (factory!=null) this.contextFactory = factory;
+	}
+
+	/** Replies the factory used to create space repositories.
+	 * 
+	 * @return the context factory.
+	 */
+	SpaceRepositoryFactory getSpaceRepositoryFactory() {
+		return this.spaceRepositoryFactory;
+	}
+
+	/** Change the factory used to create space repositories.
+	 * 
+	 * @param factory - the space repository factory.
+	 */
+	void setSpaceRepositoryFactory(SpaceRepositoryFactory factory) {
+		if (factory!=null) this.spaceRepositoryFactory = factory;
 	}
 
 	/** {@inheritDoc}
@@ -124,20 +140,20 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	 * Initialize this service with injected objects
 	 * 
 	 * @param janusID - injected identifier.
-	 * @param ihzInstance - Hazelcast instance.
+	 * @param hzInstance - Hazelcast instance.
 	 * @param logService - service of logging.
 	 * @param injector - the injector to use.
 	 */
 	@Inject
 	synchronized void postConstruction( 
 			@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusID,
-			HazelcastInstance ihzInstance,
+			HazelcastInstance hzInstance,
 			LogService logService,
 			Injector injector) {
-		this.hzInstance = ihzInstance;
 		this.logger = logService;
-		this.injector = injector;
-		this.defaultSpaces = ihzInstance.getMap(janusID.toString());
+		this.contextFactory = new DefaultContextFactory();
+		this.spaceRepositoryFactory = new Context.DefaultSpaceRepositoryFactory(injector, hzInstance, logService);
+		this.defaultSpaces = hzInstance.getMap(janusID.toString());
 	}
 
 	/** {@inheritDoc}
@@ -168,11 +184,10 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 		AgentContext context = this.contexts.get(contextID); 
 		if (context==null) {
 			Context ctx = this.contextFactory.newInstance(
-					this.injector,
-					contextID, defaultSpaceUUID,
-					this.logger,
-					this.hzInstance,
-					new SpaceListener());
+					contextID,
+					defaultSpaceUUID,
+					this.spaceRepositoryFactory,
+					new SpaceEventProxy());
 			this.contexts.put(contextID, ctx);
 			fireContextCreated(ctx);
 			Space defaultSpace = ctx.postConstruction();
@@ -289,20 +304,22 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	/** Notifies the listeners on the space creation.
 	 * 
 	 * @param space
+	 * @param isLocalCreation
 	 */
-	protected void fireSpaceCreated(Space space) {
+	protected void fireSpaceCreated(Space space, boolean isLocalCreation) {
 		for(SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
-			listener.spaceCreated(space);
+			listener.spaceCreated(space, isLocalCreation);
 		}
 	}
 
 	/** Notifies the listeners on the space destruction.
 	 * 
 	 * @param space
+	 * @param isLocalDestruction
 	 */
-	protected void fireSpaceDestroyed(Space space) {
+	protected void fireSpaceDestroyed(Space space, boolean isLocalDestruction) {
 		for(SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
-			listener.spaceDestroyed(space);
+			listener.spaceDestroyed(space, isLocalDestruction);
 		}
 	}
 	
@@ -398,33 +415,33 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 		}
 		
 	}
-
+	
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class SpaceListener implements SpaceRepository.SpaceRepositoryListener {
-
+	private class SpaceEventProxy implements SpaceRepositoryListener {
+		
 		/**
 		 */
-		public SpaceListener() {
+		public SpaceEventProxy() {
 			//
 		}
 
 		/** {@inheritDoc}
 		 */
 		@Override
-		public void spaceCreated(Space space) {
-			fireSpaceCreated(space);
+		public void spaceCreated(Space space, boolean isLocalCreation) {
+			fireSpaceCreated(space, isLocalCreation);
 		}
 
 		/** {@inheritDoc}
 		 */
 		@Override
-		public void spaceDestroyed(Space space) {
-			fireSpaceDestroyed(space);
+		public void spaceDestroyed(Space space, boolean isLocalDestruction) {
+			fireSpaceDestroyed(space, isLocalDestruction);
 		}
 		
 	}
@@ -436,38 +453,9 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	public static interface ContextFactory {
-		
-		/** Create an instance of context.
-		 * 
-		 * @param injector - injector used for inject objects.
-		 * @param contextId - id of the context.
-		 * @param defaultSpaceId - id of the default space.
-		 * @param logger - logging service.
-		 * @param hzInstance - Hazelcast instance.
-		 * @param listener - listener on the space repository that must be given to the created context at startup.
-		 * @return the context
-		 */
-		public Context newInstance(
-				Injector injector,
-				UUID contextId,
-				UUID defaultSpaceId,
-				LogService logger,
-				HazelcastInstance hzInstance,
-				io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener listener);
-		
-	}
-
-	/** Factory of contexts.
-	 * 
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
 	private static class DefaultContextFactory implements ContextFactory {
 		
-		/**
+		/** Create an instance of context.
 		 */
 		public DefaultContextFactory() {
 			//
@@ -475,18 +463,14 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 
 		@Override
 		public Context newInstance(
-				Injector injector,
 				UUID contextId,
 				UUID defaultSpaceId,
-				LogService logger,
-				HazelcastInstance hzInstance,
-				io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener listener) {
+				SpaceRepositoryFactory factory,
+				SpaceRepositoryListener listener) {
 			return new Context(
-					injector,
 					contextId,
 					defaultSpaceId,
-					logger,
-					hzInstance,
+					factory,
 					listener);
 		}
 		

@@ -628,7 +628,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
-		public void spaceCreated(Space space) {
+		public void spaceCreated(Space space, boolean isLocalCreation) {
 			synchronized(ZeroMQNetwork.this) {
 				URI localUri = ZeroMQNetwork.this.getURI();
 				try {
@@ -667,7 +667,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
-		public void spaceDestroyed(Space space) {
+		public void spaceDestroyed(Space space, boolean isLocalDestruction) {
 			synchronized(ZeroMQNetwork.this) {
 				URI localUri = ZeroMQNetwork.this.getURI();
 				try {

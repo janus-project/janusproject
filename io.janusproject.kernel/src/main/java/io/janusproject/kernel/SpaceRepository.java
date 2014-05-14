@@ -20,6 +20,7 @@
 package io.janusproject.kernel;
 
 import io.janusproject.services.LogService;
+import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
@@ -29,7 +30,6 @@ import io.sarl.util.Collections3;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EventListener;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -130,11 +130,11 @@ class SpaceRepository {
 		while (iterator.hasNext()) {
 			SpaceID spaceId = iterator.next();
 			iterator.remove();
-			removeLocalSpaceDefinition(spaceId);
+			removeLocalSpaceDefinition(spaceId, true);
 		}
 	}
 	
-	private synchronized <S extends Space> S createSpaceInstance(Class<? extends SpaceSpecification<S>> spec, SpaceID spaceID, boolean updateHazelcast, Object[] creationParams) {
+	private synchronized <S extends Space> S createSpaceInstance(Class<? extends SpaceSpecification<S>> spec, SpaceID spaceID, boolean isLocalCreation, Object[] creationParams) {
 		S space;
 		assert(spaceID.getSpaceSpecification()==null || spaceID.getSpaceSpecification().equals(spec)) : "The specification type in the space id does not corresponds to the given specification type (as parameter)"; //$NON-NLS-1$
 		// Split the call to create() to let the JVM to create the "empty" array for creation parameters.
@@ -149,11 +149,11 @@ class SpaceRepository {
 		assert(id!=null);
 		this.spaces.put(id, space);
 		this.spacesBySpec.put(id.getSpaceSpecification(), id);
-		if (updateHazelcast) {
+		if (isLocalCreation) {
 			this.spaceIDs.putIfAbsent(id,
 					(creationParams!=null && creationParams.length>0) ? creationParams : NO_PARAMETERS);
 		}
-		fireSpaceAdded(space);
+		fireSpaceAdded(space, isLocalCreation);
 		return space;
 	}
 
@@ -172,13 +172,15 @@ class SpaceRepository {
 	/** Remove a remote space. 
 	 * 
 	 * @param id - identifier of the space
+	 * @param isLocalDestruction - indicates if the destruction is initiated by
+	 * the local kernel. 
 	 */
-	protected synchronized void removeLocalSpaceDefinition(SpaceID id) {
+	protected synchronized void removeLocalSpaceDefinition(SpaceID id, boolean isLocalDestruction) {
 		Space space = this.spaces.remove(id);
 		if (space!=null) {
 			assert(space.getParticipants().isEmpty());
 			this.spacesBySpec.remove(id.getSpaceSpecification(), id);
-			fireSpaceRemoved(space);
+			fireSpaceRemoved(space, isLocalDestruction);
 		}
 	}
 	
@@ -268,20 +270,24 @@ class SpaceRepository {
 	/** Notifies the listeners on the space creation.
 	 * 
 	 * @param space
+	 * @param isLocalCreation - indicates if the creation of the space was
+	 * initiated on the current kernel.
 	 */
-	protected void fireSpaceAdded(Space space) {
+	protected void fireSpaceAdded(Space space, boolean isLocalCreation) {
 		if (this.externalListener!=null) {
-			this.externalListener.spaceCreated(space);
+			this.externalListener.spaceCreated(space, isLocalCreation);
 		}
 	}
 
 	/** Notifies the listeners on the space destruction.
 	 * 
 	 * @param space
+	 * @param isLocalDestruction - indicates if the destruction of the space was
+	 * initiated on the current kernel.
 	 */
-	protected void fireSpaceRemoved(Space space) {
+	protected void fireSpaceRemoved(Space space, boolean isLocalDestruction) {
 		if (this.externalListener!=null) {
-			this.externalListener.spaceDestroyed(space);
+			this.externalListener.spaceDestroyed(space, isLocalDestruction);
 		}
 	}
 
@@ -315,7 +321,7 @@ class SpaceRepository {
 		@Override
 		public void entryRemoved(EntryEvent<SpaceID, Object[]> event) {
 			assert(!SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
-			removeLocalSpaceDefinition(event.getKey());
+			removeLocalSpaceDefinition(event.getKey(), false);
 		}
 
 		/** {@inheritDoc}
@@ -333,31 +339,8 @@ class SpaceRepository {
 		@Override
 		public void entryEvicted(EntryEvent<SpaceID, Object[]> event) {
 			assert(!SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
-			removeLocalSpaceDefinition(event.getKey());
+			removeLocalSpaceDefinition(event.getKey(), false);
 		}
-
-	}
-
-	/** Listener on events related to the space service.
-	 *  
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	public static interface SpaceRepositoryListener extends EventListener {
-
-		/** Invoked when the space is added.
-		 * 
-		 * @param space
-		 */
-		public void spaceCreated(Space space);
-
-		/** Invoked when the space is destroyed.
-		 * 
-		 * @param space
-		 */
-		public void spaceDestroyed(Space space);
 
 	}
 

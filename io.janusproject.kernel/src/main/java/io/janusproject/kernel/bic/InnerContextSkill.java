@@ -123,7 +123,8 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 					this.agentAddressInInnerDefaultSpace.getSpaceId().getID());
 			// Register the agent in the default space
 			EventListener listener = getSkill(InternalEventBusCapacity.class).asEventListener();
-			((OpenEventSpace)this.innerContext.getDefaultSpace()).register(listener);
+			OpenEventSpace defSpace = (OpenEventSpace)this.innerContext.getDefaultSpace();
+			defSpace.register(listener);
 		}
 		return this.innerContext;
 	}

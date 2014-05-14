@@ -17,33 +17,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
+package io.janusproject.kernel;
 
-import io.sarl.lang.core.Space;
+import io.janusproject.services.SpaceRepositoryListener;
 
-import java.util.EventListener;
-
-/** Listener on events related to the spaces.
- *  
+/** Factory for the space repository in a context.
+ * 
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface SpaceRepositoryListener extends EventListener {
+interface SpaceRepositoryFactory {
 
-	/** Invoked when the space is added.
+	/** Create an instance of the space repository.
 	 * 
-	 * @param space
-	 * @param isLocalCreation - indicates if the creation of the space was initiated on the current kernel.
+	 * @param context
+	 * @param distributedSpaceSetName
+	 * @param listener
+	 * @return the new repository
 	 */
-	public void spaceCreated(Space space, boolean isLocalCreation);
+	public SpaceRepository newInstance(Context context, String distributedSpaceSetName, SpaceRepositoryListener listener);
 
-	/** Invoked when the space is destroyed.
-	 * 
-	 * @param space
-	 * @param isLocalDestruction - indicates if the destruction of the space was initiated on the current kernel.
-	 */
-	public void spaceDestroyed(Space space, boolean isLocalDestruction);
-	
 }

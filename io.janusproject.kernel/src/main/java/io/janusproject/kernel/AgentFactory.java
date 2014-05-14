@@ -17,33 +17,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
+package io.janusproject.kernel;
 
-import io.sarl.lang.core.Space;
+import io.sarl.lang.core.Agent;
 
-import java.util.EventListener;
+import java.util.UUID;
 
-/** Listener on events related to the spaces.
- *  
+/** Create of agent instance.
+ * 
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface SpaceRepositoryListener extends EventListener {
+interface AgentFactory {
 
-	/** Invoked when the space is added.
+	/** Create an instance of agent, and inject the
+	 * fields.
 	 * 
-	 * @param space
-	 * @param isLocalCreation - indicates if the creation of the space was initiated on the current kernel.
+	 * @param type - type of the agent to create.
+	 * @param contextID - id of the parent context.
+	 * @return the agent.
+	 * @throws Exception
 	 */
-	public void spaceCreated(Space space, boolean isLocalCreation);
+	public <T extends Agent> T newInstance(Class<T> type, UUID contextID) throws Exception;
 
-	/** Invoked when the space is destroyed.
-	 * 
-	 * @param space
-	 * @param isLocalDestruction - indicates if the destruction of the space was initiated on the current kernel.
-	 */
-	public void spaceDestroyed(Space space, boolean isLocalDestruction);
-	
 }

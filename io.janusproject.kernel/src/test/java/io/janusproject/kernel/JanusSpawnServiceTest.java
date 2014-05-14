@@ -19,7 +19,6 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.kernel.JanusSpawnService.AgentFactory;
 import io.janusproject.services.KernelAgentSpawnListener;
 import io.janusproject.services.SpawnService.AgentKillException;
 import io.janusproject.services.SpawnServiceListener;
@@ -123,7 +122,7 @@ public class JanusSpawnServiceTest extends Assert {
 		Mockito.when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
 		Mockito.when(this.agentContext.getDefaultSpace()).thenReturn(this.defaultSpace);
 		Mockito.when(this.defaultSpace.getAddress(Matchers.any(UUID.class))).thenReturn(Mockito.mock(Address.class));
-		Mockito.when(this.agentFactory.newInstance(Matchers.any(Class.class), Matchers.any(UUID.class), Matchers.any(Injector.class))).thenReturn(this.agent);
+		Mockito.when(this.agentFactory.newInstance(Matchers.any(Class.class), Matchers.any(UUID.class))).thenReturn(this.agent);
 		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
 		this.spawnService.addKernelAgentSpawnListener(this.kernelListener);
 		this.spawnService.addSpawnServiceListener(this.serviceListener);

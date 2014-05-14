@@ -19,10 +19,9 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.kernel.JanusContextSpaceService.ContextFactory;
-import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
 import io.janusproject.services.ContextRepositoryListener;
 import io.janusproject.services.LogService;
+import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
@@ -112,18 +111,16 @@ public class JanusContextSpaceServiceTest extends Assert {
 		Mockito.when(this.context.getID()).thenReturn(this.contextId);
 		Mockito.when(this.defaultSpace.getID()).thenReturn(this.spaceId);
 		Mockito.when(this.contextFactory.newInstance(
-				Matchers.any(Injector.class),
 				Matchers.any(UUID.class),
 				Matchers.any(UUID.class),
-				Matchers.any(LogService.class),
-				Matchers.any(HazelcastInstance.class),
+				Matchers.any(SpaceRepositoryFactory.class),
 				Matchers.any(SpaceRepositoryListener.class))).thenAnswer(new Answer<Context>(){
 					@Override
 					public Context answer(InvocationOnMock invocation) throws Throwable {
 						Context ctx = Mockito.mock(Context.class);
 						OpenEventSpace mock = Mockito.mock(OpenEventSpace.class);
-						SpaceID spaceId = new SpaceID((UUID)invocation.getArguments()[1],
-								(UUID)invocation.getArguments()[2],
+						SpaceID spaceId = new SpaceID((UUID)invocation.getArguments()[0],
+								(UUID)invocation.getArguments()[1],
 								OpenEventSpaceSpecification.class);
 						Mockito.when(ctx.getID()).thenReturn(spaceId.getContextID());
 						Mockito.when(ctx.postConstruction()).thenReturn(mock);

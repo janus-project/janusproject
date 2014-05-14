@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
 import io.janusproject.services.LogService;
+import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
@@ -60,42 +60,21 @@ class Context implements AgentContext{
 	 * <p>
 	 * CAUTION: Do not miss to call {@link #postConstruction()}.
 	 * 
-	 * @param injector - injector used to create the instances.
 	 * @param id - identifier of the context.
 	 * @param defaultSpaceID - identifier of the default space in the context.
-	 * @param logger - instance of the logging service.
-	 * @param hzInstance - object that is creating distributed structures.
+	 * @param factory - factory to use for creating the space repository.
 	 * @param startUpListener - repository listener which is added just after the creation of the repository, but before the creation of the default space.
 	 */
-	protected Context(Injector injector, UUID id, UUID defaultSpaceID, LogService logger, HazelcastInstance hzInstance, SpaceRepositoryListener startUpListener) {
+	Context(UUID id, UUID defaultSpaceID, SpaceRepositoryFactory factory, SpaceRepositoryListener startUpListener) {
+		assert(factory!=null);
 		this.id = id;
 		this.defaultSpaceID = defaultSpaceID;
-		this.spaceRepository = new SpaceRepository(
+		this.spaceRepository = factory.newInstance(
+				this,
 				id.toString()+"-spaces", //$NON-NLS-1$
-				hzInstance,
-				injector,
-				logger,
-				new SpaceListener(logger, startUpListener));
+				startUpListener);
 	}
 	
-	/** Constructs a <code>Context</code>.
-	 * <p>
-	 * <strong>You should call {@link #Context(Injector, UUID, UUID, LogService, HazelcastInstance, SpaceRepositoryListener)}
-	 * prior to this constructor.</strong>
-	 * This constructor is given for convenience writing of unit tests.
-	 * <p>
-	 * CAUTION: Do not miss to call {@link #postConstruction()}.
-	 * 
-	 * @param id - identifier of the context.
-	 * @param defaultSpaceID - identifier of the default space in the context.
-	 * @param spaceRepository - reference to the repository of spaces that is used by this context.
-	 */
-	Context(UUID id, UUID defaultSpaceID, SpaceRepository spaceRepository) {
-		this.id = id;
-		this.defaultSpaceID = defaultSpaceID;
-		this.spaceRepository = spaceRepository;
-	}
-
 	@Override
 	public String toString() {
 		return this.id.toString();
@@ -171,18 +150,22 @@ class Context implements AgentContext{
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class SpaceListener implements SpaceRepositoryListener {
+	private static class SpaceListener implements SpaceRepositoryListener {
 		
+		private final Context context;
 		private final SpaceRepositoryListener relay;
 		private final LogService logger;
 		
 		/**
+		 * @param context
 		 * @param logger
 		 * @param relay
 		 */
-		public SpaceListener(LogService logger, SpaceRepositoryListener relay) {
+		public SpaceListener(Context context, LogService logger, SpaceRepositoryListener relay) {
+			assert(context!=null);
 			assert(logger!=null);
 			assert(relay!=null);
+			this.context = context;
 			this.logger = logger;
 			this.relay = relay;
 		}
@@ -190,19 +173,55 @@ class Context implements AgentContext{
 		/** {@inheritDoc}
 		 */
 		@Override
-		public void spaceCreated(Space space) {
+		public void spaceCreated(Space space, boolean isLocalCreation) {
 			this.logger.info(Context.class, "SPACE_CREATED", space.getID()); //$NON-NLS-1$
 			// Notify the relays (other services)
-			this.relay.spaceCreated(space);
+			this.relay.spaceCreated(space, isLocalCreation);
 		}
 
 		/** {@inheritDoc}
 		 */
 		@Override
-		public void spaceDestroyed(Space space) {
+		public void spaceDestroyed(Space space, boolean isLocalDestruction) {
 			this.logger.info(Context.class, "SPACE_DESTROYED", space.getID()); //$NON-NLS-1$
 			// Notify the relays (other services)
-			this.relay.spaceDestroyed(space);
+			this.relay.spaceDestroyed(space, isLocalDestruction);
+		}
+		
+	}
+	
+	/** Factory for the space repository in a context.
+	 * 
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class DefaultSpaceRepositoryFactory implements SpaceRepositoryFactory {
+
+		private final HazelcastInstance hzInstance;
+		private final Injector injector;
+		private final LogService logger;
+		
+		/**
+		 * @param injector - instance of the injector to be used.
+		 * @param hzInstance - instance of the hazelcast engine.
+		 * @param logger - logging service.
+		 */
+		public DefaultSpaceRepositoryFactory(Injector injector, HazelcastInstance hzInstance, LogService logger) {
+			this.hzInstance = hzInstance;
+			this.injector = injector;
+			this.logger = logger;
+		}
+		
+		@Override
+		public SpaceRepository newInstance(Context context, String distributedSpaceSetName, SpaceRepositoryListener listener) {
+			return new SpaceRepository(
+					distributedSpaceSetName,
+					this.hzInstance,
+					this.injector,
+					this.logger,
+					new SpaceListener(context, this.logger, listener));
 		}
 		
 	}

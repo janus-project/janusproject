@@ -64,16 +64,16 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
 	private final Map<UUID, Agent> agents = new TreeMap<>();
 	
-	private AgentFactory agentFactory = new DefaultAgentFactory();
-
-	@Inject
-	private Injector injector;
+	private AgentFactory agentFactory;
 
 	/**
+	 * @param injector
 	 */
-	public JanusSpawnService() {
+	@Inject
+	public JanusSpawnService(Injector injector) {
 		setStartPriority(Services.START_SPAWN_SERVICE);
 		setStartPriority(Services.STOP_SPAWN_SERVICE);
+		this.agentFactory = new DefaultAgentFactory(injector);
 	}
 	
 	/** Change the agent factory.
@@ -100,7 +100,7 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	public synchronized UUID spawn(AgentContext parent, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
 			try {
-				Agent agent = this.agentFactory.newInstance(agentClazz, parent.getID(), this.injector);
+				Agent agent = this.agentFactory.newInstance(agentClazz, parent.getID());
 				assert (agent != null);
 				this.agents.put(agent.getID(), agent);
 				fireAgentSpawned(parent, agent, params);
@@ -409,28 +409,6 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 
 	}
 	
-	/** Create of agent instance.
-	 * 
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	public static interface AgentFactory {
-
-		/** Create an instance of agent, and inject the
-		 * fields.
-		 * 
-		 * @param type - type of the agent to create.
-		 * @param contextID - id of the parent context.
-		 * @param injector - used for injection.
-		 * @return the agent.
-		 * @throws Exception
-		 */
-		public <T extends Agent> T newInstance(Class<T> type, UUID contextID, Injector injector) throws Exception;
-		
-	}
-	
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -439,17 +417,20 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	 */
 	private static class DefaultAgentFactory implements AgentFactory {
 
+		private final Injector injector;
+		
 		/**
+		 * @param injector
 		 */
-		public DefaultAgentFactory() {
-			//
+		public DefaultAgentFactory(Injector injector) {
+			this.injector = injector;
 		}
 
 		@Override
-		public <T extends Agent> T newInstance(Class<T> type, UUID contextID, Injector injector) throws Exception {
+		public <T extends Agent> T newInstance(Class<T> type, UUID contextID) throws Exception {
 			Agent agent = type.getConstructor(UUID.class).newInstance(contextID);
 			assert (agent != null);
-			injector.injectMembers(agent);
+			this.injector.injectMembers(agent);
 			return type.cast(agent);
 		}
 		

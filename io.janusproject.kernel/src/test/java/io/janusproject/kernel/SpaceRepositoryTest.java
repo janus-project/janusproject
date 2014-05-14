@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.kernel.SpaceRepository.SpaceRepositoryListener;
 import io.janusproject.services.LogService;
+import io.janusproject.services.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
@@ -145,8 +145,10 @@ public class SpaceRepositoryTest extends Assert {
 		assertSame(this.space, this.repository.getSpace(this.spaceID));
 		//
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
-		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture(), argument4.capture());
 		assertSame(this.space, argument3.getValue());
+		assertFalse(argument4.getValue());
 	}
 
 	@Test
@@ -180,8 +182,10 @@ public class SpaceRepositoryTest extends Assert {
 		assertSame(this.space, this.repository.getSpace(this.spaceID));
 		//
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
-		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture(), argument4.capture());
 		assertSame(this.space, argument3.getValue());
+		assertFalse(argument4.getValue());
 	}
 
 	@Test
@@ -190,13 +194,15 @@ public class SpaceRepositoryTest extends Assert {
 		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.<UUID>emptySynchronizedSet());
 		Mockito.when(this.spaceIDs.containsKey(this.spaceID)).thenReturn(false);
 		//
-		this.repository.removeLocalSpaceDefinition(this.spaceID);
+		this.repository.removeLocalSpaceDefinition(this.spaceID, true);
 		//
 		assertNull(this.repository.getSpace(this.spaceID));
 		//
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
-		Mockito.verify(this.listener, new Times(1)).spaceDestroyed(argument3.capture());
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceDestroyed(argument3.capture(), argument4.capture());
 		assertSame(this.space, argument3.getValue());
+		assertTrue(argument4.getValue());
 	}
 	
 	@Test
@@ -264,8 +270,10 @@ public class SpaceRepositoryTest extends Assert {
 		assertSame(this.space, this.repository.getSpace(this.spaceID));
 		//
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
-		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture(), argument4.capture());
 		assertSame(this.space, argument3.getValue());
+		assertTrue(argument4.getValue());
 	}
 
 	@Test
@@ -285,7 +293,8 @@ public class SpaceRepositoryTest extends Assert {
 		assertSame(this.space, this.repository.getSpace(this.spaceID));
 		//
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
-		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture(), argument4.capture());
 		assertSame(this.space, argument3.getValue());
 	}
 
@@ -305,8 +314,10 @@ public class SpaceRepositoryTest extends Assert {
 		assertSame(this.space, this.repository.getSpace(this.spaceID));
 		//
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
-		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture(), argument4.capture());
 		assertSame(this.space, argument3.getValue());
+		assertTrue(argument4.getValue());
 	}
 
 	@Test
@@ -328,8 +339,10 @@ public class SpaceRepositoryTest extends Assert {
 		assertSame(this.space, this.repository.getSpace(this.spaceID));
 		//
 		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
-		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture());
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture(), argument4.capture());
 		assertSame(this.space, argument3.getValue());
+		assertTrue(argument4.getValue());
 	}
 
 	@Test
@@ -358,8 +371,10 @@ public class SpaceRepositoryTest extends Assert {
 		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.<UUID>emptySynchronizedSet());
 		this.repository.destroy();
 		ArgumentCaptor<Space> argument = ArgumentCaptor.forClass(Space.class);
-		Mockito.verify(this.listener, new Times(1)).spaceDestroyed(argument.capture());
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceDestroyed(argument.capture(), argument4.capture());
 		assertSame(this.space, argument.getValue());
+		assertTrue(argument4.getValue());
 	}
 
 	@Test(expected=AssertionError.class)
