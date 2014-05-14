@@ -251,11 +251,10 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 		}
 
 		EventSpace defSpace = context.getDefaultSpace();
-		AgentSpawned event = new AgentSpawned();
-		event.setAgentID(agent.getID());
-		event.setAgentType(agent.getClass().getName());
-		event.setSource(defSpace.getAddress(agent.getID()));
-		defSpace.emit(event);
+		defSpace.emit(new AgentSpawned(
+				defSpace.getAddress(agent.getID()),
+				agent.getID(),
+				agent.getClass().getName()));
 	}
 	
 	/** Replies if the given agent can be killed.
@@ -303,10 +302,10 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 			synchronized (sc.mutex()) {
 				for (AgentContext context : sc) {
 					EventSpace defSpace = context.getDefaultSpace();
-					AgentKilled event = new AgentKilled();
-					event.setAgentID(agent.getID());
-					event.setSource(defSpace.getAddress(agent.getID()));
-					defSpace.emit(event);
+					defSpace.emit(new AgentKilled(
+							defSpace.getAddress(agent.getID()),
+							agent.getID(),
+							agent.getClass().getName()));
 				}
 			}
 		} catch (RuntimeException e) {

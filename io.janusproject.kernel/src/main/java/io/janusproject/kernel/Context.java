@@ -184,10 +184,9 @@ class Context implements AgentContext{
 			if (isLocalCreation) {
 				EventSpace defSpace = this.context.getDefaultSpace();
 				if (defSpace!=null) { // May be null if the created space is the default space.
-					SpaceCreated creationEvent = new SpaceCreated();
-					creationEvent.setSpaceID(space.getID());
-					creationEvent.setSource(new Address(defSpace.getID(), this.context.getID()));
-					defSpace.emit(creationEvent);
+					defSpace.emit(new SpaceCreated(
+							new Address(defSpace.getID(), this.context.getID()),
+							space.getID()));
 				}
 			}
 		}
@@ -201,10 +200,9 @@ class Context implements AgentContext{
 			if (isLocalDestruction) {
 				EventSpace defSpace = this.context.getDefaultSpace();
 				if (defSpace!=null) { // May be null if the created space is the default space.
-					SpaceDestroyed destructionEvent = new SpaceDestroyed();
-					destructionEvent.setSpaceID(space.getID());
-					destructionEvent.setSource(new Address(defSpace.getID(), this.context.getID()));
-					defSpace.emit(destructionEvent);
+					defSpace.emit(new SpaceDestroyed(
+							new Address(defSpace.getID(), this.context.getID()),
+							space.getID()));
 				}
 			}
 			// Notify the relays (other services)

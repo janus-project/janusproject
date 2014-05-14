@@ -134,10 +134,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	 * @param futureContextDefaultSpaceID - ID of the default space of the newly joined context
 	 */
 	protected void fireContextJoined(UUID futureContext, UUID futureContextDefaultSpaceID) {
-		ContextJoined event = new ContextJoined();
-		event.setDefaultSpaceID(futureContextDefaultSpaceID);
-		event.setHolonContextID(futureContext);
-		getSkill(Behaviors.class).wake(event);
+		getSkill(Behaviors.class).wake(new ContextJoined(
+				futureContext, futureContextDefaultSpaceID));
 	}
 
 	/**
@@ -147,11 +145,11 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	 */
 	protected void fireMemberJoined(AgentContext newJoinedContext) {
 		EventSpace defSpace = newJoinedContext.getDefaultSpace();
-		MemberJoined event = new MemberJoined();
-		event.setAgentID(this.getOwner().getID());
-		event.setParentContextID(newJoinedContext.getID());
-		event.setSource(defSpace.getAddress(getOwner().getID()));
-		defSpace.emit(event);
+		defSpace.emit(new MemberJoined(
+				defSpace.getAddress(getOwner().getID()),
+				newJoinedContext.getID(),
+				getOwner().getID(),
+				getOwner().getClass().getName()));
 	}
 
 	@Override
@@ -178,9 +176,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	 * @param contextID - the ID of context that will be left
 	 */
 	protected void fireContextLeft(UUID contextID) {
-		ContextLeft event = new ContextLeft();
-		event.setHolonContextID(contextID);
-		getSkill(Behaviors.class).wake(event);
+		getSkill(Behaviors.class).wake(new ContextLeft(contextID));
 	}
 
 	/**
@@ -190,10 +186,10 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	 */
 	protected void fireMemberLeft(AgentContext leftContext) {
 		EventSpace defSpace = leftContext.getDefaultSpace();
-		MemberLeft event = new MemberLeft();
-		event.setAgentID(this.getOwner().getID());
-		event.setSource(defSpace.getAddress(getOwner().getID()));
-		defSpace.emit(event);
+		defSpace.emit(new MemberLeft(
+				defSpace.getAddress(getOwner().getID()),
+				getOwner().getID(),
+				getOwner().getClass().getName()));
 	}
 
 }
