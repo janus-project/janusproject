@@ -112,7 +112,7 @@ DefaultContextInteractions {
 	}
 
 	@Override
-	public UUID spawn(Class<? extends Agent> aAgent, Object[] params) {
+	public UUID spawn(Class<? extends Agent> aAgent, Object... params) {
 		return getSkill(Lifecycle.class).spawnInContext(aAgent, this.parentContext, params);
 	}
 

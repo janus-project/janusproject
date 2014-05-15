@@ -55,7 +55,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	}
 
 	@Override
-	public UUID spawnInContext(Class<? extends Agent> aAgent, AgentContext context, Object[] params) {
+	public UUID spawnInContext(Class<? extends Agent> aAgent, AgentContext context, Object... params) {
 		return this.spawnService.spawn(context, aAgent, params);
 	}
 

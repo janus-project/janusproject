@@ -148,16 +148,19 @@ public class DefaultContextInteractionsSkillTest extends Assert {
 
 	@Test
 	public void spawn() {
-		Object[] params = new Object[] {"a", "b", "c"};  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		this.skill.install();
-		this.skill.spawn(Agent.class, params);
+		this.skill.spawn(Agent.class, "a", "b", "c"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		ArgumentCaptor<Class> argument1 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<AgentContext> argument2 = ArgumentCaptor.forClass(AgentContext.class);
-		ArgumentCaptor<Object[]> argument3 = ArgumentCaptor.forClass(Object[].class);
-		Mockito.verify(this.lifeCapacity, new Times(1)).spawnInContext(argument1.capture(), argument2.capture(), argument3.capture());
+		ArgumentCaptor<Object> argument3 = ArgumentCaptor.forClass(Object.class);
+		ArgumentCaptor<Object> argument4 = ArgumentCaptor.forClass(Object.class);
+		ArgumentCaptor<Object> argument5 = ArgumentCaptor.forClass(Object.class);
+		Mockito.verify(this.lifeCapacity, new Times(1)).spawnInContext(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture(), argument5.capture());
 		assertEquals(Agent.class, argument1.getValue());
 		assertSame(this.parentContext, argument2.getValue());
-		assertSame(params, argument3.getValue());
+		assertEquals("a", argument3.getValue()); //$NON-NLS-1$
+		assertEquals("b", argument4.getValue()); //$NON-NLS-1$
+		assertEquals("c", argument5.getValue()); //$NON-NLS-1$
 	}
 		
 }
