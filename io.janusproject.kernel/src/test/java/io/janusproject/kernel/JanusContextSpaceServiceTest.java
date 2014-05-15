@@ -57,6 +57,7 @@ import org.mockito.stubbing.Answer;
 import com.google.inject.Injector;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.EntryView;
+import com.hazelcast.core.ExecutionCallback;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.map.EntryProcessor;
@@ -821,6 +822,53 @@ public class JanusContextSpaceServiceTest extends Assert {
 		@Override
 		public Map<Object, Object> executeOnEntries(
 				EntryProcessor entryProcessor) {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public String addLocalEntryListener(EntryListener<Object, Object> arg0,
+				Predicate<Object, Object> arg1, boolean arg2) {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public String addLocalEntryListener(EntryListener<Object, Object> arg0,
+				Predicate<Object, Object> arg1, Object arg2, boolean arg3) {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public Map<Object, Object> executeOnEntries(EntryProcessor arg0,
+				Predicate arg1) {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public Map<Object, Object> executeOnKeys(Set<Object> arg0,
+				EntryProcessor arg1) {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public Future submitToKey(Object arg0, EntryProcessor arg1) {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void submitToKey(Object arg0, EntryProcessor arg1,
+				ExecutionCallback arg2) {
 			throw new UnsupportedOperationException();
 		}
 		

@@ -43,6 +43,7 @@
 		<guava.version>17.0-SNAPSHOT</guava.version>
 		<jeromq.version>0.3.3</jeromq.version>
 		<gson.version>2.2.4</gson.version>
+		<hazelcast.version>3.2.1</hazelcast.version>
 		<afc.version>11.0-SNAPSHOT</afc.version>
 	</properties>
 
@@ -78,7 +79,7 @@
 			<dependency>
 				<groupId>com.hazelcast</groupId>
 				<artifactId>hazelcast</artifactId>
-				<version>3.1.5</version>
+				<version>${hazelcast.version}</version>
 			</dependency>
 
 			<dependency>
@@ -109,14 +110,14 @@
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-api-mockito</artifactId>
-				<version>1.5.3</version>
+				<version>1.5.4</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-module-junit4</artifactId>
-				<version>1.5.3</version>
+				<version>1.5.4</version>
 				<scope>test</scope>
 			</dependency>
 
