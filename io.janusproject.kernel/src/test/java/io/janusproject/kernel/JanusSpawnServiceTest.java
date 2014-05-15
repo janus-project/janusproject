@@ -179,8 +179,8 @@ public class JanusSpawnServiceTest extends Assert {
 		ArgumentCaptor<Event> argument4 = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.defaultSpace, new Times(1)).emit(argument4.capture());
 		assertTrue(argument4.getValue() instanceof AgentSpawned);
-		assertSame(agentId, ((AgentSpawned)argument4.getValue()).getAgentID());
-		assertEquals(ag.getClass().getName(), ((AgentSpawned)argument4.getValue()).getAgentType());
+		assertSame(agentId, ((AgentSpawned)argument4.getValue()).agentID);
+		assertEquals(ag.getClass().getName(), ((AgentSpawned)argument4.getValue()).agentType);
 	}
 
 	@Test
@@ -236,7 +236,7 @@ public class JanusSpawnServiceTest extends Assert {
 		ArgumentCaptor<Event> argument5 = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.defaultSpace, new Times(2)).emit(argument5.capture());
 		assertTrue(argument5.getValue() instanceof AgentKilled);
-		assertEquals(agentId, ((AgentKilled)argument5.getValue()).getAgentID());
+		assertEquals(agentId, ((AgentKilled)argument5.getValue()).agentID);
 		//
 		Mockito.verify(this.kernelListener, new Times(1)).kernelAgentDestroy();
 	}

@@ -242,7 +242,7 @@ public class ContextTest extends Assert {
 		ArgumentCaptor<Event> argument3 = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(defSpace, new Times(1)).emit(argument3.capture());
 		assertThat(argument3.getValue(), new IsInstanceOf(SpaceCreated.class));
-		assertEquals(id, ((SpaceCreated)argument3.getValue()).getSpaceID().getID());
+		assertEquals(id, ((SpaceCreated)argument3.getValue()).spaceID.getID());
 	}
 
 	@Test
@@ -277,7 +277,7 @@ public class ContextTest extends Assert {
 		ArgumentCaptor<Event> argument3 = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(defSpace, new Times(1)).emit(argument3.capture());
 		assertThat(argument3.getValue(), new IsInstanceOf(SpaceCreated.class));
-		assertEquals(id, ((SpaceCreated)argument3.getValue()).getSpaceID().getID());
+		assertEquals(id, ((SpaceCreated)argument3.getValue()).spaceID.getID());
 		//
 		OpenEventSpace space2 = this.context.getOrCreateSpace(OpenEventSpaceSpecification.class, id);
 		assertSame(space, space2);

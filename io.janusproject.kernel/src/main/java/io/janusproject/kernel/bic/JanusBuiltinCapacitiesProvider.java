@@ -187,7 +187,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 			}
 			
 			Initialize init = new Initialize();
-			init.setParameters(initializationParameters);
+			init.parameters = initializationParameters;
 			this.eventBusCapacity.selfEvent(init);
 		}
 

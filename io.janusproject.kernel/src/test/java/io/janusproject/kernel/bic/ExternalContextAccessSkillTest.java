@@ -187,8 +187,8 @@ public class ExternalContextAccessSkillTest extends Assert {
 			Event evt = argument1.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof MemberJoined);
-			assertEquals(c.getID(), ((MemberJoined)evt).getParentContextID());
-			assertEquals(this.agent.getID(), ((MemberJoined)evt).getAgentID());
+			assertEquals(c.getID(), ((MemberJoined)evt).parentContextID);
+			assertEquals(this.agent.getID(), ((MemberJoined)evt).agentID);
 			//
 			ArgumentCaptor<Event> argument2 = ArgumentCaptor.forClass(Event.class);
 			++nb;
@@ -196,8 +196,8 @@ public class ExternalContextAccessSkillTest extends Assert {
 			evt = argument2.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof ContextJoined);
-			assertEquals(c.getID(), ((ContextJoined)evt).getHolonContextID());
-			assertEquals(c.getDefaultSpace().getID().getID(), ((ContextJoined)evt).getDefaultSpaceID());
+			assertEquals(c.getID(), ((ContextJoined)evt).holonContextID);
+			assertEquals(c.getDefaultSpace().getID().getID(), ((ContextJoined)evt).defaultSpaceID);
 		}
 		Collection<AgentContext> c = this.skill.getAllContexts();
 		assertEquals(this.contexts.size(), c.size());
@@ -231,7 +231,7 @@ public class ExternalContextAccessSkillTest extends Assert {
 			Event evt = argument1.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof MemberLeft);
-			assertEquals(this.agent.getID(), ((MemberLeft)evt).getAgentID());
+			assertEquals(this.agent.getID(), ((MemberLeft)evt).agentID);
 			//
 			ArgumentCaptor<Event> argument2 = ArgumentCaptor.forClass(Event.class);
 			++nb;
@@ -240,7 +240,7 @@ public class ExternalContextAccessSkillTest extends Assert {
 			evt = argument2.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof ContextLeft);
-			assertEquals(c.getID(), ((ContextLeft)evt).getHolonContextID());
+			assertEquals(c.getID(), ((ContextLeft)evt).holonContextID);
 		}
 		assertTrue(remaining.isEmpty());
 	}
