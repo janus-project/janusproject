@@ -28,17 +28,13 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 
-import java.io.IOError;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+import java.util.Random;
 
-import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -54,6 +50,8 @@ import com.google.inject.Singleton;
 @Singleton
 class NoNetwork extends AbstractPrioritizedService implements NetworkService {
 
+	private static final Random RANDOM = new Random();
+	
 	private static final int DYNFROM = 0xc000;
     private static final int DYNTO = 0xffff;
     
@@ -129,22 +127,19 @@ class NoNetwork extends AbstractPrioritizedService implements NetworkService {
 	 */
 	@Override
 	protected synchronized void doStart() {
-		InetAddress adr = NetworkUtil.getPrimaryAddress(true);
-		UUID r = UUID.randomUUID();
-		byte[] p1 = Longs.toByteArray(r.getMostSignificantBits());
-		byte[] p2 = Longs.toByteArray(r.getLeastSignificantBits());
-		byte[] n = Arrays.copyOf(p1, p1.length+p2.length);
-		System.arraycopy(p2, 0, n, p1.length, p2.length);
-		BigInteger number = new BigInteger(n);
-		int port = DYNFROM + (number.intValue() % (DYNTO-DYNFROM));
+		int port = DYNFROM + (RANDOM.nextInt() % (DYNTO-DYNFROM));
+		InetAddress adr = NetworkUtil.getLoopbackAddress();
 		if (adr==null) {
 			try {
-				adr = InetAddress.getLocalHost();
-			} catch (UnknownHostException e) {
-				throw new IOError(e);
+				this.localHost = NetworkUtil.toURI("tcp://127.0.0.1:"+port); //$NON-NLS-1$
+			}
+			catch (URISyntaxException e) {
+				throw new Error(e);
 			}
 		}
-		this.localHost = NetworkUtil.toURI(adr, port);
+		else {
+			this.localHost = NetworkUtil.toURI(adr, port);
+		}
 		notifyStarted();
 	}
 

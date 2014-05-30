@@ -20,6 +20,7 @@
 package io.janusproject.network.zeromq;
 
 import io.janusproject.JanusConfig;
+import io.janusproject.network.NetworkUtil;
 import io.janusproject.network.event.EventDispatch;
 import io.janusproject.network.event.EventEnvelope;
 import io.janusproject.network.event.EventSerializer;
@@ -456,11 +457,17 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 			this.context = new ZContext();
 			// this.publisher = this.context.socket(ZMQ.PUB);
 			this.publisher = this.context.createSocket(ZMQ.PUB);
-			String strUri = this.uriCandidate.toString();
+			String strUri = NetworkUtil.toString(this.uriCandidate);
 			int port = this.publisher.bind(strUri);
-			if (port >= 0 && strUri.endsWith(":*")) { //$NON-NLS-1$
-				String prefix = strUri.substring(0, strUri.lastIndexOf(':') + 1);
-				this.validatedURI = new URI(prefix + port);
+			if (port != -1 && this.uriCandidate.getPort()==-1) {
+				this.validatedURI = new URI(
+						this.uriCandidate.getScheme(),
+						this.uriCandidate.getUserInfo(),
+						this.uriCandidate.getHost(),
+						port,
+						this.uriCandidate.getPath(),
+						this.uriCandidate.getQuery(),
+						this.uriCandidate.getFragment());
 			} else {
 				this.validatedURI = this.uriCandidate;
 			}

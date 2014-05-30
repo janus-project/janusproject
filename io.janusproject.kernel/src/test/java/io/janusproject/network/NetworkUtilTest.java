@@ -19,6 +19,7 @@
  */
 package io.janusproject.network;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -140,7 +141,7 @@ public class NetworkUtilTest extends Assert {
 	public void toURIInetAddress() throws Exception {
 		InetAddress a;
 		a = InetAddress.getByName("190.191.192.193"); //$NON-NLS-1$
-		assertEquals(new URI("tcp://190.191.192.193"), NetworkUtil.toURI(a)); //$NON-NLS-1$
+		assertEquals(NetworkUtil.toURI("tcp://190.191.192.193"), NetworkUtil.toURI(a)); //$NON-NLS-1$
 	}
 
 	@Test
@@ -149,29 +150,65 @@ public class NetworkUtilTest extends Assert {
 		InetSocketAddress sa;
 		a = InetAddress.getByName("190.191.192.193"); //$NON-NLS-1$
 		sa = new InetSocketAddress(a, 12346);
-		assertEquals(new URI("tcp://190.191.192.193:12346"), NetworkUtil.toURI(sa)); //$NON-NLS-1$
+		assertEquals(NetworkUtil.toURI("tcp://190.191.192.193:12346"), NetworkUtil.toURI(sa)); //$NON-NLS-1$
 	}
 
 	@Test
 	public void toURIInetAddressInt() throws Exception {
 		InetAddress a;
 		a = InetAddress.getByName("190.191.192.193"); //$NON-NLS-1$
-		assertEquals(new URI("tcp://190.191.192.193:12346"), NetworkUtil.toURI(a, 12346)); //$NON-NLS-1$
+		assertEquals(NetworkUtil.toURI("tcp://190.191.192.193:12346"), NetworkUtil.toURI(a, 12346)); //$NON-NLS-1$
 	}
 
 	@Test
 	public void toInetAddress() throws Exception {
-		URI uri = new URI("tcp://190.191.192.193:12346"); //$NON-NLS-1$
+		URI uri = NetworkUtil.toURI("tcp://190.191.192.193:12346"); //$NON-NLS-1$
 		InetAddress a = NetworkUtil.toInetAddress(uri);
 		assertEquals("190.191.192.193", a.getHostAddress()); //$NON-NLS-1$
 	}
 
 	@Test
 	public void toInetSocketAddress() throws Exception {
-		URI uri = new URI("tcp://190.191.192.193:12346"); //$NON-NLS-1$
+		URI uri = NetworkUtil.toURI("tcp://190.191.192.193:12346"); //$NON-NLS-1$
 		InetSocketAddress a = NetworkUtil.toInetSocketAddress(uri);
 		assertEquals("190.191.192.193", a.getHostName()); //$NON-NLS-1$
 		assertEquals(12346, a.getPort());
+	}
+	
+	@Test
+	public void getPrimaryAddress() {
+		InetAddress adr1 = NetworkUtil.getPrimaryAddress();
+		InetAddress adr2 = NetworkUtil.getPrimaryAddress();
+		if (adr1==null) {
+			assertNull(adr2);
+		}
+		else {
+			assertEquals(adr1, adr2);
+		}
+	}
+	
+	@Test
+	public void getLoopbackAddress() {
+		InetAddress ref = InetAddress.getLoopbackAddress();
+		assertNotNull(ref);
+		if (ref instanceof Inet4Address) {
+			InetAddress adr1 = NetworkUtil.getLoopbackAddress();
+			InetAddress adr2 = NetworkUtil.getLoopbackAddress();
+			assertEquals(ref, adr1);
+			assertEquals(adr1, adr2);
+		}
+		else {
+			InetAddress adr1 = NetworkUtil.getLoopbackAddress();
+			InetAddress adr2 = NetworkUtil.getLoopbackAddress();
+			assertNull(adr1);
+			assertNull(adr2);
+		}
+	}
+
+	@Test
+	public void isConnectedHost() {
+		InetAddress adr = NetworkUtil.getPrimaryAddress();
+		assertEquals((adr!=null), NetworkUtil.isConnectedHost());
 	}
 
 }

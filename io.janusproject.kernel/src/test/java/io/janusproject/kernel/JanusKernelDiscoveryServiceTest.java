@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel;
 
+import io.janusproject.network.NetworkUtil;
 import io.janusproject.services.ExecutorService;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
@@ -67,7 +68,7 @@ public class JanusKernelDiscoveryServiceTest extends Assert {
 
 	@Before
 	public void setUp() throws Exception {
-		this.kernelURI = new URI("tcp://123.124.125.126:34567"); //$NON-NLS-1$
+		this.kernelURI = NetworkUtil.toURI("tcp://123.124.125.126:34567"); //$NON-NLS-1$
 		this.contextId = UUID.randomUUID();
 		this.kernels = new SetWrapper();
 		this.hzInstance = Mockito.mock(HazelcastInstance.class);

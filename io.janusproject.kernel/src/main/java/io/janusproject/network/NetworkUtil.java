@@ -41,21 +41,28 @@ import java.util.UUID;
  */
 public class NetworkUtil {
 
-	/** Replies the first public address.
+	/** Replies if the host is connected.
+	 * 
+	 * @return <code>true</code> if this host has one non-loopback address;
+	 * <code>false</code> otherwise.
+	 */
+	public static boolean isConnectedHost() {
+		return getPrimaryAddress()!=null;
+	}
+
+	/** Replies the first IPv4 public address.
 	 * A public address is an address that is not loopback.
 	 * 
-	 * @param onlyIPv4 - indicates if only IPv4 address can be replied.
-	 * @return the first public address or <code>null</code> if
+	 * @return the first public IPv4 address or <code>null</code> if
 	 * none.
 	 */
-	public static InetAddress getPrimaryAddress(boolean onlyIPv4) {
+	public static InetAddress getPrimaryAddress() {
 		try {
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			if (interfaces!=null) {
 				NetworkInterface inter;
 				InetAddress adr;
 				Enumeration<InetAddress> addrs;
-				boolean allIPs = !onlyIPv4;
 				while (interfaces.hasMoreElements()) {
 					inter = interfaces.nextElement();
 					addrs = inter.getInetAddresses();
@@ -63,7 +70,39 @@ public class NetworkUtil {
 						while (addrs.hasMoreElements()) {
 							adr = addrs.nextElement();
 							if (adr!=null && !adr.isLoopbackAddress() &&
-									(allIPs || (adr instanceof Inet4Address))) {
+									(adr instanceof Inet4Address)) {
+								return adr;
+							}
+						}
+					}
+				}
+			}
+		} catch (SocketException e) {
+			//
+		}
+		return null;
+	}
+
+	/** Replies the IPv4 loopback address.
+	 * 
+	 * @return the IPv4 loopback address or <code>null</code> if
+	 * none.
+	 */
+	public static InetAddress getLoopbackAddress() {
+		try {
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			if (interfaces!=null) {
+				NetworkInterface inter;
+				InetAddress adr;
+				Enumeration<InetAddress> addrs;
+				while (interfaces.hasMoreElements()) {
+					inter = interfaces.nextElement();
+					addrs = inter.getInetAddresses();
+					if (addrs!=null) {
+						while (addrs.hasMoreElements()) {
+							adr = addrs.nextElement();
+							if (adr!=null && adr.isLoopbackAddress() &&
+									(adr instanceof Inet4Address)) {
 								return adr;
 							}
 						}
@@ -94,6 +133,83 @@ public class NetworkUtil {
 		return UUID.fromString(new String(id, NetworkConfig.getStringEncodingCharset()));
 	}
 
+	/** Convert a string URI to an object URI.
+	 * <p>
+	 * This function support the syntax ":*" for the port.
+	 * 
+	 * @param uri
+	 * @return the URI.
+	 * @throws URISyntaxException 
+	 */
+	public static URI toURI(String uri) throws URISyntaxException {
+		URI u = new URI(uri);
+		// Inspired by ZeroMQ
+		String adr = u.getAuthority();
+		if (adr==null) adr = u.getPath();
+		if (adr!=null && adr.endsWith(":*")) { //$NON-NLS-1$
+			return new URI(u.getScheme(), u.getUserInfo(), adr.substring(0, adr.length()-2), -1, null, u.getQuery(), u.getFragment());
+		}
+		return u;
+	}
+
+	/** Convert an object URI to a string URI.
+	 * <p>
+	 * This function differs from {@link URI#toString()}
+	 * because it outputs "*" as the port when the port in
+	 * the <var>uri</var> is lower or equals to zero.
+	 * 
+	 * @param uri
+	 * @return the URI.
+	 * @throws URISyntaxException 
+	 */
+	public static String toString(URI uri) throws URISyntaxException {
+		StringBuilder sb = new StringBuilder();
+        if (uri.getScheme()!=null) {
+            sb.append(uri.getScheme());
+            sb.append(':');
+        }
+        if (uri.isOpaque()) {
+            sb.append(uri.getSchemeSpecificPart());
+        }
+        else {
+            if (uri.getHost()!=null) {
+                sb.append("//"); //$NON-NLS-1$
+                if (uri.getUserInfo() != null) {
+                    sb.append(uri.getUserInfo());
+                    sb.append('@');
+                }
+                boolean needBrackets = ((uri.getHost().indexOf(':') >= 0)
+                                    && !uri.getHost().startsWith("[") //$NON-NLS-1$
+                                    && !uri.getHost().endsWith("]")); //$NON-NLS-1$
+                if (needBrackets) sb.append('[');
+                sb.append(uri.getHost());
+                if (needBrackets) sb.append(']');
+                sb.append(':');
+                if (uri.getPort() != -1) {
+                    sb.append(uri.getPort());
+                }
+                else {
+                    sb.append('*');
+                }
+            }
+            else if (uri.getAuthority()!=null) {
+                sb.append("//"); //$NON-NLS-1$
+                sb.append(uri.getAuthority());
+            }
+            if (uri.getPath()!=null)
+                sb.append(uri.getPath());
+            if (uri.getQuery()!=null) {
+                sb.append('?');
+                sb.append(uri.getQuery());
+            }
+        }
+        if (uri.getFragment()!=null) {
+            sb.append('#');
+            sb.append(uri.getFragment());
+        }
+        return sb.toString();
+	}
+
 	/** Convert an inet address to an URI.
 	 * 
 	 * @param adr
@@ -101,7 +217,7 @@ public class NetworkUtil {
 	 */
 	public static URI toURI(InetAddress adr) {
 		try {
-			return new URI("tcp://"+adr.getHostAddress()); //$NON-NLS-1$
+			return new URI("tcp", adr.getHostAddress(), null, null); //$NON-NLS-1$
 		}
 		catch (URISyntaxException e) {
 			throw new IOError(e);
@@ -125,10 +241,7 @@ public class NetworkUtil {
 	 */
 	public static URI toURI(InetAddress adr, int port) {
 		try {
-			String p;
-			if (port<=0) p = "*"; //$NON-NLS-1$
-			else p = Integer.toString(port);
-			return new URI("tcp://"+adr.getHostAddress()+":"+p); //$NON-NLS-1$ //$NON-NLS-2$
+			return new URI("tcp", null, adr.getHostAddress(), port, null, null, null); //$NON-NLS-1$
 		}
 		catch (URISyntaxException e) {
 			throw new IOError(e);
@@ -144,11 +257,11 @@ public class NetworkUtil {
 	 */
 	public static InetAddress toInetAddress(URI uri) {
 		try {
-			if ("tcp".equalsIgnoreCase(uri.getScheme())) { //$NON-NLS-1$
-				return InetAddress.getByName(uri.getHost());
-			}
-			else if ("udp".equalsIgnoreCase(uri.getScheme())) { //$NON-NLS-1$
-				return InetAddress.getByName(uri.getHost());
+			// Copy/paste from the ZeroMQ lib
+			String protocol = uri.getScheme();
+			String address = uri.getHost();
+			if ("tcp".equalsIgnoreCase(protocol)) { //$NON-NLS-1$
+				return InetAddress.getByName(address);
 			}
 			throw new IllegalArgumentException(uri.toString());
 		} catch (UnknownHostException e) {

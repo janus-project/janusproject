@@ -20,7 +20,6 @@
 package io.janusproject;
 
 import io.janusproject.kernel.CoreModule;
-import io.janusproject.network.NetworkUtil;
 import io.janusproject.network.event.NetworkEventModule;
 import io.janusproject.network.nonetwork.NoNetworkModule;
 import io.janusproject.network.zeromq.ZeroMQNetworkModule;
@@ -46,8 +45,7 @@ public class JanusDefaultModule extends AbstractModule {
 		install(new CoreModule());
 		install(new NetworkEventModule());
 		
-		if (!JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false)
-			&& NetworkUtil.getPrimaryAddress(true)!=null) {
+		if (!JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false)) {
 			install(new ZeroMQNetworkModule());
 		}
 		else {

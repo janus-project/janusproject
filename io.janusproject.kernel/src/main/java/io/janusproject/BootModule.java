@@ -69,7 +69,7 @@ public class BootModule extends AbstractModule {
 		// Custom logger
 		bindListener(Matchers.any(), new LoggerMemberListener());
 		
-		// Treat the PUB_URI
+		// Bind the system properties.
 		boolean foundPubUri = false;
 		String name;
 		for(Entry<Object,Object> entry : System.getProperties().entrySet()) {
@@ -80,6 +80,9 @@ public class BootModule extends AbstractModule {
 			}
 		}
 
+		// If the PUB_URI is already given as system property,
+		// then it was already binded (with a property-based binder).
+		// Otherwise, the PUB_URI should be binded here with a provider.
 		if (!foundPubUri) {
 			bind(Key.get(String.class, Names.named(JanusConfig.PUB_URI))).toProvider(PublicURIProvider.class);
 		}
@@ -145,25 +148,31 @@ public class BootModule extends AbstractModule {
 		return UUID.fromString(v);
 	}
 
-	/**
-	 * @return the spaceID
+	/** Inject the PUB_URI as a real {@link URI}.
+	 * @return the PUB_URI
 	 */
 	@Provides
 	@Named(JanusConfig.PUB_URI)
-	private static URI getPubURI() {
-		String v = getDefaultPubUri();
+	private static URI getPubURI_asURI() {
+		String v = getPUBURI_asString();
 		try {
-			return new URI(v);
+			return NetworkUtil.toURI(v);
 		}
 		catch (URISyntaxException e) {
 			throw new IOError(e);
 		}
 	}
 
-	private static String getDefaultPubUri() {
+	/** Extract the current value of the PUB_URI from the system's property or
+	 * form the platform default value.
+	 * 
+	 * @return the current PUB_URI
+	 */
+	private static String getPUBURI_asString() {
 		String pubUri = JanusConfig.getSystemProperty(JanusConfig.PUB_URI);
 		if (pubUri == null || pubUri.isEmpty()) {
-			InetAddress a = NetworkUtil.getPrimaryAddress(true);
+			InetAddress a = NetworkUtil.getPrimaryAddress();
+			if (a==null) a = NetworkUtil.getLoopbackAddress();
 			if (a != null) {
 				pubUri = NetworkUtil.toURI(a, -1).toString();
 				System.setProperty(JanusConfig.PUB_URI, pubUri);
@@ -186,7 +195,7 @@ public class BootModule extends AbstractModule {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public String get() {
-			return getDefaultPubUri();
+			return getPUBURI_asString();
 		}
 
 	}
