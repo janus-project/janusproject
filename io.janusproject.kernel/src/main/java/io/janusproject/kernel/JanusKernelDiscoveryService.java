@@ -172,6 +172,10 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	@Override
 	protected synchronized void doStop() {
 		if (this.hzRegId!=null) this.kernels.removeItemListener(this.hzRegId);
+		// Remove the current kernel from the kernel's list
+		if (this.currentURI!=null) {
+			this.kernels.remove(this.currentURI);
+		}
 		// Unconnect the kernel collection from remote clusters
 		// Not needed becasue the Kernel will be stopped: this.kernels.destroy();
 		notifyStopped();
