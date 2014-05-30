@@ -27,10 +27,16 @@ import io.janusproject.services.LogService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.SpaceID;
 
+import java.net.InetAddress;
+import java.net.URI;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.hazelcast.config.Config;
+import com.hazelcast.config.MulticastConfig;
+import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.SerializerConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -66,12 +72,6 @@ public class HazelcastModule extends AbstractModule {
 		hazelcastConfig.getSerializationConfig().addSerializerConfig(sc);
 		hazelcastConfig.getSerializationConfig().addSerializerConfig(sc2);
 
-		if (JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false)
-			|| NetworkUtil.getPrimaryAddress(true)==null) {
-			hazelcastConfig.setProperty("hazelcast.local.localAddress", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
-			hazelcastConfig.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-		}
-		
 		bind(Config.class).toInstance(hazelcastConfig);
 		
 		bind(DistributedDataStructureFactory.class).to(HazelcastDistributedDataStructureFactory.class).in(Singleton.class);
@@ -84,8 +84,56 @@ public class HazelcastModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	private static HazelcastInstance createHazelcastInstance(Config config, LogService logService) {
+	private static HazelcastInstance createHazelcastInstance(Config config, LogService logService, @Named(JanusConfig.PUB_URI) URI uri) {
+		assert(uri!=null);
+		boolean enableMulticast = true;
+		InetAddress adr = null;
+		
+		if (JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false)) {
+			adr = NetworkUtil.getLoopbackAddress();
+			enableMulticast = false;
+		}
+		else {
+			try {
+				adr = NetworkUtil.toInetAddress(uri);
+			}
+			catch(Throwable e) {
+				logService.error("INVALID_PUB_URI", e); //$NON-NLS-1$
+			}
+		}
+		
+		// Ensure to have an Inet address
+		if (adr==null) {
+			if (!NetworkUtil.isConnectedHost()) {
+				adr = NetworkUtil.getLoopbackAddress();
+			}
+			else {
+				adr = NetworkUtil.getPrimaryAddress();
+			}
+		}
+		
+		assert(adr!=null);
+		String hostname = adr.getHostAddress();
+		config.setProperty("hazelcast.local.localAddress", hostname); //$NON-NLS-1$
+		
+		NetworkConfig networkConfig = config.getNetworkConfig();
+		MulticastConfig multicastConfig = networkConfig.getJoin().getMulticastConfig();
+
+		// FIXME: Remove when hazelcast/hazelcast#2594 is fixed
+		if (!enableMulticast || adr.isLoopbackAddress()) {
+			multicastConfig.setEnabled(false);
+		}
+		// FIXME: Add when hazelcast/hazelcast#2594 is fixed
+		// The following block of code is fixing the issue hazelcast/hazelcast#2594.
+//		if (enableMulticast) {
+//			if (adr.isLoopbackAddress()) multicastConfig.setLoopbackModeEnabled(true);
+//		}
+//		else {
+//			multicastConfig.setEnabled(false);
+//		}
+		
 		HzKernelLoggerFactory.setLogService(logService);
+		
 		return Hazelcast.newHazelcastInstance(config);
 	}
 	
