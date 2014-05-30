@@ -131,7 +131,7 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 		UUID contextId = NetworkUtil.fromByteArray(envelope.getContextId());
 		UUID spaceId = NetworkUtil.fromByteArray(envelope.getSpaceId());
 
-		Map<String, String> headers = getHeadersFromString(new String(envelope.getCustomHeaders()));
+		Map<String, String> headers = getHeadersFromString(new String(envelope.getCustomHeaders(), NetworkConfig.getStringEncodingCharset()));
 
 		Class<? extends SpaceSpecification> spaceSpec = extractClass("x-java-spacespec-class", headers, SpaceSpecification.class); //$NON-NLS-1$
 		Class<? extends Event> eventClazz = extractClass("x-java-event-class", headers, Event.class); //$NON-NLS-1$
