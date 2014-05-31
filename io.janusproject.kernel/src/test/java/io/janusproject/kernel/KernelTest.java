@@ -73,7 +73,7 @@ public class KernelTest extends Assert {
 		this.spawnService = Mockito.mock(SpawnService.class);
 		this.executorService = Mockito.mock(ExecutorService.class);
 		this.contextService = Mockito.mock(ContextSpaceService.class);
-		this.services = ImmutableMultimap.of(
+		this.services = ImmutableMultimap.<State,Service>of(
 				State.RUNNING, this.spawnService,
 				State.RUNNING, this.executorService,
 				State.RUNNING, this.contextService);

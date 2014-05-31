@@ -19,9 +19,10 @@
  */
 package io.janusproject.services.impl;
 
-import io.janusproject.services.PrioritizedService;
+import io.janusproject.services.NetworkService;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import com.google.common.util.concurrent.Service;
 
 /** This service has a priority to be launch/stop.
  * 
@@ -30,43 +31,17 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class AbstractPrioritizedExecutionThreadService extends AbstractExecutionThreadService implements PrioritizedService {
+public abstract class AbstractNetworkingExecutionThreadService extends AbstractExecutionThreadService implements NetworkService {
 
-	private int startPriority = 0;
-	private int stopPriority = 0;
-	
 	/**
 	 */
-	public AbstractPrioritizedExecutionThreadService() {
+	public AbstractNetworkingExecutionThreadService() {
 		// 
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
-	public final int getStartPriority() {
-		return this.startPriority;
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public final int getStopPriority() {
-		return this.stopPriority;
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public final void setStartPriority(int priority) {
-		this.startPriority = priority;
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public final void setStopPriority(int priority) {
-		this.stopPriority = priority;
+	public final Class<? extends Service> getServiceType() {
+		return NetworkService.class;
 	}
 	
 }

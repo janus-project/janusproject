@@ -19,18 +19,23 @@
  */
 package io.janusproject.services.impl;
 
+import io.janusproject.services.AsyncStateService;
+import io.janusproject.services.DependentService;
 import io.janusproject.services.IServiceManager;
-import io.janusproject.services.PrioritizedService;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
-import org.arakhne.afc.vmutil.ObjectReferenceComparator;
+import org.arakhne.afc.vmutil.ClassComparator;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.TreeMultimap;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.State;
 import com.google.common.util.concurrent.ServiceManager;
@@ -45,110 +50,39 @@ import com.google.common.util.concurrent.ServiceManager;
  */
 public class Services {
 
-	/** Start priority for the executor service.
-	 */
-	public static final int START_EXECUTOR_SERVICE = 0;
-
-	/** Start priority for the logging service.
-	 */
-	public static final int START_LOGGING_SERVICE = 1;
-
-	/** Start priority for the kernel discovery service.
-	 */
-	public static final int START_KERNEL_DISCOVERY_SERVICE = 2;
-
-	/** Start priority for the network service.
-	 */
-	public static final int START_NETWORK_SERVICE = 3;
-
-	/** Start priority for the context service.
-	 */
-	public static final int START_CONTEXTSPACE_SERVICE = 4;
-
-	/** Start priority for the agent spawning service.
-	 */
-	public static final int START_SPAWN_SERVICE = 5;
-
-	/** Start priority for the executor service.
-	 */
-	public static final int STOP_EXECUTOR_SERVICE = 5;
-
-	/** Start priority for the logging service.
-	 */
-	public static final int STOP_LOGGING_SERVICE = 4;
-
-	/** Start priority for the kernel discovery service.
-	 */
-	public static final int STOP_KERNEL_DISCOVERY_SERVICE = 3;
-
-	/** Start priority for the network service.
-	 */
-	public static final int STOP_NETWORK_SERVICE = 2;
-
-	/** Start priority for the context service.
-	 */
-	public static final int STOP_CONTEXTSPACE_SERVICE = 1;
-
-	/** Start priority for the agent spawning service.
-	 */
-	public static final int STOP_SPAWN_SERVICE = 0;
-
 	/** Start the services associated to the given service manager.
 	 * <p>
-	 * This starting function supports the {@link PrioritizedService prioritized services}.
+	 * This starting function supports the {@link DependentService prioritized services}.
 	 * 
 	 * @param manager
 	 */
 	public static void startServices(ServiceManager manager) {
 		startServices(new GoogleServiceManager(manager));
 	}
-	
+
 	/** Start the services associated to the given service manager.
 	 * <p>
-	 * This starting function supports the {@link PrioritizedService prioritized services}.
+	 * This starting function supports the {@link DependentService prioritized services}.
 	 * 
 	 * @param manager
 	 */
 	public static void startServices(IServiceManager manager) {
 		List<Service> otherServices = new ArrayList<>();
-		Multimap<Integer,Service> priorServices = TreeMultimap.create(
-				new Comparator<Integer>() {
-					@Override
-					public int compare(Integer o1, Integer o2) {
-						return Integer.compare(o1.intValue(), o2.intValue());
-					}
-				},
-				ObjectReferenceComparator.SINGLETON);
-
-		{
-			Service service;
-			for(Entry<State,Service> entry : manager.servicesByState().entries()) {
-				if (entry.getKey()==State.NEW) {
-					service = entry.getValue();
-					if (service instanceof PrioritizedService) {
-						priorServices.put(new Integer(((PrioritizedService)service).getStartPriority()), service);
-					}
-					else {
-						otherServices.add(service);
-					}
-				}
-			}
-		}
-
-		for(Service service : priorServices.values()) {
-			service.startAsync().awaitRunning();
-		}
+		LinkedList<DependencyNode> serviceQueue = new LinkedList<>();
+		Accessors accessors = new StartingPhaseAccessors();
 		
-		for(Service service : otherServices) {
-			service.startAsync();
-		}
+		// Build the dependency graph
+		buildDependencyGraph(manager, serviceQueue, otherServices, accessors);
+
+		// Launch the services
+		runDependencyGraph(serviceQueue, otherServices, accessors);
 
 		manager.awaitHealthy();
 	}
 
 	/** Stop the services associated to the given service manager.
 	 * <p>
-	 * This stopping function supports the {@link PrioritizedService prioritized services}.
+	 * This stopping function supports the {@link DependentService prioritized services}.
 	 * 
 	 * @param manager
 	 */
@@ -158,45 +92,283 @@ public class Services {
 
 	/** Stop the services associated to the given service manager.
 	 * <p>
-	 * This stopping function supports the {@link PrioritizedService prioritized services}.
+	 * This stopping function supports the {@link DependentService prioritized services}.
 	 * 
 	 * @param manager
 	 */
 	public static void stopServices(IServiceManager manager) {
 		List<Service> otherServices = new ArrayList<>();
-		Multimap<Integer,Service> priorServices = TreeMultimap.create(
-				new Comparator<Integer>() {
-					@Override
-					public int compare(Integer o1, Integer o2) {
-						return Integer.compare(o1.intValue(), o2.intValue());
-					}
-				},
-				ObjectReferenceComparator.SINGLETON);
+		LinkedList<DependencyNode> serviceQueue = new LinkedList<>();
+		Accessors accessors = new StoppingPhaseAccessors();
+		
+		// Build the dependency graph
+		buildDependencyGraph(manager, serviceQueue, otherServices, accessors);
 
-		{
-			Service service;
-			for(Entry<State,Service> entry : manager.servicesByState().entries()) {
-				if (entry.getKey()!=State.TERMINATED && entry.getKey()!=State.STOPPING) {
-					service = entry.getValue();
-					if (service instanceof PrioritizedService) {
-						priorServices.put(new Integer(((PrioritizedService)service).getStopPriority()), service);
+		// Launch the services
+		runDependencyGraph(serviceQueue, otherServices, accessors);
+
+		manager.awaitStopped();
+	}
+
+	/** Build the dependency graph for the services.
+	 * 
+	 * @param manager - lsit of the services.
+	 * @param roots - filled with the services that have no dependency.
+	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
+	 * @param accessors - permits to retreive information on the services.
+	 */
+	private static void buildDependencyGraph(
+			IServiceManager manager,
+			List<DependencyNode> roots, List<Service> freeServices,
+			Accessors accessors) {
+		Map<Class<? extends Service>, DependencyNode> dependentServices = new TreeMap<>(ClassComparator.SINGLETON);
+
+		Service service;
+		for(Entry<State,Service> entry : manager.servicesByState().entries()) {
+			if (accessors.matches(entry.getKey())) {
+				service = entry.getValue();
+				if (service instanceof DependentService) {
+					DependentService depServ = (DependentService)service;
+					Class<? extends Service> type = depServ.getServiceType();
+					DependencyNode node = dependentServices.get(type);
+					if (node==null) {
+						node = new DependencyNode(depServ, type);
+						dependentServices.put(type, node);
 					}
 					else {
-						otherServices.add(service);
+						assert(node.service==null);
+						node.service = depServ;
+					}
+
+					boolean isRoot = true;
+					Collection<Class<? extends Service>> deps = accessors.getDependencies(depServ);
+					for(Class<? extends Service> dep : deps) {
+						isRoot = false;
+						DependencyNode depNode = dependentServices.get(dep);
+						if (depNode==null) {
+							depNode = new DependencyNode(dep);
+							dependentServices.put(dep, depNode);
+						}
+						depNode.nextServices.add(node);
+					}
+
+					deps = accessors.getWeakDependencies(depServ);
+					for(Class<? extends Service> dep : deps) {
+						isRoot = false;
+						DependencyNode depNode = dependentServices.get(dep);
+						if (depNode==null) {
+							depNode = new DependencyNode(dep);
+							dependentServices.put(dep, depNode);
+						}
+						depNode.nextWeakServices.add(node);
+					}
+
+					if (isRoot) {
+						roots.add(node);
+					}
+				}
+				else {
+					freeServices.add(service);
+				}
+			}
+		}
+		
+		if (accessors.isAsyncStateWaitingEnabled()) {
+			for(DependencyNode node : dependentServices.values()) {
+				assert(node.service!=null);
+				if (node.service instanceof AsyncStateService) {
+					for(DependencyNode next : node.nextServices) {
+						next.asyncStateServices.add(new WeakReference<>(node));
 					}
 				}
 			}
 		}
+	}
 
-		for(Service service : otherServices) {
-			service.stopAsync();
+	/** Run the dependency graph for the services.
+	 * 
+	 * @param roots - filled with the services that have no dependency.
+	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
+	 * @param accessors - permits to retreive information on the services.
+	 */
+	private static void runDependencyGraph(
+			LinkedList<DependencyNode> roots, List<Service> freeServices,
+			Accessors accessors) {
+		final boolean async = accessors.isAsyncStateWaitingEnabled();
+		Set<Class<? extends Service>> executed = new TreeSet<>(ClassComparator.SINGLETON);
+		accessors.runBefore(freeServices);
+		while (!roots.isEmpty()) {
+			DependencyNode node = roots.removeFirst();
+			if (node!=null) {
+				assert(node.type!=null);
+				if (!executed.contains(node.type)) {
+					executed.add(node.type);
+					roots.addAll(node.nextServices);
+					roots.addAll(node.nextWeakServices);
+					if (node.service!=null) {
+						if (async) {
+							for(WeakReference<DependencyNode> asyncService : node.asyncStateServices) {
+								AsyncStateService as = (AsyncStateService)(asyncService.get().service);
+								if (as!=null) {
+									while (!as.isReadyForOtherServices()) {
+										Thread.yield();
+									}
+								}
+							}
+						}
+						accessors.run(node.service);
+					}
+				}
+			}
+		}
+		accessors.runAfter(freeServices);
+	}
+	
+	/**
+	 */
+	private static class DependencyNode {
+
+		public Service service;
+		public final Class<? extends Service> type;
+		public final Collection<DependencyNode> nextServices = new ArrayList<>();
+		public final Collection<DependencyNode> nextWeakServices = new ArrayList<>();
+		public final Collection<WeakReference<DependencyNode>> asyncStateServices = new ArrayList<>();
+
+		public DependencyNode(DependentService service, Class<? extends Service> type) {
+			this.service = service;
+			this.type = type;
 		}
 
-		for(Service service : priorServices.values()) {
-			service.stopAsync().awaitTerminated();
+		public DependencyNode(Class<? extends Service> type) {
+			this.service = null;
+			this.type = type;
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public String toString() {
+			return this.service==null ? null : this.service.toString();
 		}
 		
-		manager.awaitStopped();
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static interface Accessors {
+
+		public boolean matches(State element);
+
+		public Collection<Class<? extends Service>> getDependencies(DependentService serv);
+		
+		public Collection<Class<? extends Service>> getWeakDependencies(DependentService serv);
+
+		public void runBefore(List<Service> freeServices);
+		
+		public boolean isAsyncStateWaitingEnabled();
+		
+		public void run(Service service);
+
+		public void runAfter(List<Service> freeServices);
+
+	}
+	
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class StartingPhaseAccessors implements Accessors {
+		
+		/**
+		 */
+		public StartingPhaseAccessors() {
+			//
+		}
+		
+		@Override
+		public boolean matches(State element) {
+			return element==State.NEW;
+		}
+		@Override
+		public Collection<Class<? extends Service>> getDependencies(DependentService serv) {
+			return serv.getStartingDependencies();
+		}
+		@Override
+		public Collection<Class<? extends Service>> getWeakDependencies(DependentService serv) {
+			return serv.getWeakStartingDependencies();
+		}
+		@Override
+		public void runBefore(List<Service> freeServices) {
+			//
+		}
+		@Override
+		public boolean isAsyncStateWaitingEnabled() {
+			return true;
+		}
+		@Override
+		public void run(Service service) {
+			service.startAsync().awaitRunning();
+		}
+		@Override
+		public void runAfter(List<Service> freeServices) {
+			for(Service serv : freeServices) {
+				serv.startAsync();
+			}
+		}
+
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class StoppingPhaseAccessors implements Accessors {
+		
+		/**
+		 */
+		public StoppingPhaseAccessors() {
+			//
+		}
+		
+		@Override
+		public boolean matches(State element) {
+			return element!=State.TERMINATED && element!=State.STOPPING;
+		}
+		@Override
+		public Collection<Class<? extends Service>> getDependencies(DependentService serv) {
+			return serv.getStoppingDependencies();
+		}
+		@Override
+		public Collection<Class<? extends Service>> getWeakDependencies(DependentService serv) {
+			return serv.getWeakStoppingDependencies();
+		}
+		@Override
+		public void runBefore(List<Service> freeServices) {
+			for(Service serv : freeServices) {
+				serv.stopAsync();
+			}
+		}
+		@Override
+		public boolean isAsyncStateWaitingEnabled() {
+			return false;
+		}
+		@Override
+		public void run(Service service) {
+			service.stopAsync().awaitTerminated();
+		}
+		@Override
+		public void runAfter(List<Service> freeServices) {
+			//
+		}
+
 	}
 
 }

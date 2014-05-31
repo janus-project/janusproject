@@ -26,8 +26,6 @@ import java.util.UUID;
 
 import org.arakhne.afc.vmutil.locale.Locale;
 
-import com.google.common.util.concurrent.Service;
-
 /** This service provides the tools to manage
  * the life-cycle of the agents.
  * 
@@ -37,7 +35,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface SpawnService extends Service {
+public interface SpawnService extends DependentService {
 
 	/** Spawn an agent of the given type, and pass the parameters to
 	 * its initialization function.

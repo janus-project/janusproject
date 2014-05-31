@@ -24,8 +24,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.util.concurrent.Service;
-
 /** This class enables the Janus kernel to be distributed
  * other a network.
  * 
@@ -35,7 +33,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface ExecutorService extends Service {
+public interface ExecutorService extends DependentService {
 
 	/** Replies the JVM executor service used by service.
 	 * 

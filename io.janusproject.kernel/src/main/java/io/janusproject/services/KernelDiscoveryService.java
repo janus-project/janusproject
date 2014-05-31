@@ -22,8 +22,6 @@ package io.janusproject.services;
 import java.net.URI;
 import java.util.Collection;
 
-import com.google.common.util.concurrent.Service;
-
 /** This class enables the Janus kernel to be distributed
  * other a network.
  * 
@@ -32,13 +30,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface KernelDiscoveryService extends Service {
-
-	/** Replies the mutex that is used to synchronized the access to the service.
-	 * 
-	 * @return the mutex
-	 */
-	public Object mutex();
+public interface KernelDiscoveryService extends DependentService {
 
 	/** Replies the URI of the current kernel.
 	 * 
@@ -48,11 +40,9 @@ public interface KernelDiscoveryService extends Service {
 	
 	/** Replies the URIs of the kernels, including the current kernels.
 	 * <p>
-	 * The replies collection is synchronized and any iteration on it
-	 * must be synchronized on the mutex replies by {@link #mutex}.
+	 * The replies collection must not be synchronized on the service.
 	 * 
 	 * @return the uri of the kernels.
-	 * @see #mutex()
 	 */
 	public Collection<URI> getKernels();
 

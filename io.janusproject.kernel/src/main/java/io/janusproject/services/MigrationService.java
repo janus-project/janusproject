@@ -25,7 +25,6 @@ import java.net.URI;
 import java.util.Collection;
 
 import com.google.common.base.Predicate;
-import com.google.common.util.concurrent.Service;
 
 /** This class enables the Janus kernel to support migration of
  * agents other the network.
@@ -35,7 +34,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface MigrationService extends Service {
+public interface MigrationService extends DependentService {
 
 	/** Tries to build a list of kernels that are matching the
 	 * given migration predicate.

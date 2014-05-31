@@ -20,11 +20,11 @@
 package io.janusproject.kernel;
 
 import io.janusproject.kernel.bic.BuiltinCapacityUtil;
+import io.janusproject.services.ContextSpaceService;
 import io.janusproject.services.KernelAgentSpawnListener;
 import io.janusproject.services.SpawnService;
 import io.janusproject.services.SpawnServiceListener;
-import io.janusproject.services.impl.AbstractPrioritizedService;
-import io.janusproject.services.impl.Services;
+import io.janusproject.services.impl.AbstractDependentService;
 import io.janusproject.util.ListenerCollection;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
@@ -35,6 +35,7 @@ import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -58,7 +60,7 @@ import com.google.inject.Singleton;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class JanusSpawnService extends AbstractPrioritizedService implements SpawnService {
+class JanusSpawnService extends AbstractDependentService implements SpawnService {
 
 	private final ListenerCollection<?> listeners = new ListenerCollection<>();
 	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
@@ -71,11 +73,28 @@ class JanusSpawnService extends AbstractPrioritizedService implements SpawnServi
 	 */
 	@Inject
 	public JanusSpawnService(Injector injector) {
-		setStartPriority(Services.START_SPAWN_SERVICE);
-		setStartPriority(Services.STOP_SPAWN_SERVICE);
 		this.agentFactory = new DefaultAgentFactory(injector);
 	}
 	
+	@Override
+	public final Class<? extends Service> getServiceType() {
+		return SpawnService.class;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getStartingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getStoppingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
+	}
+
 	/** Change the agent factory.
 	 * 
 	 * @param factory

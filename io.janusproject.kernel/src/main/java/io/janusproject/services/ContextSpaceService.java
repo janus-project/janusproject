@@ -25,8 +25,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.common.util.concurrent.Service;
-
 /**
  * This service enables to store the contexts and to
  * manage the spaces in the janus platform.
@@ -37,7 +35,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface ContextSpaceService extends Service {
+public interface ContextSpaceService extends DependentService {
 
 	/**
 	 * Replies the mutex that is used to synchronized the access to the service.

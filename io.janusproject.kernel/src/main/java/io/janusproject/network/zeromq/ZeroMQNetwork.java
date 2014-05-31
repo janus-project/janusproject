@@ -30,11 +30,9 @@ import io.janusproject.services.KernelDiscoveryService;
 import io.janusproject.services.KernelDiscoveryServiceListener;
 import io.janusproject.services.LogService;
 import io.janusproject.services.LogService.LogParam;
-import io.janusproject.services.NetworkService;
 import io.janusproject.services.NetworkServiceListener;
 import io.janusproject.services.SpaceRepositoryListener;
-import io.janusproject.services.impl.AbstractPrioritizedExecutionThreadService;
-import io.janusproject.services.impl.Services;
+import io.janusproject.services.impl.AbstractNetworkingExecutionThreadService;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Space;
@@ -59,6 +57,7 @@ import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
 
 import com.google.common.primitives.Ints;
+import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -74,7 +73,7 @@ import com.google.inject.name.Named;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements NetworkService {
+class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 
 	private final Listener serviceListener = new Listener();
 
@@ -119,15 +118,43 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	public ZeroMQNetwork(@Named(JanusConfig.PUB_URI) URI uri) {
 		assert (uri != null) : "Injected URI must be not null nor empty"; //$NON-NLS-1$
 		this.uriCandidate = uri;
-		setStartPriority(Services.START_NETWORK_SERVICE);
-		setStopPriority(Services.STOP_NETWORK_SERVICE);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getStartingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getWeakStartingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getStoppingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
-	public synchronized URI getURI() {
-		return this.validatedURI;
+	public Collection<Class<? extends Service>> getWeakStoppingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public URI getURI() {
+		synchronized(this) {
+			return this.validatedURI;
+		}
 	}
 
 
@@ -373,9 +400,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 		if (s!=null) {
 			this.logger.debug("PEER_DISCONNECTION", peer); //$NON-NLS-1$
 			this.poller.unregister(s);
-			//FIXME: are the two following lines needed?
-			s.close();
-			//this.context.destroySocket(s);
+			s.disconnect(peer.toString());
 			this.logger.debug("PEER_DISCONNECTED", peer); //$NON-NLS-1$
 		}
 	}
@@ -448,7 +473,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected synchronized void startUp() throws Exception {
+	protected void startUp() throws Exception {
 		Map<SpaceID,BufferedConnection> connections;
 		synchronized(this) {
 			super.startUp();
@@ -476,7 +501,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 			this.uriCandidate = null;
 			connections = this.bufferedConnections;
 			this.bufferedConnections = null;
-			this.poller = new Poller(0);
+			this.poller = new Poller(1);
 
 			this.kernelService.addKernelDiscoveryServiceListener(this.serviceListener);
 			this.spaceService.addSpaceRepositoryListener(this.serviceListener);
@@ -490,16 +515,18 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected synchronized void shutDown() throws Exception {
-		this.kernelService.removeKernelDiscoveryServiceListener(this.serviceListener);
-		this.spaceService.removeSpaceRepositoryListener(this.serviceListener);
-
-		// TODO this.poller.stop();
-		// stopPoller();
-
-		// this.publisher.close();
-
-		this.context.destroy();
+	protected void shutDown() throws Exception {
+		synchronized(this) {
+			this.kernelService.removeKernelDiscoveryServiceListener(this.serviceListener);
+			this.spaceService.removeSpaceRepositoryListener(this.serviceListener);
+	
+			// TODO this.poller.stop();
+			// stopPoller();
+	
+			// this.publisher.close();
+	
+			this.context.destroy();
+		}
 		this.logger.fineInfo("ZEROMQ_SHUTDOWN"); //$NON-NLS-1$
 	}
 
@@ -642,16 +669,14 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 					boolean isUsed = false;
 					Collection<SpaceID> spaceIDs = new ArrayList<>(ZeroMQNetwork.this.messageRecvListeners.keySet());
 					Collection<BufferedSpace> spaces = new ArrayList<>(ZeroMQNetwork.this.bufferedSpaces.values());
-					synchronized(ZeroMQNetwork.this.kernelService.mutex()) {
-						for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
-							if (!peer.equals(localUri)) {
-								if (space instanceof NetworkEventReceivingListener) {
-									magicConnect(peer, spaceIDs, spaces, space);
-									isUsed = true;
-								}
-								else {
-									ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "NOT_DISTRIBUTABLE_SPACE", space); //$NON-NLS-1$
-								}
+					for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
+						if (!peer.equals(localUri)) {
+							if (space instanceof NetworkEventReceivingListener) {
+								magicConnect(peer, spaceIDs, spaces, space);
+								isUsed = true;
+							}
+							else {
+								ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "NOT_DISTRIBUTABLE_SPACE", space); //$NON-NLS-1$
 							}
 						}
 					}
@@ -678,11 +703,9 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 			synchronized(ZeroMQNetwork.this) {
 				URI localUri = ZeroMQNetwork.this.getURI();
 				try {
-					synchronized(ZeroMQNetwork.this.kernelService.mutex()) {
-						for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
-							if (!peer.equals(localUri)) {
-								disconnectFromRemoteSpace(peer, space.getID());
-							}
+					for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
+						if (!peer.equals(localUri)) {
+							disconnectFromRemoteSpace(peer, space.getID());
 						}
 					}
 					// Ensure that the space becomes unknown
@@ -708,16 +731,14 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 				Collection<SpaceID> spaceIDs = new ArrayList<>(ZeroMQNetwork.this.messageRecvListeners.keySet());
 				Collection<BufferedSpace> spaces = new ArrayList<>(ZeroMQNetwork.this.bufferedSpaces.values());
 				if (!spaceIDs.isEmpty() || !spaces.isEmpty()) {
-					synchronized(ZeroMQNetwork.this.kernelService.mutex()) {
-						boolean cleanBuffers = false;
-						for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
-							if (!peer.equals(localUri)) {
-								magicConnect(peer, spaceIDs, spaces, null);
-								cleanBuffers = true;
-							}
+					boolean cleanBuffers = false;
+					for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
+						if (!peer.equals(localUri)) {
+							magicConnect(peer, spaceIDs, spaces, null);
+							cleanBuffers = true;
 						}
-						if (cleanBuffers) ZeroMQNetwork.this.bufferedSpaces.clear();
 					}
+					if (cleanBuffers) ZeroMQNetwork.this.bufferedSpaces.clear();
 				}
 			}
 		}

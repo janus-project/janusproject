@@ -24,8 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import com.google.common.util.concurrent.Service;
-
 /** This class enables to log information by ensuring
  * that the values of the parameters are not evaluated
  * until the information should be really log, according
@@ -53,7 +51,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface LogService extends Service {
+public interface LogService extends DependentService {
 
 	/** Log an information message.
 	 * 

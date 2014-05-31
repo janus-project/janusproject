@@ -20,10 +20,11 @@
 package io.janusproject.network.nonetwork;
 
 import io.janusproject.network.NetworkUtil;
-import io.janusproject.services.NetworkService;
+import io.janusproject.services.ExecutorService;
+import io.janusproject.services.KernelDiscoveryService;
+import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkServiceListener;
-import io.janusproject.services.impl.AbstractPrioritizedService;
-import io.janusproject.services.impl.Services;
+import io.janusproject.services.impl.AbstractNetworkingService;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
@@ -32,9 +33,12 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -48,7 +52,7 @@ import com.google.inject.Singleton;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-class NoNetwork extends AbstractPrioritizedService implements NetworkService {
+class NoNetwork extends AbstractNetworkingService {
 
 	private static final Random RANDOM = new Random();
 	
@@ -63,8 +67,7 @@ class NoNetwork extends AbstractPrioritizedService implements NetworkService {
 	 */
 	@Inject
 	public NoNetwork() {
-		setStartPriority(Services.START_NETWORK_SERVICE);
-		setStopPriority(Services.STOP_NETWORK_SERVICE);
+		//
 	}
 
 	/** {@inheritDoc}
@@ -148,6 +151,34 @@ class NoNetwork extends AbstractPrioritizedService implements NetworkService {
 	@Override
 	protected void doStop() {
 		notifyStopped();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getStartingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getWeakStartingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getStoppingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getWeakStoppingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
 	}
 
 }

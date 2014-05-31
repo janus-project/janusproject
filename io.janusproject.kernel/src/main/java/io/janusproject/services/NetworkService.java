@@ -26,8 +26,6 @@ import io.sarl.lang.core.SpaceID;
 import java.net.URI;
 import java.util.EventListener;
 
-import com.google.common.util.concurrent.Service;
-
 /** This class enables the Janus kernel to send messages other
  * the network.
  * 
@@ -37,7 +35,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface NetworkService extends Service {
+public interface NetworkService extends DependentService {
 
 	/** Publish a data over the network.
 	 * 

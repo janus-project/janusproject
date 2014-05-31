@@ -22,10 +22,11 @@ package io.janusproject.kernel;
 import io.janusproject.JanusConfig;
 import io.janusproject.services.ContextRepositoryListener;
 import io.janusproject.services.ContextSpaceService;
+import io.janusproject.services.KernelDiscoveryService;
 import io.janusproject.services.LogService;
+import io.janusproject.services.NetworkService;
 import io.janusproject.services.SpaceRepositoryListener;
-import io.janusproject.services.impl.AbstractPrioritizedService;
-import io.janusproject.services.impl.Services;
+import io.janusproject.services.impl.AbstractDependentService;
 import io.janusproject.util.ListenerCollection;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.AgentContext;
@@ -33,6 +34,7 @@ import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.Collections3;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -42,6 +44,7 @@ import java.util.UUID;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -62,7 +65,7 @@ import com.hazelcast.core.IMap;
  */
 @Singleton
 @TwoStepConstruction
-class JanusContextSpaceService extends AbstractPrioritizedService implements ContextSpaceService {
+class JanusContextSpaceService extends AbstractDependentService implements ContextSpaceService {
 
 	private final ListenerCollection<?> listeners = new ListenerCollection<>();
 
@@ -93,10 +96,24 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	/** Constructs <code>ContextRepository</code>.
 	 */
 	public JanusContextSpaceService() {
-		setStartPriority(Services.START_CONTEXTSPACE_SERVICE);
-		setStopPriority(Services.STOP_CONTEXTSPACE_SERVICE);
+		//
 	}
 	
+	@Override
+	public final Class<? extends Service> getServiceType() {
+		return ContextSpaceService.class;
+	}
+
+	@Override
+	public Collection<java.lang.Class<? extends Service>> getStartingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class);
+	}
+	
+	@Override
+	public Collection<java.lang.Class<? extends Service>> getStoppingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class);
+	}
+
 	/** Replies the factory used to create contexts.
 	 * 
 	 * @return the context factory.
@@ -132,7 +149,7 @@ class JanusContextSpaceService extends AbstractPrioritizedService implements Con
 	/** {@inheritDoc}
 	 */
 	@Override
-	public Object mutex() {
+	public final Object mutex() {
 		return this;
 	}
 

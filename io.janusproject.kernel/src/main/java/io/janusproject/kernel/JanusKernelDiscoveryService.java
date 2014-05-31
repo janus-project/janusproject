@@ -22,22 +22,24 @@ package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.network.NetworkUtil;
+import io.janusproject.services.AsyncStateService;
 import io.janusproject.services.ExecutorService;
+import io.janusproject.services.KernelDiscoveryService;
 import io.janusproject.services.KernelDiscoveryServiceListener;
 import io.janusproject.services.LogService;
 import io.janusproject.services.NetworkService;
-import io.janusproject.services.impl.AbstractPrioritizedService;
-import io.janusproject.services.impl.Services;
+import io.janusproject.services.impl.AbstractDependentService;
 import io.janusproject.util.ListenerCollection;
 import io.janusproject.util.TwoStepConstruction;
-import io.sarl.util.Collections3;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.UUID;
 
+import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -58,7 +60,7 @@ import com.hazelcast.core.MembershipListener;
  */
 @Singleton
 @TwoStepConstruction
-class JanusKernelDiscoveryService extends AbstractPrioritizedService implements io.janusproject.services.KernelDiscoveryService {
+class JanusKernelDiscoveryService extends AbstractDependentService implements KernelDiscoveryService, AsyncStateService {
 
 	private final UUID janusID;
 	private URI currentPubURI;
@@ -66,6 +68,8 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 
 	private IMap<URI,URI> kernels;
 
+	private boolean isReady = false;
+	
 	private String hzRegId1 = null;
 	private String hzRegId2 = null;
 
@@ -76,9 +80,9 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	private ExecutorService executorService;
 
 	private final ListenerCollection<KernelDiscoveryServiceListener> listeners = new ListenerCollection<>();
-	
+
 	private HazelcastInstance hzInstance;
-	
+
 	private final HazelcastListener hzListener = new HazelcastListener(); 
 
 	/** Constructs a <code>KernelRepositoryService</code>.
@@ -88,10 +92,33 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	@Inject
 	public JanusKernelDiscoveryService(@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusID) {
 		this.janusID = janusID;
-		setStartPriority(Services.START_KERNEL_DISCOVERY_SERVICE);
-		setStopPriority(Services.STOP_KERNEL_DISCOVERY_SERVICE);
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public boolean isReadyForOtherServices() {
+		return isRunning() && this.isReady;
 	}
 	
+	@Override
+	public final Class<? extends Service> getServiceType() {
+		return KernelDiscoveryService.class;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getStartingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	public Collection<Class<? extends Service>> getStoppingDependencies() {
+		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
+	}
 
 	/** Do the post initialization.
 	 * 
@@ -113,14 +140,7 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	/** {@inheritDoc}
 	 */
 	@Override
-	public Object mutex() {
-		return this;
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public synchronized URI getCurrentKernel() {
+	public URI getCurrentKernel() {
 		return this.currentPubURI;
 	}
 
@@ -128,7 +148,7 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	 */
 	@Override
 	public synchronized Collection<URI> getKernels() {
-		return Collections3.synchronizedCollection(Collections.unmodifiableMap(this.kernels).values(),mutex());
+		return new ArrayList<>(this.kernels.values());
 	}
 
 	/** {@inheritDoc}
@@ -184,14 +204,13 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 	 */
 	@Override
 	protected synchronized void doStop() {
+		this.isReady = false;
 		if (this.hzRegId1!=null) this.kernels.removeEntryListener(this.hzRegId1);
 		if (this.hzRegId2!=null) this.hzInstance.getClientService().removeClientListener(this.hzRegId2);
 		// Remove the current kernel from the kernel's list
 		if (this.currentHzURI!=null) {
 			this.kernels.remove(this.currentHzURI);
 		}
-		// Unconnect the kernel collection from remote clusters
-		// Not needed becasue the Kernel will be stopped: this.kernels.destroy();
 		notifyStopped();
 	}
 
@@ -244,14 +263,26 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 		 */
 		@Override
 		public void entryAdded(EntryEvent<URI, URI> event) {
-			fireKernelDiscovered(event.getValue());
+			URI newPeer = event.getValue();
+			assert(newPeer!=null);
+			if (!newPeer.equals(getCurrentKernel())) {
+				fireKernelDiscovered(newPeer);
+			}
+		}
+
+		private void fireDisconnected(EntryEvent<URI, URI> event) {
+			URI newPeer = event.getValue();
+			assert(newPeer!=null);
+			if (!newPeer.equals(getCurrentKernel())) {
+				fireKernelDisconnected(newPeer);
+			}
 		}
 
 		/** {@inheritDoc}
 		 */
 		@Override
 		public void entryRemoved(EntryEvent<URI, URI> event) {
-			fireKernelDisconnected(event.getValue());
+			fireDisconnected(event);
 		}
 
 		/** {@inheritDoc}
@@ -265,7 +296,7 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 		 */
 		@Override
 		public void entryEvicted(EntryEvent<URI, URI> event) {
-			fireKernelDisconnected(event.getValue());
+			fireDisconnected(event);
 		}
 
 	}
@@ -290,18 +321,28 @@ class JanusKernelDiscoveryService extends AbstractPrioritizedService implements 
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void running() {
-			synchronized(JanusKernelDiscoveryService.this) {
-				if (JanusKernelDiscoveryService.this.currentPubURI==null) {
-					URI uri = JanusKernelDiscoveryService.this.network.getURI();
+			URI uri = JanusKernelDiscoveryService.this.network.getURI(); // Outside the synchronizing to avoid deadlock
+			if (JanusKernelDiscoveryService.this.currentPubURI==null) {
+				synchronized(JanusKernelDiscoveryService.this) {
 					JanusKernelDiscoveryService.this.currentPubURI = uri;
-					JanusKernelDiscoveryService.this.currentHzURI = NetworkUtil.toURI(JanusKernelDiscoveryService.this.hzInstance.getCluster().getLocalMember().getSocketAddress());
-					JanusKernelDiscoveryService.this.kernels.put(
+					JanusKernelDiscoveryService.this.currentHzURI = NetworkUtil.toURI(
+							JanusKernelDiscoveryService.this.hzInstance.getCluster()
+							.getLocalMember().getSocketAddress());
+				}
+
+				// Notify about the discovery of the already launched kernels
+				for(URI remotePublicKernel : getKernels()) {
+					fireKernelDiscovered(remotePublicKernel);
+				}
+
+				synchronized(JanusKernelDiscoveryService.this) {
+					JanusKernelDiscoveryService.this.isReady = true;
+					JanusKernelDiscoveryService.this.kernels.putIfAbsent(
 							JanusKernelDiscoveryService.this.currentHzURI,
 							JanusKernelDiscoveryService.this.currentPubURI);
 				}
 			}
 		}
-
 	}
 
 }

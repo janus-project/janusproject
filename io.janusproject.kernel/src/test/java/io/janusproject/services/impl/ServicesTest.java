@@ -19,12 +19,17 @@
  */
 package io.janusproject.services.impl;
 
+import io.janusproject.services.ContextSpaceService;
+import io.janusproject.services.ExecutorService;
 import io.janusproject.services.IServiceManager;
-import io.janusproject.services.PrioritizedService;
+import io.janusproject.services.KernelDiscoveryService;
+import io.janusproject.services.LogService;
+import io.janusproject.services.NetworkService;
+import io.janusproject.services.SpawnService;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -51,20 +56,80 @@ public class ServicesTest extends Assert {
 	private Multimap<State,Service> services;
 	private IServiceManager serviceManager;
 	private List<Service> encounteredServices;
+	private ContextSpaceService s1;
+	private ExecutorService s2;
+	private KernelDiscoveryService s3;
+	private LogService s4;
+	private NetworkService s5;
+	private SpawnService s6;
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Before
 	public void setUp() {
-		Random r = new Random();
 		this.encounteredServices = new LinkedList<>();
 		this.services = LinkedListMultimap.create();
-		for(int i=0; i<10; ++i) {
-			PrioritizedService serv = Mockito.mock(PrioritizedService.class);
-			Mockito.when(serv.startAsync()).thenAnswer(new EncounteredServiceAnswer(serv));
-			Mockito.when(serv.stopAsync()).thenAnswer(new EncounteredServiceAnswer(serv));
-			Mockito.when(serv.getStartPriority()).thenReturn(r.nextInt());
-			Mockito.when(serv.getStopPriority()).thenReturn(r.nextInt());
-			this.services.put(State.NEW, serv);
-		}
+		
+		this.s1 = Mockito.mock(ContextSpaceService.class, "s1"); //$NON-NLS-1$
+		this.s2 = Mockito.mock(ExecutorService.class, "s2"); //$NON-NLS-1$
+		this.s3 = Mockito.mock(KernelDiscoveryService.class, "s3"); //$NON-NLS-1$
+		this.s4 = Mockito.mock(LogService.class, "s4"); //$NON-NLS-1$
+		this.s5 = Mockito.mock(NetworkService.class, "s5"); //$NON-NLS-1$
+		this.s6 = Mockito.mock(SpawnService.class, "s6"); //$NON-NLS-1$
+		
+		Mockito.when(this.s1.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s1));
+		Mockito.when(this.s1.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s1));
+		Mockito.when(this.s1.getServiceType()).thenReturn((Class)ContextSpaceService.class);
+		Mockito.when(this.s1.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class));
+		Mockito.when(this.s1.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class));
+		Mockito.when(this.s1.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s1.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		this.services.put(State.NEW, this.s1);
+
+		Mockito.when(this.s2.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s2));
+		Mockito.when(this.s2.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s2));
+		Mockito.when(this.s2.getServiceType()).thenReturn((Class)ExecutorService.class);
+		Mockito.when(this.s2.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s2.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s2.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s2.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		this.services.put(State.NEW, this.s2);
+
+		Mockito.when(this.s3.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s3));
+		Mockito.when(this.s3.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s3));
+		Mockito.when(this.s3.getServiceType()).thenReturn((Class)KernelDiscoveryService.class);
+		Mockito.when(this.s3.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
+		Mockito.when(this.s3.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
+		Mockito.when(this.s3.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s3.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		this.services.put(State.NEW, this.s3);
+
+		Mockito.when(this.s4.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s4));
+		Mockito.when(this.s4.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s4));
+		Mockito.when(this.s4.getServiceType()).thenReturn((Class)LogService.class);
+		Mockito.when(this.s4.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s4.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s4.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s4.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		this.services.put(State.NEW, this.s4);
+
+		Mockito.when(this.s5.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s5));
+		Mockito.when(this.s5.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s5));
+		Mockito.when(this.s5.getServiceType()).thenReturn((Class)NetworkService.class);
+		Mockito.when(this.s5.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
+		Mockito.when(this.s5.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
+		Mockito.when(this.s5.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class));
+		Mockito.when(this.s5.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class));
+		this.services.put(State.NEW, this.s5);
+
+		Mockito.when(this.s6.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s6));
+		Mockito.when(this.s6.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s6));
+		Mockito.when(this.s6.getServiceType()).thenReturn((Class)SpawnService.class);
+		Mockito.when(this.s6.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(ContextSpaceService.class));
+		Mockito.when(this.s6.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(ContextSpaceService.class));
+		Mockito.when(this.s6.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s6.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		this.services.put(State.NEW, this.s6);
+
 		for(int i=0; i<10; ++i) {
 			Service serv = Mockito.mock(Service.class);
 			Mockito.when(serv.startAsync()).thenAnswer(new EncounteredServiceAnswer(serv));
@@ -80,74 +145,66 @@ public class ServicesTest extends Assert {
 		this.serviceManager = null;
 		this.services = null;
 		this.encounteredServices = null;
+		this.s1 = null;
+		this.s2 = null;
+		this.s3 = null;
+		this.s4 = null;
+		this.s5 = null;
+		this.s6 = null;
 	}
 
 	@Test
 	public void startServices() {
 		Services.startServices(this.serviceManager);
-		assertStartPriorities();
+		// s1 : ContextSpace -> Network, KernelDiscovery
+		// s2 : Executor ->
+		// s3 : KernelDiscovery -> Log, Executor
+		// s4 : Log ->
+		// s5 : Network -> Log, Executor, KernelDiscovery
+		// s6 : Spawn -> ContextSpace
+
+		// Executor(s2)
+		// Log(s4)
+		// KernelDiscovery(s3)
+		// Network(s5)
+		// ContextSpace(s1)
+		// Spawn(s6)
+		assertEquals(16, this.encounteredServices.size());
+		
+		assertSame(this.s2, this.encounteredServices.get(0));
+		assertSame(this.s4, this.encounteredServices.get(1));
+		assertSame(this.s3, this.encounteredServices.get(2));
+		assertSame(this.s5, this.encounteredServices.get(3));
+		assertSame(this.s1, this.encounteredServices.get(4));
+		assertSame(this.s6, this.encounteredServices.get(5));
 	}
 
 	@Test
 	public void stopServices() {
 		Services.stopServices(this.serviceManager);
-		assertStopPriorities();
+		// s1 : ContextSpace -> Network, KernelDiscovery
+		// s2 : Executor ->
+		// s3 : KernelDiscovery -> Log, Executor
+		// s4 : Log ->
+		// s5 : Network -> Log, Executor, KernelDiscovery
+		// s6 : Spawn -> ContextSpace
+
+		// Executor(s2)
+		// Log(s4)
+		// KernelDiscovery(s3)
+		// Network(s5)
+		// ContextSpace(s1)
+		// Spawn(s6)
+		assertEquals(16, this.encounteredServices.size());
+		
+		assertSame(this.s2, this.encounteredServices.get(10));
+		assertSame(this.s4, this.encounteredServices.get(11));
+		assertSame(this.s3, this.encounteredServices.get(12));
+		assertSame(this.s5, this.encounteredServices.get(13));
+		assertSame(this.s1, this.encounteredServices.get(14));
+		assertSame(this.s6, this.encounteredServices.get(15));
 	}
 	
-	private void assertStartPriorities() {
-		assertEquals(this.services.size(), this.encounteredServices.size());
-
-		boolean isPrior = true;
-		int previous = Integer.MIN_VALUE;
-		while (!this.encounteredServices.isEmpty()) {
-			Service service = this.encounteredServices.remove(0);
-			if (isPrior) {
-				if (service instanceof PrioritizedService) {
-					PrioritizedService serv = (PrioritizedService)service;
-					int p = serv.getStartPriority();
-					if (previous>=p) {
-						fail("Invalid order for the prioritized services. Previous priority: "+previous+"; current priority: "+p); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					previous = p ;
-				}
-				else {
-					isPrior = false;
-					this.encounteredServices.add(0, service);
-				}
-			}
-			else if (service instanceof PrioritizedService) {
-				fail("Invalid service launching order"); //$NON-NLS-1$
-			}
-		}
-	}
-
-	private void assertStopPriorities() {
-		assertEquals(this.services.size(), this.encounteredServices.size());
-
-		boolean isPrior = false;
-		int previous = Integer.MIN_VALUE;
-		while (!this.encounteredServices.isEmpty()) {
-			Service service = this.encounteredServices.remove(0);
-			if (!isPrior) {
-				if (service instanceof PrioritizedService) {
-					isPrior = true;
-					this.encounteredServices.add(0, service);
-				}
-			}
-			else if (!(service instanceof PrioritizedService)) {
-				fail("Invalid service launching order"); //$NON-NLS-1$
-			}
-			else {
-				PrioritizedService serv = (PrioritizedService)service;
-				int p = serv.getStopPriority();
-				if (previous>=p) {
-					fail("Invalid order for the prioritized services. Previous priority: "+previous+"; current priority: "+p); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				previous = p ;
-			}
-		}
-	}
-
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$

@@ -29,38 +29,17 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface PrioritizedService extends Service {
+public interface AsyncStateService extends Service {
 
-	/** Replies the launching priority.
+	/** Replies if the service is launched and ready for running.
 	 * <p>
-	 * Lower is the priority, sooner the service is started.
+	 * This functions differs from {@link Service#isRunning()}:
+	 * this functions replies <code>true</code> if the service
+	 * is running (similar to {@link Service#isRunning()}) AND
+	 * the service considers it is redy to respond to other services.
 	 * 
-	 * @return the launching priority. 
+	 * @return <code>true</code> if ready.
 	 */
-	public int getStartPriority();
-
-	/** Replies the stopping priority.
-	 * <p>
-	 * Lower is the priority, sooner the service is stopped.
-	 * 
-	 * @return the stopping priority. 
-	 */
-	public int getStopPriority();
-
-	/** Change the launching priority.
-	 * <p>
-	 * Lower is the priority, sooner the service is started.
-	 * 
-	 * @param priority 
-	 */
-	public void setStartPriority(int priority);
-
-	/** Change the stopping priority.
-	 * <p>
-	 * Lower is the priority, sooner the service is stopped.
-	 * 
-	 * @param priority 
-	 */
-	public void setStopPriority(int priority);
-
+	public boolean isReadyForOtherServices();
+	
 }

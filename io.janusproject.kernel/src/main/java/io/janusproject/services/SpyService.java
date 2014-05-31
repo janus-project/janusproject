@@ -22,8 +22,6 @@ package io.janusproject.services;
 import java.beans.PropertyChangeListener;
 import java.util.UUID;
 
-import com.google.common.util.concurrent.Service;
-
 /** This class enables the Janus kernel to support the spying on agents.
  * 
  * @author $Author: sgalland$
@@ -31,7 +29,7 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public interface SpyService extends Service {
+public interface SpyService extends DependentService {
 
 	/** Add a spy on an agent.
 	 * 
