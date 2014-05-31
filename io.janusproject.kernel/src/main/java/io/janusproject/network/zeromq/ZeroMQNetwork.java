@@ -375,7 +375,7 @@ class ZeroMQNetwork extends AbstractPrioritizedExecutionThreadService implements
 			this.poller.unregister(s);
 			//FIXME: are the two following lines needed?
 			s.close();
-			this.context.destroySocket(s);
+			//this.context.destroySocket(s);
 			this.logger.debug("PEER_DISCONNECTED", peer); //$NON-NLS-1$
 		}
 	}

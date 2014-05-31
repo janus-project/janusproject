@@ -32,6 +32,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -77,6 +78,8 @@ public class Kernel {
 		Kernel k = injector.getInstance(Kernel.class);
 		return k;
 	}
+	
+	private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
 	private AgentContext janusContext;
 
@@ -96,11 +99,15 @@ public class Kernel {
 	 */
 	@Inject
 	Kernel(IServiceManager serviceManager, SpawnService spawnService, HazelcastInstance hazelcastInstance, UncaughtExceptionHandler exceptionHandler) {
-		// Ensure that all the threads has a default hander.
-		Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
+		// Initialize the fields
 		this.hazelcastInstance = hazelcastInstance;
 		this.serviceManager = serviceManager;
 		this.spawnService = spawnService;
+
+		// Ensure that all the threads has a default hander.
+		Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
+				
+		// Listen on the kernel's events
 		this.spawnService.addKernelAgentSpawnListener(new KernelStoppingListener());
 
 		// Start the services NOW to ensure that the default context and space
@@ -131,19 +138,6 @@ public class Kernel {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Stop the Janus kernel.
-	 */
-	private void stopKernel() {
-		// CAUTION: EXECUTE THE STOP FUNCTION IN A THREAD THAT
-		// IS INDEPENDENT TO THE ONES FROM THE EXECUTORS
-		// CREATED BY THE EXECUTORSERVICE.
-		// THIS AVOID THE STOP FUNCTION TO BE INTERRUPTED
-		// BECAUSE THE EXECUTORSERVICE WAS SHUTTED DOWN.
-		StopTheKernel t = new StopTheKernel();
-		t.start();
 	}
 
 	/**
@@ -183,7 +177,15 @@ public class Kernel {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void kernelAgentDestroy() {
-			stopKernel();
+			if (Kernel.this.isRunning.getAndSet(false)) {
+				// CAUTION: EXECUTE THE STOP FUNCTION IN A THREAD THAT
+				// IS INDEPENDENT TO THE ONES FROM THE EXECUTORS
+				// CREATED BY THE EXECUTORSERVICE.
+				// THIS AVOID THE STOP FUNCTION TO BE INTERRUPTED
+				// BECAUSE THE EXECUTORSERVICE WAS SHUTTED DOWN.
+				StopTheKernel t = new StopTheKernel();
+				t.start();
+			}
 		}
 	}
 
@@ -195,7 +197,9 @@ public class Kernel {
 	 */
 	private class StopTheKernel implements ThreadFactory, Runnable, UncaughtExceptionHandler {
 
-		private final Logger rawLogger = LoggerCreator.createLogger(Kernel.class.getName());
+		/** Logger for the shuting down stage.
+		 */
+		public final Logger rawLogger = LoggerCreator.createLogger(Kernel.class.getName());
 		
 		/**
 		 */
@@ -248,6 +252,6 @@ public class Kernel {
 		}
 
 	}
-
+	
 }
 
