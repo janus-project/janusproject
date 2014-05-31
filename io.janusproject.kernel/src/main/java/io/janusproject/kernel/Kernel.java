@@ -32,7 +32,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -79,8 +78,6 @@ public class Kernel {
 		return k;
 	}
 	
-	private final AtomicBoolean isRunning = new AtomicBoolean(false);
-
 	private AgentContext janusContext;
 
 	private final IServiceManager serviceManager;
@@ -174,18 +171,15 @@ public class Kernel {
 
 		/** {@inheritDoc}
 		 */
-		@SuppressWarnings("synthetic-access")
 		@Override
 		public void kernelAgentDestroy() {
-			if (Kernel.this.isRunning.getAndSet(false)) {
-				// CAUTION: EXECUTE THE STOP FUNCTION IN A THREAD THAT
-				// IS INDEPENDENT TO THE ONES FROM THE EXECUTORS
-				// CREATED BY THE EXECUTORSERVICE.
-				// THIS AVOID THE STOP FUNCTION TO BE INTERRUPTED
-				// BECAUSE THE EXECUTORSERVICE WAS SHUTTED DOWN.
-				StopTheKernel t = new StopTheKernel();
-				t.start();
-			}
+			// CAUTION: EXECUTE THE STOP FUNCTION IN A THREAD THAT
+			// IS INDEPENDENT TO THE ONES FROM THE EXECUTORS
+			// CREATED BY THE EXECUTORSERVICE.
+			// THIS AVOID THE STOP FUNCTION TO BE INTERRUPTED
+			// BECAUSE THE EXECUTORSERVICE WAS SHUTTED DOWN.
+			StopTheKernel t = new StopTheKernel();
+			t.start();
 		}
 	}
 
