@@ -84,17 +84,10 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 	/** {@inheritDoc}
 	 */
 	@Override
-	public Collection<Class<? extends Service>> getStartingDependencies() {
+	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
 	}
 	
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Collection<Class<? extends Service>> getStoppingDependencies() {
-		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
-	}
-
 	/** Change the agent factory.
 	 * 
 	 * @param factory

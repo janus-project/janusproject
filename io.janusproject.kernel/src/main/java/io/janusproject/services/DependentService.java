@@ -39,44 +39,28 @@ public interface DependentService extends Service {
 	 */
 	public Class<? extends Service> getServiceType();
 
-	/** Replies the services that must be launched BEFORE launching this service.
+	/** Replies the services that must be launched BEFORE launching this service,
+	 * and that must be stop AFTER stopping this service.
 	 * <p>
-	 * Lower is the priority, sooner the service is started.
-	 * <p>
-	 * This function replies dependencies that are care of {@link AsyncStateService}.
+	 * If one of the dependencies is a {@link AsyncStateService}, this service
+	 * will way until {@link AsyncStateService#isReadyForOtherServices()} is
+	 * true.
 	 * 
-	 * @return the dependencies. 
+	 * @return the dependencies.
+	 * @see #getServiceWeakDependencies() 
 	 */
-	public Collection<Class<? extends Service>> getStartingDependencies();
+	public Collection<Class<? extends Service>> getServiceDependencies();
 
-	/** Replies the services that must be launched BEFORE launching this service.
+	/** Replies the services that must be launched BEFORE launching this service,
+	 * and that must be stop AFTER stopping this service.
 	 * <p>
-	 * Lower is the priority, sooner the service is started.
-	 * <p>
-	 * This function replies dependencies that must be care of {@link AsyncStateService}.
+	 * Even if one of the dependencies is a {@link AsyncStateService}, this service
+	 * will never wait until {@link AsyncStateService#isReadyForOtherServices()} is
+	 * true.
 	 * 
-	 * @return the dependencies. 
+	 * @return the dependencies.
+	 * @see #getServiceDependencies() 
 	 */
-	public Collection<Class<? extends Service>> getWeakStartingDependencies();
-
-	/** Replies the services that must be stop AFTER stopping this service.
-	 * <p>
-	 * Lower is the priority, sooner the service is started.
-	 * <p>
-	 * This function replies dependencies that are care of {@link AsyncStateService}.
-	 * 
-	 * @return the dependencies. 
-	 */
-	public Collection<Class<? extends Service>> getStoppingDependencies();
-
-	/** Replies the services that must be stop AFTER stopping this service.
-	 * <p>
-	 * Lower is the priority, sooner the service is started.
-	 * <p>
-	 * This function replies dependencies that must be care of {@link AsyncStateService}.
-	 * 
-	 * @return the dependencies. 
-	 */
-	public Collection<Class<? extends Service>> getWeakStoppingDependencies();
+	public Collection<Class<? extends Service>> getServiceWeakDependencies();
 
 }

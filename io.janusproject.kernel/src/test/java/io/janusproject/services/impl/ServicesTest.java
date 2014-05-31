@@ -79,55 +79,43 @@ public class ServicesTest extends Assert {
 		Mockito.when(this.s1.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s1));
 		Mockito.when(this.s1.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s1));
 		Mockito.when(this.s1.getServiceType()).thenReturn((Class)ContextSpaceService.class);
-		Mockito.when(this.s1.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class));
-		Mockito.when(this.s1.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class));
-		Mockito.when(this.s1.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s1.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s1.getServiceDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class));
+		Mockito.when(this.s1.getServiceWeakDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
 		this.services.put(State.NEW, this.s1);
 
 		Mockito.when(this.s2.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s2));
 		Mockito.when(this.s2.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s2));
 		Mockito.when(this.s2.getServiceType()).thenReturn((Class)ExecutorService.class);
-		Mockito.when(this.s2.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s2.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s2.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s2.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s2.getServiceDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s2.getServiceWeakDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
 		this.services.put(State.NEW, this.s2);
 
 		Mockito.when(this.s3.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s3));
 		Mockito.when(this.s3.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s3));
 		Mockito.when(this.s3.getServiceType()).thenReturn((Class)KernelDiscoveryService.class);
-		Mockito.when(this.s3.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
-		Mockito.when(this.s3.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
-		Mockito.when(this.s3.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s3.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s3.getServiceDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
+		Mockito.when(this.s3.getServiceWeakDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
 		this.services.put(State.NEW, this.s3);
 
 		Mockito.when(this.s4.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s4));
 		Mockito.when(this.s4.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s4));
 		Mockito.when(this.s4.getServiceType()).thenReturn((Class)LogService.class);
-		Mockito.when(this.s4.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s4.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s4.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s4.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s4.getServiceDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s4.getServiceWeakDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
 		this.services.put(State.NEW, this.s4);
 
 		Mockito.when(this.s5.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s5));
 		Mockito.when(this.s5.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s5));
 		Mockito.when(this.s5.getServiceType()).thenReturn((Class)NetworkService.class);
-		Mockito.when(this.s5.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
-		Mockito.when(this.s5.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
-		Mockito.when(this.s5.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class));
-		Mockito.when(this.s5.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class));
+		Mockito.when(this.s5.getServiceDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class));
+		Mockito.when(this.s5.getServiceWeakDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class));
 		this.services.put(State.NEW, this.s5);
 
 		Mockito.when(this.s6.startAsync()).thenAnswer(new EncounteredServiceAnswer(this.s6));
 		Mockito.when(this.s6.stopAsync()).thenAnswer(new EncounteredServiceAnswer(this.s6));
 		Mockito.when(this.s6.getServiceType()).thenReturn((Class)SpawnService.class);
-		Mockito.when(this.s6.getStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(ContextSpaceService.class));
-		Mockito.when(this.s6.getStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(ContextSpaceService.class));
-		Mockito.when(this.s6.getWeakStartingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
-		Mockito.when(this.s6.getWeakStoppingDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
+		Mockito.when(this.s6.getServiceDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList(ContextSpaceService.class));
+		Mockito.when(this.s6.getServiceWeakDependencies()).thenReturn(Arrays.<Class<? extends Service>>asList());
 		this.services.put(State.NEW, this.s6);
 
 		for(int i=0; i<10; ++i) {
@@ -197,13 +185,13 @@ public class ServicesTest extends Assert {
 		// Spawn(s6)
 		assertEquals(16, this.encounteredServices.size());
 		
-		assertSame(this.s2, this.encounteredServices.get(10));
-		assertSame(this.s4, this.encounteredServices.get(11));
-		assertSame(this.s3, this.encounteredServices.get(12));
-		assertSame(this.s5, this.encounteredServices.get(13));
-		assertSame(this.s1, this.encounteredServices.get(14));
-		assertSame(this.s6, this.encounteredServices.get(15));
-	}
+		assertSame(this.s6, this.encounteredServices.get(10));
+		assertSame(this.s1, this.encounteredServices.get(11));
+		assertSame(this.s5, this.encounteredServices.get(12));
+		assertSame(this.s3, this.encounteredServices.get(13));
+		assertSame(this.s4, this.encounteredServices.get(14));
+		assertSame(this.s2, this.encounteredServices.get(15));
+}
 	
 	/**
 	 * @author $Author: sgalland$

@@ -109,17 +109,10 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 	/** {@inheritDoc}
 	 */
 	@Override
-	public Collection<Class<? extends Service>> getStartingDependencies() {
+	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
 	}
 	
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Collection<Class<? extends Service>> getStoppingDependencies() {
-		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
-	}
-
 	/** Do the post initialization.
 	 * 
 	 * @param instance

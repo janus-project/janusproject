@@ -105,15 +105,10 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	}
 
 	@Override
-	public Collection<java.lang.Class<? extends Service>> getStartingDependencies() {
+	public Collection<java.lang.Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class);
 	}
 	
-	@Override
-	public Collection<java.lang.Class<? extends Service>> getStoppingDependencies() {
-		return Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class);
-	}
-
 	/** Replies the factory used to create contexts.
 	 * 
 	 * @return the context factory.

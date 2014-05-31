@@ -156,29 +156,15 @@ class NoNetwork extends AbstractNetworkingService {
 	/** {@inheritDoc}
 	 */
 	@Override
-	public Collection<Class<? extends Service>> getStartingDependencies() {
+	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
 	}
 	
 	/** {@inheritDoc}
 	 */
 	@Override
-	public Collection<Class<? extends Service>> getWeakStartingDependencies() {
+	public Collection<Class<? extends Service>> getServiceWeakDependencies() {
 		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
 	}
 	
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Collection<Class<? extends Service>> getStoppingDependencies() {
-		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Collection<Class<? extends Service>> getWeakStoppingDependencies() {
-		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
-	}
-
 }

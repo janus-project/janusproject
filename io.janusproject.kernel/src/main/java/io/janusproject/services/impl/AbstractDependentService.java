@@ -45,28 +45,14 @@ public abstract class AbstractDependentService extends AbstractService implement
 	/** {@inheritDoc}
 	 */
 	@Override
-	public Collection<Class<? extends Service>> getStartingDependencies() {
+	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Collections.emptyList();
 	}
 	
 	/** {@inheritDoc}
 	 */
 	@Override
-	public Collection<Class<? extends Service>> getWeakStartingDependencies() {
-		return Collections.emptyList();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Collection<Class<? extends Service>> getStoppingDependencies() {
-		return Collections.emptyList();
-	}
-	
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Collection<Class<? extends Service>> getWeakStoppingDependencies() {
+	public Collection<Class<? extends Service>> getServiceWeakDependencies() {
 		return Collections.emptyList();
 	}
 

@@ -102,7 +102,7 @@ public class Services {
 		Accessors accessors = new StoppingPhaseAccessors();
 		
 		// Build the dependency graph
-		buildDependencyGraph(manager, serviceQueue, otherServices, accessors);
+		buildInvertedDependencyGraph(manager, serviceQueue, otherServices, accessors);
 
 		// Launch the services
 		runDependencyGraph(serviceQueue, otherServices, accessors);
@@ -141,7 +141,7 @@ public class Services {
 					}
 
 					boolean isRoot = true;
-					Collection<Class<? extends Service>> deps = accessors.getDependencies(depServ);
+					Collection<Class<? extends Service>> deps = depServ.getServiceDependencies();
 					for(Class<? extends Service> dep : deps) {
 						isRoot = false;
 						DependencyNode depNode = dependentServices.get(dep);
@@ -152,7 +152,7 @@ public class Services {
 						depNode.nextServices.add(node);
 					}
 
-					deps = accessors.getWeakDependencies(depServ);
+					deps = depServ.getServiceWeakDependencies();
 					for(Class<? extends Service> dep : deps) {
 						isRoot = false;
 						DependencyNode depNode = dependentServices.get(dep);
@@ -183,6 +183,72 @@ public class Services {
 				}
 			}
 		}
+	}
+
+	/** Build the dependency graph for the services.
+	 * 
+	 * @param manager - lsit of the services.
+	 * @param roots - filled with the services that have no dependency.
+	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
+	 * @param accessors - permits to retreive information on the services.
+	 */
+	private static void buildInvertedDependencyGraph(
+			IServiceManager manager,
+			List<DependencyNode> roots, List<Service> freeServices,
+			Accessors accessors) {
+		Map<Class<? extends Service>,DependencyNode> dependentServices = new TreeMap<>(ClassComparator.SINGLETON);
+		Map<Class<? extends Service>,DependencyNode> rootServices = new TreeMap<>(ClassComparator.SINGLETON);
+
+		Service service;
+		for(Entry<State,Service> entry : manager.servicesByState().entries()) {
+			if (accessors.matches(entry.getKey())) {
+				service = entry.getValue();
+				if (service instanceof DependentService) {
+					DependentService depServ = (DependentService)service;
+					Class<? extends Service> type = depServ.getServiceType();
+					DependencyNode node = dependentServices.get(type);
+					boolean isRoot = true;
+					if (node==null) {
+						node = new DependencyNode(depServ, type);
+						dependentServices.put(type, node);
+					}
+					else {
+						assert(node.service==null);
+						node.service = depServ;
+						isRoot = false;
+					}
+
+					Collection<Class<? extends Service>> deps = depServ.getServiceDependencies();
+					for(Class<? extends Service> dep : deps) {
+						DependencyNode depNode = dependentServices.get(dep);
+						if (depNode==null) {
+							depNode = new DependencyNode(dep);
+							dependentServices.put(dep, depNode);
+						}
+						node.nextServices.add(depNode);
+						rootServices.remove(depNode.type);
+					}
+
+					deps = depServ.getServiceWeakDependencies();
+					for(Class<? extends Service> dep : deps) {
+						DependencyNode depNode = dependentServices.get(dep);
+						if (depNode==null) {
+							depNode = new DependencyNode(dep);
+							dependentServices.put(dep, depNode);
+						}
+						node.nextWeakServices.add(depNode);
+						rootServices.remove(depNode.type);
+					}
+					
+					if (isRoot) rootServices.put(type, node);
+				}
+				else {
+					freeServices.add(service);
+				}
+			}
+		}
+		
+		roots.addAll(rootServices.values());
 	}
 
 	/** Run the dependency graph for the services.
@@ -263,10 +329,6 @@ public class Services {
 
 		public boolean matches(State element);
 
-		public Collection<Class<? extends Service>> getDependencies(DependentService serv);
-		
-		public Collection<Class<? extends Service>> getWeakDependencies(DependentService serv);
-
 		public void runBefore(List<Service> freeServices);
 		
 		public boolean isAsyncStateWaitingEnabled();
@@ -294,14 +356,6 @@ public class Services {
 		@Override
 		public boolean matches(State element) {
 			return element==State.NEW;
-		}
-		@Override
-		public Collection<Class<? extends Service>> getDependencies(DependentService serv) {
-			return serv.getStartingDependencies();
-		}
-		@Override
-		public Collection<Class<? extends Service>> getWeakDependencies(DependentService serv) {
-			return serv.getWeakStartingDependencies();
 		}
 		@Override
 		public void runBefore(List<Service> freeServices) {
@@ -341,14 +395,6 @@ public class Services {
 		@Override
 		public boolean matches(State element) {
 			return element!=State.TERMINATED && element!=State.STOPPING;
-		}
-		@Override
-		public Collection<Class<? extends Service>> getDependencies(DependentService serv) {
-			return serv.getStoppingDependencies();
-		}
-		@Override
-		public Collection<Class<? extends Service>> getWeakDependencies(DependentService serv) {
-			return serv.getWeakStoppingDependencies();
 		}
 		@Override
 		public void runBefore(List<Service> freeServices) {
