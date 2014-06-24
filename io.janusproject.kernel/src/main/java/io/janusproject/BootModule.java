@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,9 +51,9 @@ import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 
 /**
- * The module configures the minimum requirements for 
+ * The module configures the minimum requirements for
  * the system variables.
- * 
+ *
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -68,11 +68,11 @@ public class BootModule extends AbstractModule {
 	protected void configure() {
 		// Custom logger
 		bindListener(Matchers.any(), new LoggerMemberListener());
-		
+
 		// Bind the system properties.
 		boolean foundPubUri = false;
 		String name;
-		for(Entry<Object,Object> entry : System.getProperties().entrySet()) {
+		for (Entry<Object, Object> entry : System.getProperties().entrySet()) {
 			name = entry.getKey().toString();
 			bind(Key.get(String.class, Names.named(name))).toInstance(entry.getValue().toString());
 			if (JanusConfig.PUB_URI.equals(name)) {
@@ -153,26 +153,27 @@ public class BootModule extends AbstractModule {
 	 */
 	@Provides
 	@Named(JanusConfig.PUB_URI)
-	private static URI getPubURI_asURI() {
-		String v = getPUBURI_asString();
+	private static URI getPubURIAsURI() {
+		String v = getPUBURIAsString();
 		try {
 			return NetworkUtil.toURI(v);
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			throw new IOError(e);
 		}
 	}
 
 	/** Extract the current value of the PUB_URI from the system's property or
 	 * form the platform default value.
-	 * 
+	 *
 	 * @return the current PUB_URI
 	 */
-	private static String getPUBURI_asString() {
+	private static String getPUBURIAsString() {
 		String pubUri = JanusConfig.getSystemProperty(JanusConfig.PUB_URI);
 		if (pubUri == null || pubUri.isEmpty()) {
 			InetAddress a = NetworkUtil.getPrimaryAddress();
-			if (a==null) a = NetworkUtil.getLoopbackAddress();
+			if (a == null) {
+				a = NetworkUtil.getLoopbackAddress();
+			}
 			if (a != null) {
 				pubUri = NetworkUtil.toURI(a, -1).toString();
 				System.setProperty(JanusConfig.PUB_URI, pubUri);
@@ -195,7 +196,7 @@ public class BootModule extends AbstractModule {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public String get() {
-			return getPUBURI_asString();
+			return getPUBURIAsString();
 		}
 
 	}
@@ -208,27 +209,28 @@ public class BootModule extends AbstractModule {
 	 */
 	private static final class LoggerMemberListener implements TypeListener {
 
-		private static void init() {
-			String propertyFileName = JanusConfig.getSystemProperty(JanusConfig.LOGGING_PROPERTY_FILE_NAME, JanusConfig.LOGGING_PROPERTY_FILE_VALUE);
-			if (propertyFileName!=null && !propertyFileName.isEmpty()) {
-				URL url = FileSystem.convertStringToURL(propertyFileName, true);
-				if (url!=null) {
-					try(InputStream is = url.openStream()) {
-						LogManager.getLogManager().readConfiguration(is);
-					}
-					catch(IOException e) {
-						throw new IOError(e);
-					}
-				}
-			}
-		}
-		
 		private final AtomicBoolean isInit = new AtomicBoolean(false);
 
 		/**
 		 */
 		public LoggerMemberListener() {
 			//
+		}
+
+		private static void init() {
+			String propertyFileName = JanusConfig.getSystemProperty(
+					JanusConfig.LOGGING_PROPERTY_FILE_NAME,
+					JanusConfig.LOGGING_PROPERTY_FILE_VALUE);
+			if (propertyFileName != null && !propertyFileName.isEmpty()) {
+				URL url = FileSystem.convertStringToURL(propertyFileName, true);
+				if (url != null) {
+					try (InputStream is = url.openStream()) {
+						LogManager.getLogManager().readConfiguration(is);
+					} catch (IOException e) {
+						throw new IOError(e);
+					}
+				}
+			}
 		}
 
 		/** {@inheritDoc}
@@ -264,22 +266,20 @@ public class BootModule extends AbstractModule {
 		public LoggerMemberInjector(Field field) {
 			this.field = field;
 		}
-		
+
 		/** {@inheritDoc}
 		 */
 		@Override
 		public void injectMembers(T instance) {
 			Logger logger = LoggerCreator.createLogger(this.field.getDeclaringClass().getName());
-			
+
 			boolean accessible = this.field.isAccessible();
 			try {
 				this.field.setAccessible(true);
 				this.field.set(instance, logger);
-			}
-			catch (IllegalArgumentException | IllegalAccessException e) {
+			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new RuntimeException(e);
-			}
-			finally {
+			} finally {
 				this.field.setAccessible(accessible);
 			}
 		}

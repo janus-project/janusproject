@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.LogService;
-import io.janusproject.services.SpaceRepositoryListener;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
@@ -50,7 +50,7 @@ import com.hazelcast.core.IMap;
 
 /**
  * A repository of spaces specific to a given context.
- * 
+ *
  * @author $Author: ngaud$
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -59,8 +59,8 @@ import com.hazelcast.core.IMap;
  */
 @TwoStepConstruction
 class SpaceRepository {
-	
-	private static final Object[] NO_PARAMETERS = new Object[0]; 
+
+	private static final Object[] NO_PARAMETERS = new Object[0];
 
 	private final String distributedSpaceSetName;
 	private final Injector injector;
@@ -71,20 +71,23 @@ class SpaceRepository {
 	private final SpaceRepositoryListener externalListener;
 
 	/**
-	 * The set of the id of all spaces stored in this repository This set must be distributed and synchronized all over the network
+	 * The set of the id of all spaces stored in this repository This set must be
+	 * distributed and synchronized all over the network.
 	 */
-	private final IMap<SpaceID,Object[]> spaceIDs;
+	private final IMap<SpaceID, Object[]> spaceIDs;
 
 	/**
-	 * Map linking a space id to its related Space object This is local non-distributed map
+	 * Map linking a space id to its related Space object This is local non-distributed map.
 	 */
 	private final Map<SpaceID, Space> spaces;
 
 	/**
-	 * Map linking a a class of Space specification to its related implementations' ids Use the map <code>spaces</code> to get the Space object associated to a given id This is local non-distributed map
+	 * Map linking a a class of Space specification to its related implementations'
+	 * ids Use the map <code>spaces</code> to get the Space object associated to a
+	 * given id This is local non-distributed map.
 	 */
 	private final Multimap<Class<? extends SpaceSpecification<?>>, SpaceID> spacesBySpec;
-	
+
 	/** Id of the Hazelcast listener.
 	 */
 	private String spaceIDListener;
@@ -96,7 +99,12 @@ class SpaceRepository {
 	 * @param logService - logging service
 	 * @param listener - listener on the events in the space repository.
 	 */
-	public SpaceRepository(String distributedSpaceSetName, HazelcastInstance hzInstance, Injector injector, LogService logService, SpaceRepositoryListener listener) {
+	public SpaceRepository(
+			String distributedSpaceSetName,
+			HazelcastInstance hzInstance,
+			Injector injector,
+			LogService logService,
+			SpaceRepositoryListener listener) {
 		this.distributedSpaceSetName = distributedSpaceSetName;
 		this.injector = injector;
 		this.logService = logService;
@@ -105,22 +113,22 @@ class SpaceRepository {
 		this.spacesBySpec = TreeMultimap.create(ClassComparator.SINGLETON, ObjectReferenceComparator.SINGLETON);
 		this.spaceIDs = hzInstance.getMap(this.distributedSpaceSetName);
 	}
-	
+
 	/** Finalize the initialization: ensure that the events are fired outside the scope of the SpaceRepository constructor.
 	 */
 	synchronized void postConstruction() {
-		for (Entry<SpaceID,Object[]> e : this.spaceIDs.entrySet()) {
-			assert(this.spaceIDs.containsKey(e.getKey()));
+		for (Entry<SpaceID, Object[]> e : this.spaceIDs.entrySet()) {
+			assert (this.spaceIDs.containsKey(e.getKey()));
 			ensureLocalSpaceDefinition(e.getKey(), e.getValue());
 		}
 		this.spaceIDListener = this.spaceIDs.addEntryListener(new HazelcastListener(), true);
 	}
-	
+
 	/** Destroy this repository and releaqse all the resources.
 	 */
 	public synchronized void destroy() {
 		// Unregister from Hazelcast layer.
-		if (this.spaceIDListener!=null) {
+		if (this.spaceIDListener != null) {
 			this.spaceIDs.removeEntryListener(this.spaceIDListener);
 		}
 		// Delete the spaces. If this function is called, it
@@ -133,59 +141,64 @@ class SpaceRepository {
 			removeLocalSpaceDefinition(spaceId, true);
 		}
 	}
-	
-	private synchronized <S extends Space> S createSpaceInstance(Class<? extends SpaceSpecification<S>> spec, SpaceID spaceID, boolean isLocalCreation, Object[] creationParams) {
+
+	private synchronized <S extends Space> S createSpaceInstance(
+			Class<? extends SpaceSpecification<S>> spec,
+					SpaceID spaceID,
+					boolean isLocalCreation,
+					Object[] creationParams) {
 		S space;
-		assert(spaceID.getSpaceSpecification()==null || spaceID.getSpaceSpecification().equals(spec)) : "The specification type in the space id does not corresponds to the given specification type (as parameter)"; //$NON-NLS-1$
+		assert (spaceID.getSpaceSpecification() == null || spaceID.getSpaceSpecification().equals(spec))
+			: "The specification type is invalid"; //$NON-NLS-1$
 		// Split the call to create() to let the JVM to create the "empty" array for creation parameters.
-		if (creationParams!=null) {
+		if (creationParams != null) {
 			space = this.injector.getInstance(spec).create(spaceID, creationParams);
-		}
-		else {
+		} else {
 			space = this.injector.getInstance(spec).create(spaceID);
 		}
-		assert(space!=null);
+		assert (space != null);
 		SpaceID id = space.getID();
-		assert(id!=null);
+		assert (id != null);
 		this.spaces.put(id, space);
 		this.spacesBySpec.put(id.getSpaceSpecification(), id);
 		if (isLocalCreation) {
 			this.spaceIDs.putIfAbsent(id,
-					(creationParams!=null && creationParams.length>0) ? creationParams : NO_PARAMETERS);
+					(creationParams != null && creationParams.length > 0) ? creationParams : NO_PARAMETERS);
 		}
 		fireSpaceAdded(space, isLocalCreation);
 		return space;
 	}
 
-	/** Add the existing, but not yet known, spaces into this repository. 
-	 * 
+	/** Add the existing, but not yet known, spaces into this repository.
+	 *
 	 * @param id - identifier of the space
 	 * @param initializationParameters - parameters for initialization.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized void ensureLocalSpaceDefinition(SpaceID id, Object[] initializationParameters) {
 		if (!this.spaces.containsKey(id)) {
-			createSpaceInstance((Class)id.getSpaceSpecification(), id, false, initializationParameters);
+			createSpaceInstance((Class) id.getSpaceSpecification(), id, false, initializationParameters);
 		}
 	}
 
-	/** Remove a remote space. 
-	 * 
+	/** Remove a remote space.
+	 *
 	 * @param id - identifier of the space
 	 * @param isLocalDestruction - indicates if the destruction is initiated by
-	 * the local kernel. 
+	 * the local kernel.
 	 */
 	protected synchronized void removeLocalSpaceDefinition(SpaceID id, boolean isLocalDestruction) {
 		Space space = this.spaces.remove(id);
-		if (space!=null) {
-			assert(space.getParticipants().isEmpty());
+		if (space != null) {
+			assert (space.getParticipants().isEmpty());
 			this.spacesBySpec.remove(id.getSpaceSpecification(), id);
 			fireSpaceRemoved(space, isLocalDestruction);
 		}
 	}
-	
+
 	/** Create a space.
-	 * 
+	 *
+	 * @param <S> - the type of the space to reply.
 	 * @param spaceID - ID of the space.
 	 * @param spec - specification of the space.
 	 * @param creationParams - creation parameters.
@@ -193,18 +206,19 @@ class SpaceRepository {
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized <S extends io.sarl.lang.core.Space> S createSpace(
-			SpaceID spaceID, 
+			SpaceID spaceID,
 			Class<? extends SpaceSpecification<S>> spec,
 			Object... creationParams) {
-		S space = (S)this.spaces.get(spaceID);
-		if (space==null) {
+		S space = (S) this.spaces.get(spaceID);
+		if (space == null) {
 			space = createSpaceInstance(spec, spaceID, true, creationParams);
 		}
 		return space;
 	}
 
 	/** Retrive the first space of the given specification, or create a space if none.
-	 * 
+	 *
+	 * @param <S> - the type of the space to reply.
 	 * @param spec - specification of the space.
 	 * @param spaceID - ID of the space (used only when creating a space).
 	 * @param creationParams - creation parameters (used only when creating a space).
@@ -213,24 +227,23 @@ class SpaceRepository {
 	@SuppressWarnings("unchecked")
 	public synchronized <S extends io.sarl.lang.core.Space> S getOrCreateSpace(
 			Class<? extends SpaceSpecification<S>> spec,
-			SpaceID spaceID, 
+			SpaceID spaceID,
 			Object... creationParams) {
 		Collection<SpaceID> ispaces = this.spacesBySpec.get(spec);
 		S firstSpace;
 		if (ispaces == null || ispaces.isEmpty()) {
 			firstSpace = createSpaceInstance(spec, spaceID, true, creationParams);
+		} else {
+			firstSpace = (S) this.spaces.get(ispaces.iterator().next());
 		}
-		else {
-			firstSpace = (S)this.spaces.get(ispaces.iterator().next());
-		}
-		assert(firstSpace!=null);
+		assert (firstSpace != null);
 		return firstSpace;
 	}
 
 	/**
-	 * Returns the collection of all spaces stored in this repository
-	 * 
-	 * @return the collection of all spaces stored in this repository
+	 * Returns the collection of all spaces stored in this repository.
+	 *
+	 * @return the collection of all spaces stored in this repository.
 	 */
 	public synchronized SynchronizedCollection<? extends Space> getSpaces() {
 		return Collections3.synchronizedCollection(
@@ -240,7 +253,7 @@ class SpaceRepository {
 
 	/**
 	 * Returns the first instance of a space with the specified SpaceID.
-	 * 
+	 *
 	 * @param spaceID - the identifier to retreive.
 	 * @return the space instance of <code>null</code> if none.
 	 */
@@ -250,15 +263,19 @@ class SpaceRepository {
 
 
 	/**
-	 * Returns the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
-	 * 
-	 * @param spec - the specification used to filter the set of stored spaces
-	 * @return the collection of all spaces with the specified {@link SpaceSpecification} stored in this repository
+	 * Returns the collection of all spaces with the specified {@link SpaceSpecification} stored
+	 * in this repository.
+	 *
+	 * @param <S> - type of the spaces to reply.
+	 * @param spec - the specification used to filter the set of stored spaces.
+	 * @return the collection of all spaces with the specified
+	 *         {@link SpaceSpecification} stored in this repository
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized <S extends Space> SynchronizedCollection<S> getSpaces(final Class<? extends SpaceSpecification<S>> spec) {
+	public synchronized <S extends Space> SynchronizedCollection<S> getSpaces(
+			final Class<? extends SpaceSpecification<S>> spec) {
 		return Collections3.synchronizedCollection(
-				(Collection<S>)Collections2.filter(this.spaces.values(), new Predicate<Space>() {
+				(Collection<S>) Collections2.filter(this.spaces.values(), new Predicate<Space>() {
 					@Override
 					public boolean apply(Space input) {
 						return input.getID().getSpaceSpecification().equals(spec);
@@ -266,39 +283,39 @@ class SpaceRepository {
 				}),
 				this);
 	}
-	
+
 	/** Notifies the listeners on the space creation.
-	 * 
-	 * @param space
+	 *
+	 * @param space - the created space.
 	 * @param isLocalCreation - indicates if the creation of the space was
-	 * initiated on the current kernel.
+	 *                          initiated on the current kernel.
 	 */
 	protected void fireSpaceAdded(Space space, boolean isLocalCreation) {
-		if (this.externalListener!=null) {
+		if (this.externalListener != null) {
 			this.externalListener.spaceCreated(space, isLocalCreation);
 		}
 	}
 
 	/** Notifies the listeners on the space destruction.
-	 * 
-	 * @param space
+	 *
+	 * @param space - the removed space.
 	 * @param isLocalDestruction - indicates if the destruction of the space was
-	 * initiated on the current kernel.
+	 *                             initiated on the current kernel.
 	 */
 	protected void fireSpaceRemoved(Space space, boolean isLocalDestruction) {
-		if (this.externalListener!=null) {
+		if (this.externalListener != null) {
 			this.externalListener.spaceDestroyed(space, isLocalDestruction);
 		}
 	}
 
 	/** Listener on events related to the space service.
-	 *  
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class HazelcastListener implements EntryListener<SpaceID,Object[]> {
+	private class HazelcastListener implements EntryListener<SpaceID, Object[]> {
 
 		/**
 		 */
@@ -311,7 +328,7 @@ class SpaceRepository {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryAdded(EntryEvent<SpaceID, Object[]> event) {
-			assert(SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
+			assert (SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
 			ensureLocalSpaceDefinition(event.getKey(), event.getValue());
 		}
 
@@ -320,7 +337,7 @@ class SpaceRepository {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryRemoved(EntryEvent<SpaceID, Object[]> event) {
-			assert(!SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
+			assert (!SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
 			removeLocalSpaceDefinition(event.getKey(), false);
 		}
 
@@ -338,7 +355,7 @@ class SpaceRepository {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryEvicted(EntryEvent<SpaceID, Object[]> event) {
-			assert(!SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
+			assert (!SpaceRepository.this.spaceIDs.containsKey(event.getKey()));
 			removeLocalSpaceDefinition(event.getKey(), false);
 		}
 

@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,9 +21,9 @@ package io.janusproject.kernel.space;
 
 import io.janusproject.repository.DistributedDataStructureFactory;
 import io.janusproject.repository.UniqueAddressParticipantRepository;
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.LogService;
-import io.janusproject.services.NetworkService;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.NetworkService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -41,11 +41,11 @@ import com.google.inject.Inject;
 
 /**
  * Abstract implementation of an event space.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
  * @author $Author: sgalland$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -55,24 +55,24 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 */
 	protected final UniqueAddressParticipantRepository<Address> participants;
 
-	/** Network service.
-	 */
-	@Inject
-	private NetworkService network;
-
 	/** Logging service.
 	 */
 	@Inject
 	protected LogService logger;
-	
+
 	/** Executor service.
 	 */
 	@Inject
 	protected ExecutorService executorService;
 
+	/** Network service.
+	 */
+	@Inject
+	private NetworkService network;
+
 	/**
 	 * Constructs an event space.
-	 * 
+	 *
 	 * @param id - identifier of the space.
 	 * @param factory - factory that is used to create the internal data structure.
 	 */
@@ -85,7 +85,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 
 	/**
 	 * Replies the address associated to the given participant.
-	 * 
+	 *
 	 * @param entity - instance of a participant.
 	 * @return the address of the participant with the given id.
 	 */
@@ -94,8 +94,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	}
 
 	/** Replies the address associated with the given id.
-	 * 
-	 * @param id
+	 *
+	 * @param id - the identifier of the participant.
 	 * @return the address.
 	 */
 	public Address getAddress(UUID id) {
@@ -103,14 +103,19 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	}
 
 	/** Emit the given event in the given scope.
-	 * 
-	 * @param event
-	 * @param scope
+	 * <p>
+	 * This function emits on the internal event bus of the agent
+	 * (call to {@link #doEmit(Event, Scope)}), and on the network.
+	 *
+	 * @param event - the event to emit.
+	 * @param scope - description of the scope of the event, i.e. the receivers of the event.
+	 * @see #emit(Event)
 	 */
 	public final void emit(Event event, Scope<Address> scope) {
 		assert (event != null);
 		assert (event.getSource() != null) : "Every event must have a source"; //$NON-NLS-1$
-		assert this.getID().equals(event.getSource().getSpaceId()) : "The source address must belong to this space"; //$NON-NLS-1$
+		assert this.getID().equals(event.getSource().getSpaceId())
+			: "The source address must belong to this space"; //$NON-NLS-1$
 
 		try {
 			this.network.publish(scope, event);
@@ -122,17 +127,24 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	}
 
 	/** Emit the given event.
-	 * 
-	 * @param event
+	 * <p>
+	 * This function emits on the internal event bus of the agent
+	 * (call to {@link #doEmit(Event, Scope)}), and on the network.
+	 *
+	 * @param event - the event to emit.
+	 * @see #emit(Event, Scope)
 	 */
 	public final void emit(Event event) {
 		emit(event, Scopes.<Address>allParticipants());
 	}
 
 	/** Do the emission of the event.
-	 * 
-	 * @param event
-	 * @param scope
+	 * <p>
+	 * This function emits the event <strong>only on the internal
+	 * event bus</strong> of the agents.
+	 *
+	 * @param event - the event to emit.
+	 * @param scope - description of the scope of the event, i.e. the receivers of the event.
 	 */
 	protected void doEmit(Event event, Scope<? super Address> scope) {
 		for (EventListener agent : this.participants.getListeners()) {
@@ -153,7 +165,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 
 	/**
 	 * Invoked when an event was not handled by a listener.
-	 * 
+	 *
 	 * @param e - dead event
 	 */
 	@Subscribe
@@ -161,7 +173,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		this.logger.debug("UNHANDLED_EVENT", //$NON-NLS-1$
 				getID(), ((Event) e.getEvent()).getSource(), e.getEvent());
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
@@ -176,12 +188,11 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	public void eventReceived(SpaceID space, Scope<?> scope, Event event) {
 		try {
 			AbstractEventSpace.this.doEmit(event, (Scope<Address>) scope);
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			this.logger.error(AbstractEventSpace.class,  "INVALID_EMIT", e); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -192,7 +203,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 
 		private final EventListener agent;
 		private final Event event;
-		
+
 		/**
 		 * @param agent
 		 * @param event
@@ -201,15 +212,15 @@ public abstract class AbstractEventSpace extends SpaceBase {
 			this.agent = agent;
 			this.event = event;
 		}
-		
+
 		@Override
 		public void run() {
 			this.agent.receiveEvent(this.event);
 		}
-		
+
 		@Override
 		public String toString() {
-			return "[agent="+this.agent+"; event="+this.event+"]"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			return "[agent=" + this.agent + "; event=" + this.event + "]"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 
 	}

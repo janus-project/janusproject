@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,9 +19,9 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.IServiceManager;
-import io.janusproject.services.KernelAgentSpawnListener;
-import io.janusproject.services.SpawnService;
+import io.janusproject.services.agentplatform.KernelAgentSpawnListener;
+import io.janusproject.services.agentplatform.SpawnService;
+import io.janusproject.services.api.IServiceManager;
 import io.janusproject.services.impl.Services;
 import io.janusproject.util.LoggerCreator;
 import io.janusproject.util.TwoStepConstruction;
@@ -51,11 +51,11 @@ import com.hazelcast.core.HazelcastInstance;
  * <p>
  * <strong>The Kernel is a singleton.</strong>
  * <p>
- * The Kernel is assimilated to an agent that is omniscient and 
+ * The Kernel is assimilated to an agent that is omniscient and
  * distributed other the network. It is containing all the other agents.
  * <p>
  * To create a Kernel, you should use the function {@link #create(Module...)}.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
  * @author $Author: sgalland$
@@ -64,20 +64,9 @@ import com.hazelcast.core.HazelcastInstance;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-@TwoStepConstruction(names={"setJanusContext"})
+@TwoStepConstruction(names = { "setJanusContext" })
 public class Kernel {
 
-	/** Create an instance of {@link Kernel}.
-	 * 
-	 * @param modules - modules to link to the new kernel.
-	 * @return the new kernel.
-	 */
-	public static final Kernel create(Module... modules){
-		Injector injector = Guice.createInjector(modules);
-		Kernel k = injector.getInstance(Kernel.class);
-		return k;
-	}
-	
 	private AgentContext janusContext;
 
 	private final IServiceManager serviceManager;
@@ -88,14 +77,17 @@ public class Kernel {
 
 	/**
 	 * Constructs a Janus kernel.
-	 * 
+	 *
 	 * @param serviceManager is the instance of the service manager that must be used by the kernel.
 	 * @param spawnService is the instance of the spawn service.
 	 * @param hazelcastInstance is the instance of the Hazelcast tools.
 	 * @param exceptionHandler is the handler of the uncaught exceptions.
 	 */
 	@Inject
-	Kernel(IServiceManager serviceManager, SpawnService spawnService, HazelcastInstance hazelcastInstance, UncaughtExceptionHandler exceptionHandler) {
+	Kernel(IServiceManager serviceManager,
+			SpawnService spawnService,
+			HazelcastInstance hazelcastInstance,
+			UncaughtExceptionHandler exceptionHandler) {
 		// Initialize the fields
 		this.hazelcastInstance = hazelcastInstance;
 		this.serviceManager = serviceManager;
@@ -103,7 +95,7 @@ public class Kernel {
 
 		// Ensure that all the threads has a default hander.
 		Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
-				
+
 		// Listen on the kernel's events
 		this.spawnService.addKernelAgentSpawnListener(new KernelStoppingListener());
 
@@ -112,9 +104,20 @@ public class Kernel {
 		Services.startServices(this.serviceManager);
 	}
 
+	/** Create an instance of {@link Kernel}.
+	 *
+	 * @param modules - modules to link to the new kernel.
+	 * @return the new kernel.
+	 */
+	public static final Kernel create(Module... modules) {
+		Injector injector = Guice.createInjector(modules);
+		Kernel k = injector.getInstance(Kernel.class);
+		return k;
+	}
+
 	/**
 	 * Spawn an agent of the given type, and pass the parameters to its initialization function.
-	 * 
+	 *
 	 * @param agent - the type of the agent to spawn.
 	 * @param params - the list of the parameters to pass to the agent initialization function.
 	 * @return the identifier of the agent, never <code>null</code>.
@@ -122,14 +125,15 @@ public class Kernel {
 	public UUID spawn(Class<? extends Agent> agent, Object... params) {
 		return this.spawnService.spawn(this.janusContext, agent, params);
 	}
-	
+
 	/** Replies a kernel service that is alive.
-	 * 
-	 * @param type
+	 *
+	 * @param <S> - type of the type to reply.
+	 * @param type - type of the type to reply.
 	 * @return the service, or <code>null</code>.
 	 */
 	public <S extends Service> S getService(Class<S> type) {
-		for(Service serv : this.serviceManager.servicesByState().values()) {
+		for (Service serv : this.serviceManager.servicesByState().values()) {
 			if (serv.isRunning() && type.isInstance(serv)) {
 				return type.cast(serv);
 			}
@@ -139,7 +143,7 @@ public class Kernel {
 
 	/**
 	 * Change the Janus context of the kernel.
-	 * 
+	 *
 	 * @param janusContext - the new janus kernel. It must be never <code>null</code>.
 	 */
 	@Inject
@@ -193,8 +197,8 @@ public class Kernel {
 
 		/** Logger for the shuting down stage.
 		 */
-		public final Logger rawLogger = LoggerCreator.createLogger(Kernel.class.getName());
-		
+		private final Logger rawLogger = LoggerCreator.createLogger(Kernel.class.getName());
+
 		/**
 		 */
 		public StopTheKernel() {
@@ -234,18 +238,18 @@ public class Kernel {
 		 */
 		@Override
 		public void uncaughtException(Thread t, Throwable e) {
-			assert(t!=null);
-			assert(e!=null);
-			LogRecord record = new LogRecord(Level.SEVERE, e.getLocalizedMessage());		
+			assert (t != null);
+			assert (e != null);
+			LogRecord record = new LogRecord(Level.SEVERE, e.getLocalizedMessage());
 			record.setThrown(e);
 			StackTraceElement elt = e.getStackTrace()[0];
-			assert(elt!=null);
+			assert (elt != null);
 			record.setSourceClassName(elt.getClassName());
 			record.setSourceMethodName(elt.getMethodName());
 			this.rawLogger.log(record);
 		}
 
 	}
-	
+
 }
 

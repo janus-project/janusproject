@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,14 +32,14 @@ import com.google.inject.name.Named;
  * Public configuration properties for the network modules.
  * Define the properties as required in your application module as a
  * {@link Named} annotation.
- * 
+ *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class NetworkConfig {
-		
+public final class NetworkConfig {
+
 	/** Name of the property for the AES key.
 	 */
 	public static final String AES_KEY = "network.encrypter.aes.key"; //$NON-NLS-1$
@@ -65,8 +65,14 @@ public class NetworkConfig {
 	 */
 	public static final Charset BYTE_ARRAY_STRING_CHARSET_VALUE = Charsets.UTF_8;
 
+	private static Charset currentStringEncoding;
+
+	private NetworkConfig() {
+		//
+	}
+
 	/** Replies the default values for the properties supported by Janus config.
-	 * 
+	 *
 	 * @param defaultValues - filled with the default values supported by the Janus platform.
 	 */
 	public static void getDefaultValues(Properties defaultValues) {
@@ -74,32 +80,28 @@ public class NetworkConfig {
 		defaultValues.put(AES_KEY, ""); //$NON-NLS-1$
 		defaultValues.put(BYTE_ARRAY_STRING_CHARSET_NAME, BYTE_ARRAY_STRING_CHARSET_VALUE.name());
 	}
-		
+
 	/** Replies the charset that must be used for encoding the strings.
-	 * 
+	 *
 	 * @return the encoding charset.
 	 */
 	public static Charset getStringEncodingCharset() {
-		if (currentStringEncoding==null) {
+		if (currentStringEncoding == null) {
 			String value = JanusConfig.getSystemProperty(BYTE_ARRAY_STRING_CHARSET_NAME, null);
-			if (value!=null) {
+			if (value != null) {
 				try {
 					currentStringEncoding = Charset.forName(value);
-					if (currentStringEncoding==null) {
+					if (currentStringEncoding == null) {
 						currentStringEncoding = BYTE_ARRAY_STRING_CHARSET_VALUE;
 					}
-				}
-				catch(Throwable _) {
+				} catch (Throwable _) {
 					currentStringEncoding = BYTE_ARRAY_STRING_CHARSET_VALUE;
 				}
-			}
-			else {
+			} else {
 				currentStringEncoding = BYTE_ARRAY_STRING_CHARSET_VALUE;
 			}
 		}
 		return currentStringEncoding;
 	}
-
-	private static Charset currentStringEncoding = null;
 
 }

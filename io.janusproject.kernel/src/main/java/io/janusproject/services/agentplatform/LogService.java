@@ -1,23 +1,25 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
+package io.janusproject.services.agentplatform;
+
+import io.janusproject.services.api.DependentService;
 
 import java.util.logging.Filter;
 import java.util.logging.Level;
@@ -30,10 +32,10 @@ import java.util.logging.Logger;
  * to the log level.
  * <p>
  * The LogService considers the parameters of the functions as:<ul>
- * <li>the <var>messageKey</var> is the name of the message in the property file;</li>
- * <li>the <var>message</var> parameters are the values that will replace the
+ * <li>the messageKey is the name of the message in the property file;</li>
+ * <li>the message parameters are the values that will replace the
  * strings {0}, {1}, {2}... in the text extracted from the ressource property;</li>
- * <li>the parameter <var>propertyType</var> is the class from which the filename of
+ * <li>the parameter propertyType is the class from which the filename of
  * the property file will be built.</li>
  * </ul>
  * <p>
@@ -44,8 +46,8 @@ import java.util.logging.Logger;
  * function will be invoked.
  * <p>
  * For all the other objects, the {@link #toString()} function is invoked.
- * 
- * 
+ *
+ *
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -54,179 +56,193 @@ import java.util.logging.Logger;
 public interface LogService extends DependentService {
 
 	/** Log an information message.
-	 * 
+	 *
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 * @see #fineInfo(String, Object...)
 	 * @see #finerInfo(String, Object...)
 	 */
-	public void info(String messageKey, Object... message);
+	void info(String messageKey, Object... message);
 
 	/** Log an information message.
-	 * 
+	 *
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 * @see #fineInfo(Class, String, Object...)
 	 * @see #finerInfo(Class, String, Object...)
 	 */
-	public void info(Class<?> propertyType, String messageKey, Object... message);
+	void info(Class<?> propertyType, String messageKey, Object... message);
 
 	/** Log a fine information message.
-	 * 
+	 *
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 * @see #info(String, Object...)
 	 * @see #finerInfo(String, Object...)
 	 */
-	public void fineInfo(String messageKey, Object... message);
+	void fineInfo(String messageKey, Object... message);
 
 	/** Log an information message.
-	 * 
+	 *
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 * @see #info(Class, String, Object...)
 	 * @see #finerInfo(Class, String, Object...)
 	 */
-	public void fineInfo(Class<?> propertyType, String messageKey, Object... message);
+	void fineInfo(Class<?> propertyType, String messageKey, Object... message);
 
 	/** Log a finer information message.
-	 * 
+	 *
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 * @see #info(String, Object...)
 	 * @see #fineInfo(String, Object...)
 	 */
-	public void finerInfo(String messageKey, Object... message);
+	void finerInfo(String messageKey, Object... message);
 
 	/** Log a finer information message.
-	 * 
+	 *
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 * @see #info(Class, String, Object...)
 	 * @see #fineInfo(Class, String, Object...)
 	 */
-	public void finerInfo(Class<?> propertyType, String messageKey, Object... message);
+	void finerInfo(Class<?> propertyType, String messageKey, Object... message);
 
 	/** Log a debug message.
-	 * 
+	 *
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 */
-	public void debug(String messageKey, Object... message);
+	void debug(String messageKey, Object... message);
 
 	/** Log a debug message.
-	 * 
+	 *
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 */
-	public void debug(Class<?> propertyType, String messageKey, Object... message);
+	void debug(Class<?> propertyType, String messageKey, Object... message);
 
 	/** Log a warning message.
-	 * 
+	 *
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 */
-	public void warning(Class<?> propertyType, String messageKey, Object... message);
+	void warning(Class<?> propertyType, String messageKey, Object... message);
 
 	/** Log a warning message.
-	 * 
+	 *
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 */
-	public void warning(String messageKey, Object... message);
+	void warning(String messageKey, Object... message);
 
 	/** Log an error message.
-	 * 
+	 *
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 */
-	public void error(String messageKey, Object... message);
+	void error(String messageKey, Object... message);
 
 	/** Log an error message.
-	 * 
+	 *
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 */
-	public void error(Class<?> propertyType, String messageKey, Object... message);
+	void error(Class<?> propertyType, String messageKey, Object... message);
 
 	/** Log the given record.
-	 * 
-	 * @param record
+	 *
+	 * @param record - the description of the message to log.
 	 */
-	public void log(LogRecord record);
-	
+	void log(LogRecord record);
+
 	/** Log a message.
-	 * 
+	 *
 	 * @param level - level of logging for the message.
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 */
-	public void log(Level level, Class<?> propertyType, String messageKey, Object... message);
+	void log(Level level, Class<?> propertyType, String messageKey, Object... message);
 
 	/** Log a warning message.
-	 * 
+	 *
 	 * @param level - level of logging for the message.
 	 * @param messageKey - key of the message in the properties.
-	 * @param message
+	 * @param message - the values to insert into the message in place of the
+	 * parameter marker (<code>{0}</code>, etc.)
 	 */
-	public void log(Level level, String messageKey, Object... message);
+	void log(Level level, String messageKey, Object... message);
 
 	/** Replies the logger.
-	 * 
+	 *
 	 * @return the logger.
 	 */
-	public Logger getLogger();
-	
+	Logger getLogger();
+
 	/** Change the logger.
-	 * 
-	 * @param logger
+	 *
+	 * @param logger - the background logger instance.
 	 */
-	public void setLogger(Logger logger);
-	
+	void setLogger(Logger logger);
+
 	/** Change the filter that permits to output particular logs.
-	 * 
-	 * @param filter
+	 *
+	 * @param filter - the filter.
 	 */
-	public void setFilter(Filter filter);
+	void setFilter(Filter filter);
 
 	/** Replies the filter that permits to output particular logs.
-	 * 
+	 *
 	 * @return the filter
 	 */
-	public Filter getFilter();
-	
+	Filter getFilter();
+
 	/** Check if a message of the given level would actually be logged
      * by this logger.  This check is based on the Loggers effective level,
      * which may be inherited from its parent.
      *
-     * @param   level   a message logging level
-     * @return  true if the given message level is currently being logged.
+     * @param   level - a message logging level
+     * @return  <code>true</code> if the given message level is currently being logged.
      */
-	public boolean isLoggeable(Level level);
+	boolean isLoggeable(Level level);
 
 	/** Replies the level of logging.
      *
      * @return  the level of logging.
      */
-	public Level getLevel();
+	Level getLevel();
 
 
 	/** Change the level of logging.
      *
-     * @param level
+     * @param level - the level of the logging.
      */
-	public void setLevel(Level level);
+	void setLevel(Level level);
 
 	/** Utility to put objec that us asynchronously evaluated by
 	 * the {@link LogService}.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -234,10 +250,10 @@ public interface LogService extends DependentService {
 	 * @see LogService
 	 */
 	public interface LogParam {
-		
+
 		@Override
-		public abstract String toString();
-		
+		String toString();
+
 	}
 
 }

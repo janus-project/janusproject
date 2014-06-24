@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,10 @@
 package io.janusproject.kernel;
 
 import io.janusproject.kernel.bic.BuiltinCapacityUtil;
-import io.janusproject.services.ContextSpaceService;
-import io.janusproject.services.KernelAgentSpawnListener;
-import io.janusproject.services.SpawnService;
-import io.janusproject.services.SpawnServiceListener;
+import io.janusproject.services.agentplatform.ContextSpaceService;
+import io.janusproject.services.agentplatform.KernelAgentSpawnListener;
+import io.janusproject.services.agentplatform.SpawnService;
+import io.janusproject.services.agentplatform.SpawnServiceListener;
 import io.janusproject.services.impl.AbstractDependentService;
 import io.janusproject.util.ListenerCollection;
 import io.sarl.core.AgentKilled;
@@ -53,7 +53,7 @@ import com.google.inject.Singleton;
 
 /**
  * Implementation of a spawning service.
- * 
+ *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -65,17 +65,17 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 	private final ListenerCollection<?> listeners = new ListenerCollection<>();
 	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
 	private final Map<UUID, Agent> agents = new TreeMap<>();
-	
+
 	private AgentFactory agentFactory;
 
 	/**
-	 * @param injector
+	 * @param injector - the background injector that is currently used.
 	 */
 	@Inject
 	public JanusSpawnService(Injector injector) {
 		this.agentFactory = new DefaultAgentFactory(injector);
 	}
-	
+
 	@Override
 	public final Class<? extends Service> getServiceType() {
 		return SpawnService.class;
@@ -87,18 +87,18 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
 	}
-	
+
 	/** Change the agent factory.
-	 * 
-	 * @param factory
+	 *
+	 * @param factory - factory of agents.
 	 */
 	public synchronized void setAgentFactory(AgentFactory factory) {
-		assert(factory!=null);
+		assert (factory != null);
 		this.agentFactory = factory;
 	}
 
 	/** Replies the agent factory.
-	 * 
+	 *
 	 * @return the agent factory.
 	 */
 	public synchronized AgentFactory getAgentFactory() {
@@ -132,7 +132,7 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 		boolean error = !isRunning();
 		// We should check if it is possible to kill the agent BEFORE killing it.
 		Agent agent = this.agents.get(agentID);
-		if (agent!=null) {
+		if (agent != null) {
 			if (canKillAgent(agent)) {
 				this.agents.remove(agentID);
 				fireAgentDestroyed(agent);
@@ -142,15 +142,14 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 				if (error) {
 					throw new SpawnServiceStopException(agentID);
 				}
-			}
-			else {
+			} else {
 				throw new AgentKillException(agentID);
 			}
 		}
 	}
-	
+
 	/** Replies the registered agents.
-	 * 
+	 *
 	 * @return the registered agents.
 	 */
 	public synchronized SynchronizedSet<UUID> getAgents() {
@@ -158,12 +157,12 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 	}
 
 	/** Replies the registered agent.
-	 * 
+	 *
 	 * @param id is the identifier of the agent.
 	 * @return the registered agent, or <code>null</code>.
 	 */
 	synchronized Agent getAgent(UUID id) {
-		assert(id!=null);
+		assert (id != null);
 		return this.agents.get(id);
 	}
 
@@ -239,10 +238,10 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 
 	/**
 	 * Notifies the listeners about the agent creation.
-	 * 
+	 *
 	 * @param context - context in which the agent is spawn.
 	 * @param agent - the spawn agent.
-	 * @param initializationParameters
+	 * @param initializationParameters - list of the values to pass as initialization parameters.
 	 */
 	protected void fireAgentSpawned(AgentContext context, Agent agent, Object[] initializationParameters) {
 		SpawnServiceListener[] ilisteners;
@@ -251,7 +250,7 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 			ilisteners = new SpawnServiceListener[list.size()];
 			list.toArray(ilisteners);
 		}
-		
+
 		SpawnServiceListener[] ilisteners2 = this.listeners.getListeners(SpawnServiceListener.class);
 
 		for (SpawnServiceListener l : ilisteners2) {
@@ -268,9 +267,9 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 				agent.getID(),
 				agent.getClass().getName()));
 	}
-	
+
 	/** Replies if the given agent can be killed.
-	 * 
+	 *
 	 * @param agent - agent to test.
 	 * @return <code>true</code> if the given agent can be killed,
 	 * otherwise <code>false</code>.
@@ -279,12 +278,12 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 	public synchronized boolean canKillAgent(Agent agent) {
 		try {
 			AgentContext ac = BuiltinCapacityUtil.getContextIn(agent);
-			if (ac!=null) {
+			if (ac != null) {
 				//FIXME: Is is sufficient to check the default space? May the other spaces be checked also?
 				Set<UUID> participants = ac.getDefaultSpace().getParticipants();
-				if (participants!=null &&
-					(participants.size()>1 ||
-					 (participants.size()==1 && !participants.contains(agent.getID())))) {
+				if (participants != null
+					&& (participants.size() > 1
+					 || (participants.size() == 1 && !participants.contains(agent.getID())))) {
 					return false;
 				}
 			}
@@ -293,11 +292,11 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Notifies the listeners about the agent destruction.
-	 * 
-	 * @param agent
+	 *
+	 * @param agent - the destroyed agent.
 	 */
 	protected void fireAgentDestroyed(Agent agent) {
 		SpawnServiceListener[] ilisteners;
@@ -306,7 +305,7 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 			ilisteners = new SpawnServiceListener[list.size()];
 			list.toArray(ilisteners);
 		}
-		
+
 		SpawnServiceListener[] ilisteners2 = this.listeners.getListeners(SpawnServiceListener.class);
 
 		try {
@@ -357,7 +356,7 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 
 	/**
 	 * This exception is thrown when the spawning service of agents is disabled.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -379,7 +378,7 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 
 	/**
 	 * This exception is thrown when the spawning service is not running when the killing function on an agent is called.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -400,7 +399,7 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 
 	/**
 	 * This exception is thrown when an agent cannot be spawned.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -415,11 +414,13 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 		 * @param cause - the cause of the exception.
 		 */
 		public CannotSpawnException(Class<? extends Agent> agentClazz, Throwable cause) {
-			super(Locale.getString(JanusSpawnService.class, "CANNOT_INSTANCIATE_AGENT", agentClazz), cause); //$NON-NLS-1$
+			super(Locale.getString(JanusSpawnService.class,
+					"CANNOT_INSTANCIATE_AGENT", agentClazz), //$NON-NLS-1$
+				cause);
 		}
 
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -429,7 +430,7 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 	private static class DefaultAgentFactory implements AgentFactory {
 
 		private final Injector injector;
-		
+
 		/**
 		 * @param injector
 		 */
@@ -444,7 +445,7 @@ class JanusSpawnService extends AbstractDependentService implements SpawnService
 			this.injector.injectMembers(agent);
 			return type.cast(agent);
 		}
-		
+
 	}
 
 }

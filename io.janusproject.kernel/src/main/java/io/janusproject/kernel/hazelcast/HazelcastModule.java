@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ import io.janusproject.JanusConfig;
 import io.janusproject.JanusDefaultModule;
 import io.janusproject.network.NetworkUtil;
 import io.janusproject.repository.DistributedDataStructureFactory;
-import io.janusproject.services.LogService;
+import io.janusproject.services.agentplatform.LogService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.SpaceID;
 
@@ -42,9 +42,9 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
 /**
- * The Core Janus Module configures the minimum requirements for Janus to run properly. If you need a standard configuration use {@link JanusDefaultModule}
- * 
- * 
+ * The Core Janus Module configures the minimum requirements for Janus to
+ * run properly. If you need a standard configuration use {@link JanusDefaultModule}.
+ *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -60,7 +60,7 @@ public class HazelcastModule extends AbstractModule {
 		requireBinding(LogService.class);
 
 		Config hazelcastConfig = new Config();
-		
+
 		SerializerConfig sc = new SerializerConfig();
 		sc.setTypeClass(SpaceID.class);
 		sc.setImplementation(new SpaceIDSerializer());
@@ -73,49 +73,52 @@ public class HazelcastModule extends AbstractModule {
 		hazelcastConfig.getSerializationConfig().addSerializerConfig(sc2);
 
 		bind(Config.class).toInstance(hazelcastConfig);
-		
-		bind(DistributedDataStructureFactory.class).to(HazelcastDistributedDataStructureFactory.class).in(Singleton.class);
+
+		bind(DistributedDataStructureFactory.class).to(HazelcastDistributedDataStructureFactory.class)
+			.in(Singleton.class);
 
 		// Ensure the system property for the hazelcast logger factory
-		String factory = JanusConfig.getSystemProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY_NAME, JanusConfig.HAZELCAST_LOGGER_FACTORY_VALUE);
-		assert(factory!=null && !factory.isEmpty());
+		String factory = JanusConfig.getSystemProperty(
+				JanusConfig.HAZELCAST_LOGGER_FACTORY_NAME,
+				JanusConfig.HAZELCAST_LOGGER_FACTORY_VALUE);
+		assert (factory != null && !factory.isEmpty());
 		System.setProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY_NAME, factory);
 	}
 
 	@Provides
 	@Singleton
-	private static HazelcastInstance createHazelcastInstance(Config config, LogService logService, @Named(JanusConfig.PUB_URI) URI uri) {
-		assert(uri!=null);
+	private static HazelcastInstance createHazelcastInstance(
+			Config config,
+			LogService logService,
+			@Named(JanusConfig.PUB_URI) URI uri) {
+		assert (uri != null);
 		boolean enableMulticast = true;
 		InetAddress adr = null;
-		
+
 		if (JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false)) {
 			adr = NetworkUtil.getLoopbackAddress();
 			enableMulticast = false;
-		}
-		else {
+		} else {
 			try {
 				adr = NetworkUtil.toInetAddress(uri);
-			}
-			catch(Throwable e) {
+			} catch (Throwable e) {
 				logService.error("INVALID_PUB_URI", e); //$NON-NLS-1$
 			}
 		}
-		
+
 		// Ensure to have an Inet address
-		if (adr==null) {
+		if (adr == null) {
 			if (!NetworkUtil.isConnectedHost()) {
 				adr = NetworkUtil.getLoopbackAddress();
-			}
-			else {
+			} else {
 				adr = NetworkUtil.getPrimaryAddress();
 			}
 		}
-		
-		assert(adr!=null);
+
+		assert (adr != null);
 		String hostname = adr.getHostAddress();
 		config.setProperty("hazelcast.local.localAddress", hostname); //$NON-NLS-1$
-		
+
 		NetworkConfig networkConfig = config.getNetworkConfig();
 		MulticastConfig multicastConfig = networkConfig.getJoin().getMulticastConfig();
 
@@ -131,10 +134,10 @@ public class HazelcastModule extends AbstractModule {
 //		else {
 //			multicastConfig.setEnabled(false);
 //		}
-		
+
 		HzKernelLoggerFactory.setLogService(logService);
-		
+
 		return Hazelcast.newHazelcastInstance(config);
 	}
-	
+
 }

@@ -1,17 +1,16 @@
 /*
-/*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,12 +21,12 @@ package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.network.NetworkUtil;
-import io.janusproject.services.AsyncStateService;
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.KernelDiscoveryService;
-import io.janusproject.services.KernelDiscoveryServiceListener;
-import io.janusproject.services.LogService;
-import io.janusproject.services.NetworkService;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.KernelDiscoveryService;
+import io.janusproject.services.agentplatform.KernelDiscoveryServiceListener;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.NetworkService;
+import io.janusproject.services.api.AsyncStateService;
 import io.janusproject.services.impl.AbstractDependentService;
 import io.janusproject.util.ListenerCollection;
 import io.janusproject.util.TwoStepConstruction;
@@ -52,7 +51,7 @@ import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
 
 /** Service that is providing the access to the repository of the Janus kernels.
- * 
+ *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -66,12 +65,12 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 	private URI currentPubURI;
 	private URI currentHzURI;
 
-	private IMap<URI,URI> kernels;
+	private IMap<URI, URI> kernels;
 
-	private boolean isReady = false;
-	
-	private String hzRegId1 = null;
-	private String hzRegId2 = null;
+	private boolean isReady;
+
+	private String hzRegId1;
+	private String hzRegId2;
 
 	private NetworkService network;
 
@@ -83,10 +82,10 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 
 	private HazelcastInstance hzInstance;
 
-	private final HazelcastListener hzListener = new HazelcastListener(); 
+	private final HazelcastListener hzListener = new HazelcastListener();
 
 	/** Constructs a <code>KernelRepositoryService</code>.
-	 * 
+	 *
 	 * @param janusID - injected identifier of the Janus context.
 	 */
 	@Inject
@@ -100,7 +99,7 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 	public boolean isReadyForOtherServices() {
 		return isRunning() && this.isReady;
 	}
-	
+
 	@Override
 	public final Class<? extends Service> getServiceType() {
 		return KernelDiscoveryService.class;
@@ -112,16 +111,21 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
 	}
-	
+
 	/** Do the post initialization.
-	 * 
-	 * @param instance
-	 * @param networkService
-	 * @param executorService
-	 * @param logger
+	 *
+	 * @param instance - instance of the Hazelcast service that permits
+	 *                   to shared data among the network.
+	 * @param networkService - network service to be linked to.
+	 * @param executorService - execution service to use.
+	 * @param logger - logging service to use.
 	 */
 	@Inject
-	void postConstruction(HazelcastInstance instance, NetworkService networkService, ExecutorService executorService, LogService logger) {
+	void postConstruction(
+			HazelcastInstance instance,
+			NetworkService networkService,
+			ExecutorService executorService,
+			LogService logger) {
 		this.executorService = executorService;
 		this.hzInstance = instance;
 		this.logger = logger;
@@ -159,27 +163,29 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 	}
 
 	/** Notifies the listeners about the discovering of a kernel.
-	 * 
-	 * @param uri
+	 *
+	 * @param uri - URI of the discovered kernel.
 	 */
 	protected void fireKernelDiscovered(URI uri) {
 		this.logger.info(
 				JanusKernelDiscoveryService.class,
 				"KERNEL_DISCOVERY", uri, getCurrentKernel()); //$NON-NLS-1$
-		for(KernelDiscoveryServiceListener listener : this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
+		for (KernelDiscoveryServiceListener listener
+				: this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
 			listener.kernelDiscovered(uri);
 		}
 	}
 
 	/** Notifies the listeners about the killing of a kernel.
-	 * 
-	 * @param uri
+	 *
+	 * @param uri - URI of the disconnected kernel.
 	 */
 	protected void fireKernelDisconnected(URI uri) {
 		this.logger.info(
 				JanusKernelDiscoveryService.class,
 				"KERNEL_DISCONNECTION", uri, getCurrentKernel()); //$NON-NLS-1$
-		for(KernelDiscoveryServiceListener listener : this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
+		for (KernelDiscoveryServiceListener listener
+				: this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
 			listener.kernelDisconnected(uri);
 		}
 	}
@@ -198,12 +204,18 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 	@Override
 	protected synchronized void doStop() {
 		this.isReady = false;
-		if (this.hzRegId1!=null) this.kernels.removeEntryListener(this.hzRegId1);
-		if (this.hzRegId2!=null) this.hzInstance.getClientService().removeClientListener(this.hzRegId2);
+		if (this.hzRegId1 != null) {
+			this.kernels.removeEntryListener(this.hzRegId1);
+		}
+		if (this.hzRegId2 != null) {
+			this.hzInstance.getClientService().removeClientListener(this.hzRegId2);
+		}
 		// Remove the current kernel from the kernel's list
-		if (this.currentHzURI!=null) {
+		if (this.currentHzURI != null) {
 			this.kernels.remove(this.currentHzURI);
 		}
+		// For avoiding memory leaks due to reference loop
+		this.network = null;
 		notifyStopped();
 	}
 
@@ -214,7 +226,7 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class HazelcastListener implements EntryListener<URI,URI>, MembershipListener {
+	private class HazelcastListener implements EntryListener<URI, URI>, MembershipListener {
 
 		/**
 		 */
@@ -235,10 +247,10 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 		@Override
 		public void memberRemoved(MembershipEvent membershipEvent) {
 			InetSocketAddress s = membershipEvent.getMember().getSocketAddress();
-			if (s!=null) {
+			if (s != null) {
 				URI u = NetworkUtil.toURI(s);
-				if (u!=null) {
-					synchronized(JanusKernelDiscoveryService.this) {
+				if (u != null) {
+					synchronized (JanusKernelDiscoveryService.this) {
 						JanusKernelDiscoveryService.this.kernels.remove(u);
 					}
 				}
@@ -249,7 +261,7 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 		 */
 		@Override
 		public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
-			//	
+			//
 		}
 
 		/** {@inheritDoc}
@@ -257,7 +269,7 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 		@Override
 		public void entryAdded(EntryEvent<URI, URI> event) {
 			URI newPeer = event.getValue();
-			assert(newPeer!=null);
+			assert (newPeer != null);
 			if (!newPeer.equals(getCurrentKernel())) {
 				fireKernelDiscovered(newPeer);
 			}
@@ -265,7 +277,7 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 
 		private void fireDisconnected(EntryEvent<URI, URI> event) {
 			URI newPeer = event.getValue();
-			assert(newPeer!=null);
+			assert (newPeer != null);
 			if (!newPeer.equals(getCurrentKernel())) {
 				fireKernelDisconnected(newPeer);
 			}
@@ -314,9 +326,10 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void running() {
-			URI uri = JanusKernelDiscoveryService.this.network.getURI(); // Outside the synchronizing to avoid deadlock
-			if (JanusKernelDiscoveryService.this.currentPubURI==null) {
-				synchronized(JanusKernelDiscoveryService.this) {
+			// Outside the synchronizing statement to avoid deadlock
+			URI uri = JanusKernelDiscoveryService.this.network.getURI();
+			if (JanusKernelDiscoveryService.this.currentPubURI == null) {
+				synchronized (JanusKernelDiscoveryService.this) {
 					JanusKernelDiscoveryService.this.currentPubURI = uri;
 					JanusKernelDiscoveryService.this.currentHzURI = NetworkUtil.toURI(
 							JanusKernelDiscoveryService.this.hzInstance.getCluster()
@@ -324,11 +337,11 @@ class JanusKernelDiscoveryService extends AbstractDependentService implements Ke
 				}
 
 				// Notify about the discovery of the already launched kernels
-				for(URI remotePublicKernel : getKernels()) {
+				for (URI remotePublicKernel : getKernels()) {
 					fireKernelDiscovered(remotePublicKernel);
 				}
 
-				synchronized(JanusKernelDiscoveryService.this) {
+				synchronized (JanusKernelDiscoveryService.this) {
 					JanusKernelDiscoveryService.this.isReady = true;
 					JanusKernelDiscoveryService.this.kernels.putIfAbsent(
 							JanusKernelDiscoveryService.this.currentHzURI,

@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.LogService;
-import io.janusproject.services.SpaceRepositoryListener;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.core.SpaceCreated;
 import io.sarl.lang.core.Event;

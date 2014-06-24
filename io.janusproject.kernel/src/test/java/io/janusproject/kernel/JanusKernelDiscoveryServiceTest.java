@@ -20,9 +20,9 @@
 package io.janusproject.kernel;
 
 import io.janusproject.network.NetworkUtil;
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.LogService;
-import io.janusproject.services.NetworkService;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.NetworkService;
 import io.janusproject.util.TwoStepConstruction;
 
 import java.lang.reflect.Method;

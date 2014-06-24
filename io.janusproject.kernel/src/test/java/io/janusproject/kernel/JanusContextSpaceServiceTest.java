@@ -19,9 +19,9 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.ContextRepositoryListener;
-import io.janusproject.services.LogService;
-import io.janusproject.services.SpaceRepositoryListener;
+import io.janusproject.services.agentplatform.ContextRepositoryListener;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.SpaceRepositoryListener;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;

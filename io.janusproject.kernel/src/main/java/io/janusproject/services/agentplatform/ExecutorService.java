@@ -1,23 +1,25 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
+package io.janusproject.services.agentplatform;
+
+import io.janusproject.services.api.DependentService;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -26,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 /** This class enables the Janus kernel to be distributed
  * other a network.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -36,53 +38,56 @@ import java.util.concurrent.TimeUnit;
 public interface ExecutorService extends DependentService {
 
 	/** Replies the JVM executor service used by service.
-	 * 
+	 *
 	 * @return the JVM executor service.
 	 */
-	public java.util.concurrent.ExecutorService getExecutorService();
-	
+	java.util.concurrent.ExecutorService getExecutorService();
+
 	/** Submit a task to the executor service.
-	 * 
-	 * @param task
+	 *
+	 * @param task - the task to submit.
 	 * @return a Future representing the pending execution task.
      */
-    public Future<?> submit(Runnable task);
+    Future<?> submit(Runnable task);
 
 	/** Submit a task to the executor service.  The Future's get method
 	 * will return the given result upon successful completion.
-	 * 
-	 * @param task
+	 *
+	 * @param <T> - the type of the value replied by the task.
+	 * @param task - the task to submit.
 	 * @param result - result to return after the execution.
 	 * @return a Future representing the pending execution task.
      */
-    public <T> Future<T> submit(Runnable task, T result);
+    <T> Future<T> submit(Runnable task, T result);
 
     /** Submit a task to the executor service.
-	 * 
-	 * @param task
+	 *
+	 * @param <T> - the type of the value replied by the task.
+	 * @param task - the task to submit.
 	 * @return a Future representing the pending execution task.
      */
-    public <T> Future<T> submit(Callable<T> task);
+    <T> Future<T> submit(Callable<T> task);
 
     /** Schedule the given task.
-     * 
+     *
      * @param command - task to run
      * @param delay - delay for waiting before launching the command
-     * @param unit - time unit of the <var>delay</var>
+     * @param unit - time unit of the delay
      * @return a Future representing the pending execution task.
      */
-    public ScheduledFuture<?> schedule(Runnable command,
+    ScheduledFuture<?> schedule(Runnable command,
                                        long delay,
                                        TimeUnit unit);
-    
+
     /** Schedule the given task.
-     * 
+     *
+	 * @param <T> - the type of the value replied by the task.
      * @param command - task to run
      * @param delay - delay for waiting before launching the command
-     * @param unit - time unit of the <var>delay</var>
+     * @param unit - time unit of the delay
      * @return a Future representing the pending execution task.
      */
-    public <T> ScheduledFuture<T> schedule(Callable<T> command,
+    <T> ScheduledFuture<T> schedule(Callable<T> command,
                                        long delay,
                                        TimeUnit unit);
 
@@ -94,14 +99,15 @@ public interface ExecutorService extends DependentService {
      * only terminate via cancellation or termination of the executor. If any execution
      * of this task takes longer than its period, then subsequent executions may start
      * late, but will not concurrently execute.
-     * 
+     *
      * @param command - task to run
      * @param initialDelay - the time to delay first execution
      * @param period - the period between successive executions
      * @param unit è the time unit of the initialDelay and period parameters
      * @return a Future representing the pending execution task.
      */
-	public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit);
+	ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
+			long initialDelay, long period, TimeUnit unit);
 
 	/** Creates and executes a periodic action that becomes enabled first after the
 	 * given initial delay, and subsequently with the given delay between the
@@ -109,14 +115,15 @@ public interface ExecutorService extends DependentService {
 	 * execution of the task encounters an exception, subsequent executions are
 	 * suppressed. Otherwise, the task will only terminate via cancellation or
 	 * termination of the executor.
-	 * 
+	 *
 	 * @param command - the task to execute
 	 * @param initialDelay - the time to delay first execution
-	 * @param delay - the delay between the termination of one execution and the commencement of the next
+	 * @param delay - the delay between the termination of one execution and the start  of the next
 	 * @param unit - the time unit of the initialDelay and delay parameters
 	 * @return a ScheduledFuture representing pending completion of the task, and whose get() method will
 	 * throw an exception upon cancellation
 	 */
-	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit);
-	
+	ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay,
+			long delay, TimeUnit unit);
+
 }

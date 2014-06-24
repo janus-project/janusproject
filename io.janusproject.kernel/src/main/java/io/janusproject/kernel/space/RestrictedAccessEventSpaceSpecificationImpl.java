@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ import com.google.inject.Injector;
  * an instance of {@link Acl}. This instance is the Access Control List.
  * The first parameter that is a {@link Permission} will be assumed as the
  * permission to have to be allowed to access to the space.
- * 
+ *
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -51,16 +51,17 @@ class RestrictedAccessEventSpaceSpecificationImpl implements RestrictedAccessEve
 	public RestrictedAccessEventSpace create(SpaceID id, Object... params) {
 		Acl acl = null;
 		Permission p = null;
-		for(Object o : params) {
+		for (Object o : params) {
 			if (o instanceof Acl) {
-				acl = (Acl)o;
-			}
-			else if (o instanceof Permission) {
-				p = (Permission)o;
+				acl = (Acl) o;
+			} else if (o instanceof Permission) {
+				p = (Permission) o;
 			}
 		}
-		if (acl!=null) {
-			if (p==null) p = new RegistrationPermission();
+		if (acl != null) {
+			if (p == null) {
+				p = new RegistrationPermission();
+			}
 			RestrictedAccessEventSpaceImpl space = new RestrictedAccessEventSpaceImpl(id, acl, p,
 					this.injector.getInstance(DistributedDataStructureFactory.class));
 			this.injector.injectMembers(space);
@@ -68,5 +69,5 @@ class RestrictedAccessEventSpaceSpecificationImpl implements RestrictedAccessEve
 		}
 		throw new IllegalArgumentException();
 	}
-	
+
 }

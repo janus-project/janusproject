@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
  */
 package io.janusproject.services.impl;
 
-import io.janusproject.services.LogService;
+import io.janusproject.services.agentplatform.LogService;
 
 import java.util.logging.Filter;
 import java.util.logging.Level;
@@ -38,10 +38,10 @@ import com.google.inject.Inject;
  * This implementation is based on {@link Locale}, and the logger is injected.
  * <p>
  * The LogService considers the parameters of the functions as:<ul>
- * <li>the <var>messageKey</var> is the name of the message in the property file;</li>
- * <li>the <var>message</var> parameters are the values that will replace the
+ * <li>the messageKey is the name of the message in the property file;</li>
+ * <li>the message parameters are the values that will replace the
  * strings {0}, {1}, {2}... in the text extracted from the ressource property;</li>
- * <li>the parameter <var>propertyType</var> is the class from which the filename of
+ * <li>the parameter propertyType is the class from which the filename of
  * the property file will be built.</li>
  * </ul>
  * <p>
@@ -55,8 +55,8 @@ import com.google.inject.Inject;
  * function will be invoked.
  * <p>
  * For all the other objects, the {@link #toString()} function is invoked.
- * 
- * 
+ *
+ *
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -65,49 +65,48 @@ import com.google.inject.Inject;
 public class ArakhneLocaleLogService extends AbstractDependentService implements LogService {
 
 	private Logger logger;
-	
+
 	/**
 	 */
 	public ArakhneLocaleLogService() {
 		//
 	}
-	
+
 	@Override
 	public final Class<? extends Service> getServiceType() {
 		return LogService.class;
 	}
-	
+
 	private static StackTraceElement getCaller() {
 		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 		Class<?> type;
 		// Start at 1 because the top of the stack corresponds to getStackTrace.
-		for(int i=1; i<stackTrace.length; ++i) {
+		for (int i = 1; i < stackTrace.length; ++i) {
 			try {
 				type = Class.forName(stackTrace[i].getClassName());
-				if (type!=null && !LogService.class.isAssignableFrom(type)) {
+				if (type != null && !LogService.class.isAssignableFrom(type)) {
 					return stackTrace[i];
 				}
-			}
-			catch (ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) {
 				//
 			}
 		}
 		return null;
 	}
-	
+
 	/** Replies if this service permits to log the messages.
-	 * 
+	 *
 	 * @return <code>true</code> if the messages are loggeable,
 	 * <code>false</code> otherwise.
 	 */
 	protected boolean isLogEnabled() {
 		return state().ordinal() <= State.RUNNING.ordinal();
 	}
-	
+
 	private synchronized void log(Level level, boolean exception, String messageKey, Object... message) {
 		if (isLogEnabled() && this.logger.isLoggable(level)) {
 			StackTraceElement elt = getCaller();
-			assert(elt!=null);
+			assert (elt != null);
 			Class<?> callerType;
 			try {
 				callerType = Class.forName(elt.getClassName());
@@ -117,23 +116,30 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 			log(level, exception, callerType, messageKey, message);
 		}
 	}
-	
-	private synchronized void log(Level level, boolean exception, Class<?> propertyType, String messageKey, Object... message) {
+
+	private synchronized void log(
+			Level level,
+			boolean exception,
+			Class<?> propertyType,
+			String messageKey,
+			Object... message) {
 		if (isLogEnabled() && this.logger.isLoggable(level)) {
 			StackTraceElement elt = getCaller();
-			assert(elt!=null);
+			assert (elt != null);
 			String text = Locale.getString(propertyType, messageKey, message);
 			Throwable e = null;
 			if (exception) {
-				for(Object m : message) {
+				for (Object m : message) {
 					if (m instanceof Throwable) {
-						e = (Throwable)m;
+						e = (Throwable) m;
 						break;
 					}
 				}
 			}
 			LogRecord record = new LogRecord(level, text);
-			if (e!=null) record.setThrown(e);
+			if (e != null) {
+				record.setThrown(e);
+			}
 			record.setSourceClassName(elt.getClassName());
 			record.setSourceMethodName(elt.getMethodName());
 			this.logger.log(record);
@@ -144,7 +150,9 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	 */
 	@Override
 	public synchronized void log(LogRecord record) {
-		if (isLogEnabled()) this.logger.log(record);
+		if (isLogEnabled()) {
+			this.logger.log(record);
+		}
 	}
 
 	/** {@inheritDoc}
@@ -264,7 +272,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	@Inject
 	@Override
 	public synchronized void setLogger(Logger logger) {
-		if (logger!=null) {
+		if (logger != null) {
 			this.logger = logger;
 		}
 	}
@@ -317,5 +325,5 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	protected void doStop() {
 		notifyStopped();
 	}
-	
+
 }

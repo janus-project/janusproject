@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ import java.util.UUID;
 
 
 /** An encrypter of events to be published over the network.
- * 
+ *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -32,24 +32,24 @@ import java.util.UUID;
 public interface EventEncrypter {
 
 	/** Encrypt the given envelope.
-	 * 
+	 *
 	 * @param envelope - the envelope to encrypt.
-	 * @throws Exception
+	 * @throws Exception - if error when encrypting.
 	 */
-	public void encrypt(EventEnvelope envelope) throws Exception;
+	void encrypt(EventEnvelope envelope) throws Exception;
 
 	/** Decrypt the given envelope.
-	 * 
+	 *
 	 * @param envelope - the envelope to decrypt.
-	 * @throws Exception
+	 * @throws Exception - if error when decrypting.
 	 */
-	public void decrypt(EventEnvelope envelope) throws Exception;
-		
+	void decrypt(EventEnvelope envelope) throws Exception;
+
 	/** Encrypt the given UUID.
-	 * 
-	 * @param uuid
+	 *
+	 * @param uuid - the UUID to encrypt.
 	 * @return the encrypted UUID.
 	 */
-	public byte[] encryptUUID(UUID uuid);
-	
+	byte[] encryptUUID(UUID uuid);
+
 }

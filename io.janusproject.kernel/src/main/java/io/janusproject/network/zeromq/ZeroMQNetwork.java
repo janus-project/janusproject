@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,14 +24,14 @@ import io.janusproject.network.NetworkUtil;
 import io.janusproject.network.event.EventDispatch;
 import io.janusproject.network.event.EventEnvelope;
 import io.janusproject.network.event.EventSerializer;
-import io.janusproject.services.ContextSpaceService;
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.KernelDiscoveryService;
-import io.janusproject.services.KernelDiscoveryServiceListener;
-import io.janusproject.services.LogService;
-import io.janusproject.services.LogService.LogParam;
-import io.janusproject.services.NetworkServiceListener;
-import io.janusproject.services.SpaceRepositoryListener;
+import io.janusproject.services.agentplatform.ContextSpaceService;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.KernelDiscoveryService;
+import io.janusproject.services.agentplatform.KernelDiscoveryServiceListener;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.NetworkServiceListener;
+import io.janusproject.services.agentplatform.SpaceRepositoryListener;
+import io.janusproject.services.agentplatform.LogService.LogParam;
 import io.janusproject.services.impl.AbstractNetworkingExecutionThreadService;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
@@ -64,16 +64,18 @@ import com.google.inject.name.Named;
 
 /**
  * Service that is providing the ZeroMQ network.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
  * @author $Author: ngaud$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
 class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
+
+	private static final long POLL_TIMEOUT = 1000;
 
 	private final Listener serviceListener = new Listener();
 
@@ -96,22 +98,22 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	private Socket publisher;
 	private Map<URI, Socket> subcribers = new ConcurrentHashMap<>();
 
-	private final Map<SpaceID,NetworkEventReceivingListener> messageRecvListeners = new TreeMap<>();
+	private final Map<SpaceID, NetworkEventReceivingListener> messageRecvListeners = new TreeMap<>();
 
 	// TODO Change poller that can be stopped properly.
 	private Poller poller;
 
 	private URI uriCandidate;
-	private URI validatedURI = null;
+	private URI validatedURI;
 
-	private Map<SpaceID,BufferedConnection> bufferedConnections = new TreeMap<>();
-	private Map<SpaceID,BufferedSpace> bufferedSpaces = new TreeMap<>();
+	private Map<SpaceID, BufferedConnection> bufferedConnections = new TreeMap<>();
+	private Map<SpaceID, BufferedSpace> bufferedSpaces = new TreeMap<>();
 
 	private final List<NetworkServiceListener> listeners = new ArrayList<>();
 
 	/**
 	 * Construct a <code>ZeroMQNetwork</code>.
-	 * 
+	 *
 	 * @param uri - injected URI of the PUB socket.
 	 */
 	@Inject
@@ -119,26 +121,26 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		assert (uri != null) : "Injected URI must be not null nor empty"; //$NON-NLS-1$
 		this.uriCandidate = uri;
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceWeakDependencies() {
 		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	public URI getURI() {
-		synchronized(this) {
+		synchronized (this) {
 			return this.validatedURI;
 		}
 	}
@@ -163,9 +165,9 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	}
 
 	/** Notifies that a peer space was connected.
-	 * 
-	 * @param peerURI
-	 * @param space
+	 *
+	 * @param peerURI - the URI of the peer that was connected to.
+	 * @param space - the identifier of the connected space.
 	 */
 	protected void firePeerConnected(URI peerURI, SpaceID space) {
 		NetworkServiceListener[] ilisteners;
@@ -173,15 +175,15 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			ilisteners = new NetworkServiceListener[this.listeners.size()];
 			this.listeners.toArray(ilisteners);
 		}
-		for(NetworkServiceListener listener : ilisteners) {
+		for (NetworkServiceListener listener : ilisteners) {
 			listener.peerConnected(peerURI, space);
 		}
 	}
 
 	/** Notifies that a peer space was disconnected.
-	 * 
-	 * @param peerURI
-	 * @param space
+	 *
+	 * @param peerURI - the URI of the peer that was disconnected to.
+	 * @param space - the identifier of the disconnected space.
 	 */
 	protected void firePeerDisconnected(URI peerURI, SpaceID space) {
 		NetworkServiceListener[] ilisteners;
@@ -189,14 +191,14 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			ilisteners = new NetworkServiceListener[this.listeners.size()];
 			this.listeners.toArray(ilisteners);
 		}
-		for(NetworkServiceListener listener : ilisteners) {
+		for (NetworkServiceListener listener : ilisteners) {
 			listener.peerDisconnected(peerURI, space);
 		}
 	}
 
 	/** Notifies that a peer was discovered.
-	 * 
-	 * @param peerURI
+	 *
+	 * @param peerURI - the URI of the remote kernel that was disconnected to.
 	 */
 	protected void firePeerDiscovered(URI peerURI) {
 		NetworkServiceListener[] ilisteners;
@@ -204,14 +206,14 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			ilisteners = new NetworkServiceListener[this.listeners.size()];
 			this.listeners.toArray(ilisteners);
 		}
-		for(NetworkServiceListener listener : ilisteners) {
+		for (NetworkServiceListener listener : ilisteners) {
 			listener.peerDiscovered(peerURI);
 		}
 	}
 
 	/** Notifies that a peer was disconnected.
-	 * 
-	 * @param peerURI
+	 *
+	 * @param peerURI - the URI of the peer that was disconnected to.
 	 */
 	protected void firePeerDisconnected(URI peerURI) {
 		NetworkServiceListener[] ilisteners;
@@ -219,7 +221,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			ilisteners = new NetworkServiceListener[this.listeners.size()];
 			this.listeners.toArray(ilisteners);
 		}
-		for(NetworkServiceListener listener : ilisteners) {
+		for (NetworkServiceListener listener : ilisteners) {
 			listener.peerDisconnected(peerURI);
 		}
 	}
@@ -241,13 +243,13 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	 * For a given contextID (translated into a byte array with an
 	 * {@link EventSerializer}), this function must always reply the
 	 * same sequence of bytes.
-	 * 
+	 *
 	 * @param contextID
 	 * @return the header of the ZeroMQ message that may be used for
 	 * filtering.
 	 */
 	private static byte[] buildFilterableHeader(byte[] contextID) {
-		byte[] header = new byte[Ints.BYTES+contextID.length];
+		byte[] header = new byte[Ints.BYTES + contextID.length];
 		byte[] length = Ints.toByteArray(contextID.length);
 		System.arraycopy(length, 0, header, 0, length.length);
 		System.arraycopy(contextID, 0, header, length.length, contextID.length);
@@ -259,10 +261,9 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	@Override
 	public synchronized void publish(Scope<?> scope, Event data)
 			throws Exception {
-		if (this.validatedURI==null) {
+		if (this.validatedURI == null) {
 			this.logger.debug("DISCARDED_MESSAGE", data.getSource().getSpaceId(), scope, data); //$NON-NLS-1$
-		}
-		else if (!this.subcribers.isEmpty()) {
+		} else if (!this.subcribers.isEmpty()) {
 			SpaceID spaceID = data.getSource().getSpaceId();
 			EventEnvelope env = this.serializer.serialize(new EventDispatch(spaceID, data, scope));
 			send(env);
@@ -271,7 +272,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	}
 
 	private static byte[] readBuffer(ByteBuffer buffer, int size) throws IOException {
-		if (buffer.remaining()>=size) {
+		if (buffer.remaining() >= size) {
 			byte[] result = new byte[size];
 			buffer.get(result);
 			return result;
@@ -286,43 +287,42 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 
 	/**
 	 * Receive data from the network.
-	 * 
+	 *
 	 * @param socket - network reader.
 	 * @return the envelope received over the network.
 	 * @throws IOException if the envelope cannot be read from the network.
 	 */
 	private static EventEnvelope extractEnvelope(Socket socket) throws IOException {
-		//TODO: Read the ZeroMQ socket via a NIO wrapper to support large data: indeed the arrays has a maximal size bounded by a native int value, and the real data could be larger than this limit.
+		// TODO: Read the ZeroMQ socket via a NIO wrapper to support large data:
+		// indeed the arrays has a maximal size bounded by a native int value, and
+		// the real data could be larger than this limit.
 
-		byte[] data;
-		{ 
-			data = socket.recv(ZMQ.DONTWAIT);
-			byte[] cdata;
-			int oldSize = 0;
-			while (socket.hasReceiveMore()) {
-				cdata = socket.recv(ZMQ.DONTWAIT);
-				oldSize = data.length;
-				data = Arrays.copyOf(data, data.length + cdata.length);
-				System.arraycopy(cdata, 0, data, oldSize, cdata.length);
-			}
+		byte[] data = socket.recv(ZMQ.DONTWAIT);
+		byte[] cdata;
+		int oldSize = 0;
+		while (socket.hasReceiveMore()) {
+			cdata = socket.recv(ZMQ.DONTWAIT);
+			oldSize = data.length;
+			data = Arrays.copyOf(data, data.length + cdata.length);
+			System.arraycopy(cdata, 0, data, oldSize, cdata.length);
 		}
 
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 
 		byte[] contextId = readBlock(buffer);
-		assert(contextId!=null && contextId.length>0);
+		assert (contextId != null && contextId.length > 0);
 
 		byte[] spaceId = readBlock(buffer);
-		assert(spaceId!=null && spaceId.length>0);
+		assert (spaceId != null && spaceId.length > 0);
 
 		byte[] scope = readBlock(buffer);
-		assert(scope!=null && scope.length>0);
+		assert (scope != null && scope.length > 0);
 
 		byte[] headers = readBlock(buffer);
-		assert(headers!=null && headers.length>0);
+		assert (headers != null && headers.length > 0);
 
 		byte[] body = readBlock(buffer);
-		assert(body!=null && body.length>0);
+		assert (body != null && body.length > 0);
 
 		return new EventEnvelope(contextId, spaceId, scope, headers, body);
 	}
@@ -333,27 +333,26 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	@Override
 	public synchronized void connectToRemoteSpaces(URI peerUri, SpaceID space,
 			NetworkEventReceivingListener listener) throws Exception {
-		if (this.validatedURI==null) {
+		if (this.validatedURI == null) {
 			// Bufferizing the peerURI.
-			assert(this.bufferedConnections!=null);
+			assert (this.bufferedConnections != null);
 			this.bufferedConnections.put(space, new BufferedConnection(peerUri, space, listener));
-		}
-		else {
+		} else {
 			Socket subscriber = this.subcribers.get(peerUri);
-			if (subscriber==null) {
+			if (subscriber == null) {
 				this.logger.debug("PEER_CONNECTION", peerUri, space); //$NON-NLS-1$
 				// Socket subscriber = this.context.socket(ZMQ.SUB);
 				subscriber = this.context.createSocket(ZMQ.SUB);
-				assert(subscriber!=null);
+				assert (subscriber != null);
 				this.subcribers.put(peerUri, subscriber);
 				subscriber.connect(peerUri.toString());
 				this.poller.register(subscriber, Poller.POLLIN);
 				this.logger.debug("PEER_CONNECTED", peerUri); //$NON-NLS-1$
 			}
-			assert(subscriber!=null);
+			assert (subscriber != null);
 			NetworkEventReceivingListener old = this.messageRecvListeners.get(space);
-			if (old==null) {
-				assert(listener!=null);
+			if (old == null) {
+				assert (listener != null);
 				this.messageRecvListeners.put(space, listener);
 				byte[] header = buildFilterableHeader(
 						this.serializer.serializeContextID(space.getContextID()));
@@ -369,7 +368,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	@Override
 	public synchronized void disconnectFromRemoteSpace(URI peer, SpaceID space) throws Exception {
 		Socket s = this.subcribers.get(peer);
-		if (s!=null) {
+		if (s != null) {
 			this.logger.debug("PEER_UNSUBSCRIPTION ", peer, space); //$NON-NLS-1$
 			byte[] header = buildFilterableHeader(
 					this.serializer.serializeContextID(space.getContextID()));
@@ -383,7 +382,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	@Override
 	public synchronized void disconnectPeer(URI peer) throws Exception {
 		Socket s = this.subcribers.remove(peer);
-		if (s!=null) {
+		if (s != null) {
 			this.logger.debug("PEER_DISCONNECTION", peer); //$NON-NLS-1$
 			this.poller.unregister(s);
 			s.disconnect(peer.toString());
@@ -392,9 +391,9 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	}
 
 	/** Extract data from a received envelope, and forwad it to the rest of the platform.
-	 * 
-	 * @param env
-	 * @throws Exception
+	 *
+	 * @param env - the evenlope received over the network, and that must be deserialize.
+	 * @throws Exception - if cannot deserialize the envelope.
 	 */
 	protected synchronized void receive(EventEnvelope env) throws Exception {
 		this.logger.debug("ENVELOPE_RECEIVED", this.validatedURI, env); //$NON-NLS-1$
@@ -407,8 +406,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			this.executorService.submit(new AsyncRunner(
 					space, spaceID,
 					dispatch.getScope(), dispatch.getEvent()));
-		}
-		else {
+		} else {
 			this.logger.debug("UNKNOWN_SPACE", spaceID, dispatch.getEvent()); //$NON-NLS-1$
 		}
 	}
@@ -420,7 +418,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		while (isRunning()) {
 			try {
 				if (this.poller.getSize() > 0) {
-					int signaled = this.poller.poll(1000);
+					int signaled = this.poller.poll(POLL_TIMEOUT);
 					if (signaled > 0) {
 						for (int i = 0; i < this.poller.getSize(); i++) {
 							if (this.poller.pollin(i)) {
@@ -431,15 +429,20 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 								try {
 									receive(ev);
 								} catch (Throwable e) {
-									this.logger.log(Level.FINE, ZeroMQNetwork.class, "CANNOT_RECEIVE_EVENT", e); //$NON-NLS-1$
+									this.logger.log(
+											Level.FINE,
+											ZeroMQNetwork.class,
+											"CANNOT_RECEIVE_EVENT", e); //$NON-NLS-1$
 								}
 							} else if (this.poller.pollerr(i)) {
 								final int poolerIdx = i;
-								this.logger.warning("POLLING_ERROR", new LogParam() { //$NON-NLS-1$
+								this.logger.warning("POLLING_ERROR", //$NON-NLS-1$
+										new LogParam() {
 									@SuppressWarnings("synthetic-access")
 									@Override
 									public String toString() {
-										return ZeroMQNetwork.this.poller.getSocket(poolerIdx).toString();
+										return ZeroMQNetwork.this.poller.getSocket(
+												poolerIdx).toString();
 									}
 								});
 							}
@@ -449,7 +452,8 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			} catch (Throwable e) {
 				this.logger.log(Level.SEVERE, ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 			}
-			Thread.yield(); // ensure that this thread does not take too much time.
+			// ensure that this thread does not take too much time.
+			Thread.yield();
 		}
 		// FIXME: May the poller be stopped?
 		// stopPoller();
@@ -460,8 +464,8 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	 */
 	@Override
 	protected void startUp() throws Exception {
-		Map<SpaceID,BufferedConnection> connections;
-		synchronized(this) {
+		Map<SpaceID, BufferedConnection> connections;
+		synchronized (this) {
 			super.startUp();
 			// this.context = ZMQ.context(1);
 
@@ -470,7 +474,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			this.publisher = this.context.createSocket(ZMQ.PUB);
 			String strUri = NetworkUtil.toString(this.uriCandidate);
 			int port = this.publisher.bind(strUri);
-			if (port != -1 && this.uriCandidate.getPort()==-1) {
+			if (port != -1 && this.uriCandidate.getPort() == -1) {
 				this.validatedURI = new URI(
 						this.uriCandidate.getScheme(),
 						this.uriCandidate.getUserInfo(),
@@ -492,8 +496,8 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			this.kernelService.addKernelDiscoveryServiceListener(this.serviceListener);
 			this.spaceService.addSpaceRepositoryListener(this.serviceListener);
 		}
-		for(BufferedConnection t : connections.values()) {
-			connectToRemoteSpaces(t.peerURI, t.spaceID, t.listener);
+		for (BufferedConnection t : connections.values()) {
+			connectToRemoteSpaces(t.getPeerURI(), t.getSpaceID(), t.getListener());
 		}
 	}
 
@@ -502,15 +506,15 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	 */
 	@Override
 	protected void shutDown() throws Exception {
-		synchronized(this) {
+		synchronized (this) {
 			this.kernelService.removeKernelDiscoveryServiceListener(this.serviceListener);
 			this.spaceService.removeSpaceRepositoryListener(this.serviceListener);
-	
+
 			// TODO this.poller.stop();
 			// stopPoller();
-	
+
 			// this.publisher.close();
-	
+
 			this.context.destroy();
 		}
 		this.logger.fineInfo("ZEROMQ_SHUTDOWN"); //$NON-NLS-1$
@@ -526,15 +530,15 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 
 		/** URI of the peer.
 		 */
-		public final URI peerURI;
+		private final URI peerURI;
 
 		/** ID of the space.
 		 */
-		public final SpaceID spaceID;
+		private final SpaceID spaceID;
 
 		/** Reception listener.
 		 */
-		public final NetworkEventReceivingListener listener;
+		private final NetworkEventReceivingListener listener;
 
 		/**
 		 * @param peerURI
@@ -545,6 +549,18 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			this.peerURI = peerURI;
 			this.spaceID = spaceID;
 			this.listener = listener;
+		}
+
+		public URI getPeerURI() {
+			return this.peerURI;
+		}
+
+		public SpaceID getSpaceID() {
+			return this.spaceID;
+		}
+
+		public NetworkEventReceivingListener getListener() {
+			return this.listener;
 		}
 
 	}
@@ -559,11 +575,11 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 
 		/** ID of the space.
 		 */
-		public final SpaceID spaceID;
+		private final SpaceID spaceID;
 
 		/** Reception listener.
 		 */
-		public final NetworkEventReceivingListener listener;
+		private final NetworkEventReceivingListener listener;
 
 		/**
 		 * @param spaceID
@@ -572,6 +588,14 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		public BufferedSpace(SpaceID spaceID, NetworkEventReceivingListener listener) {
 			this.spaceID = spaceID;
 			this.listener = listener;
+		}
+
+		public SpaceID getSpaceID() {
+			return this.spaceID;
+		}
+
+		public NetworkEventReceivingListener getListener() {
+			return this.listener;
 		}
 
 	}
@@ -615,31 +639,36 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		public Listener() {
 			//
 		}
-		
+
 		@SuppressWarnings("synthetic-access")
-		private void magicConnect(URI peer, Collection<SpaceID> spaceIDs, Collection<BufferedSpace> ibufferedSpaces, Space space) {
-			if (space!=null) {
+		private void magicConnect(
+				URI peer,
+				Collection<SpaceID> spaceIDs,
+				Collection<BufferedSpace> ibufferedSpaces,
+				Space space) {
+			if (space != null) {
 				try {
-					connectToRemoteSpaces(peer, space.getID(), (NetworkEventReceivingListener)space);
-				}
-				catch (Exception e) {
-					ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
+					connectToRemoteSpaces(peer, space.getID(), (NetworkEventReceivingListener) space);
+				} catch (Exception e) {
+					ZeroMQNetwork.this.logger.error(
+							ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 				}
 			}
-			for(SpaceID sid : spaceIDs) {
+			for (SpaceID sid : spaceIDs) {
 				try {
-					connectToRemoteSpaces(peer, sid, null); // null does not change the SPACEID->LISTENER map
-				}
-				catch (Exception e) {
-					ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
+					 // Below, the null constant does not change the SPACEID->LISTENER map
+					connectToRemoteSpaces(peer, sid, null);
+				} catch (Exception e) {
+					ZeroMQNetwork.this.logger.error(
+							ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 				}
 			}
-			for(BufferedSpace sp : ibufferedSpaces) {
+			for (BufferedSpace sp : ibufferedSpaces) {
 				try {
-					connectToRemoteSpaces(peer, sp.spaceID, sp.listener);
-				}
-				catch (Exception e) {
-					ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
+					connectToRemoteSpaces(peer, sp.getSpaceID(), sp.getListener());
+				} catch (Exception e) {
+					ZeroMQNetwork.this.logger.error(
+							ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 				}
 			}
 		}
@@ -649,34 +678,39 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void spaceCreated(Space space, boolean isLocalCreation) {
-			synchronized(ZeroMQNetwork.this) {
+			synchronized (ZeroMQNetwork.this) {
 				URI localUri = ZeroMQNetwork.this.getURI();
 				try {
 					boolean isUsed = false;
-					Collection<SpaceID> spaceIDs = new ArrayList<>(ZeroMQNetwork.this.messageRecvListeners.keySet());
-					Collection<BufferedSpace> spaces = new ArrayList<>(ZeroMQNetwork.this.bufferedSpaces.values());
-					for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
+					Collection<SpaceID> spaceIDs = new ArrayList<>(
+							ZeroMQNetwork.this.messageRecvListeners.keySet());
+					Collection<BufferedSpace> spaces = new ArrayList<>(
+							ZeroMQNetwork.this.bufferedSpaces.values());
+					for (URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
 						if (!peer.equals(localUri)) {
 							if (space instanceof NetworkEventReceivingListener) {
 								magicConnect(peer, spaceIDs, spaces, space);
 								isUsed = true;
-							}
-							else {
-								ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "NOT_DISTRIBUTABLE_SPACE", space); //$NON-NLS-1$
+							} else {
+								ZeroMQNetwork.this.logger.error(
+										ZeroMQNetwork.class,
+										"NOT_DISTRIBUTABLE_SPACE", space); //$NON-NLS-1$
 							}
 						}
 					}
 					if (!isUsed) {
 						// The space was not used to be connected to a remote host => put in a buffer.
-						ZeroMQNetwork.this.bufferedSpaces.put(space.getID(), new BufferedSpace(space.getID(), (NetworkEventReceivingListener)space));
-					}
-					else {
+						ZeroMQNetwork.this.bufferedSpaces.put(
+								space.getID(),
+								new BufferedSpace(space.getID(),
+								(NetworkEventReceivingListener) space));
+					} else {
 						// The buffer was consumed by the "magicConnect"
 						ZeroMQNetwork.this.bufferedSpaces.clear();
 					}
-				}
-				catch (Exception e) {
-					ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
+				} catch (Exception e) {
+					ZeroMQNetwork.this.logger.error(
+							ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 				}
 			}
 		}
@@ -686,23 +720,23 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void spaceDestroyed(Space space, boolean isLocalDestruction) {
-			synchronized(ZeroMQNetwork.this) {
+			synchronized (ZeroMQNetwork.this) {
 				URI localUri = ZeroMQNetwork.this.getURI();
 				try {
-					for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
+					for (URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
 						if (!peer.equals(localUri)) {
 							disconnectFromRemoteSpace(peer, space.getID());
 						}
 					}
 					// Ensure that the space becomes unknown
 					ZeroMQNetwork.this.messageRecvListeners.remove(space.getID());
-					if (ZeroMQNetwork.this.bufferedConnections!=null) {
+					if (ZeroMQNetwork.this.bufferedConnections != null) {
 						ZeroMQNetwork.this.bufferedConnections.remove(space.getID());
 					}
 					ZeroMQNetwork.this.bufferedSpaces.remove(space.getID());
-				}
-				catch (Exception e) {
-					ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
+				} catch (Exception e) {
+					ZeroMQNetwork.this.logger.error(
+							ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 				}
 			}
 		}
@@ -712,19 +746,21 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void kernelDiscovered(URI peerURI) {
-			synchronized(ZeroMQNetwork.this) {
+			synchronized (ZeroMQNetwork.this) {
 				URI localUri = ZeroMQNetwork.this.getURI();
 				Collection<SpaceID> spaceIDs = new ArrayList<>(ZeroMQNetwork.this.messageRecvListeners.keySet());
 				Collection<BufferedSpace> spaces = new ArrayList<>(ZeroMQNetwork.this.bufferedSpaces.values());
 				if (!spaceIDs.isEmpty() || !spaces.isEmpty()) {
 					boolean cleanBuffers = false;
-					for(URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
+					for (URI peer : ZeroMQNetwork.this.kernelService.getKernels()) {
 						if (!peer.equals(localUri)) {
 							magicConnect(peer, spaceIDs, spaces, null);
 							cleanBuffers = true;
 						}
 					}
-					if (cleanBuffers) ZeroMQNetwork.this.bufferedSpaces.clear();
+					if (cleanBuffers) {
+						ZeroMQNetwork.this.bufferedSpaces.clear();
+					}
 				}
 			}
 		}
@@ -734,15 +770,15 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void kernelDisconnected(URI peerURI) {
-			synchronized(ZeroMQNetwork.this) {
+			synchronized (ZeroMQNetwork.this) {
 				try {
 					URI localUri = ZeroMQNetwork.this.getURI();
 					if (!peerURI.equals(localUri)) {
 						disconnectPeer(peerURI);
 					}
-				}
-				catch (Exception e) {
-					ZeroMQNetwork.this.logger.error(ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
+				} catch (Exception e) {
+					ZeroMQNetwork.this.logger.error(
+							ZeroMQNetwork.class, "UNEXPECTED_EXCEPTION", e); //$NON-NLS-1$
 				}
 			}
 		}

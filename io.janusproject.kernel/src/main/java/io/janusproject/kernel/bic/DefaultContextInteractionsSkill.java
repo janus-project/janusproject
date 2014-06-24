@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,7 @@ import io.sarl.util.AddressScope;
 import java.util.UUID;
 
 /** Skill to access to the default interaction context.
- * 
+ *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -44,27 +44,27 @@ DefaultContextInteractions {
 
 	private AgentContext parentContext;
 	private EventSpace defaultSpace;
-	private Address addressInParentDefaultSpace = null;
+	private Address addressInParentDefaultSpace;
 
 
 	/** Constructs a <code>DefaultContextInteractionsImpl</code>.
-	 * 
+	 *
 	 * @param agent - owner of the skill.
 	 * @param parentContext - reference to the parent context.
 	 */
 	public DefaultContextInteractionsSkill(Agent agent, AgentContext parentContext) {
 		super(agent);
-		this.parentContext = parentContext;	
+		this.parentContext = parentContext;
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()
-				+", parentContext = "+this.parentContext //$NON-NLS-1$
-				+", defaultSpace = "+this.defaultSpace //$NON-NLS-1$
-				+", addressInDefaultspace = "+this.addressInParentDefaultSpace; //$NON-NLS-1$
+				+ ", parentContext = " + this.parentContext //$NON-NLS-1$
+				+ ", defaultSpace = " + this.defaultSpace //$NON-NLS-1$
+				+ ", addressInDefaultspace = " + this.addressInParentDefaultSpace; //$NON-NLS-1$
 	}
 
 	@Override
@@ -87,9 +87,9 @@ DefaultContextInteractions {
 	@Override
 	public Address getDefaultAddress() {
 		Address adr = this.addressInParentDefaultSpace;
-		if (adr==null) {
+		if (adr == null) {
 			adr = this.defaultSpace.getAddress(getOwner().getID());
-			assert(adr!=null) : "The agent has no address in the default space"; //$NON-NLS-1$
+			assert (adr != null) : "The agent has no address in the default space"; //$NON-NLS-1$
 			this.addressInParentDefaultSpace = adr;
 		}
 		return adr;

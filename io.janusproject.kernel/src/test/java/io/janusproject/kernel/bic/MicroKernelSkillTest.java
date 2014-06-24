@@ -20,7 +20,7 @@
 package io.janusproject.kernel.bic;
 
 import io.janusproject.kernel.Kernel;
-import io.janusproject.services.NetworkService;
+import io.janusproject.services.agentplatform.NetworkService;
 
 import org.junit.After;
 import org.junit.Assert;

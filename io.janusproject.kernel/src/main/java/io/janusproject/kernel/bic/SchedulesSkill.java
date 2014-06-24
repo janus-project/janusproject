@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,8 +20,8 @@
 package io.janusproject.kernel.bic;
 
 import io.janusproject.kernel.executor.JanusScheduledFutureTask;
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.LogService;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.LogService;
 import io.sarl.core.AgentTask;
 import io.sarl.core.Schedules;
 import io.sarl.lang.core.Agent;
@@ -45,9 +45,9 @@ import com.google.common.base.Objects;
 import com.google.inject.Inject;
 
 /** Skill that permits to execute tasks with an executor service.
- * 
+ *
  * @author $Author: srodriguez$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -63,7 +63,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	private final Map<String, ScheduledFuture<?>> futures = new HashMap<>();
 
 	/**
-	 * @param agent
+	 * @param agent - the owner of this skill.
 	 */
 	public SchedulesSkill(Agent agent) {
 		super(agent);
@@ -74,20 +74,20 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()
-				+", tasks = "+this.tasks; //$NON-NLS-1$
+				+ ", tasks = " + this.tasks; //$NON-NLS-1$
 	}
-	
+
 	/** Remove any reference to the given task.
-	 * 
+	 *
 	 * @param name - name of the task.
 	 */
 	private synchronized void finishTask(String name) {
 		this.tasks.remove(name);
 		this.futures.remove(name);
 	}
-	
+
 	/** Replies the names of the active tasks.
-	 * 
+	 *
 	 * @return the names of the active tasks.
 	 */
 	synchronized Collection<String> getActiveTasks() {
@@ -95,7 +95,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	}
 
 	/** Replies the names of the active futures.
-	 * 
+	 *
 	 * @return the names of the active futures.
 	 */
 	synchronized Collection<ScheduledFuture<?>> getActiveFutures() {
@@ -105,15 +105,17 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Override
 	protected synchronized void uninstall() {
 		ScheduledFuture<?> future;
-		for (Entry<String,ScheduledFuture<?>> futureDescription : this.futures.entrySet()) {
+		for (Entry<String, ScheduledFuture<?>> futureDescription : this.futures.entrySet()) {
 			future = futureDescription.getValue();
 			if ((future instanceof JanusScheduledFutureTask<?>)
-					&&((JanusScheduledFutureTask<?>)future).isCurrentThread()) {
+					&& ((JanusScheduledFutureTask<?>) future).isCurrentThread()) {
 				// Ignore the cancelation of the future.
 				// It is assumed that a ChuckNorrisException will be thrown later.
-				this.logger.fineInfo("SKIP_CANCELED_TASK_ON_CURRENT_THREAD", futureDescription.getKey(), future); //$NON-NLS-1$
-			}
-			else {
+				this.logger.fineInfo(
+						"SKIP_CANCELED_TASK_ON_CURRENT_THREAD", //$NON-NLS-1$
+						futureDescription.getKey(),
+						future);
+			} else {
 				future.cancel(true);
 				this.logger.fineInfo("CANCELED_TASK", futureDescription.getKey(), future); //$NON-NLS-1$
 			}
@@ -130,7 +132,7 @@ class SchedulesSkill extends Skill implements Schedules {
 	@Override
 	public synchronized AgentTask in(AgentTask task, long delay, Procedure1<? super Agent> procedure) {
 		task.setProcedure(procedure);
-		ScheduledFuture<?> sf = 
+		ScheduledFuture<?> sf =
 				this.executorService.schedule(
 						new AgentRunnableTask(task, false), delay, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
@@ -150,7 +152,7 @@ class SchedulesSkill extends Skill implements Schedules {
 		t.setGuard(new Function1<Agent, Boolean>() {
 
 			@Override
-			public Boolean apply(Agent arg0) {				
+			public Boolean apply(Agent arg0) {
 				return Boolean.TRUE;
 			}
 		});
@@ -171,10 +173,10 @@ class SchedulesSkill extends Skill implements Schedules {
 	 */
 	@Override
 	public synchronized boolean cancel(AgentTask task, boolean mayInterruptIfRunning) {
-		if (task!=null) {
+		if (task != null) {
 			String name = task.getName();
 			ScheduledFuture<?> future = this.futures.get(name);
-			if (future!=null
+			if (future != null
 				&& !future.isDone()
 				&& !future.isCancelled()
 				&& future.cancel(mayInterruptIfRunning)) {
@@ -225,15 +227,17 @@ class SchedulesSkill extends Skill implements Schedules {
 		public void run() {
 			AgentTask task = this.agentTaskRef.get();
 			if (task == null) {
-				throw new RuntimeException(Locale.getString(SchedulesSkill.class, "NULL_AGENT_TASK")); //$NON-NLS-1$
+				throw new RuntimeException(
+						Locale.getString(
+								SchedulesSkill.class,
+								"NULL_AGENT_TASK")); //$NON-NLS-1$
 			}
 			try {
 				Agent owner = getOwner();
 				if (task.getGuard().apply(owner).booleanValue()) {
 					task.getProcedure().apply(owner);
 				}
-			}
-			finally {
+			} finally {
 				if (!this.isPeriodic) {
 					finishTask(task.getName());
 				}

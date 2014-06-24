@@ -19,10 +19,10 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.ContextSpaceService;
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.IServiceManager;
-import io.janusproject.services.SpawnService;
+import io.janusproject.services.agentplatform.ContextSpaceService;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.SpawnService;
+import io.janusproject.services.api.IServiceManager;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;

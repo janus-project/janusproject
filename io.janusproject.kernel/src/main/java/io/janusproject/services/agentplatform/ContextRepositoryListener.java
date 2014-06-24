@@ -17,43 +17,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.impl;
+package io.janusproject.services.agentplatform;
 
-import io.janusproject.services.api.DependentService;
+import io.sarl.lang.core.AgentContext;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.EventListener;
 
-import com.google.common.util.concurrent.AbstractService;
-import com.google.common.util.concurrent.Service;
-
-/** This service has a priority to be launch/stop.
+/** Listener on events related to the contexts.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class AbstractDependentService extends AbstractService implements DependentService {
+public interface ContextRepositoryListener extends EventListener {
 
-	/**
+	/** Invoked when the context is added.
+	 *
+	 * @param context - the created context.
 	 */
-	public AbstractDependentService() {
-		//
-	}
+	void contextCreated(AgentContext context);
 
-	/** {@inheritDoc}
+	/** Invoked when the context is destroyed.
+	 *
+	 * @param context - the destroyed context.
 	 */
-	@Override
-	public Collection<Class<? extends Service>> getServiceDependencies() {
-		return Collections.emptyList();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Collection<Class<? extends Service>> getServiceWeakDependencies() {
-		return Collections.emptyList();
-	}
+	void contextDestroyed(AgentContext context);
 
 }

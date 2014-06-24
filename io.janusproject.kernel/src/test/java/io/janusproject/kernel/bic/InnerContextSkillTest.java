@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.services.ContextSpaceService;
+import io.janusproject.services.agentplatform.ContextSpaceService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;

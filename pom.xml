@@ -218,6 +218,35 @@
 					<version>2.9.1</version>
 				</plugin>
 
+				<!-- Configure the checkstyle plugin. This plugin must be
+				     activated module per module in the module's pom files. -->
+				<plugin>
+				        <groupId>org.apache.maven.plugins</groupId>
+				        <artifactId>maven-checkstyle-plugin</artifactId>
+				        <version>2.12.1</version>
+					<executions>
+						<execution>
+				        		<phase>prepare-package</phase>
+				        		<goals>
+				        			<goal>checkstyle</goal>
+				        		</goals>
+						</execution>
+					</executions>
+				        <configuration>
+				        	<configLocation>${main.basedir}/checkstyle/checkstyle.xml</configLocation>
+				        	<suppressionsLocation>${main.basedir}/checkstyle/suppressions.xml</suppressionsLocation>
+				        	<headerLocation>${main.basedir}/checkstyle/ClassHeader.txt</headerLocation>
+				        	<enableRSS>false</enableRSS>
+				        	<linkXRef>true</linkXRef>
+				        	<consoleOutput>true</consoleOutput>
+				       		<failsOnError>true</failsOnError>
+				       		<failOnViolation>true</failOnViolation>
+						<includeTestSourceDirectory>false</includeTestSourceDirectory>
+						<enableRulesSummary>true</enableRulesSummary>
+						<propertyExpansion>main.basedir=${main.basedir}</propertyExpansion>
+				        </configuration>
+				</plugin>
+
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
 				<plugin>

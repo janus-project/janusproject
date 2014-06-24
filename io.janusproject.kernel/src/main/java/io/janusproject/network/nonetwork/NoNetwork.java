@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,10 @@
 package io.janusproject.network.nonetwork;
 
 import io.janusproject.network.NetworkUtil;
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.KernelDiscoveryService;
-import io.janusproject.services.LogService;
-import io.janusproject.services.NetworkServiceListener;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.KernelDiscoveryService;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.NetworkServiceListener;
 import io.janusproject.services.impl.AbstractNetworkingService;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
@@ -45,9 +45,9 @@ import com.google.inject.Singleton;
 /**
  * Service that is providing the network service but does not
  * send othet the network.
- * 
+ *
  * @author $Author: sgalland$
- * @version $Name$ $Revision$ $Date$
+ * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
@@ -55,14 +55,14 @@ import com.google.inject.Singleton;
 class NoNetwork extends AbstractNetworkingService {
 
 	private static final Random RANDOM = new Random();
-	
+
 	private static final int DYNFROM = 0xc000;
     private static final int DYNTO = 0xffff;
-    
+
     private final List<NetworkServiceListener> listeners = new ArrayList<>();
-	
-	private URI localHost = null;
-	
+
+	private URI localHost;
+
 	/**
 	 */
 	@Inject
@@ -130,17 +130,15 @@ class NoNetwork extends AbstractNetworkingService {
 	 */
 	@Override
 	protected synchronized void doStart() {
-		int port = DYNFROM + (RANDOM.nextInt() % (DYNTO-DYNFROM));
+		int port = DYNFROM + (RANDOM.nextInt() % (DYNTO - DYNFROM));
 		InetAddress adr = NetworkUtil.getLoopbackAddress();
-		if (adr==null) {
+		if (adr == null) {
 			try {
-				this.localHost = NetworkUtil.toURI("tcp://127.0.0.1:"+port); //$NON-NLS-1$
-			}
-			catch (URISyntaxException e) {
+				this.localHost = NetworkUtil.toURI("tcp://127.0.0.1:" + port); //$NON-NLS-1$
+			} catch (URISyntaxException e) {
 				throw new Error(e);
 			}
-		}
-		else {
+		} else {
 			this.localHost = NetworkUtil.toURI(adr, port);
 		}
 		notifyStarted();
@@ -159,12 +157,12 @@ class NoNetwork extends AbstractNetworkingService {
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceWeakDependencies() {
 		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
 	}
-	
+
 }

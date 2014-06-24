@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.executor;
 
-import io.janusproject.services.LogService;
+import io.janusproject.services.agentplatform.LogService;
 import io.sarl.lang.core.Event;
 
 import java.util.concurrent.CancellationException;

@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ import com.hazelcast.core.MultiMap;
 
 /**
  * Factory that permits to manage data structures that are shared over a network.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
  * @author $Author: sgalland$
@@ -48,10 +48,10 @@ class HazelcastDistributedDataStructureFactory implements DistributedDataStructu
 
 	@Inject
 	private HazelcastInstance hazelcastInstance;
-	
+
 	/** Change the hazelcast instance used by this factory.
-	 * 
-	 * @param hazelcastInstance
+	 *
+	 * @param hazelcastInstance - reference to the Hazelcast engine.
 	 */
 	void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
 		this.hazelcastInstance = hazelcastInstance;
@@ -64,8 +64,10 @@ class HazelcastDistributedDataStructureFactory implements DistributedDataStructu
 
 	@Override
 	public <K, V> io.janusproject.repository.MultiMap<K, V> getMultiMap(String name) {
-		MultiMap<K,V> m = this.hazelcastInstance.getMultiMap(name);
-		if (m!=null) return new MultiMapWrapper<>(m);
+		MultiMap<K, V> m = this.hazelcastInstance.getMultiMap(name);
+		if (m != null) {
+			return new MultiMapWrapper<>(m);
+		}
 		return null;
 	}
 
@@ -90,19 +92,19 @@ class HazelcastDistributedDataStructureFactory implements DistributedDataStructu
 	}
 
 	/**
+	 * @param <K> - type of the keys.
+	 * @param <V> - type of the values.
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
-	 * @param <K>
-	 * @param <V>
 	 */
-	private static final class MultiMapWrapper<K,V> implements io.janusproject.repository.MultiMap<K,V> {
-		
-		private final MultiMap<K,V> map;
-		
-		public MultiMapWrapper(MultiMap<K,V> map) {
-			assert(map!=null);
+	private static final class MultiMapWrapper<K, V> implements io.janusproject.repository.MultiMap<K, V> {
+
+		private final MultiMap<K, V> map;
+
+		public MultiMapWrapper(MultiMap<K, V> map) {
+			assert (map != null);
 			this.map = map;
 		}
 
@@ -196,7 +198,7 @@ class HazelcastDistributedDataStructureFactory implements DistributedDataStructu
 		public int valueCount(K key) {
 			return this.map.valueCount(key);
 		}
-		
+
 	}
-	
+
 }

@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.LogService;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.LogService;
 import io.sarl.core.AgentTask;
 import io.sarl.lang.core.Agent;
 

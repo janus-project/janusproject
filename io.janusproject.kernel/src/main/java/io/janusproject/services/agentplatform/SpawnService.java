@@ -1,24 +1,25 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
+package io.janusproject.services.agentplatform;
 
+import io.janusproject.services.api.DependentService;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 
@@ -28,7 +29,7 @@ import org.arakhne.afc.vmutil.locale.Locale;
 
 /** This service provides the tools to manage
  * the life-cycle of the agents.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -39,73 +40,73 @@ public interface SpawnService extends DependentService {
 
 	/** Spawn an agent of the given type, and pass the parameters to
 	 * its initialization function.
-	 * 
+	 *
 	 * @param parent - the parent entity that is creating the agent.
 	 * @param agentClazz - the type of the agent to spawn.
 	 * @param params - the list of the parameters to pass to the agent initialization function.
 	 * @return the identifier of the agent, never <code>null</code>.
 	 */
-	public UUID spawn(AgentContext parent, Class<? extends Agent> agentClazz, Object... params);
+	UUID spawn(AgentContext parent, Class<? extends Agent> agentClazz, Object... params);
 
 	/** Kill the agent with the given identifier.
-	 * 
+	 *
 	 * @param agentID - the identifier of the agent to kill.
 	 * @throws AgentKillException - thrown when the agent cannot be killed.
 	 */
-	public void killAgent(UUID agentID) throws AgentKillException;
+	void killAgent(UUID agentID) throws AgentKillException;
 
 	/** Add a listener on the changes in the current state of an agent.
-	 * 
+	 *
 	 * @param id - identifier of the agent.
-	 * @param agentLifecycleListener
+	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
-	public void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
+	void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
 
 	/** Remove a listener on the changes in the current state of an agent.
-	 * 
+	 *
 	 * @param id - identifier of the agent.
-	 * @param agentLifecycleListener
+	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
-	public void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
-	
+	void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
+
 	/** Add a listener on the changes in the current state of an agent.
-	 * 
-	 * @param agentLifecycleListener
+	 *
+	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
-	public void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
+	void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
 
 	/** Remove a listener on the changes in the current state of an agent.
-	 * 
-	 * @param agentLifecycleListener
+	 *
+	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
-	public void removeSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
+	void removeSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
 
 	/** Add a listener on the changes related to the kernel agent.
-	 * 
-	 * @param listener
+	 *
+	 * @param listener - listener on the spawning events in the local kernel.
 	 */
-	public void addKernelAgentSpawnListener(KernelAgentSpawnListener listener);
+	void addKernelAgentSpawnListener(KernelAgentSpawnListener listener);
 
 	/** Remove a listener on the changes related to the kernel agent.
-	 * 
-	 * @param listener
+	 *
+	 * @param listener - listener on the spawning events in the local kernel.
 	 */
-	public void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener);
+	void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener);
 
 
 	/** Exception occurs when an agent cannot be killed.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
 	public static class AgentKillException extends Exception {
-		
+
 		private static final long serialVersionUID = -7911946040378324212L;
 
 		private final UUID agent;
-		
+
 		/**
 		 * @param agent - id of the agent that cannot be killed.
 		 */
@@ -114,24 +115,27 @@ public interface SpawnService extends DependentService {
 			this.agent = agent;
 			fillInStackTrace();
 		}
-		
+
 		/**
 		 * @param agent - id of the agent that cannot be killed.
 		 * @param cause - the exception that is the cause of the killing discarding.
 		 */
 		public AgentKillException(UUID agent, Throwable cause) {
-			super(Locale.getString(SpawnService.class, "AGENT_KILL_EXCEPTION_WITH_CAUSE",  agent, cause), cause); //$NON-NLS-1$
+			super(Locale.getString(SpawnService.class,
+					"AGENT_KILL_EXCEPTION_WITH_CAUSE", //$NON-NLS-1$
+					agent, cause),
+					cause);
 			this.agent = agent;
 		}
 
 		/** Replies the id of the agent that cannot be skilled.
-		 * 
+		 *
 		 * @return the agent id.
 		 */
 		public UUID getAgent() {
 			return this.agent;
 		}
-		
+
 	}
 
 }

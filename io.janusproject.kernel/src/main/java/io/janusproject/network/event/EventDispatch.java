@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,7 +32,7 @@ import java.util.Map;
  * <p>
  * A {@link EventDispatch} can be transformed into/from a {@link EventEnvelope}
  * with a {@link EventSerializer}.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -42,53 +42,55 @@ import java.util.Map;
  * @see EventSerializer
  */
 public class EventDispatch implements Serializable {
-	
+
 	private static final long serialVersionUID = 3394801973705690138L;
-	
+
 	private final Scope<?> scope;
 	private final Event event;
 	private final SpaceID spaceID;
 	private Map<String, String> headers;
-	
-	/** Construct a <code>EventDispatch</code>
-	 * 
+
+	/** Construct a <code>EventDispatch</code>.
+	 *
 	 * @param sid - identifier of the space in which the event occurs.
 	 * @param event - event to dispatch.
 	 * @param scope - scope of the event.
 	 * @param headers - custom headers associated to the event.
 	 */
-	public EventDispatch(SpaceID sid, Event event, Scope<?> scope, Map<String, String> headers){
-		assert(sid!=null) : "Parameter 'sid' must not be null"; //$NON-NLS-1$
-		assert(event!=null) : "Parameter 'event' must not be null"; //$NON-NLS-1$
-		assert(scope!=null) : "Parameter 'scope' must not be null"; //$NON-NLS-1$
+	public EventDispatch(SpaceID sid, Event event, Scope<?> scope, Map<String, String> headers) {
+		assert (sid != null) : "Parameter 'sid' must not be null"; //$NON-NLS-1$
+		assert (event != null) : "Parameter 'event' must not be null"; //$NON-NLS-1$
+		assert (scope != null) : "Parameter 'scope' must not be null"; //$NON-NLS-1$
 		this.spaceID = sid;
 		this.event = event;
 		this.scope = scope;
-		this.headers = (headers==null) ? new HashMap<String,String>() : headers;
+		this.headers = (headers == null) ? new HashMap<String, String>() : headers;
 	}
 
-	/** Construct a <code>EventDispatch</code>
-	 * 
+	/** Construct a <code>EventDispatch</code>.
+	 *
 	 * @param sid - identifier of the space in which the event occurs.
 	 * @param event - event to dispatch.
 	 * @param scope - scope of the event.
 	 */
 	public EventDispatch(SpaceID sid, Event event, Scope<?> scope) {
-		this(sid,event,scope,null);
-	}	
-	
+		this(sid, event, scope, null);
+	}
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	public String toString() {
-		return "EventDispatch [scope=" + this.scope + ", event=" + this.event  //$NON-NLS-1$//$NON-NLS-2$
-				+ ", spaceID=" + this.spaceID + ", headers=" + this.headers + "]";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		return "EventDispatch [scope=" + this.scope //$NON-NLS-1$
+				+ ", event=" + this.event //$NON-NLS-1$
+				+ ", spaceID=" + this.spaceID + ", headers=" //$NON-NLS-1$//$NON-NLS-2$
+				+ this.headers + "]";  //$NON-NLS-1$
 	}
 
-	
+
 
 	/** Replies the event to dispatch.
-	 * 
+	 *
 	 * @return the event.
 	 */
 	public Event getEvent() {
@@ -96,27 +98,27 @@ public class EventDispatch implements Serializable {
 	}
 
 	/** Replies the scope of the event.
-	 * 
+	 *
 	 * @return the scope.
 	 */
-	public Scope<?> getScope(){
+	public Scope<?> getScope() {
 		return this.scope;
 	}
-	
+
 	/** Replies the custom headers associated to the event.
-	 * 
+	 *
 	 * @return the custom headers.
 	 */
-	public Map<String, String> getCustomHeaders(){
+	public Map<String, String> getCustomHeaders() {
 		return this.headers;
 	}
-	
+
 	/** Replies the identifier of the space in which the event occurs.
-	 * 
+	 *
 	 * @return the space identifier.
 	 */
-	public SpaceID getSpaceID(){
+	public SpaceID getSpaceID() {
 		return this.spaceID;
 	}
-	
+
 }

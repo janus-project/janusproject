@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.services.LogService;
+import io.janusproject.services.agentplatform.LogService;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
@@ -41,8 +41,8 @@ import com.google.common.eventbus.AsyncSyncEventBus;
 import com.google.inject.Inject;
 
 /** Janus implementation of an internal skill that provides
- * an event bus to notify the different components of an agent. 
- * 
+ * an event bus to notify the different components of an agent.
+ *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
  * @author $Author: sgalland$
@@ -51,7 +51,7 @@ import com.google.inject.Inject;
  * @mavenartifactid $ArtifactId$
  */
 class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
-	
+
 	/** State of the owner.
 	 */
 	private final AtomicReference<OwnerState> state = new AtomicReference<>(OwnerState.NEW);
@@ -59,7 +59,7 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	/** Implementation of an EventListener linked to the owner of this skill.
 	 */
 	private final AgentEventListener agentAsEventListener;
-	
+
 	/** Reference to the event bus.
 	 * The event bus is the mean of routing of the events inside
 	 * the context of the agents. The agent itself and the behaviors
@@ -74,58 +74,59 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	/** Address of the agent in the inner space.
 	 */
 	private final Address agentAddressInInnerDefaultSpace;
-	
+
 	/** Collection of objects that are listening the event bus,
 	 * except the owner of this skill.
 	 */
-	private List<Object> eventListeners = null;
-	
+	private List<Object> eventListeners;
+
 	/**
-	 * @param agent
-	 * @param addressInInnerDefaultSpace
+	 * @param agent - reference to the owner of this skill.
+	 * @param addressInInnerDefaultSpace - address of the owner of this skill
+	 *                                     in its inner default space.
 	 */
 	public InternalEventBusSkill(Agent agent, Address addressInInnerDefaultSpace) {
 		super(agent);
 		this.agentAsEventListener = new AgentEventListener(this);
 		this.agentAddressInInnerDefaultSpace = addressInInnerDefaultSpace;
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()
-				+", state = "+this.state //$NON-NLS-1$
-				+", addressInDefaultspace = "+this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
+				+ ", state = " + this.state //$NON-NLS-1$
+				+ ", addressInDefaultspace = " + this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
 	}
 
 	@Override
 	public synchronized Address getInnerDefaultSpaceAddress() {
 		return this.agentAddressInInnerDefaultSpace;
 	}
-	
+
 	@Override
 	protected synchronized void install() {
 		this.eventBus.register(getOwner());
 	}
-	
+
 	@Override
 	protected synchronized void uninstall() {
 		this.eventBus.unregister(getOwner());
 		// TODO: dispose eventBus => remove any registered objects, but without a list in this skill
 		List<Object> list = this.eventListeners;
 		this.eventListeners = null;
-		if (list!=null) {
-			for(Object o : list) {
+		if (list != null) {
+			for (Object o : list) {
 				this.eventBus.unregister(o);
 			}
 		}
 	}
-	
+
 	@Override
 	public synchronized void registerEventListener(Object listener) {
 		this.eventBus.register(listener);
-		if (this.eventListeners==null) {
+		if (this.eventListeners == null) {
 			this.eventListeners = new ArrayList<>();
 		}
 		this.eventListeners.add(listener);
@@ -134,7 +135,7 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	@Override
 	public synchronized void unregisterEventListener(Object listener) {
 		this.eventBus.unregister(listener);
-		if (this.eventListeners!=null) {
+		if (this.eventListeners != null) {
 			this.eventListeners.remove(listener);
 			if (this.eventListeners.isEmpty()) {
 				this.eventListeners = null;
@@ -145,13 +146,13 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	/**
 	 * Internal event dispatching. This methods post the event in the internal
 	 * eventbus without modifying it (i.e. as is)
-	 * 
+	 *
 	 * This method is called when: - A behavior wakes other behaviors and the
 	 * event is returned from the inner default Space. - The
 	 * {@link DefaultContextInteractions} receives an event.
-	 * 
+	 *
 	 * Do not call directly
-	 * 
+	 *
 	 * @param event
 	 */
 	private synchronized void internalReceiveEvent(Event event) {
@@ -162,14 +163,17 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	public synchronized void selfEvent(Event event) {
 		event.setSource(getInnerDefaultSpaceAddress());
 		if (event instanceof Initialize) {
-			this.eventBus.fire(event);//Immediate synchronous dispatching of Initialize event
+			//Immediate synchronous dispatching of Initialize event
+			this.eventBus.fire(event);
 			this.state.set(OwnerState.RUNNING);
 			this.agentAsEventListener.agentInitialized();
 		} else if (event instanceof Destroy) {
-			this.eventBus.fire(event);//Immediate synchronous dispatching of Destroy event
+			//Immediate synchronous dispatching of Destroy event
+			this.eventBus.fire(event);
 			this.state.set(OwnerState.DESTROYED);
 		} else {
-			internalReceiveEvent(event);//Asynchronous parallel dispatching of this event
+			//Asynchronous parallel dispatching of this event
+			internalReceiveEvent(event);
 		}
 		this.logger.debug("SELF_EVENT", event); //$NON-NLS-1$
 	}
@@ -209,7 +213,7 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		@Override
 		public void receiveEvent(Event event) {
 			InternalEventBusSkill s = this.skill.get();
-			synchronized(s) {
+			synchronized (s) {
 				switch(s.state.get()) {
 				case NEW:
 					this.buffer.add(event);
@@ -231,7 +235,7 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		@SuppressWarnings("synthetic-access")
 		void agentInitialized() {
 			InternalEventBusSkill s = this.skill.get();
-			synchronized(s) {
+			synchronized (s) {
 				for (Event evt : this.buffer) {
 					s.internalReceiveEvent(evt);
 				}
@@ -239,7 +243,7 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		}
 
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$

@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,9 @@
 package io.janusproject.kernel.bic;
 
 import io.janusproject.kernel.Kernel;
-import io.janusproject.services.ContextSpaceService;
-import io.janusproject.services.SpawnService;
-import io.janusproject.services.SpawnServiceListener;
+import io.janusproject.services.agentplatform.ContextSpaceService;
+import io.janusproject.services.agentplatform.SpawnService;
+import io.janusproject.services.agentplatform.SpawnServiceListener;
 import io.sarl.core.Behaviors;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
@@ -50,7 +50,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 /** Provider of the built-in capacities of the Janus platform.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
  * @version $FullVersion$
@@ -73,7 +73,8 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 	 */
 	@Override
 	public Map<Class<? extends Capacity>, Skill> getBuiltinCapacities(Agent agent) {
-		Map<Class<? extends Capacity>, Skill> result = new HashMap<>(); // no need to be synchronized
+		// no need to be synchronized
+		Map<Class<? extends Capacity>, Skill> result = new HashMap<>();
 
 		UUID innerContextID = agent.getID();
 		SpaceID innerSpaceID = new SpaceID(
@@ -82,16 +83,18 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 				OpenEventSpaceSpecification.class);
 		Address agentAddressInInnerSpace = new Address(innerSpaceID, agent.getID());
 		Kernel k = this.injector.getInstance(Kernel.class);
-				
+
 		MicroKernelSkill microKernelSkill = new MicroKernelSkill(agent, k);
-		InternalEventBusSkill eventBusSkill = new InternalEventBusSkill(agent, agentAddressInInnerSpace);		
+		InternalEventBusSkill eventBusSkill = new InternalEventBusSkill(agent, agentAddressInInnerSpace);
 		InnerContextSkill innerContextSkill = new InnerContextSkill(agent, agentAddressInInnerSpace);
 		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent, agentAddressInInnerSpace);
 		LifecycleSkill lifecycleSkill = new LifecycleSkill(agent);
 		ExternalContextAccessSkill externalContextSkill = new ExternalContextAccessSkill(agent);
-		DefaultContextInteractionsSkill interactionSkill = new DefaultContextInteractionsSkill(agent, this.contextRepository.getContext(agent.getParentID()));
+		DefaultContextInteractionsSkill interactionSkill = new DefaultContextInteractionsSkill(
+				agent,
+				this.contextRepository.getContext(agent.getParentID()));
 		SchedulesSkill scheduleSkill = new SchedulesSkill(agent);
-		
+
 		this.injector.injectMembers(eventBusSkill);
 		this.injector.injectMembers(innerContextSkill);
 		this.injector.injectMembers(behaviorSkill);
@@ -99,7 +102,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		this.injector.injectMembers(externalContextSkill);
 		this.injector.injectMembers(interactionSkill);
 		this.injector.injectMembers(scheduleSkill);
-		
+
 		result.put(MicroKernelCapacity.class, microKernelSkill);
 		result.put(InternalEventBusCapacity.class, eventBusSkill);
 		result.put(InnerContextAccess.class, innerContextSkill);
@@ -108,7 +111,7 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		result.put(ExternalContextAccess.class, externalContextSkill);
 		result.put(DefaultContextInteractions.class, interactionSkill);
 		result.put(Schedules.class, scheduleSkill);
-		
+
 		this.spawnService.addSpawnServiceListener(agent.getID(),
 				new AgentLifeCycleSupport(
 						agent.getID(),
@@ -123,14 +126,14 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 						scheduleSkill));
 
 		// Test if all the BICs are installed.
-		assert(result.get(Behaviors.class)!=null);
-		assert(result.get(DefaultContextInteractions.class)!=null);
-		assert(result.get(InternalEventBusCapacity.class)!=null);
-		assert(result.get(ExternalContextAccess.class)!=null);
-		assert(result.get(InnerContextAccess.class)!=null);
-		assert(result.get(Lifecycle.class)!=null);
-		assert(result.get(Schedules.class)!=null);
-		assert(result.get(MicroKernelCapacity.class)!=null);
+		assert (result.get(Behaviors.class) != null);
+		assert (result.get(DefaultContextInteractions.class) != null);
+		assert (result.get(InternalEventBusCapacity.class) != null);
+		assert (result.get(ExternalContextAccess.class) != null);
+		assert (result.get(InnerContextAccess.class) != null);
+		assert (result.get(Lifecycle.class) != null);
+		assert (result.get(Schedules.class) != null);
+		assert (result.get(MicroKernelCapacity.class) != null);
 
 		return result;
 	}
@@ -147,14 +150,18 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		private final WeakReference<SpawnService> spawnService;
 		private final InternalEventBusCapacity eventBusCapacity;
 		private final Skill[] skills;
-		
+
 		/**
-		 * @param agentId
-		 * @param spawnService
-		 * @param eventBusCapacity
-		 * @param skills
+		 * @param agentId - identifier of the agent for which this class is created.
+		 * @param spawnService - the agent spawning service.
+		 * @param eventBusCapacity - the capacity of the agent to manage an internal bus.
+		 * @param skills - the skills for the built-in capacities.
 		 */
-		public AgentLifeCycleSupport(UUID agentId, SpawnService spawnService, InternalEventBusCapacity eventBusCapacity, Skill... skills) {
+		public AgentLifeCycleSupport(
+				UUID agentId,
+				SpawnService spawnService,
+				InternalEventBusCapacity eventBusCapacity,
+				Skill... skills) {
 			this.agentID = agentId;
 			this.spawnService = new WeakReference<>(spawnService);
 			this.eventBusCapacity = eventBusCapacity;
@@ -171,21 +178,18 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 				try {
 					m.setAccessible(true);
 					m.invoke(this.eventBusCapacity);
-					for(Skill s : this.skills) {
+					for (Skill s : this.skills) {
 						m.invoke(s);
 					}
-				}
-				finally {
+				} finally {
 					m.setAccessible(isAccessible);
 				}
-			}
-			catch(RuntimeException e) {
+			} catch (RuntimeException e) {
 				throw e;
-			}
-			catch(Exception e) {
+			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			
+
 			Initialize init = new Initialize();
 			init.parameters = initializationParameters;
 			this.eventBusCapacity.selfEvent(init);
@@ -194,9 +198,9 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 		@Override
 		public void agentDestroy(Agent agent) {
 			SpawnService service = this.spawnService.get();
-			assert(service!=null);
+			assert (service != null);
 			service.removeSpawnServiceListener(this.agentID, this);
-			
+
 			Destroy destroy = new Destroy();
 			this.eventBusCapacity.selfEvent(destroy);
 
@@ -206,23 +210,20 @@ class JanusBuiltinCapacitiesProvider implements BuiltinCapacitiesProvider {
 				boolean isAccessible = m.isAccessible();
 				try {
 					m.setAccessible(true);
-					for(int i=this.skills.length-1; i>=0; i--) {
+					for (int i = this.skills.length - 1; i >= 0; i--) {
 						m.invoke(this.skills[i]);
 					}
 					m.invoke(this.eventBusCapacity);
-				}
-				finally {
+				} finally {
 					m.setAccessible(isAccessible);
 				}
-			}
-			catch(RuntimeException e) {
+			} catch (RuntimeException e) {
 				throw e;
-			}
-			catch(Exception e) {
+			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
-		
+
 	}
 
 }

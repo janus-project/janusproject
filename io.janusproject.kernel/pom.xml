@@ -9,6 +9,11 @@
 	<artifactId>io.janusproject.kernel</artifactId>
 	<name>Janus Kernel</name>
 
+	<properties>
+		<!-- needed for checkstyle/findbugs -->
+		<main.basedir>${project.parent.basedir}</main.basedir>
+	</properties>
+
 	<dependencies>
 
 		<dependency>
@@ -83,6 +88,10 @@
 
 	<build>
 		<plugins>
+			<plugin>
+		        	<groupId>org.apache.maven.plugins</groupId>
+		        	<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<!-- to create a jar with all dependencies -->
 				<groupId>org.apache.maven.plugins</groupId>

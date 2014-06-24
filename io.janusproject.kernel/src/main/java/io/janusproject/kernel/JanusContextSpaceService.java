@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,12 @@
 package io.janusproject.kernel;
 
 import io.janusproject.JanusConfig;
-import io.janusproject.services.ContextRepositoryListener;
-import io.janusproject.services.ContextSpaceService;
-import io.janusproject.services.KernelDiscoveryService;
-import io.janusproject.services.LogService;
-import io.janusproject.services.NetworkService;
-import io.janusproject.services.SpaceRepositoryListener;
+import io.janusproject.services.agentplatform.ContextRepositoryListener;
+import io.janusproject.services.agentplatform.ContextSpaceService;
+import io.janusproject.services.agentplatform.KernelDiscoveryService;
+import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.NetworkService;
+import io.janusproject.services.agentplatform.SpaceRepositoryListener;
 import io.janusproject.services.impl.AbstractDependentService;
 import io.janusproject.util.ListenerCollection;
 import io.janusproject.util.TwoStepConstruction;
@@ -56,7 +56,7 @@ import com.hazelcast.core.IMap;
 
 /**
  * A repository of Agent's context and spaces.
- * 
+ *
  * @author $Author: ngaud$
  * @author $Author: srodriguez$
  * @version $FullVersion$
@@ -72,7 +72,7 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	/** Factory of contexts.
 	 */
 	private ContextFactory contextFactory;
-	
+
 	/** Factory of space repositories.
 	 */
 	private SpaceRepositoryFactory spaceRepositoryFactory;
@@ -85,20 +85,20 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 
 	/**
 	 * Map linking a context id to its related Context object This is local
-	 * non-distributed map
+	 * non-distributed map.
 	 */
-	private Map<UUID,AgentContext> contexts = new TreeMap<>();
-	
-	private String hazelcastListener = null;
-	
+	private Map<UUID, AgentContext> contexts = new TreeMap<>();
+
+	private String hazelcastListener;
+
 	private LogService logger;
-	
+
 	/** Constructs <code>ContextRepository</code>.
 	 */
 	public JanusContextSpaceService() {
 		//
 	}
-	
+
 	@Override
 	public final Class<? extends Service> getServiceType() {
 		return ContextSpaceService.class;
@@ -108,9 +108,9 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	public Collection<java.lang.Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(NetworkService.class, KernelDiscoveryService.class);
 	}
-	
+
 	/** Replies the factory used to create contexts.
-	 * 
+	 *
 	 * @return the context factory.
 	 */
 	ContextFactory getContextFactory() {
@@ -118,15 +118,17 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	}
 
 	/** Change the factory used to create contexts.
-	 * 
+	 *
 	 * @param factory - the context factory.
 	 */
 	void setContextFactory(ContextFactory factory) {
-		if (factory!=null) this.contextFactory = factory;
+		if (factory != null) {
+			this.contextFactory = factory;
+		}
 	}
 
 	/** Replies the factory used to create space repositories.
-	 * 
+	 *
 	 * @return the context factory.
 	 */
 	SpaceRepositoryFactory getSpaceRepositoryFactory() {
@@ -134,11 +136,13 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	}
 
 	/** Change the factory used to create space repositories.
-	 * 
+	 *
 	 * @param factory - the space repository factory.
 	 */
 	void setSpaceRepositoryFactory(SpaceRepositoryFactory factory) {
-		if (factory!=null) this.spaceRepositoryFactory = factory;
+		if (factory != null) {
+			this.spaceRepositoryFactory = factory;
+		}
 	}
 
 	/** {@inheritDoc}
@@ -148,16 +152,15 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 		return this;
 	}
 
-	/**
-	 * Initialize this service with injected objects
-	 * 
+	/** Initialize this service with injected objects.
+	 *
 	 * @param janusID - injected identifier.
 	 * @param hzInstance - Hazelcast instance.
 	 * @param logService - service of logging.
 	 * @param injector - the injector to use.
 	 */
 	@Inject
-	synchronized void postConstruction( 
+	synchronized void postConstruction(
 			@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusID,
 			HazelcastInstance hzInstance,
 			LogService logService,
@@ -188,13 +191,13 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	public synchronized boolean containsContext(UUID contextID) {
 		return this.contexts.containsKey(contextID);
 	}
-	
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	public synchronized AgentContext createContext(UUID contextID, UUID defaultSpaceUUID) {
-		AgentContext context = this.contexts.get(contextID); 
-		if (context==null) {
+		AgentContext context = this.contexts.get(contextID);
+		if (context == null) {
 			Context ctx = this.contextFactory.newInstance(
 					contextID,
 					defaultSpaceUUID,
@@ -222,8 +225,8 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	public synchronized void removeContext(UUID contextID) {
 		this.defaultSpaces.remove(contextID);
 		AgentContext context = this.contexts.remove(contextID);
-		if (context!=null) {
-			((Context)context).destroy();
+		if (context != null) {
+			((Context) context).destroy();
 			fireContextDestroyed(context);
 		}
 	}
@@ -255,10 +258,10 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	public synchronized Collection<AgentContext> getContexts(final Collection<UUID> contextIDs) {
 		return Collections2.filter(this.contexts.values(), new Predicate<AgentContext>() {
 			@Override
-			public boolean apply(AgentContext input) {	
+			public boolean apply(AgentContext input) {
 				return contextIDs.contains(input.getID());
 			}
-		} );
+		});
 	}
 
 	/** {@inheritDoc}
@@ -276,25 +279,25 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	}
 
 	/** Notifies the listeners about a context creation.
-	 * 
-	 * @param context
+	 *
+	 * @param context - reference to the created context.
 	 */
 	protected void fireContextCreated(AgentContext context) {
 		ContextRepositoryListener[] ilisteners = this.listeners.getListeners(ContextRepositoryListener.class);
 		this.logger.info(JanusContextSpaceService.class, "CONTEXT_CREATED", context.getID()); //$NON-NLS-1$
-		for(ContextRepositoryListener listener : ilisteners) {
+		for (ContextRepositoryListener listener : ilisteners) {
 			listener.contextCreated(context);
 		}
 	}
 
 	/** Notifies the listeners about a context destruction.
-	 * 
-	 * @param context
+	 *
+	 * @param context - reference to the destroyed context.
 	 */
 	protected void fireContextDestroyed(AgentContext context) {
 		ContextRepositoryListener[] ilisteners = this.listeners.getListeners(ContextRepositoryListener.class);
 		this.logger.info(JanusContextSpaceService.class, "CONTEXT_DESTROYED", context.getID()); //$NON-NLS-1$
-		for(ContextRepositoryListener listener : ilisteners) {
+		for (ContextRepositoryListener listener : ilisteners) {
 			listener.contextDestroyed(context);
 		}
 	}
@@ -312,32 +315,34 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	public void removeSpaceRepositoryListener(SpaceRepositoryListener listener) {
 		this.listeners.remove(SpaceRepositoryListener.class, listener);
 	}
-	
+
 	/** Notifies the listeners on the space creation.
-	 * 
-	 * @param space
-	 * @param isLocalCreation
+	 *
+	 * @param space - reference to the created space.
+	 * @param isLocalCreation - indicates if the space was initially created on the
+	 *                          current kernel.
 	 */
 	protected void fireSpaceCreated(Space space, boolean isLocalCreation) {
-		for(SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
+		for (SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
 			listener.spaceCreated(space, isLocalCreation);
 		}
 	}
 
 	/** Notifies the listeners on the space destruction.
-	 * 
-	 * @param space
-	 * @param isLocalDestruction
+	 *
+	 * @param space - reference to the destroyed space.
+	 * @param isLocalDestruction - indicates if the space was destroyed in the current kernel.
 	 */
 	protected void fireSpaceDestroyed(Space space, boolean isLocalDestruction) {
-		for(SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
+		for (SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
 			listener.spaceDestroyed(space, isLocalDestruction);
 		}
 	}
-	
+
 	/** Update the internal data structure when a default
-	 * space was discovered. 
-	 * @param spaceID
+	 * space was discovered.
+	 *
+	 * @param spaceID - identifier of the space to initialize.
 	 */
 	protected synchronized void ensureDefaultSpaceDefinition(SpaceID spaceID) {
 		UUID contextID = spaceID.getContextID();
@@ -345,19 +350,22 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	}
 
 	/** Update the internal data structure when a default
-	 * space was removed. 
-	 * @param spaceID
+	 * space was removed.
+	 *
+	 * @param spaceID - identifier of the space to remove.
 	 */
 	protected synchronized void removeDefaultSpaceDefinition(SpaceID spaceID) {
 		AgentContext context = this.contexts.remove(spaceID.getContextID());
-		if (context!=null) fireContextDestroyed(context);
+		if (context != null) {
+			fireContextDestroyed(context);
+		}
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
 	protected synchronized void doStart() {
-		for(SpaceID space : this.defaultSpaces.values()) {
+		for (SpaceID space : this.defaultSpaces.values()) {
 			ensureDefaultSpaceDefinition(space);
 		}
 		this.hazelcastListener = this.defaultSpaces.addEntryListener(new HazelcastListener(), true);
@@ -368,16 +376,16 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	 */
 	@Override
 	protected synchronized void doStop() {
-		if (this.hazelcastListener!=null) {
+		if (this.hazelcastListener != null) {
 			this.defaultSpaces.removeEntryListener(this.hazelcastListener);
 		}
 		// Unconnect the default space collection from remote clusters
 		// Not needed becasue the Kernel will be stopped: this.defaultSpaces.destroy();
 		// Delete the contexts from this repository
-		Map<UUID,AgentContext> old = this.contexts;
+		Map<UUID, AgentContext> old = this.contexts;
 		this.contexts = new TreeMap<>();
-		for(AgentContext context : old.values()) {
-			((Context)context).destroy();
+		for (AgentContext context : old.values()) {
+			((Context) context).destroy();
 			fireContextDestroyed(context);
 		}
 		notifyStopped();
@@ -389,7 +397,7 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class HazelcastListener implements EntryListener<UUID,SpaceID> {
+	private class HazelcastListener implements EntryListener<UUID, SpaceID> {
 
 		/**
 		 */
@@ -416,7 +424,10 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryUpdated(EntryEvent<UUID, SpaceID> event) {
-			JanusContextSpaceService.this.logger.warning(JanusContextSpaceService.class, "UNSUPPORTED_HAZELCAST_EVENT", event); //$NON-NLS-1$
+			JanusContextSpaceService.this.logger.warning(
+					JanusContextSpaceService.class,
+					"UNSUPPORTED_HAZELCAST_EVENT", //$NON-NLS-1$
+					event);
 		}
 
 		/** {@inheritDoc}
@@ -425,9 +436,9 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 		public void entryEvicted(EntryEvent<UUID, SpaceID> event) {
 			removeDefaultSpaceDefinition(event.getValue());
 		}
-		
+
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -435,7 +446,7 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 	 * @mavenartifactid $ArtifactId$
 	 */
 	private class SpaceEventProxy implements SpaceRepositoryListener {
-		
+
 		/**
 		 */
 		public SpaceEventProxy() {
@@ -455,18 +466,18 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 		public void spaceDestroyed(Space space, boolean isLocalDestruction) {
 			fireSpaceDestroyed(space, isLocalDestruction);
 		}
-		
+
 	}
-	
+
 	/** Factory of contexts.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
 	private static class DefaultContextFactory implements ContextFactory {
-		
+
 		/** Create an instance of context.
 		 */
 		public DefaultContextFactory() {
@@ -485,7 +496,7 @@ class JanusContextSpaceService extends AbstractDependentService implements Conte
 					factory,
 					listener);
 		}
-		
+
 	}
 
 }

@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,136 +18,113 @@
  * limitations under the License.
  */
 package io.janusproject;
-
 import java.util.Properties;
 
-
-
 /** Constants for the Janus configuration.
- * 
+ *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class JanusConfig {
-	
+public final class JanusConfig {
 	/** Name of the property that contains the logger factory for hazelcast.
 	 * @see #HAZELCAST_LOGGER_FACTORY_VALUE
 	 */
 	public static final String HAZELCAST_LOGGER_FACTORY_NAME = "hazelcast.logging.class"; //$NON-NLS-1$
-
 	/** The default name of the hazelcast logger factory of Janus.
 	 * @see #HAZELCAST_LOGGER_FACTORY_NAME
 	 */
-	public static final String HAZELCAST_LOGGER_FACTORY_VALUE = "io.janusproject.kernel.hazelcast.HzKernelLoggerFactory"; //$NON-NLS-1$
-
+	public static final String HAZELCAST_LOGGER_FACTORY_VALUE =
+			"io.janusproject.kernel.hazelcast.HzKernelLoggerFactory"; //$NON-NLS-1$
 	/** Name of the property that contains the verbosity level of Janus.
 	 * @see #VERBOSE_LEVEL_VALUE
 	 */
 	public static final String VERBOSE_LEVEL_NAME = "janus.verbose.level"; //$NON-NLS-1$
-
 	/** The default verbosity level of Janus.
 	 * @see #VERBOSE_LEVEL_NAME
 	 */
 	public static final String VERBOSE_LEVEL_VALUE = "info"; //$NON-NLS-1$
-
 	/** Name of the property that contains the verbosity level of Janus.
 	 * @see #LOGGING_PROPERTY_FILE_VALUE
 	 */
 	public static final String LOGGING_PROPERTY_FILE_NAME = "java.util.logging.config.file"; //$NON-NLS-1$
-
 	/** The default name of the logging property file of Janus.
 	 * @see #LOGGING_PROPERTY_FILE_NAME
 	 */
 	public static final String LOGGING_PROPERTY_FILE_VALUE = "resource:io/janusproject/logging.properties"; //$NON-NLS-1$
-	
 	/** Name of the property that contains the identifier of the Janus context.
 	 * @see #DEFAULT_CONTEXT_ID_VALUE
 	 */
 	public static final String DEFAULT_CONTEXT_ID_NAME = "janus.context.id"; //$NON-NLS-1$
-
 	/** The default value for the Janus context identifier.
 	 * @see #DEFAULT_CONTEXT_ID_NAME
 	 */
 	public static final String DEFAULT_CONTEXT_ID_VALUE = "2c38fb7f-f363-4f6e-877b-110b1f07cc77"; //$NON-NLS-1$
-
 	/** Name of the property that contains the identifier for the default
 	 * space of the Janus context.
 	 * @see #DEFAULT_SPACE_ID_VALUE
 	 */
 	public static final String DEFAULT_SPACE_ID_NAME = "janus.context.space.id"; //$NON-NLS-1$
-	
 	/** The default value for the Janus space identifier.
 	 * @see #DEFAULT_SPACE_ID_NAME
 	 */
 	public static final String DEFAULT_SPACE_ID_VALUE = "7ba8885d-545b-445a-a0e9-b655bc15ebe0"; //$NON-NLS-1$
-
 	/** Name of the property that indicates if the ID of the default context
 	 * must be randomly computed at boot time, or not.
 	 * @see #DEFAULT_CONTEXT_ID_NAME
 	 * @see #RANDOM_DEFAULT_CONTEXT_ID_VALUE
 	 */
 	public static final String RANDOM_DEFAULT_CONTEXT_ID_NAME = "janus.context.id.random"; //$NON-NLS-1$
-
 	/** Indicates if the default context id has a random value or not at each boot time.
 	 * @see #RANDOM_DEFAULT_CONTEXT_ID_NAME
 	 */
 	public static final Boolean RANDOM_DEFAULT_CONTEXT_ID_VALUE = Boolean.FALSE;
-
 	/** Name of the property that indicates if the ID of the default context
 	 * must be computed from the boot agent type, or not.
 	 * @see #DEFAULT_CONTEXT_ID_NAME
 	 * @see #DEFAULT_CONTEXT_ID_VALUE
 	 */
 	public static final String BOOT_DEFAULT_CONTEXT_ID_NAME = "janus.context.id.boot"; //$NON-NLS-1$
-
 	/** Indicates if the default context id has a value computed
 	 * from the boot agent type.
 	 * @see #BOOT_DEFAULT_CONTEXT_ID_NAME
 	 */
 	public static final Boolean BOOT_DEFAULT_CONTEXT_ID_VALUE = Boolean.FALSE;
-
 	/** Name of the property that contains the boolean value for offline/online.
 	 */
 	public static final String OFFLINE = "janus.network.offline"; //$NON-NLS-1$
-
 	/** Name of the property that contains the classname of the boot agent.
 	 */
 	public static final String BOOT_AGENT = "janus.boot.agent"; //$NON-NLS-1$
-
 	/** Name of the property that contains the public network URI.
 	 */
 	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
-
 	/** Name of the property that contains the maximal number of threads in the pool.
 	 * @see #MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE
 	 */
 	public static final String MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME = "janus.executors.threads.max"; //$NON-NLS-1$
-
 	/** Indicates the maximal number of threads to keep in the pool, even
      * if they are idle, unless {@code allowCoreThreadTimeOut} is set.
 	 * @see #MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME
 	 */
 	public static final int MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE = 50;
-
 	/** Name of the property that contains the numbers of seconds that the kernel is waiting
 	 * for thread terminations before timeout.
 	 * @see #KERNEL_THREAD_TIMEOUT_VALUE
 	 */
 	public static final String KERNEL_THREAD_TIMEOUT_NAME = "janus.executors.timeout"; //$NON-NLS-1$
-
 	/** Indicates the numbers of seconds that the kernel is waiting
 	 * for thread terminations before timeout.
 	 * @see #KERNEL_THREAD_TIMEOUT_NAME
 	 */
 	public static final int KERNEL_THREAD_TIMEOUT_VALUE = 30;
-	
 
-	
-	
+	private JanusConfig() {
+		//
+	}
 	/** Replies the default values for the properties supported by Janus config.
-	 * 
+	 *
 	 * @param defaultValues - filled with the default values supported by the Janus platform.
 	 */
 	public static void getDefaultValues(Properties defaultValues) {
@@ -161,92 +138,89 @@ public class JanusConfig {
 		defaultValues.put(VERBOSE_LEVEL_NAME, VERBOSE_LEVEL_VALUE);
 		defaultValues.put(LOGGING_PROPERTY_FILE_NAME, LOGGING_PROPERTY_FILE_VALUE);
 		defaultValues.put(HAZELCAST_LOGGER_FACTORY_NAME, HAZELCAST_LOGGER_FACTORY_VALUE);
-		defaultValues.put(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME, Integer.toString(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE));
+		defaultValues.put(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
+				Integer.toString(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE));
 		defaultValues.put(KERNEL_THREAD_TIMEOUT_NAME, Integer.toString(KERNEL_THREAD_TIMEOUT_VALUE));
 	}
-		
 	/** Replies the value of the system property.
-	 * 
+	 *
 	 * @param name - name of the property.
 	 * @return the value, or <code>null</code> if no property found.
 	 */
 	public static String getSystemProperty(String name) {
 		return getSystemProperty(name, null);
 	}
-
 	/** Replies the value of the system property.
-	 * 
+	 *
 	 * @param name - name of the property.
 	 * @param defaultValue - value to reply if the these is no property found
-	 * @return the value, or <var>defaultValue</var>.
+	 * @return the value, or defaultValue.
 	 */
 	public static String getSystemProperty(String name, String defaultValue) {
 		String value;
 		value = System.getProperty(name, null);
-		if (value!=null) return value;
+		if (value != null) {
+			return value;
+		}
 		value = System.getenv(name);
-		if (value!=null) return value;
+		if (value != null) {
+			return value;
+		}
 		return defaultValue;
 	}
-	
 	/** Replies the value of the boolean system property.
-	 * 
+	 *
 	 * @param name - name of the property.
 	 * @return the value, or <code>false</code> if no property found.
 	 */
 	public static boolean getSystemPropertyAsBoolean(String name) {
 		return getSystemPropertyAsBoolean(name, false);
 	}
-
 	/** Replies the value of the boolean system property.
-	 * 
+	 *
 	 * @param name - name of the property.
 	 * @param defaultValue - value to reply if the these is no property found
-	 * @return the value, or <var>defaultValue</var>.
+	 * @return the value, or defaultValue.
 	 */
 	public static boolean getSystemPropertyAsBoolean(String name, boolean defaultValue) {
 		String value = getSystemProperty(name, null);
-		if (value!=null) {
+		if (value != null) {
 			try {
 				return Boolean.parseBoolean(value);
-			}
-			catch(Throwable _) {
+			} catch (Throwable _) {
 				//
 			}
 		}
 		return defaultValue;
 	}
-
 	/** Replies the value of the integer system property.
-	 * 
+	 *
 	 * @param name - name of the property.
 	 * @return the value, or <code>0</code> if no property found.
 	 */
 	public static int getSystemPropertyAsInteger(String name) {
 		return getSystemPropertyAsInteger(name, 0);
 	}
-
 	/** Replies the value of the integer system property.
-	 * 
+	 *
 	 * @param name - name of the property.
 	 * @param defaultValue - value to reply if the these is no property found
-	 * @return the value, or <var>defaultValue</var>.
+	 * @return the value, or defaultValue.
 	 */
 	public static int getSystemPropertyAsInteger(String name, int defaultValue) {
 		String value = getSystemProperty(name, null);
-		if (value!=null) {
+		if (value != null) {
 			try {
 				return Integer.parseInt(value);
-			}
-			catch(Throwable _) {
+			} catch (Throwable _) {
 				//
 			}
 		}
 		return defaultValue;
 	}
-
 	/** Replies the value of the enumeration system property.
-	 * 
+	 *
+	 * @param <S> - type of the enumeration to read.
 	 * @param type - type of the enumeration.
 	 * @param name - name of the property.
 	 * @return the value, or <code>null</code> if no property found.
@@ -254,34 +228,35 @@ public class JanusConfig {
 	public static <S extends Enum<S>> S getSystemPropertyAsEnum(Class<S> type, String name) {
 		return getSystemPropertyAsEnum(type, name, null);
 	}
-
 	/** Replies the value of the integer system property.
-	 * 
+	 *
+	 * @param <S> - type of the enumeration to read.
 	 * @param type - type of the enumeration.
 	 * @param name - name of the property.
 	 * @param defaultValue - value to reply if the these is no property found
-	 * @return the value, or <var>defaultValue</var>.
+	 * @return the value, or defaultValue.
 	 */
 	public static <S extends Enum<S>> S getSystemPropertyAsEnum(Class<S> type, String name, S defaultValue) {
 		String value = getSystemProperty(name, null);
-		if (value!=null) {
+		if (value != null) {
 			try {
 				S e = Enum.valueOf(type, value);
-				if (e!=null) return e;
-			}
-			catch(Throwable _) {
+				if (e != null) {
+					return e;
+				}
+			} catch (Throwable _) {
 				//
 			}
 			try {
 				int ordinal = Integer.parseInt(value);
 				S e = type.getEnumConstants()[ordinal];
-				if (e!=null) return e;
-			}
-			catch(Throwable _) {
+				if (e != null) {
+					return e;
+				}
+			} catch (Throwable _) {
 				//
 			}
 		}
 		return defaultValue;
 	}
-
 }

@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.hazelcast;
 
-import io.janusproject.services.LogService;
+import io.janusproject.services.agentplatform.LogService;
 
 import java.util.UUID;
 import java.util.logging.Level;

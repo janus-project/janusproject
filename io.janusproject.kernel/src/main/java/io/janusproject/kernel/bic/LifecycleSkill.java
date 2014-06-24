@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,7 @@
 package io.janusproject.kernel.bic;
 
 import io.janusproject.kernel.executor.ChuckNorrisException;
-import io.janusproject.services.SpawnService;
+import io.janusproject.services.agentplatform.SpawnService;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
@@ -32,7 +32,7 @@ import com.google.inject.Inject;
 
 /**
  * Skill that permits to manage the life cycle of the agents.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
  * @author $Author: sgalland$
@@ -47,7 +47,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 	/**
 	 * Constructs the skill.
-	 * 
+	 *
 	 * @param agent - owner of the skill.
 	 */
 	public LifecycleSkill(Agent agent) {
@@ -64,38 +64,37 @@ class LifecycleSkill extends Skill implements Lifecycle {
 		try {
 			this.spawnService.killAgent(getOwner().getID());
 			throw new ChuckNorrisException();
-		}
-		catch(io.janusproject.services.SpawnService.AgentKillException e) {
-			throw new AgentKillException(e);			
+		} catch (io.janusproject.services.agentplatform.SpawnService.AgentKillException e) {
+			throw new AgentKillException(e);
 		}
 	}
-	
+
 	/** This runtie exception is thrown when an agent cannot be killed.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
 	public static class AgentKillException extends RuntimeException {
-		
+
 		private static final long serialVersionUID = 3186824315988212481L;
-		
+
 		/**
 		 * @param e - cause
 		 */
-		AgentKillException(io.janusproject.services.SpawnService.AgentKillException e) {
+		AgentKillException(io.janusproject.services.agentplatform.SpawnService.AgentKillException e) {
 			super(e.getMessage(), e);
 		}
-		
+
 		/** Replies the agent that cannot be killed.
-		 * 
+		 *
 		 * @return the agent.
 		 */
 		public UUID getAgent() {
-			return ((io.janusproject.services.SpawnService.AgentKillException)getCause()).getAgent();
+			return ((io.janusproject.services.agentplatform.SpawnService.AgentKillException) getCause()).getAgent();
 		}
-		
+
 	}
-	
+
 }

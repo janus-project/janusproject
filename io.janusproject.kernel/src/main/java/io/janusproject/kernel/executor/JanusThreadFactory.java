@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ import com.google.inject.Inject;
 
 /**
  * A factory of threads for the Janus platform.
- * 
+ *
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -36,13 +36,14 @@ import com.google.inject.Inject;
 public class JanusThreadFactory implements ThreadFactory {
 
 	private final ThreadFactory defaultThreadFactory;
-	
+
 	private final UncaughtExceptionHandler handler;
 
 	/** Constructs a factory based on the
 	 * {@link Executors#defaultThreadFactory() default thread factory}.
-	 * 
-	 * @param handler
+	 *
+	 * @param handler - the uncaught exception handler that must be provided to
+	 *                  the created threads.
 	 */
 	@Inject
 	public JanusThreadFactory(UncaughtExceptionHandler handler) {
@@ -56,7 +57,7 @@ public class JanusThreadFactory implements ThreadFactory {
 	public Thread newThread(Runnable r) {
 		Thread t = this.defaultThreadFactory.newThread(r);
 		t.setDaemon(false);
-		assert(this.handler!=null);
+		assert (this.handler != null);
 		t.setUncaughtExceptionHandler(this.handler);
 		return t;
 	}

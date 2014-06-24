@@ -19,9 +19,9 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.KernelAgentSpawnListener;
-import io.janusproject.services.SpawnService.AgentKillException;
-import io.janusproject.services.SpawnServiceListener;
+import io.janusproject.services.agentplatform.KernelAgentSpawnListener;
+import io.janusproject.services.agentplatform.SpawnServiceListener;
+import io.janusproject.services.agentplatform.SpawnService.AgentKillException;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ExternalContextAccess;

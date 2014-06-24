@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,7 @@ import com.google.inject.Inject;
  * mechanism to generate the corresponding {@link EventEnvelope}.
  * <p>
  * This implementation assumes that an {@link EventEncrypter} is injected.
- * 
+ *
  * @author $Author: sgalland$
  * @author $Author: ngaud$
  * @version $FullVersion$
@@ -53,8 +53,8 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 
 	/** Constructs an GsonEventSerializer.
 	 * The {@link EventEncrypter} is injected.
-	 * 
-	 * @param encrypter
+	 *
+	 * @param encrypter - the object that will permits to encrypt the events.
 	 */
 	@Inject
 	public JavaBinaryEventSerializer(EventEncrypter encrypter) {
@@ -83,9 +83,9 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 				toBytes(scope),
 				toBytes(dispatch.getCustomHeaders()),
 				toBytes(event));
-		
+
 		this.encrypter.encrypt(envelope);
-		
+
 		return envelope;
 	}
 
@@ -125,7 +125,8 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 			throw new ClassCastException(Locale.getString("INVALID_TYPE", spaceSpec)); //$NON-NLS-1$
 		}
 
-		SpaceID spaceID = new SpaceID(contextId, spaceId, (Class<? extends SpaceSpecification<?>>)spaceSpec);
+		SpaceID spaceID = new SpaceID(contextId, spaceId,
+				(Class<? extends SpaceSpecification<?>>) spaceSpec);
 
 		Event event = fromBytes(envelope.getBody(), Event.class);
 		assert (event != null);
@@ -138,11 +139,12 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(data)) {
 			ObjectInputStream oos = new ObjectInputStream(bais);
 			Object object = oos.readObject();
-			if (object != null && type.isInstance(object))
+			if (object != null && type.isInstance(object)) {
 				return type.cast(object);
+			}
 			throw new ClassCastException(Locale.getString("INVALID_TYPE", //$NON-NLS-1$
 					type.getName()));
 		}
 	}
-	
+
 }

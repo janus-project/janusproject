@@ -1,20 +1,21 @@
-/* 
+/*
  * $Id$
- * 
- * Copyright (C) 2010-2012 Janus Core Developers
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Janus platform is an open-source multiagent platform.
+ * More details on http://www.janusproject.io
+ *
+ * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.janusproject.util;
 
@@ -25,21 +26,25 @@ import java.util.logging.Logger;
 
 /**
  * Helper for creating a logger.
- * 
- * @author $Author: galland$
+ *
+ * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class LoggerCreator {
+public final class LoggerCreator {
 
-	private static Level levelFromProperties = null;
-	
+	private static Level levelFromProperties;
+
+	private LoggerCreator() {
+		//
+	}
+
 	/** Create a logger with the given name.
 	 * <p>
 	 * The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
-	 * 
-	 * @param name
+	 *
+	 * @param name - the name of the new logger.
 	 * @return the logger.
 	 */
 	public static Logger createLogger(String name) {
@@ -47,26 +52,29 @@ public class LoggerCreator {
 		logger.setLevel(getLoggingLevelFromProperties());
 		return logger;
 	}
-	
+
 	/** Extract the logging level from the system properties.
-	 * 
+	 *
 	 * @return the logging level.
 	 */
 	public static Level getLoggingLevelFromProperties() {
-		if (levelFromProperties==null) {
-			String verboseLevel = JanusConfig.getSystemProperty(JanusConfig.VERBOSE_LEVEL_NAME, JanusConfig.VERBOSE_LEVEL_VALUE);
+		if (levelFromProperties == null) {
+			String verboseLevel = JanusConfig.getSystemProperty(
+					JanusConfig.VERBOSE_LEVEL_NAME, JanusConfig.VERBOSE_LEVEL_VALUE);
 			levelFromProperties = parseLoggingLevel(verboseLevel);
 		}
 		return levelFromProperties;
 	}
 
 	/** Extract the logging level from the given string.
-	 * 
-	 * @param level
+	 *
+	 * @param level - the string representation of the logging level.
 	 * @return the logging level.
 	 */
 	public static Level parseLoggingLevel(String level) {
-		if (level==null) return Level.INFO;
+		if (level == null) {
+			return Level.INFO;
+		}
 		switch(level.toLowerCase()) {
 		case "none": //$NON-NLS-1$
 		case "false": //$NON-NLS-1$
@@ -101,8 +109,7 @@ public class LoggerCreator {
 		default:
 			try {
 				return fromInt(Integer.parseInt(level));
-			}
-			catch(Throwable _) {
+			} catch (Throwable _) {
 				//
 			}
 			return Level.INFO;
@@ -110,7 +117,7 @@ public class LoggerCreator {
 	}
 
 	/** Convert a numerical representation of logging level to the logging level.
-	 * 
+	 *
 	 * @param num - the numerical index that corresponds to the given level.
 	 * @return the logging level.
 	 */
@@ -133,26 +140,46 @@ public class LoggerCreator {
 		case 7:
 			return Level.ALL;
 		default:
-			if (num<0) return Level.OFF;
+			if (num < 0) {
+				return Level.OFF;
+			}
 			return Level.ALL;
 		}
 	}
 
 	/** Convert a logging level to its numerical equivalent.
-	 * 
-	 * @param level
+	 *
+	 * @param level - the logging level.
 	 * @return the numerical index that corresponds to the given level.
 	 */
 	public static int toInt(Level level) {
-		if (level==Level.OFF) return 0;
-		if (level==Level.SEVERE) return 1;
-		if (level==Level.WARNING) return 2;
-		if (level==Level.INFO) return 3;
-		if (level==Level.CONFIG) return 4;
-		if (level==Level.FINE) return 4;
-		if (level==Level.FINER) return 5;
-		if (level==Level.FINEST) return 6;
-		if (level==Level.ALL) return 7;
+		if (level == Level.OFF) {
+			return 0;
+		}
+		if (level == Level.SEVERE) {
+			return 1;
+		}
+		if (level == Level.WARNING) {
+			return 2;
+		}
+		if (level == Level.INFO) {
+			return 3;
+		}
+		if (level == Level.CONFIG) {
+			return 4;
+		}
+		if (level == Level.FINE) {
+			return 4;
+		}
+		if (level == Level.FINER) {
+			return 5;
+		}
+		if (level == Level.FINEST) {
+			return 6;
+		}
+		if (level == Level.ALL) {
+			return 7;
+		}
 		return 3;
 	}
 
@@ -162,16 +189,16 @@ public class LoggerCreator {
 	 * This is a convinient function that calls
 	 * {@link #parseLoggingLevel(String)} and
 	 * {@link #toInt(Level)}.
-	 * 
-	 * @param level
+	 *
+	 * @param level - the string representation of the logging level.
 	 * @return the numerical index that corresponds to the given level.
 	 */
 	public static int toInt(String level) {
 		return toInt(parseLoggingLevel(level));
 	}
-	
+
 	/** Replies the string representations for the logging levels.
-	 * 
+	 *
 	 * @return the string representations, indexed by the numerical index of the level.
 	 */
 	public static String[] getLevelStrings() {
@@ -183,7 +210,7 @@ public class LoggerCreator {
 				"fine", //$NON-NLS-1$
 				"finer", //$NON-NLS-1$
 				"finest", //$NON-NLS-1$
-				"all" //$NON-NLS-1$
+				"all", //$NON-NLS-1$
 		};
 	}
 

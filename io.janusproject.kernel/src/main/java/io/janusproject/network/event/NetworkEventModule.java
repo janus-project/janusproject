@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,7 +32,7 @@ import com.google.inject.Provides;
 
 /**
  * Module that provides the network events.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -42,12 +42,16 @@ import com.google.inject.Provides;
 public class NetworkEventModule extends AbstractModule {
 
 	/** Replies the default values for the properties supported by Janus config.
-	 * 
+	 *
 	 * @param defaultValues - filled with the default values supported by the Janus platform.
 	 */
 	public static void getDefaultValues(Properties defaultValues) {
-		defaultValues.put(NetworkConfig.SERIALIZER_CLASSNAME, GsonEventSerializer.class.getName());
-		defaultValues.put(NetworkConfig.ENCRYPTER_CLASSNAME, PlainTextEventEncrypter.class.getName());
+		defaultValues.put(
+				NetworkConfig.SERIALIZER_CLASSNAME,
+				GsonEventSerializer.class.getName());
+		defaultValues.put(
+				NetworkConfig.ENCRYPTER_CLASSNAME,
+				PlainTextEventEncrypter.class.getName());
 	}
 
 	@Override
@@ -57,7 +61,10 @@ public class NetworkEventModule extends AbstractModule {
 
 	@Provides
 	private static Gson createGson() {
-		return new GsonBuilder().registerTypeAdapter(Class.class, new GsonEventSerializer.ClassTypeAdapter()).setPrettyPrinting().create();
+		return new GsonBuilder().registerTypeAdapter(
+				Class.class,
+				new GsonEventSerializer.ClassTypeAdapter())
+			.setPrettyPrinting().create();
 	}
 
 	@Provides
@@ -74,7 +81,7 @@ public class NetworkEventModule extends AbstractModule {
 			if (type != null && EventSerializer.class.isAssignableFrom(type)) {
 				serializerType = type.asSubclass(EventSerializer.class);
 			}
-			assert(injector!=null);
+			assert (injector != null);
 			return injector.getInstance(serializerType);
 		}
 		return injector.getInstance(serializerType);
@@ -102,7 +109,7 @@ public class NetworkEventModule extends AbstractModule {
 				encrypterType = PlainTextEventEncrypter.class;
 			}
 		}
-		assert(injector!=null);
+		assert (injector != null);
 		return injector.getInstance(encrypterType);
 	}
 

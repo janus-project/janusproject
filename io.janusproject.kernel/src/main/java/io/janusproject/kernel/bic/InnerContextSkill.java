@@ -1,16 +1,16 @@
 /*
  * $Id$
- * 
+ *
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
- * 
+ *
  * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.services.ContextSpaceService;
+import io.janusproject.services.agentplatform.ContextSpaceService;
 import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
@@ -37,7 +37,7 @@ import java.util.UUID;
 import com.google.inject.Inject;
 
 /** Janus implementation of SARL's {@link InnerContextSkill} built-in capacity.
- * 
+ *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
  * @author $Author: sgalland$
@@ -46,36 +46,36 @@ import com.google.inject.Inject;
  * @mavenartifactid $ArtifactId$
  */
 class InnerContextSkill extends Skill implements InnerContextAccess {
-	
-	private final Address agentAddressInInnerDefaultSpace;
-	
-	/**
-	 * Context inside the agent. 
-	 */
-	private AgentContext innerContext = null;
 
+	private final Address agentAddressInInnerDefaultSpace;
+
+	/**
+	 * Context inside the agent.
+	 */
+	private AgentContext innerContext;
 	@Inject
 	private ContextSpaceService contextService;
 
 	/**
-	 * @param agent
-	 * @param agentAddressInInnerDefaultSpace
+	 * @param agent - owner of this skill.
+	 * @param agentAddressInInnerDefaultSpace - address of the owner of this skill in
+	 *                                          its default space.
 	 */
 	public InnerContextSkill(Agent agent, Address agentAddressInInnerDefaultSpace) {
 		super(agent);
 		this.agentAddressInInnerDefaultSpace = agentAddressInInnerDefaultSpace;
 	}
-	
+
 	/** Replies if the inner context was instanciated.
 	 * To create the inner context, call {@link #getInnerContext()}
-	 * 
+	 *
 	 * @return <code>true</code> if an instance of inner context exists,
 	 * otherwise <code>false</code>.
 	 */
 	synchronized boolean hasInnerContext() {
-		return this.innerContext!=null;
+		return this.innerContext != null;
 	}
-	
+
 	/** Force to reset the inner context.
 	 * This function does not update the context repository.
 	 * <p>
@@ -92,7 +92,7 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()
-				+", addressInDefaultspace = "+this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
+				+ ", addressInDefaultspace = " + this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
 	}
 
 	/**
@@ -102,28 +102,28 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	protected void uninstall() {
 		AgentContext context = this.innerContext;
 		this.innerContext = null;
-		if (context!=null) {
+		if (context != null) {
 			// Unregister the agent from the default space
 			EventListener listener = getSkill(InternalEventBusCapacity.class).asEventListener();
-			((OpenEventSpace)context.getDefaultSpace()).unregister(listener);
+			((OpenEventSpace) context.getDefaultSpace()).unregister(listener);
 			// Destroy the context
 			this.contextService.removeContext(context);
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public synchronized AgentContext getInnerContext() {
-		if (this.innerContext==null) {
+		if (this.innerContext == null) {
 			// Create the inner context.
 			this.innerContext = this.contextService.createContext(
 					this.agentAddressInInnerDefaultSpace.getSpaceId().getContextID(),
 					this.agentAddressInInnerDefaultSpace.getSpaceId().getID());
 			// Register the agent in the default space
 			EventListener listener = getSkill(InternalEventBusCapacity.class).asEventListener();
-			OpenEventSpace defSpace = (OpenEventSpace)this.innerContext.getDefaultSpace();
+			OpenEventSpace defSpace = (OpenEventSpace) this.innerContext.getDefaultSpace();
 			defSpace.register(listener);
 		}
 		return this.innerContext;
@@ -133,11 +133,11 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	 */
 	@Override
 	public synchronized boolean hasMemberAgent() {
-		if (this.innerContext!=null) {
+		if (this.innerContext != null) {
 			Set<UUID> participants = this.innerContext.getDefaultSpace().getParticipants();
-			assert(participants!=null);
-			return ((participants.size()>1) ||
-					 ((participants.size()==1)
+			assert (participants != null);
+			return ((participants.size() > 1)
+					 || ((participants.size() == 1)
 					  && (!participants.contains(getOwner().getID()))));
 		}
 		return false;
@@ -147,9 +147,9 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	 */
 	@Override
 	public synchronized int getMemberAgentCount() {
-		if (this.innerContext!=null) {
+		if (this.innerContext != null) {
 			SynchronizedSet<UUID> participants = this.innerContext.getDefaultSpace().getParticipants();
-			assert(participants!=null);
+			assert (participants != null);
 			int count = participants.size();
 			if (participants.contains(getOwner().getID())) {
 				--count;
@@ -163,12 +163,12 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	 */
 	@Override
 	public synchronized SynchronizedSet<UUID> getMemberAgents() {
-		if (this.innerContext!=null) {
+		if (this.innerContext != null) {
 			SynchronizedSet<UUID> participants = this.innerContext.getDefaultSpace().getParticipants();
-			assert(participants!=null);
+			assert (participants != null);
 			Set<UUID> members = new HashSet<>();
 			UUID myId = getOwner().getID();
-			for(UUID id : participants) {
+			for (UUID id : participants) {
 				if (!id.equals(myId)) {
 					members.add(id);
 				}

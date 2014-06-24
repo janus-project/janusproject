@@ -20,8 +20,8 @@
 package io.janusproject.kernel.space;
 
 import io.janusproject.repository.DistributedDataStructureFactory;
-import io.janusproject.services.ExecutorService;
-import io.janusproject.services.NetworkService;
+import io.janusproject.services.agentplatform.ExecutorService;
+import io.janusproject.services.agentplatform.NetworkService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
