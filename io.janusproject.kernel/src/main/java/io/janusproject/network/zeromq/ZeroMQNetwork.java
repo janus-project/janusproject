@@ -29,9 +29,9 @@ import io.janusproject.services.agentplatform.ExecutorService;
 import io.janusproject.services.agentplatform.KernelDiscoveryService;
 import io.janusproject.services.agentplatform.KernelDiscoveryServiceListener;
 import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.agentplatform.LogService.LogParam;
 import io.janusproject.services.agentplatform.NetworkServiceListener;
 import io.janusproject.services.agentplatform.SpaceRepositoryListener;
-import io.janusproject.services.agentplatform.LogService.LogParam;
 import io.janusproject.services.impl.AbstractNetworkingExecutionThreadService;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
@@ -95,8 +95,8 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	private EventSerializer serializer;
 
 	private ZContext context;
-	private Socket publisher;
-	private Map<URI, Socket> subcribers = new ConcurrentHashMap<>();
+	private Socket sendingSocket;
+	private Map<URI, Socket> receptionSocketsPerRemoteKernel = new ConcurrentHashMap<>();
 
 	private final Map<SpaceID, NetworkEventReceivingListener> messageRecvListeners = new TreeMap<>();
 
@@ -227,15 +227,15 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	}
 
 	private void send(EventEnvelope e) {
-		this.publisher.sendMore(buildFilterableHeader(e.getContextId()));
-		this.publisher.sendMore(Ints.toByteArray(e.getSpaceId().length));
-		this.publisher.sendMore(e.getSpaceId());
-		this.publisher.sendMore(Ints.toByteArray(e.getScope().length));
-		this.publisher.sendMore(e.getScope());
-		this.publisher.sendMore(Ints.toByteArray(e.getCustomHeaders().length));
-		this.publisher.sendMore(e.getCustomHeaders());
-		this.publisher.sendMore(Ints.toByteArray(e.getBody().length));
-		this.publisher.send(e.getBody());
+		this.sendingSocket.sendMore(buildFilterableHeader(e.getContextId()));
+		this.sendingSocket.sendMore(Ints.toByteArray(e.getSpaceId().length));
+		this.sendingSocket.sendMore(e.getSpaceId());
+		this.sendingSocket.sendMore(Ints.toByteArray(e.getScope().length));
+		this.sendingSocket.sendMore(e.getScope());
+		this.sendingSocket.sendMore(Ints.toByteArray(e.getCustomHeaders().length));
+		this.sendingSocket.sendMore(e.getCustomHeaders());
+		this.sendingSocket.sendMore(Ints.toByteArray(e.getBody().length));
+		this.sendingSocket.send(e.getBody());
 	}
 
 	/** Build the byte array that may be used for the ZeroMQ filtering
@@ -263,7 +263,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			throws Exception {
 		if (this.validatedURI == null) {
 			this.logger.debug("DISCARDED_MESSAGE", data.getSource().getSpaceId(), scope, data); //$NON-NLS-1$
-		} else if (!this.subcribers.isEmpty()) {
+		} else if (!this.receptionSocketsPerRemoteKernel.isEmpty()) {
 			SpaceID spaceID = data.getSource().getSpaceId();
 			EventEnvelope env = this.serializer.serialize(new EventDispatch(spaceID, data, scope));
 			send(env);
@@ -338,27 +338,26 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 			assert (this.bufferedConnections != null);
 			this.bufferedConnections.put(space, new BufferedConnection(peerUri, space, listener));
 		} else {
-			Socket subscriber = this.subcribers.get(peerUri);
-			if (subscriber == null) {
+			Socket receptionSocket = this.receptionSocketsPerRemoteKernel.get(peerUri);
+			if (receptionSocket == null) {
 				this.logger.debug("PEER_CONNECTION", peerUri, space); //$NON-NLS-1$
-				// Socket subscriber = this.context.socket(ZMQ.SUB);
-				subscriber = this.context.createSocket(ZMQ.SUB);
-				assert (subscriber != null);
-				this.subcribers.put(peerUri, subscriber);
-				subscriber.connect(peerUri.toString());
-				this.poller.register(subscriber, Poller.POLLIN);
+				receptionSocket = this.context.createSocket(ZMQ.SUB);
+				assert (receptionSocket != null);
+				this.receptionSocketsPerRemoteKernel.put(peerUri, receptionSocket);
+				receptionSocket.connect(peerUri.toString());
+				this.poller.register(receptionSocket, Poller.POLLIN);
 				this.logger.debug("PEER_CONNECTED", peerUri); //$NON-NLS-1$
 			}
-			assert (subscriber != null);
+			assert (receptionSocket != null);
 			NetworkEventReceivingListener old = this.messageRecvListeners.get(space);
 			if (old == null) {
 				assert (listener != null);
 				this.messageRecvListeners.put(space, listener);
-				byte[] header = buildFilterableHeader(
-						this.serializer.serializeContextID(space.getContextID()));
-				subscriber.subscribe(header);
-				this.logger.debug("PEER_SUBSCRIPTION", peerUri, space); //$NON-NLS-1$
 			}
+			byte[] header = buildFilterableHeader(
+					this.serializer.serializeContextID(space.getContextID()));
+			receptionSocket.subscribe(header);
+			this.logger.debug("PEER_SUBSCRIPTION", peerUri, space); //$NON-NLS-1$
 		}
 	}
 
@@ -367,7 +366,7 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	@SuppressWarnings("resource")
 	@Override
 	public synchronized void disconnectFromRemoteSpace(URI peer, SpaceID space) throws Exception {
-		Socket s = this.subcribers.get(peer);
+		Socket s = this.receptionSocketsPerRemoteKernel.get(peer);
 		if (s != null) {
 			this.logger.debug("PEER_UNSUBSCRIPTION ", peer, space); //$NON-NLS-1$
 			byte[] header = buildFilterableHeader(
@@ -381,11 +380,11 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 	@SuppressWarnings("resource")
 	@Override
 	public synchronized void disconnectPeer(URI peer) throws Exception {
-		Socket s = this.subcribers.remove(peer);
+		Socket s = this.receptionSocketsPerRemoteKernel.remove(peer);
 		if (s != null) {
 			this.logger.debug("PEER_DISCONNECTION", peer); //$NON-NLS-1$
 			this.poller.unregister(s);
-			s.disconnect(peer.toString());
+			s.close();
 			this.logger.debug("PEER_DISCONNECTED", peer); //$NON-NLS-1$
 		}
 	}
@@ -467,13 +466,10 @@ class ZeroMQNetwork extends AbstractNetworkingExecutionThreadService {
 		Map<SpaceID, BufferedConnection> connections;
 		synchronized (this) {
 			super.startUp();
-			// this.context = ZMQ.context(1);
-
 			this.context = new ZContext();
-			// this.publisher = this.context.socket(ZMQ.PUB);
-			this.publisher = this.context.createSocket(ZMQ.PUB);
+			this.sendingSocket = this.context.createSocket(ZMQ.PUB);
 			String strUri = NetworkUtil.toString(this.uriCandidate);
-			int port = this.publisher.bind(strUri);
+			int port = this.sendingSocket.bind(strUri);
 			if (port != -1 && this.uriCandidate.getPort() == -1) {
 				this.validatedURI = new URI(
 						this.uriCandidate.getScheme(),
