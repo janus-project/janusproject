@@ -190,7 +190,6 @@ class SpaceRepository {
 	protected synchronized void removeLocalSpaceDefinition(SpaceID id, boolean isLocalDestruction) {
 		Space space = this.spaces.remove(id);
 		if (space != null) {
-			assert (space.getParticipants().isEmpty());
 			this.spacesBySpec.remove(id.getSpaceSpecification(), id);
 			fireSpaceRemoved(space, isLocalDestruction);
 		}
