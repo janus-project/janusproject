@@ -377,12 +377,17 @@ public class SpaceRepositoryTest extends Assert {
 		assertTrue(argument4.getValue());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test
 	public void destroy_hasparticipant() {
 		initRepository();
 		Mockito.when(this.space.getParticipants()).thenReturn(
 				Collections3.synchronizedSingleton(UUID.randomUUID()));
 		this.repository.destroy();
+		ArgumentCaptor<Space> argument = ArgumentCaptor.forClass(Space.class);
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceDestroyed(argument.capture(), argument4.capture());
+		assertSame(this.space, argument.getValue());
+		assertTrue(argument4.getValue());
 	}
 
 }
