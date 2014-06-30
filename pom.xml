@@ -44,7 +44,7 @@
 		<jeromq.version>0.3.4</jeromq.version>
 		<gson.version>2.2.4</gson.version>
 		<hazelcast.version>3.3-EA2</hazelcast.version>
-		<afc.version>11.0-SNAPSHOT</afc.version>
+		<afc.version>11.0</afc.version>
 	</properties>
 
 	<!-- ======================================= -->
