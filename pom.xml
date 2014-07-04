@@ -7,7 +7,7 @@
 
 	<groupId>io.janusproject</groupId>
 	<artifactId>io.janusproject</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+	<version>2.0.1.0-SNAPSHOT</version>
 
 
 	<name>Janus Project</name>
@@ -247,6 +247,18 @@
 				        </configuration>
 				</plugin>
 
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.arakhne.afc.maven</groupId>
+					<artifactId>tag-replacer</artifactId>
+					<version>11.0</version>
+				</plugin>
+
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
@@ -380,7 +392,7 @@
 				<executions>
 					<execution>
 						<id>attach-sources</id>
-						<phase>verify</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>jar-no-fork</goal>
 						</goals>
@@ -478,6 +490,52 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>release-tasks</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.arakhne.afc.maven</groupId>
+						<artifactId>tag-replacer</artifactId>
+						<executions>
+							<execution>
+								<id>update-source-tags</id>
+								<phase>process-sources</phase>
+								<goals>
+									<goal>generatereplacesrc</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<!-- ======================================= -->
 	<!-- ==== Third-Party Repositories === -->
 	<!-- ==== Should be removed when all === -->
@@ -494,12 +552,6 @@
 			<id>io.sarl.maven</id>
 			<name>SARL Repository</name>
 			<url>http://maven.sarl.io/</url>
-		</repository>
-		<!-- for Arakhne.org vmutil api -->
-		<repository>
-			<id>org.arakhne-maven</id>
-			<name>Arakhnê.org Snapshots</name>
-			<url>http://download.tuxfamily.org/arakhne/maven/</url>
 		</repository>
 	</repositories>
 
@@ -574,5 +626,15 @@
 			<url>file:///var/www/janus-maven-repository/</url>
 		</snapshotRepository>
 	</distributionManagement>
+
+	<!-- ==================== -->
+	<!-- ==== Development === -->
+	<!-- ==================== -->
+
+	<scm>
+		<url>https://github.com/janus-project/janusproject</url>
+		<connection>scm:git:git://github.com/janus-project/janusproject.git</connection>
+		<developerConnection>scm:git:https://github.com/janus-project/janusproject.git</developerConnection>
+	</scm>
 
 </project>
