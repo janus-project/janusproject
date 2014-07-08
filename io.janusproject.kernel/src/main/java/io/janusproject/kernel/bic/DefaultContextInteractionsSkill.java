@@ -28,7 +28,7 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Skill;
-import io.sarl.util.AddressScope;
+import io.sarl.util.Scopes;
 
 import java.util.UUID;
 
@@ -108,7 +108,7 @@ DefaultContextInteractions {
 	@Override
 	public void receive(UUID receiverID, Event event) {
 		Address recAddr = this.defaultSpace.getAddress(receiverID);
-		this.emit(event, AddressScope.getScope(recAddr));
+		this.emit(event, Scopes.addresses(recAddr));
 	}
 
 	@Override

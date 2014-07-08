@@ -27,7 +27,6 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
-import io.sarl.util.AddressScope;
 import io.sarl.util.OpenEventSpaceSpecification;
 import io.sarl.util.Scopes;
 
@@ -189,14 +188,14 @@ public class EventSpaceImplTest extends Assert {
 		
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(this.address));
+		this.space.doEmit(event, Scopes.addresses(this.address));
 		Mockito.verifyZeroInteractions(this.listener);
 		
 		register();
 		
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(this.address));
+		this.space.doEmit(event, Scopes.addresses(this.address));
 		
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
@@ -206,7 +205,7 @@ public class EventSpaceImplTest extends Assert {
 
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(this.address));
+		this.space.doEmit(event, Scopes.addresses(this.address));
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertNotSame(event, argument.getValue());
 	}
@@ -222,21 +221,21 @@ public class EventSpaceImplTest extends Assert {
 		
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(otherAddress));
+		this.space.doEmit(event, Scopes.addresses(otherAddress));
 		Mockito.verifyZeroInteractions(this.listener);
 		
 		register();
 		
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(otherAddress));
+		this.space.doEmit(event, Scopes.addresses(otherAddress));
 		Mockito.verify(this.listener, new Times(0)).receiveEvent(Mockito.any(Event.class));
 
 		unregister();
 
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(otherAddress));
+		this.space.doEmit(event, Scopes.addresses(otherAddress));
 		Mockito.verify(this.listener, new Times(0)).receiveEvent(Mockito.any(Event.class));
 	}
 
@@ -251,14 +250,14 @@ public class EventSpaceImplTest extends Assert {
 		
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(this.address, otherAddress));
+		this.space.doEmit(event, Scopes.addresses(this.address, otherAddress));
 		Mockito.verifyZeroInteractions(this.listener);
 		
 		register();
 		
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(this.address, otherAddress));
+		this.space.doEmit(event, Scopes.addresses(this.address, otherAddress));
 		
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
@@ -268,7 +267,7 @@ public class EventSpaceImplTest extends Assert {
 
 		event = Mockito.mock(Event.class);
 		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, AddressScope.getScope(this.address, otherAddress));
+		this.space.doEmit(event, Scopes.addresses(this.address, otherAddress));
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertNotSame(event, argument.getValue());
 	}
@@ -299,7 +298,7 @@ public class EventSpaceImplTest extends Assert {
 	@Test
 	public void emitEventScope_scopeaddress() throws Exception {
 		Event event;
-		Scope<Address> scope = AddressScope.getScope(this.address);
+		Scope<Address> scope = Scopes.addresses(this.address);
 		
 		register();
 		
@@ -327,7 +326,7 @@ public class EventSpaceImplTest extends Assert {
 				OpenEventSpaceSpecification.class), UUID.randomUUID());
 
 		Event event;
-		Scope<Address> scope = AddressScope.getScope(otherAddress);
+		Scope<Address> scope = Scopes.addresses(otherAddress);
 		
 		register();
 		
@@ -352,7 +351,7 @@ public class EventSpaceImplTest extends Assert {
 				OpenEventSpaceSpecification.class), UUID.randomUUID());
 
 		Event event;
-		Scope<Address> scope = AddressScope.getScope(this.address, otherAddress);
+		Scope<Address> scope = Scopes.addresses(this.address, otherAddress);
 		
 		register();
 		
