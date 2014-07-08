@@ -149,9 +149,11 @@ public final class Boot {
 					}
 					File file = new File(rawFilename);
 					if (!file.canRead()) {
+						//CHECKSTYLE:OFF
 						System.err.println(Locale.getString(
 								"INVALID_PROPERTY_FILENAME", //$NON-NLS-1$
 								rawFilename));
+						//CHECKSTYLE:ON
 						System.exit(ERROR_EXIT_CODE);
 					}
 					propertyFiles.add(file.toURI().toURL());
@@ -159,7 +161,9 @@ public final class Boot {
 			}
 			return cmd.getArgs();
 		} catch (IOException | ParseException e) {
+			//CHECKSTYLE:OFF
 			e.printStackTrace();
+			//CHECKSTYLE:ON
 			showHelp();
 			// Only to avoid compilation errors
 			throw new Error();
@@ -193,7 +197,9 @@ public final class Boot {
 				}
 				// Set the boot agent classname
 				System.setProperty(JanusConfig.BOOT_AGENT, agent.getCanonicalName());
+				//CHECKSTYLE:OFF
 				System.out.println(Locale.getString("LAUNCHING_AGENT", agentToLaunch)); //$NON-NLS-1$
+				//CHECKSTYLE:ON
 				startJanus(
 						(Class<? extends Agent>) agent,
 						Arrays.copyOfRange(
@@ -205,7 +211,9 @@ public final class Boot {
 						Locale.getString("INVALID_AGENT_TYPE", agentToLaunch)); //$NON-NLS-1$
 			}
 		} catch (IOException | ClassNotFoundException e) {
+			//CHECKSTYLE:OFF
 			e.printStackTrace();
+			//CHECKSTYLE:ON
 			showHelp();
 		}
 	}
@@ -285,14 +293,18 @@ public final class Boot {
 		try {
 			defaultValues.storeToXML(System.out, null);
 		} catch (IOException e) {
+			//CHECKSTYLE:OFF
 			e.printStackTrace();
+			//CHECKSTYLE:ON
 		}
 		System.exit(ERROR_EXIT_CODE);
 	}
 	/** Show the heading logo of the Janus platform.
 	 */
 	public static void showJanusLogo() {
+		//CHECKSTYLE:OFF
 		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
+		//CHECKSTYLE:ON
 	}
 	/** Launch the first agent of the Janus kernel.
 	 * <p>

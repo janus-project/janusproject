@@ -59,8 +59,10 @@ final class ExecutorUtil {
 				if (h != null) {
 					h.uncaughtException(thread, e);
 				} else {
+					//CHECKSTYLE:OFF
 					System.err.println(e.toString());
 					e.printStackTrace();
+					//CHECKSTYLE:ON
 				}
 			} else {
 				return true;
