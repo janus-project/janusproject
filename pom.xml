@@ -38,7 +38,7 @@
 		<year>2014</year>
 		<copyrighters>Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND</copyrighters>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<sarl.version>0.1.0-SNAPSHOT</sarl.version>
+		<sarl.version.range>[0.1.0-SNAPSHOT,0.2.0-SNAPSHOT)</sarl.version.range>
 		<guice.version>4.0-beta4</guice.version>
 		<guava.version>17.0</guava.version>
 		<jeromq.version>0.3.4</jeromq.version>
@@ -79,7 +79,7 @@
 			<dependency>
 				<groupId>io.sarl.maven</groupId>
 				<artifactId>io.sarl.maven.sdk</artifactId>
-				<version>${sarl.version}</version>
+				<version>${sarl.version.range}</version>
 				<type>pom</type>
 				<exclusions>
 					<exclusion>
