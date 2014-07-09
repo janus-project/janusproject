@@ -78,7 +78,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>io.sarl.maven</groupId>
-				<artifactId>io.sarl.sdk</artifactId>
+				<artifactId>io.sarl.maven.sdk</artifactId>
 				<version>${sarl.version}</version>
 				<type>pom</type>
 				<exclusions>
@@ -237,7 +237,7 @@
 				        	<suppressionsLocation>${main.basedir}/checkstyle/suppressions.xml</suppressionsLocation>
 				        	<headerLocation>${main.basedir}/checkstyle/ClassHeader.txt</headerLocation>
 				        	<enableRSS>false</enableRSS>
-				        	<linkXRef>true</linkXRef>
+				        	<linkXRef>false</linkXRef>
 				        	<consoleOutput>true</consoleOutput>
 				       		<failsOnError>true</failsOnError>
 				       		<failOnViolation>true</failOnViolation>
