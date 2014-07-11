@@ -100,6 +100,11 @@
 					<descriptors>
 						<descriptor>with-dependencies.xml</descriptor>
 					</descriptors>
+					<archive>
+						<manifest>
+							<mainClass>io.janusproject.Boot</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 				<executions>
 					<execution>
