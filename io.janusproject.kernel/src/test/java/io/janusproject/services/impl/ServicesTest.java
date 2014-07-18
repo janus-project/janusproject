@@ -19,13 +19,13 @@
  */
 package io.janusproject.services.impl;
 
-import io.janusproject.services.agentplatform.ContextSpaceService;
-import io.janusproject.services.agentplatform.ExecutorService;
-import io.janusproject.services.agentplatform.KernelDiscoveryService;
-import io.janusproject.services.agentplatform.LogService;
-import io.janusproject.services.agentplatform.NetworkService;
-import io.janusproject.services.agentplatform.SpawnService;
 import io.janusproject.services.api.IServiceManager;
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.services.spawn.SpawnService;
 
 import java.util.Arrays;
 import java.util.LinkedList;

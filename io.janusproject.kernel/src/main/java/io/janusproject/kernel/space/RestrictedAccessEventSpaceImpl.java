@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.SpaceID;
@@ -56,7 +56,7 @@ public class RestrictedAccessEventSpaceImpl extends AbstractEventSpace implement
 			SpaceID id,
 			Acl acl,
 			Permission accessPermission,
-			DistributedDataStructureFactory factory) {
+			DistributedDataStructureService factory) {
 		super(id, factory);
 		assert (acl != null);
 		assert (accessPermission != null);

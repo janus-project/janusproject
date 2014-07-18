@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.RestrictedAccessEventSpace;
 import io.sarl.util.RestrictedAccessEventSpaceSpecification;
@@ -42,7 +42,7 @@ import com.google.inject.Injector;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class RestrictedAccessEventSpaceSpecificationImpl implements RestrictedAccessEventSpaceSpecification {
+public class RestrictedAccessEventSpaceSpecificationImpl implements RestrictedAccessEventSpaceSpecification {
 
 	@Inject
 	private Injector injector;
@@ -63,7 +63,7 @@ class RestrictedAccessEventSpaceSpecificationImpl implements RestrictedAccessEve
 				p = new RegistrationPermission();
 			}
 			RestrictedAccessEventSpaceImpl space = new RestrictedAccessEventSpaceImpl(id, acl, p,
-					this.injector.getInstance(DistributedDataStructureFactory.class));
+					this.injector.getInstance(DistributedDataStructureService.class));
 			this.injector.injectMembers(space);
 			return space;
 		}

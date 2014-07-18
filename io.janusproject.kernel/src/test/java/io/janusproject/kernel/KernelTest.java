@@ -19,10 +19,10 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.agentplatform.ContextSpaceService;
-import io.janusproject.services.agentplatform.ExecutorService;
-import io.janusproject.services.agentplatform.SpawnService;
 import io.janusproject.services.api.IServiceManager;
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.spawn.SpawnService;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
@@ -44,7 +44,6 @@ import org.mockito.Mockito;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.State;
-import com.hazelcast.core.HazelcastInstance;
 
 
 /**
@@ -60,7 +59,6 @@ public class KernelTest extends Assert {
 	private SpawnService spawnService;
 	private ExecutorService executorService;
 	private ContextSpaceService contextService;
-	private HazelcastInstance hzInstance;
 	private IServiceManager serviceManager;
 	private UncaughtExceptionHandler exceptionHandler;
 	private AgentContext agentContext;
@@ -77,7 +75,6 @@ public class KernelTest extends Assert {
 				State.RUNNING, this.spawnService,
 				State.RUNNING, this.executorService,
 				State.RUNNING, this.contextService);
-		this.hzInstance = Mockito.mock(HazelcastInstance.class);
 		this.agentContext = Mockito.mock(AgentContext.class);
 		this.exceptionHandler = Mockito.mock(UncaughtExceptionHandler.class);
 		this.serviceManager = Mockito.mock(IServiceManager.class);
@@ -91,7 +88,7 @@ public class KernelTest extends Assert {
 		Mockito.when(this.contextService.state()).thenReturn(State.RUNNING);
 		Mockito.when(this.serviceManager.servicesByState()).thenReturn(this.services);
 		//
-		this.kernel = new Kernel(this.serviceManager, this.spawnService, this.hzInstance, this.exceptionHandler);
+		this.kernel = new Kernel(this.serviceManager, this.spawnService, this.exceptionHandler);
 		this.kernel = Mockito.spy(this.kernel);
 	}
 	
@@ -100,7 +97,6 @@ public class KernelTest extends Assert {
 		this.kernel = null;
 		this.agentContext = null;
 		this.serviceManager = null;
-		this.hzInstance = null;
 		this.spawnService = null;
 		this.executorService = null;
 		this.contextService = null;

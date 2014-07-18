@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
@@ -34,7 +34,7 @@ import com.google.inject.Injector;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class EventSpaceSpecificationImpl implements EventSpaceSpecification {
+public class EventSpaceSpecificationImpl implements EventSpaceSpecification {
 
 	@Inject
 	private Injector injector;
@@ -42,7 +42,7 @@ class EventSpaceSpecificationImpl implements EventSpaceSpecification {
 	@Override
 	public EventSpace create(SpaceID id, Object... params) {
 		EventSpaceImpl space = new EventSpaceImpl(id,
-				this.injector.getInstance(DistributedDataStructureFactory.class));
+				this.injector.getInstance(DistributedDataStructureService.class));
 		this.injector.injectMembers(space);
 		return space;
 	}

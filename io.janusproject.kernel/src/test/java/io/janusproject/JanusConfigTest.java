@@ -20,9 +20,12 @@
 package io.janusproject;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -37,10 +40,12 @@ import org.junit.Test;
 public class JanusConfigTest {
 
 	private static final String DEFAULT_VALUE = UUID.randomUUID().toString();
+	private static final float FLOAT_EPSILON = 0.000001f;
 	
 	@Test
 	public void testGetSystemPropertyString_fromProperties() throws Exception {
-		for(Object k : System.getProperties().keySet()) {
+		List<Object> names = new ArrayList<>(System.getProperties().keySet());
+		for(Object k : names) {
 			String sv = System.getProperty(k.toString());
 			String v = JanusConfig.getSystemProperty(k.toString());
 			assertEquals(sv, v);
@@ -62,7 +67,8 @@ public class JanusConfigTest {
 
 	@Test
 	public void testGetSystemPropertyString_fromEnv() throws Exception {
-		for(Object k : System.getenv().keySet()) {
+		List<String> names = new ArrayList<>(System.getenv().keySet());
+		for(String k : names) {
 			String sv = System.getenv(k.toString());
 			String v = JanusConfig.getSystemProperty(k.toString());
 			assertEquals(sv, v);
@@ -73,7 +79,8 @@ public class JanusConfigTest {
 
 	@Test
 	public void testGetSystemPropertyStringString_fromEnv() throws Exception {
-		for(Object k : System.getenv().keySet()) {
+		List<String> names = new ArrayList<>(System.getenv().keySet());
+		for(String k : names) {
 			String sv = System.getenv(k.toString());
 			String v = JanusConfig.getSystemProperty(k.toString(), DEFAULT_VALUE);
 			assertEquals(sv, v);
@@ -85,7 +92,8 @@ public class JanusConfigTest {
 	@Test
 	public void testGetSystemPropertyAsInteger() throws Exception {
 		System.setProperty("janus.unit.test.enum", Integer.toString(234)); //$NON-NLS-1$
-		for(Object k : System.getProperties().keySet()) {
+		List<Object> names = new ArrayList<>(System.getProperties().keySet());
+		for(Object k : names) {
 			String sv = JanusConfig.getSystemProperty(k.toString(), ""); //$NON-NLS-1$
 			int v = JanusConfig.getSystemPropertyAsInteger(k.toString(), 567);
 			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
@@ -108,9 +116,36 @@ public class JanusConfigTest {
 	}
 
 	@Test
+	public void testGetSystemPropertyAsFloat() throws Exception {
+		System.setProperty("janus.unit.test.enum", Float.toString(234.567f)); //$NON-NLS-1$
+		List<Object> names = new ArrayList<>(System.getProperties().keySet());
+		for(Object k : names) {
+			String sv = JanusConfig.getSystemProperty(k.toString(), ""); //$NON-NLS-1$
+			float v = JanusConfig.getSystemPropertyAsFloat(k.toString(), 567.8901f);
+			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
+				assertEquals(234.567f, v, FLOAT_EPSILON);
+			}
+			else {
+				float rv;
+				try {
+					rv = Float.parseFloat(sv);
+				}
+				catch(Throwable _) {
+					rv = 567.8901f;
+				}
+				assertEquals(rv, v, FLOAT_EPSILON);
+			}
+		}
+		float v = JanusConfig.getSystemPropertyAsFloat(
+				"janus.unit.test.enum2", 789.0123f); //$NON-NLS-1$
+		assertEquals(789.0123f, v, FLOAT_EPSILON);
+	}
+
+	@Test
 	public void testGetSystemPropertyAsBoolean() throws Exception {
 		System.setProperty("janus.unit.test.enum", Boolean.TRUE.toString()); //$NON-NLS-1$
-		for(Object k : System.getProperties().keySet()) {
+		List<Object> names = new ArrayList<>(System.getProperties().keySet());
+		for(Object k : names) {
 			String sv = JanusConfig.getSystemProperty(k.toString(), ""); //$NON-NLS-1$
 			boolean v = JanusConfig.getSystemPropertyAsBoolean(k.toString(), true);
 			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
@@ -128,7 +163,8 @@ public class JanusConfigTest {
 	@Test
 	public void testGetSystemPropertyAsEnum() throws Exception {
 		System.setProperty("janus.unit.test.enum", UnitTestEnum.UNIT_TEST_ENUM_DEF.name()); //$NON-NLS-1$
-		for(Object k : System.getProperties().keySet()) {
+		List<Object> names = new ArrayList<>(System.getProperties().keySet());
+		for(Object k : names) {
 			UnitTestEnum v = JanusConfig.getSystemPropertyAsEnum(
 					UnitTestEnum.class, k.toString(), UnitTestEnum.UNIT_TEST_ENUM_ABC);
 			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
@@ -141,6 +177,45 @@ public class JanusConfigTest {
 		UnitTestEnum v = JanusConfig.getSystemPropertyAsEnum(
 				UnitTestEnum.class, "janus.unit.test.enum2", UnitTestEnum.UNIT_TEST_ENUM_ABC); //$NON-NLS-1$
 		assertSame(UnitTestEnum.UNIT_TEST_ENUM_ABC, v);
+	}
+
+	@Test
+	public void testGetSystemPropertyAsClassObject() throws Exception {
+		System.setProperty("janus.unit.test.enum", JanusConfig.class.getName()); //$NON-NLS-1$
+		List<Object> names = new ArrayList<>(System.getProperties().keySet());
+		for(Object k : names) {
+			Class<?> v = JanusConfig.getSystemPropertyAsClass(
+					k.toString(), Boot.class);
+			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
+				assertEquals(JanusConfig.class, v);
+			}
+			else {
+				assertNotNull(v);
+			}
+		}
+		Class<?> v = JanusConfig.getSystemPropertyAsClass(
+				"janus.unit.test.enum2", JanusConfig.class); //$NON-NLS-1$
+		assertEquals(JanusConfig.class, v);
+	}
+
+	@Test
+	public void testGetSystemPropertyAsClassS() throws Exception {
+		System.setProperty("janus.unit.test.enum", JanusConfig.class.getName()); //$NON-NLS-1$
+		List<Object> names = new ArrayList<>(System.getProperties().keySet());
+		for(Object k : names) {
+			Class<? extends JanusConfig> v = JanusConfig.getSystemPropertyAsClass(
+					JanusConfig.class,
+					k.toString(), (Class<JanusConfig>)null);
+			if (k.equals("janus.unit.test.enum")) { //$NON-NLS-1$
+				assertEquals(JanusConfig.class, v);
+			}
+			else {
+				assertNull(v);
+			}
+		}
+		Class<?> v = JanusConfig.getSystemPropertyAsClass(
+				JanusConfig.class, "janus.unit.test.enum2", JanusConfig.class); //$NON-NLS-1$
+		assertEquals(JanusConfig.class, v);
 	}
 
 	/**

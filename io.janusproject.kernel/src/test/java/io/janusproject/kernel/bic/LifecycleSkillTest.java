@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.kernel.executor.ChuckNorrisException;
-import io.janusproject.services.agentplatform.SpawnService;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.spawn.SpawnService;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 

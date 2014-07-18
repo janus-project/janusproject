@@ -19,9 +19,10 @@
  */
 package io.janusproject;
 import io.janusproject.kernel.Kernel;
-import io.janusproject.network.NetworkConfig;
+import io.janusproject.services.network.NetworkConfig;
 import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -40,6 +42,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.arakhne.afc.vmutil.locale.Locale;
+
+import com.google.inject.Module;
 /** This is the class that permits to boot the Janus platform.
  * <p>
  * This class provides the "main" function for the platform.
@@ -173,7 +177,7 @@ public final class Boot {
 	 * the first agent.
 	 *
 	 * @param args - command line arguments
-	 * @see #startJanus(Class, Object...)
+	 * @see #startJanus(Class, Class, Object...)
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
@@ -200,7 +204,14 @@ public final class Boot {
 				//CHECKSTYLE:OFF
 				System.out.println(Locale.getString("LAUNCHING_AGENT", agentToLaunch)); //$NON-NLS-1$
 				//CHECKSTYLE:ON
+
+				// Get the start-up injection module
+				Class<? extends Module> startupModule = JanusConfig.getSystemPropertyAsClass(
+						Module.class, JanusConfig.INJECTION_MODULE_NAME,
+						JanusConfig.INJECTION_MODULE_NAME_VALUE);
+
 				startJanus(
+						startupModule,
 						(Class<? extends Agent>) agent,
 						Arrays.copyOfRange(
 								freeArgs,
@@ -210,7 +221,7 @@ public final class Boot {
 				throw new ClassCastException(
 						Locale.getString("INVALID_AGENT_TYPE", agentToLaunch)); //$NON-NLS-1$
 			}
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (Exception e) {
 			//CHECKSTYLE:OFF
 			e.printStackTrace();
 			//CHECKSTYLE:ON
@@ -261,7 +272,7 @@ public final class Boot {
 			++l;
 		}
 		opt = new Option("l", "log", true, Locale.getString("CLI_HELP_L",  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					JanusConfig.VERBOSE_LEVEL_VALUE, b));
+				JanusConfig.VERBOSE_LEVEL_VALUE, b));
 		opt.setArgs(1);
 		options.addOption(opt);
 		opt = new Option("D", true, Locale.getString("CLI_HELP_D"));  //$NON-NLS-1$//$NON-NLS-2$
@@ -283,6 +294,7 @@ public final class Boot {
 				getOptions());
 		System.exit(ERROR_EXIT_CODE);
 	}
+
 	/** Show the default values of the system properties.
 	 * This function never returns.
 	 */
@@ -299,6 +311,7 @@ public final class Boot {
 		}
 		System.exit(ERROR_EXIT_CODE);
 	}
+
 	/** Show the heading logo of the Janus platform.
 	 */
 	public static void showJanusLogo() {
@@ -306,6 +319,7 @@ public final class Boot {
 		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
 		//CHECKSTYLE:ON
 	}
+
 	/** Launch the first agent of the Janus kernel.
 	 * <p>
 	 * Thus function does not parse the command line.
@@ -313,12 +327,19 @@ public final class Boot {
 	 * When this function is called, it is assumed that all the
 	 * system's properties are correctly set.
 	 *
+	 * @param platformModule - type of the injection module to use for initializing the platform.
 	 * @param agentCls - type of the first agent to launch.
 	 * @param params - parameters to pass to the agent as its initliazation parameters.
+	 * @throws Exception - if it is impossible to start the platform.
 	 * @see #main(String[])
 	 */
-	public static void startJanus(Class<? extends Agent> agentCls, Object... params) {
-		Kernel k = Kernel.create(new JanusDefaultModule());
+	public static void startJanus(
+			Class<? extends Module> platformModule,
+			Class<? extends Agent> agentCls,
+			Object... params) throws Exception {
+		assert (platformModule != null) : "No platform injection module"; //$NON-NLS-1$
+		Kernel k = Kernel.create(platformModule.newInstance());
 		k.spawn(agentCls, params);
 	}
+
 }

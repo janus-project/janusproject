@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.kernel.executor.ChuckNorrisException;
-import io.janusproject.services.agentplatform.SpawnService;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.spawn.SpawnService;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
@@ -64,7 +64,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 		try {
 			this.spawnService.killAgent(getOwner().getID());
 			throw new ChuckNorrisException();
-		} catch (io.janusproject.services.agentplatform.SpawnService.AgentKillException e) {
+		} catch (io.janusproject.services.spawn.SpawnService.AgentKillException e) {
 			throw new AgentKillException(e);
 		}
 	}
@@ -83,7 +83,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 		/**
 		 * @param e - cause
 		 */
-		AgentKillException(io.janusproject.services.agentplatform.SpawnService.AgentKillException e) {
+		AgentKillException(io.janusproject.services.spawn.SpawnService.AgentKillException e) {
 			super(e.getMessage(), e);
 		}
 
@@ -92,7 +92,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 		 * @return the agent.
 		 */
 		public UUID getAgent() {
-			return ((io.janusproject.services.agentplatform.SpawnService.AgentKillException) getCause()).getAgent();
+			return ((io.janusproject.services.spawn.SpawnService.AgentKillException) getCause()).getAgent();
 		}
 
 	}

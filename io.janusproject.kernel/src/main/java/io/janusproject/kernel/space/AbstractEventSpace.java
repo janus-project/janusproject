@@ -19,11 +19,11 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
-import io.janusproject.repository.UniqueAddressParticipantRepository;
-import io.janusproject.services.agentplatform.ExecutorService;
-import io.janusproject.services.agentplatform.LogService;
-import io.janusproject.services.agentplatform.NetworkService;
+import io.janusproject.kernel.repository.UniqueAddressParticipantRepository;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.NetworkService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -76,7 +76,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @param id - identifier of the space.
 	 * @param factory - factory that is used to create the internal data structure.
 	 */
-	public AbstractEventSpace(SpaceID id, DistributedDataStructureFactory factory) {
+	public AbstractEventSpace(SpaceID id, DistributedDataStructureService factory) {
 		super(id);
 		this.participants = new UniqueAddressParticipantRepository<>(
 				getID().getID().toString() + "-participants", //$NON-NLS-1$
@@ -121,7 +121,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 			this.network.publish(scope, event);
 			doEmit(event, scope);
 		} catch (Throwable e) {
-			this.logger.error("CANNOT_EMIT_EVENT", event, scope, e); //$NON-NLS-1$
+			this.logger.error(AbstractEventSpace.class,
+					"CANNOT_EMIT_EVENT", event, scope, e); //$NON-NLS-1$
 		}
 
 	}
