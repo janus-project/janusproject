@@ -52,6 +52,7 @@ import com.google.inject.Inject;
 public abstract class AbstractEventSpace extends SpaceBase {
 
 	/** List of participants in this space.
+	 * DO MISS TO BE SYNCHRONIZED ON THE PARTICIPANT REPOSITORY.
 	 */
 	protected final UniqueAddressParticipantRepository<Address> participants;
 
@@ -99,7 +100,9 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @return the address.
 	 */
 	public Address getAddress(UUID id) {
-		return this.participants.getAddress(id);
+		synchronized (this.participants) {
+			return this.participants.getAddress(id);
+		}
 	}
 
 	/** Emit the given event in the given scope.
@@ -148,10 +151,12 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @param scope - description of the scope of the event, i.e. the receivers of the event.
 	 */
 	protected void doEmit(Event event, Scope<? super Address> scope) {
-		for (EventListener agent : this.participants.getListeners()) {
-			if (scope.matches(getAddress(agent))) {
-				// TODO Verify the agent is still alive and running
-				this.executorService.submit(new AsyncRunner(agent, event));
+		synchronized (this.participants) {
+			for (EventListener agent : this.participants.getListeners()) {
+				if (scope.matches(getAddress(agent))) {
+					// TODO Verify the agent is still alive and running
+					this.executorService.submit(new AsyncRunner(agent, event));
+				}
 			}
 		}
 	}
@@ -161,7 +166,9 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 */
 	@Override
 	public SynchronizedSet<UUID> getParticipants() {
-		return Collections3.unmodifiableSynchronizedSet(this.participants.getParticipantIDs());
+		synchronized (this.participants) {
+			return Collections3.unmodifiableSynchronizedSet(this.participants.getParticipantIDs());
+		}
 	}
 
 	/**

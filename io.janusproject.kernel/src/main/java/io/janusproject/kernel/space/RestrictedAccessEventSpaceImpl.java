@@ -84,7 +84,9 @@ public class RestrictedAccessEventSpaceImpl extends AbstractEventSpace implement
 	public Address register(EventListener entity, Principal principal) {
 		if (this.acl.checkPermission(principal, this.accessPermission)) {
 			Address a = new Address(getID(), entity.getID());
-			return this.participants.registerParticipant(a, entity);
+			synchronized (this.participants) {
+				return this.participants.registerParticipant(a, entity);
+			}
 		}
 		return null;
 	}
@@ -96,7 +98,9 @@ public class RestrictedAccessEventSpaceImpl extends AbstractEventSpace implement
 
 	@Override
 	public Address unregister(EventListener entity) {
-		return this.participants.unregisterParticipant(entity);
+		synchronized (this.participants) {
+			return this.participants.unregisterParticipant(entity);
+		}
 	}
 
 }
