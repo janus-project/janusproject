@@ -61,12 +61,11 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 	@Override
 	public void killMe() {
-		try {
-			this.spawnService.killAgent(getOwner().getID());
-			throw new ChuckNorrisException();
-		} catch (io.janusproject.services.spawn.SpawnService.AgentKillException e) {
-			throw new AgentKillException(e);
-		}
+		// The agent should be killed by a specific asynchronous event.
+		// This event is supported by the internal event bus implementation.
+		InternalEventBusCapacity busCapacity = getSkill(InternalEventBusCapacity.class);
+		busCapacity.selfEvent(new AsynchronousAgentKillingEvent());
+		throw new ChuckNorrisException();
 	}
 
 	/** This runtie exception is thrown when an agent cannot be killed.

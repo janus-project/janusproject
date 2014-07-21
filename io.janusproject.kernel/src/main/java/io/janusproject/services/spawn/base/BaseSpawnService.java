@@ -29,6 +29,7 @@ import io.janusproject.services.spawn.SpawnServiceListener;
 import io.janusproject.util.ListenerCollection;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
@@ -66,8 +67,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class BaseSpawnService extends AbstractDependentService implements SpawnService {
 
-	private final ListenerCollection<?> listeners = new ListenerCollection<>();
-	private final Multimap<UUID, SpawnServiceListener> lifecycleListeners = ArrayListMultimap.create();
+	private final ListenerCollection<?> globalListeners = new ListenerCollection<>();
+	private final Multimap<UUID, SpawnServiceListener> agentLifecycleListeners = ArrayListMultimap.create();
 	private final Map<UUID, Agent> agents = new TreeMap<>();
 
 	private AgentFactory agentFactory;
@@ -147,6 +148,8 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 			} else {
 				throw new AgentKillException(agentID);
 			}
+		} else {
+			throw new AgentKillException(agentID);
 		}
 	}
 
@@ -173,7 +176,7 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 */
 	@Override
 	public void addKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
-		this.listeners.add(KernelAgentSpawnListener.class, listener);
+		this.globalListeners.add(KernelAgentSpawnListener.class, listener);
 	}
 
 	/**
@@ -181,14 +184,14 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 */
 	@Override
 	public void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
-		this.listeners.remove(KernelAgentSpawnListener.class, listener);
+		this.globalListeners.remove(KernelAgentSpawnListener.class, listener);
 	}
 
 	/**
 	 * Notifies the listeners about the kernel agent creation.
 	 */
 	protected void fireKernelAgentSpawn() {
-		for (KernelAgentSpawnListener l : this.listeners.getListeners(KernelAgentSpawnListener.class)) {
+		for (KernelAgentSpawnListener l : this.globalListeners.getListeners(KernelAgentSpawnListener.class)) {
 			l.kernelAgentSpawn();
 		}
 	}
@@ -197,7 +200,7 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 * Notifies the listeners about the kernel agent destruction.
 	 */
 	protected void fireKernelAgentDestroy() {
-		for (KernelAgentSpawnListener l : this.listeners.getListeners(KernelAgentSpawnListener.class)) {
+		for (KernelAgentSpawnListener l : this.globalListeners.getListeners(KernelAgentSpawnListener.class)) {
 			l.kernelAgentDestroy();
 		}
 	}
@@ -207,8 +210,8 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 */
 	@Override
 	public void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener) {
-		synchronized (this.lifecycleListeners) {
-			this.lifecycleListeners.put(id, agentLifecycleListener);
+		synchronized (this.agentLifecycleListeners) {
+			this.agentLifecycleListeners.put(id, agentLifecycleListener);
 		}
 	}
 
@@ -217,8 +220,8 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 */
 	@Override
 	public void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener) {
-		synchronized (this.lifecycleListeners) {
-			this.lifecycleListeners.remove(id, agentLifecycleListener);
+		synchronized (this.agentLifecycleListeners) {
+			this.agentLifecycleListeners.remove(id, agentLifecycleListener);
 		}
 	}
 
@@ -227,7 +230,7 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 */
 	@Override
 	public void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
-		this.listeners.add(SpawnServiceListener.class, agentLifecycleListener);
+		this.globalListeners.add(SpawnServiceListener.class, agentLifecycleListener);
 	}
 
 	/**
@@ -235,7 +238,7 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 */
 	@Override
 	public void removeSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
-		this.listeners.remove(SpawnServiceListener.class, agentLifecycleListener);
+		this.globalListeners.remove(SpawnServiceListener.class, agentLifecycleListener);
 	}
 
 	/**
@@ -246,27 +249,38 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 * @param initializationParameters - list of the values to pass as initialization parameters.
 	 */
 	protected void fireAgentSpawned(AgentContext context, Agent agent, Object[] initializationParameters) {
-		SpawnServiceListener[] ilisteners;
-		synchronized (this.lifecycleListeners) {
-			Collection<SpawnServiceListener> list = this.lifecycleListeners.get(agent.getID());
-			ilisteners = new SpawnServiceListener[list.size()];
-			list.toArray(ilisteners);
-		}
-
-		SpawnServiceListener[] ilisteners2 = this.listeners.getListeners(SpawnServiceListener.class);
-
-		for (SpawnServiceListener l : ilisteners2) {
+		// Notify the listeners on the spawn events (not restricted to a
+		// single agent)
+		for (SpawnServiceListener l : this.globalListeners.getListeners(SpawnServiceListener.class)) {
 			l.agentSpawned(context, agent, initializationParameters);
 		}
 
-		for (SpawnServiceListener l : ilisteners) {
+		// Notify the listeners on the lifecycle events on
+		// the just spawned agent.
+		// Usually, only BICs and the AgentLifeCycleSupport in
+		// io.janusproject.kernel.bic.StandardBuiltinCapacitiesProvider
+		// is invoked.
+		SpawnServiceListener[] agentListeners;
+		synchronized (this.agentLifecycleListeners) {
+			Collection<SpawnServiceListener> list = this.agentLifecycleListeners.get(agent.getID());
+			agentListeners = new SpawnServiceListener[list.size()];
+			list.toArray(agentListeners);
+		}
+		for (SpawnServiceListener l : agentListeners) {
 			l.agentSpawned(context, agent, initializationParameters);
 		}
 
+		// Send the event in the default space.
+		UUID agentID = agent.getID();
+		assert (agentID != null) : "Empty agent identifier"; //$NON-NLS-1$
 		EventSpace defSpace = context.getDefaultSpace();
+		assert (defSpace != null) : "A context does not contain a default space"; //$NON-NLS-1$
+		Address agentAddress = defSpace.getAddress(agentID);
+		assert (agentAddress != null) : "Cannot find an address in the default space for " + agentID; //$NON-NLS-1$
+
 		defSpace.emit(new AgentSpawned(
-				defSpace.getAddress(agent.getID()),
-				agent.getID(),
+				agentAddress,
+				agentID,
 				agent.getClass().getName()));
 	}
 
@@ -281,7 +295,6 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 		try {
 			AgentContext ac = BuiltinCapacityUtil.getContextIn(agent);
 			if (ac != null) {
-				//FIXME: Is is sufficient to check the default space? May the other spaces be checked also?
 				Set<UUID> participants = ac.getDefaultSpace().getParticipants();
 				if (participants != null
 					&& (participants.size() > 1
@@ -302,13 +315,13 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 */
 	protected void fireAgentDestroyed(Agent agent) {
 		SpawnServiceListener[] ilisteners;
-		synchronized (this.lifecycleListeners) {
-			Collection<SpawnServiceListener> list = this.lifecycleListeners.get(agent.getID());
+		synchronized (this.agentLifecycleListeners) {
+			Collection<SpawnServiceListener> list = this.agentLifecycleListeners.get(agent.getID());
 			ilisteners = new SpawnServiceListener[list.size()];
 			list.toArray(ilisteners);
 		}
 
-		SpawnServiceListener[] ilisteners2 = this.listeners.getListeners(SpawnServiceListener.class);
+		SpawnServiceListener[] ilisteners2 = this.globalListeners.getListeners(SpawnServiceListener.class);
 
 		try {
 			SynchronizedCollection<AgentContext> sc = BuiltinCapacityUtil.getContextsOf(agent);
@@ -350,8 +363,8 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 	 */
 	@Override
 	protected synchronized void doStop() {
-		synchronized (this.lifecycleListeners) {
-			this.lifecycleListeners.clear();
+		synchronized (this.agentLifecycleListeners) {
+			this.agentLifecycleListeners.clear();
 		}
 		notifyStopped();
 	}
