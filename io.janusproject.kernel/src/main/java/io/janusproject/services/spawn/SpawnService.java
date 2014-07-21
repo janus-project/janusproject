@@ -93,6 +93,17 @@ public interface SpawnService extends DependentService {
 	 */
 	void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener);
 
+	/** Change the agent factory.
+	 *
+	 * @param factory - factory of agents.
+	 */
+	void setAgentFactory(AgentFactory factory);
+
+	/** Replies the agent factory.
+	 *
+	 * @return the agent factory.
+	 */
+	AgentFactory getAgentFactory();
 
 	/** Exception occurs when an agent cannot be killed.
 	 *

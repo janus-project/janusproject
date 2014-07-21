@@ -22,6 +22,7 @@ package io.janusproject.services.spawn.base;
 import io.janusproject.kernel.bic.BuiltinCapacityUtil;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.impl.AbstractDependentService;
+import io.janusproject.services.spawn.AgentFactory;
 import io.janusproject.services.spawn.KernelAgentSpawnListener;
 import io.janusproject.services.spawn.SpawnService;
 import io.janusproject.services.spawn.SpawnServiceListener;
@@ -91,19 +92,17 @@ public class BaseSpawnService extends AbstractDependentService implements SpawnS
 		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
 	}
 
-	/** Change the agent factory.
-	 *
-	 * @param factory - factory of agents.
+	/** {@inheritDoc}
 	 */
+	@Override
 	public synchronized void setAgentFactory(AgentFactory factory) {
 		assert (factory != null);
 		this.agentFactory = factory;
 	}
 
-	/** Replies the agent factory.
-	 *
-	 * @return the agent factory.
+	/** {@inheritDoc}
 	 */
+	@Override
 	public synchronized AgentFactory getAgentFactory() {
 		return this.agentFactory;
 	}

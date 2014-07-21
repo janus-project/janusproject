@@ -19,10 +19,10 @@
  */
 package io.janusproject.services.spawn.base;
 
+import io.janusproject.services.spawn.AgentFactory;
 import io.janusproject.services.spawn.KernelAgentSpawnListener;
 import io.janusproject.services.spawn.SpawnServiceListener;
 import io.janusproject.services.spawn.SpawnService.AgentKillException;
-import io.janusproject.services.spawn.base.AgentFactory;
 import io.janusproject.services.spawn.base.BaseSpawnService;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
