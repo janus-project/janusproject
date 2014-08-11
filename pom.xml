@@ -65,8 +65,7 @@
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
-			<url>ttp://www.apache.org/licenses/LICENSE-2.0</url>
-			<distribution>repo</distribution>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
 
@@ -598,11 +597,6 @@
 	<!-- ======================================= -->
 	<repositories>
 		<repository>
-			<id>io.janusproject.maven</id>
-			<name>Janus Repository</name>
-			<url>http://maven.janusproject.io/</url>
-		</repository>
-		<repository>
 			<id>io.sarl.maven</id>
 			<name>SARL Repository</name>
 			<url>http://maven.sarl.io/</url>
@@ -686,9 +680,9 @@
 	<!-- ==================== -->
 
 	<scm>
-		<url>https://github.com/janus-project/janusproject</url>
-		<connection>scm:git:git://github.com/janus-project/janusproject.git</connection>
-		<developerConnection>scm:git:https://github.com/janus-project/janusproject.git</developerConnection>
+		<connection>scm:git:git@github.com:janus-project/janusproject.git</connection>
+		<developerConnection>scm:git:git@github.com:janus-project/janusproject.git</developerConnection>
+		<url>git@github.com:janus-project/janusproject.git</url>
 	</scm>
 
 </project>
