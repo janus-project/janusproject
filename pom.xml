@@ -212,12 +212,6 @@
 					<version>2.2.1</version>
 				</plugin>
 
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.9.1</version>
-				</plugin>
-
 				<!-- Configure the checkstyle plugin. This plugin must be
 				     activated module per module in the module's pom files. -->
 				<plugin>
@@ -257,6 +251,113 @@
 					<groupId>org.arakhne.afc.maven</groupId>
 					<artifactId>tag-replacer</artifactId>
 					<version>11.0</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.9.1</version>
+					<configuration>
+						<docencoding>${project.build.sourceEncoding}</docencoding>
+						<encoding>${project.build.sourceEncoding}</encoding>
+						<charset>${project.build.sourceEncoding}</charset>
+						<show>protected</show>
+						<detectLinks>true</detectLinks>
+						<detectJavaApiLink>true</detectJavaApiLink>
+						<links>
+							<link>http://www.sarl.io/docs/api/</link>
+							<link>http://hazelcast.org/docs/latest/javadoc/</link>
+							<link>http://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/</link>
+							<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/</link>
+							<link>http://google-guice.googlecode.com/svn/trunk/javadoc/</link>
+						</links>
+						<docfilessubdirs>true</docfilessubdirs>
+						<excludePackageNames></excludePackageNames>
+						<breakiterator>true</breakiterator>
+						<version>true</version>
+						<author>true</author>
+						<keywords>true</keywords>
+						<useStandardDocletOptions>true</useStandardDocletOptions>
+						<excludePackageNames></excludePackageNames>
+						<bottom>&lt;small&gt;Copyright &amp;copy;
+							${project.inceptionYear}-${year} ${copyrighters}.
+						</bottom>
+						<groups>
+							<group>
+								<title>Boot and Configuration</title>
+								<packages>io.janusproject</packages>
+							</group>
+							<group>
+								<title>Janus Micro-Kernel</title>
+								<packages>io.janusproject.kernel*</packages>
+							</group>
+							<group>
+								<title>Context Space Service</title>
+								<packages>io.janusproject.services.contextspace*</packages>
+							</group>
+							<group>
+								<title>Distributed Data Service</title>
+								<packages>io.janusproject.services.distributeddata*</packages>
+							</group>
+							<group>
+								<title>Executor Service</title>
+								<packages>io.janusproject.services.executor*</packages>
+							</group>
+							<group>
+								<title>Infrastructure Service</title>
+								<packages>io.janusproject.services.infrastructure*</packages>
+							</group>
+							<group>
+								<title>Kernel Discovery Service</title>
+								<packages>io.janusproject.services.kerneldiscovery*</packages>
+							</group>
+							<group>
+								<title>Logging Service</title>
+								<packages>io.janusproject.services.logging*</packages>
+							</group>
+							<group>
+								<title>Network Service</title>
+								<packages>io.janusproject.services.network*</packages>
+							</group>
+							<group>
+								<title>Spawn Service</title>
+								<packages>io.janusproject.services.spawn*</packages>
+							</group>
+							<group>
+								<title>Generic Service API</title>
+								<packages>io.janusproject.services.api*:io.janusproject.services.impl*</packages>
+							</group>
+							<group>
+								<title>Injection Modules</title>
+								<packages>io.janusproject.modules*</packages>
+							</group>
+						</groups>
+						<tags>
+							<tag>
+								<name>mavengroupid</name>
+								<placement>pt</placement>
+								<head>Maven Group Id:</head>
+							</tag>
+							<tag>
+								<name>mavenartifactid</name>
+								<placement>pt</placement>
+								<head>Maven Artifact Id:</head>
+							</tag>
+							<tag>
+								<name>fires</name>
+								<placement>m</placement>
+								<head>Fired Events:</head>
+							</tag>
+						</tags>
+					</configuration>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
@@ -449,49 +550,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<configuration>
-							<docencoding>UTF-8</docencoding>
-							<encoding>UTF-8</encoding>
-							<charset>UTF-8</charset>
-							<show>protected</show>
-							<detectLinks>true</detectLinks>
-							<detectJavaApiLink>true</detectJavaApiLink>
-							<links>
-								<link>http://download.eclipse.org/modeling/tmf/xtext/javadoc/2.5/</link>
-								<link>http://hazelcast.org/docs/latest/javadoc/</link>
-								<link>http://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/</link>
-								<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/</link>
-								<link>http://google-guice.googlecode.com/svn/trunk/javadoc/</link>
-							</links>
-							<docfilessubdirs>true</docfilessubdirs>
-							<excludePackageNames></excludePackageNames>
-							<breakiterator>true</breakiterator>
-							<version>true</version>
-							<author>true</author>
-							<keywords>true</keywords>
-							<useStandardDocletOptions>true</useStandardDocletOptions>
-							<excludePackageNames></excludePackageNames>
-							<bottom>&lt;small&gt;Copyright &amp;copy;
-								${project.inceptionYear}-${year} ${copyrighters}.
-							</bottom>
-							<tags>
-								<tag>
-									<name>mavengroupid</name>
-									<placement>pt</placement>
-									<head>Maven Group Id:</head>
-								</tag>
-								<tag>
-									<name>mavenartifactid</name>
-									<placement>pt</placement>
-									<head>Maven Artifact Id:</head>
-								</tag>
-								<tag>
-									<name>fires</name>
-									<placement>m</placement>
-									<head>Fired Events:</head>
-								</tag>
-							</tags>
-						</configuration>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>
@@ -513,8 +571,6 @@
 								</goals>
 							</execution>
 						</executions>
-						<configuration>
-						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.arakhne.afc.maven</groupId>
@@ -528,8 +584,6 @@
 								</goals>
 							</execution>
 						</executions>
-						<configuration>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
