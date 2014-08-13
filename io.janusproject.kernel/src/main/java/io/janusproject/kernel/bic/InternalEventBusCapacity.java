@@ -37,6 +37,12 @@ import io.sarl.lang.core.EventListener;
  */
 public interface InternalEventBusCapacity extends Capacity {
 
+	/** Replies the state of the owner of the event bus.
+	 *
+	 * @return the state of the agent.
+	 */
+	OwnerState getOwnerState();
+
 	/** Register the given object on the event bus for receiving
 	 * any event.
 	 *
@@ -72,5 +78,24 @@ public interface InternalEventBusCapacity extends Capacity {
 	 * @return the address of the agent in its inner default space.
 	 */
 	Address getInnerDefaultSpaceAddress();
+
+	/** Describe the states of the owner of an event bus.
+	 *
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public enum OwnerState {
+		/** The owner of the event bus is under creation.
+		 */
+		NEW,
+		/** The owner of the event bus is running.
+		 */
+		RUNNING,
+		/** The owner of the event bus was destroyed.
+		 */
+		DESTROYED,
+	}
 
 }

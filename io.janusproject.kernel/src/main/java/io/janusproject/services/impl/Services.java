@@ -22,6 +22,7 @@ package io.janusproject.services.impl;
 import io.janusproject.services.api.AsyncStateService;
 import io.janusproject.services.api.DependentService;
 import io.janusproject.services.api.IServiceManager;
+import io.janusproject.services.infrastructure.InfrastructureService;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -73,14 +74,15 @@ public final class Services {
 	 */
 	public static void startServices(IServiceManager manager) {
 		List<Service> otherServices = new ArrayList<>();
+		List<Service> infraServices = new ArrayList<>();
 		LinkedList<DependencyNode> serviceQueue = new LinkedList<>();
 		Accessors accessors = new StartingPhaseAccessors();
 
 		// Build the dependency graph
-		buildDependencyGraph(manager, serviceQueue, otherServices, accessors);
+		buildDependencyGraph(manager, serviceQueue, infraServices, otherServices, accessors);
 
 		// Launch the services
-		runDependencyGraph(serviceQueue, otherServices, accessors);
+		runDependencyGraph(serviceQueue, infraServices, otherServices, accessors);
 
 		manager.awaitHealthy();
 	}
@@ -103,14 +105,15 @@ public final class Services {
 	 */
 	public static void stopServices(IServiceManager manager) {
 		List<Service> otherServices = new ArrayList<>();
+		List<Service> infraServices = new ArrayList<>();
 		LinkedList<DependencyNode> serviceQueue = new LinkedList<>();
 		Accessors accessors = new StoppingPhaseAccessors();
 
 		// Build the dependency graph
-		buildInvertedDependencyGraph(manager, serviceQueue, otherServices, accessors);
+		buildInvertedDependencyGraph(manager, serviceQueue, infraServices, otherServices, accessors);
 
 		// Launch the services
-		runDependencyGraph(serviceQueue, otherServices, accessors);
+		runDependencyGraph(serviceQueue, infraServices, otherServices, accessors);
 
 		manager.awaitStopped();
 	}
@@ -161,12 +164,15 @@ public final class Services {
 	 *
 	 * @param manager - lsit of the services.
 	 * @param roots - filled with the services that have no dependency.
+	 * @param infraServices - filled with the infrastructure services.
 	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
 	 * @param accessors - permits to retreive information on the services.
 	 */
 	private static void buildDependencyGraph(
 			IServiceManager manager,
-			List<DependencyNode> roots, List<Service> freeServices,
+			List<DependencyNode> roots,
+			List<Service> infraServices,
+			List<Service> freeServices,
 			Accessors accessors) {
 		Map<Class<? extends Service>, DependencyNode> dependentServices = new TreeMap<>(ClassComparator.SINGLETON);
 
@@ -174,7 +180,9 @@ public final class Services {
 		for (Entry<State, Service> entry : manager.servicesByState().entries()) {
 			if (accessors.matches(entry.getKey())) {
 				service = entry.getValue();
-				if (service instanceof DependentService) {
+				if (service instanceof InfrastructureService) {
+					infraServices.add(service);
+				} else if (service instanceof DependentService) {
 					addNodeIntoDependencyGraph((DependentService) service, dependentServices, roots);
 				} else {
 					freeServices.add(service);
@@ -198,12 +206,15 @@ public final class Services {
 	 *
 	 * @param manager - lsit of the services.
 	 * @param roots - filled with the services that have no dependency.
+	 * @param infraServices - filled with the infrastructure services.
 	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
 	 * @param accessors - permits to retreive information on the services.
 	 */
 	private static void buildInvertedDependencyGraph(
 			IServiceManager manager,
-			List<DependencyNode> roots, List<Service> freeServices,
+			List<DependencyNode> roots,
+			List<Service> infraServices,
+			List<Service> freeServices,
 			Accessors accessors) {
 		Map<Class<? extends Service>, DependencyNode> dependentServices = new TreeMap<>(ClassComparator.SINGLETON);
 		Map<Class<? extends Service>, DependencyNode> rootServices = new TreeMap<>(ClassComparator.SINGLETON);
@@ -212,7 +223,9 @@ public final class Services {
 		for (Entry<State, Service> entry : manager.servicesByState().entries()) {
 			if (accessors.matches(entry.getKey())) {
 				service = entry.getValue();
-				if (service instanceof DependentService) {
+				if (service instanceof InfrastructureService) {
+					infraServices.add(service);
+				} else if (service instanceof DependentService) {
 					DependentService depServ = (DependentService) service;
 					Class<? extends Service> type = depServ.getServiceType();
 					DependencyNode node = dependentServices.get(type);
@@ -263,16 +276,19 @@ public final class Services {
 	/** Run the dependency graph for the services.
 	 *
 	 * @param roots - filled with the services that have no dependency.
+	 * @param infraServices - filled with the infrastructure services.
 	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
 	 * @param accessors - permits to retreive information on the services.
 	 */
 	private static void runDependencyGraph(
 			Queue<DependencyNode> roots,
+			List<Service> infraServices,
 			List<Service> freeServices,
 			Accessors accessors) {
 		final boolean async = accessors.isAsyncStateWaitingEnabled();
 		Set<Class<? extends Service>> executed = new TreeSet<>(ClassComparator.SINGLETON);
-		accessors.runBefore(freeServices);
+		accessors.runInfrastructureServicesBefore(infraServices);
+		accessors.runFreeServicesBefore(freeServices);
 		while (!roots.isEmpty()) {
 			DependencyNode node = roots.remove();
 			assert (node != null && node.getType() != null);
@@ -293,7 +309,8 @@ public final class Services {
 				accessors.run(node.getService());
 			}
 		}
-		accessors.runAfter(freeServices);
+		accessors.runFreeServicesAfter(freeServices);
+		accessors.runInfrastructureServicesAfter(infraServices);
 	}
 
 	/**
@@ -359,13 +376,17 @@ public final class Services {
 
 		boolean matches(State element);
 
-		void runBefore(List<Service> freeServices);
+		void runInfrastructureServicesBefore(List<Service> infraServices);
+
+		void runFreeServicesBefore(List<Service> freeServices);
 
 		boolean isAsyncStateWaitingEnabled();
 
 		void run(Service service);
 
-		void runAfter(List<Service> freeServices);
+		void runFreeServicesAfter(List<Service> freeServices);
+
+		void runInfrastructureServicesAfter(List<Service> infraServices);
 
 	}
 
@@ -388,8 +409,14 @@ public final class Services {
 			return element == State.NEW;
 		}
 		@Override
-		public void runBefore(List<Service> freeServices) {
+		public void runFreeServicesBefore(List<Service> freeServices) {
 			//
+		}
+		@Override
+		public void runInfrastructureServicesBefore(List<Service> infraServices) {
+			for (Service serv : infraServices) {
+				serv.startAsync().awaitRunning();
+			}
 		}
 		@Override
 		public boolean isAsyncStateWaitingEnabled() {
@@ -400,10 +427,14 @@ public final class Services {
 			service.startAsync().awaitRunning();
 		}
 		@Override
-		public void runAfter(List<Service> freeServices) {
+		public void runFreeServicesAfter(List<Service> freeServices) {
 			for (Service serv : freeServices) {
 				serv.startAsync();
 			}
+		}
+		@Override
+		public void runInfrastructureServicesAfter(List<Service> infraServices) {
+			//
 		}
 
 	}
@@ -427,10 +458,14 @@ public final class Services {
 			return element != State.TERMINATED && element != State.STOPPING;
 		}
 		@Override
-		public void runBefore(List<Service> freeServices) {
+		public void runFreeServicesBefore(List<Service> freeServices) {
 			for (Service serv : freeServices) {
 				serv.stopAsync();
 			}
+		}
+		@Override
+		public void runInfrastructureServicesBefore(List<Service> infraServices) {
+			//
 		}
 		@Override
 		public boolean isAsyncStateWaitingEnabled() {
@@ -441,8 +476,14 @@ public final class Services {
 			service.stopAsync().awaitTerminated();
 		}
 		@Override
-		public void runAfter(List<Service> freeServices) {
+		public void runFreeServicesAfter(List<Service> freeServices) {
 			//
+		}
+		@Override
+		public void runInfrastructureServicesAfter(List<Service> infraServices) {
+			for (Service serv : infraServices) {
+				serv.stopAsync();
+			}
 		}
 
 	}

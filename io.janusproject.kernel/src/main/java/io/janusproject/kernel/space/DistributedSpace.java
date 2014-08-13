@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.services.agentplatform.NetworkService.NetworkEventReceivingListener;
+import io.janusproject.services.network.NetworkService.NetworkEventReceivingListener;
 import io.sarl.lang.core.Space;
 
 /**

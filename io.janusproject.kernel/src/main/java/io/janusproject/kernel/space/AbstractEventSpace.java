@@ -19,11 +19,11 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
-import io.janusproject.repository.UniqueAddressParticipantRepository;
-import io.janusproject.services.agentplatform.ExecutorService;
-import io.janusproject.services.agentplatform.LogService;
-import io.janusproject.services.agentplatform.NetworkService;
+import io.janusproject.kernel.repository.UniqueAddressParticipantRepository;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.NetworkService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -52,6 +52,7 @@ import com.google.inject.Inject;
 public abstract class AbstractEventSpace extends SpaceBase {
 
 	/** List of participants in this space.
+	 * DO MISS TO BE SYNCHRONIZED ON THE PARTICIPANT REPOSITORY.
 	 */
 	protected final UniqueAddressParticipantRepository<Address> participants;
 
@@ -76,7 +77,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @param id - identifier of the space.
 	 * @param factory - factory that is used to create the internal data structure.
 	 */
-	public AbstractEventSpace(SpaceID id, DistributedDataStructureFactory factory) {
+	public AbstractEventSpace(SpaceID id, DistributedDataStructureService factory) {
 		super(id);
 		this.participants = new UniqueAddressParticipantRepository<>(
 				getID().getID().toString() + "-participants", //$NON-NLS-1$
@@ -99,7 +100,9 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @return the address.
 	 */
 	public Address getAddress(UUID id) {
-		return this.participants.getAddress(id);
+		synchronized (this.participants) {
+			return this.participants.getAddress(id);
+		}
 	}
 
 	/** Emit the given event in the given scope.
@@ -121,7 +124,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 			this.network.publish(scope, event);
 			doEmit(event, scope);
 		} catch (Throwable e) {
-			this.logger.error("CANNOT_EMIT_EVENT", event, scope, e); //$NON-NLS-1$
+			this.logger.error(AbstractEventSpace.class,
+					"CANNOT_EMIT_EVENT", event, scope, e); //$NON-NLS-1$
 		}
 
 	}
@@ -147,10 +151,12 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 * @param scope - description of the scope of the event, i.e. the receivers of the event.
 	 */
 	protected void doEmit(Event event, Scope<? super Address> scope) {
-		for (EventListener agent : this.participants.getListeners()) {
-			if (scope.matches(getAddress(agent))) {
-				// TODO Verify the agent is still alive and running
-				this.executorService.submit(new AsyncRunner(agent, event));
+		synchronized (this.participants) {
+			for (EventListener agent : this.participants.getListeners()) {
+				if (scope.matches(getAddress(agent))) {
+					// TODO Verify the agent is still alive and running
+					this.executorService.submit(new AsyncRunner(agent, event));
+				}
 			}
 		}
 	}
@@ -160,7 +166,9 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 */
 	@Override
 	public SynchronizedSet<UUID> getParticipants() {
-		return Collections3.unmodifiableSynchronizedSet(this.participants.getParticipantIDs());
+		synchronized (this.participants) {
+			return Collections3.unmodifiableSynchronizedSet(this.participants.getParticipantIDs());
+		}
 	}
 
 	/**

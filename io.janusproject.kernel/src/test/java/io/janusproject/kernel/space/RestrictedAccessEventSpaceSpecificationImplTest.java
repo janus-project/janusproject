@@ -19,7 +19,8 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.MapMock;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.RestrictedAccessEventSpace;
@@ -54,7 +55,7 @@ public class RestrictedAccessEventSpaceSpecificationImplTest extends Assert {
 	private SpaceID spaceId;
 
 	@Mock
-	private DistributedDataStructureFactory structureFactory;
+	private DistributedDataStructureService structureFactory;
 	@Mock
 	private Injector injector;
 	@InjectMocks
@@ -68,7 +69,7 @@ public class RestrictedAccessEventSpaceSpecificationImplTest extends Assert {
 				EventSpaceSpecification.class);
 		MockitoAnnotations.initMocks(this);
 		Mockito.when(this.injector.getInstance(Matchers.any(Class.class))).thenReturn(this.structureFactory);
-		Mockito.when(this.structureFactory.getMap(Matchers.anyString())).thenReturn(new HashMap<>());
+		Mockito.when(this.structureFactory.getMap(Matchers.anyString())).thenReturn(new MapMock<>());
 	}
 	
 	@After

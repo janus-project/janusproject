@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.SpaceID;
@@ -43,19 +43,23 @@ public class EventSpaceImpl extends AbstractEventSpace implements OpenEventSpace
 	 * @param id - identifier of the space.
 	 * @param factory - factory that is used to create the internal data structure.
 	 */
-	public EventSpaceImpl(SpaceID id, DistributedDataStructureFactory factory) {
+	public EventSpaceImpl(SpaceID id, DistributedDataStructureService factory) {
 		super(id, factory);
 	}
 
 	@Override
 	public Address register(EventListener entity) {
 		Address a = new Address(getID(), entity.getID());
-		return this.participants.registerParticipant(a, entity);
+		synchronized (this.participants) {
+			return this.participants.registerParticipant(a, entity);
+		}
 	}
 
 	@Override
 	public Address unregister(EventListener entity) {
-		return this.participants.unregisterParticipant(entity);
+		synchronized (this.participants) {
+			return this.participants.unregisterParticipant(entity);
+		}
 	}
 
 }

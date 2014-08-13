@@ -19,13 +19,16 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.kernel.executor.ChuckNorrisException;
-import io.janusproject.services.agentplatform.SpawnService;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.spawn.SpawnService;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.AgentTraitUnitTestAccessor;
+import io.sarl.lang.core.Event;
 
 import java.util.UUID;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,7 +56,7 @@ public class LifecycleSkillTest extends Assert {
 	private SpawnService spawnService;
 	
 	@Mock
-	private Agent agent;
+	private InternalEventBusSkill eventBus;
 
 	@InjectMocks
 	private LifecycleSkill skill;
@@ -62,13 +65,24 @@ public class LifecycleSkillTest extends Assert {
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		this.agentId = UUID.randomUUID();
-		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
+		Agent agent = new Agent(UUID.randomUUID()) {
+			@SuppressWarnings("synthetic-access")
+			@Override
+			protected <S extends io.sarl.lang.core.Capacity> S getSkill(java.lang.Class<S> capacity) {
+				return capacity.cast(LifecycleSkillTest.this.eventBus);
+			}
+			@SuppressWarnings("synthetic-access")
+			@Override
+			public UUID getID() {
+				return LifecycleSkillTest.this.agentId;
+			}
+		};
+		AgentTraitUnitTestAccessor.setOwner(this.skill, agent);
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		this.spawnService = null;
-		this.agent = null;
 		this.skill = null;
 		this.agentId = null;
 	}
@@ -94,7 +108,7 @@ public class LifecycleSkillTest extends Assert {
 	public void killMe() throws Exception {
 		try {
 			this.skill.killMe();
-			fail("killMe() msut never return!"); //$NON-NLS-1$
+			fail("killMe() must never return!"); //$NON-NLS-1$
 		}
 		catch(ChuckNorrisException _) {
 			// Expected exception
@@ -102,9 +116,9 @@ public class LifecycleSkillTest extends Assert {
 		catch(Exception e) {
 			throw e;
 		}
-		ArgumentCaptor<UUID> argument = ArgumentCaptor.forClass(UUID.class);
-		Mockito.verify(this.spawnService, new Times(1)).killAgent(argument.capture());
-		assertSame(this.agentId, argument.getValue());
+		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
+		Mockito.verify(this.eventBus, new Times(1)).selfEvent(argument.capture());
+		assertThat(argument.getValue(), IsInstanceOf.instanceOf(AsynchronousAgentKillingEvent.class));
 	}
 
 }

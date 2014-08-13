@@ -19,10 +19,10 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.agentplatform.KernelAgentSpawnListener;
-import io.janusproject.services.agentplatform.SpawnService;
 import io.janusproject.services.api.IServiceManager;
 import io.janusproject.services.impl.Services;
+import io.janusproject.services.spawn.KernelAgentSpawnListener;
+import io.janusproject.services.spawn.SpawnService;
 import io.janusproject.util.LoggerCreator;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Agent;
@@ -44,7 +44,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
-import com.hazelcast.core.HazelcastInstance;
 
 /**
  * This class represents the Kernel of the Janus platform.
@@ -71,8 +70,6 @@ public class Kernel {
 
 	private final IServiceManager serviceManager;
 
-	private final HazelcastInstance hazelcastInstance;
-
 	private final SpawnService spawnService;
 
 	/**
@@ -80,16 +77,13 @@ public class Kernel {
 	 *
 	 * @param serviceManager is the instance of the service manager that must be used by the kernel.
 	 * @param spawnService is the instance of the spawn service.
-	 * @param hazelcastInstance is the instance of the Hazelcast tools.
 	 * @param exceptionHandler is the handler of the uncaught exceptions.
 	 */
 	@Inject
 	Kernel(IServiceManager serviceManager,
 			SpawnService spawnService,
-			HazelcastInstance hazelcastInstance,
 			UncaughtExceptionHandler exceptionHandler) {
 		// Initialize the fields
-		this.hazelcastInstance = hazelcastInstance;
 		this.serviceManager = serviceManager;
 		this.spawnService = spawnService;
 
@@ -219,7 +213,6 @@ public class Kernel {
 		public void run() {
 			this.rawLogger.info(Locale.getString(Kernel.class, "STOP_KERNEL_SERVICES")); //$NON-NLS-1$
 			Services.stopServices(Kernel.this.serviceManager);
-			Kernel.this.hazelcastInstance.shutdown();
 			this.rawLogger.info(Locale.getString(Kernel.class, "KERNEL_SERVICES_STOPPED")); //$NON-NLS-1$
 		}
 
