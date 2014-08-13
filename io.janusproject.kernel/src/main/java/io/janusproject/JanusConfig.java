@@ -52,6 +52,17 @@ public final class JanusConfig {
 	 * @see #VERBOSE_LEVEL_NAME
 	 */
 	public static final String VERBOSE_LEVEL_VALUE = "info"; //$NON-NLS-1$
+
+	/** Name of the property that contains the flag for showing the Janus logo.
+	 * @see #JANUS_LOGO_SHOW
+	 */
+	public static final String JANUS_LOGO_SHOW_NAME = "janus.logo.show"; //$NON-NLS-1$
+
+	/** The default value of the flag for showing the Janus logo.
+	 * @see #JANUS_LOGO_SHOW_NAME
+	 */
+	public static final Boolean JANUS_LOGO_SHOW = Boolean.TRUE;
+
 	/** Name of the property that contains the verbosity level of Janus.
 	 * @see #LOGGING_PROPERTY_FILE_VALUE
 	 */
@@ -175,6 +186,7 @@ public final class JanusConfig {
 				Integer.toString(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE));
 		defaultValues.put(KERNEL_THREAD_TIMEOUT_NAME, Integer.toString(KERNEL_THREAD_TIMEOUT_VALUE));
 		defaultValues.put(INJECTION_MODULE_NAME, INJECTION_MODULE_NAME_VALUE);
+		defaultValues.put(JANUS_LOGO_SHOW_NAME, JANUS_LOGO_SHOW.toString());
 	}
 
 	/** Replies the value of the system property.

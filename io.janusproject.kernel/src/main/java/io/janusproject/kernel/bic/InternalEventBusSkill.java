@@ -167,8 +167,8 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 			this.state.set(OwnerState.RUNNING);
 		} else if (event instanceof Destroy) {
 			//Immediate synchronous dispatching of Destroy event
-			this.eventBus.fire(event);
 			this.state.set(OwnerState.DESTROYED);
+			this.eventBus.fire(event);
 		} else if (event instanceof AsynchronousAgentKillingEvent) {
 			//Asynchronous kill of the event.
 			this.agentAsEventListener.killOrMarkAsKilled();
