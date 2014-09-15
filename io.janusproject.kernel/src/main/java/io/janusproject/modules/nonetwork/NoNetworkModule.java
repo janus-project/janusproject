@@ -19,8 +19,8 @@
  */
 package io.janusproject.modules.nonetwork;
 
+import io.janusproject.kernel.services.jdk.network.NoNetworkService;
 import io.janusproject.services.network.NetworkService;
-import io.janusproject.services.network.nonetwork.NoNetworkService;
 
 import com.google.common.util.concurrent.Service;
 import com.google.inject.AbstractModule;

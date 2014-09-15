@@ -19,7 +19,7 @@
  */
 package io.janusproject.services.distributeddata;
 
-import io.janusproject.services.api.DependentService;
+import io.janusproject.services.DependentService;
 
 /**
  * Service that permits to manage data structures that are

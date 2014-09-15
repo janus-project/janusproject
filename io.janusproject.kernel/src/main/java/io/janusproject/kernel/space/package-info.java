@@ -19,7 +19,7 @@
  */
 
 /**
- * Implementation of the SARL spaces.
+ * Implementation of spaces.
  */
 package io.janusproject.kernel.space;
 

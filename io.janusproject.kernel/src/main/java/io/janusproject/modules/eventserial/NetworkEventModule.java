@@ -20,12 +20,12 @@
 package io.janusproject.modules.eventserial;
 
 import io.janusproject.JanusConfig;
+import io.janusproject.kernel.services.gson.GsonEventSerializer;
+import io.janusproject.kernel.services.jdk.network.AESEventEncrypter;
+import io.janusproject.kernel.services.jdk.network.PlainTextEventEncrypter;
+import io.janusproject.services.network.EventEncrypter;
+import io.janusproject.services.network.EventSerializer;
 import io.janusproject.services.network.NetworkConfig;
-import io.janusproject.services.network.event.AESEventEncrypter;
-import io.janusproject.services.network.event.EventEncrypter;
-import io.janusproject.services.network.event.EventSerializer;
-import io.janusproject.services.network.event.GsonEventSerializer;
-import io.janusproject.services.network.event.PlainTextEventEncrypter;
 
 import java.util.Properties;
 

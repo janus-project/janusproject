@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel;
 
-import io.janusproject.services.api.IServiceManager;
+import io.janusproject.services.IServiceManager;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.spawn.SpawnService;

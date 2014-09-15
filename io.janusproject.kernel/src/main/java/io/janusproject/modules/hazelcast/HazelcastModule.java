@@ -20,12 +20,12 @@
 package io.janusproject.modules.hazelcast;
 
 import io.janusproject.JanusConfig;
+import io.janusproject.kernel.services.hazelcast.HazelcastDistributedDataStructureService;
+import io.janusproject.kernel.services.hazelcast.HazelcastInfrastructureService;
+import io.janusproject.kernel.services.hazelcast.HazelcastKernelDiscoveryService;
 import io.janusproject.modules.StandardJanusPlatformModule;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.services.distributeddata.hazelcast.HazelcastDistributedDataStructureService;
-import io.janusproject.services.infrastructure.hazelcast.HazelcastInfrastructureService;
 import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.kerneldiscovery.hazelcast.HazelcastKernelDiscoveryService;
 import io.janusproject.services.logging.LogService;
 import io.janusproject.services.network.NetworkUtil;
 import io.sarl.lang.core.Address;

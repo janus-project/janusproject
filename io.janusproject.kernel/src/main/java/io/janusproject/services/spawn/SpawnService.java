@@ -19,7 +19,7 @@
  */
 package io.janusproject.services.spawn;
 
-import io.janusproject.services.api.DependentService;
+import io.janusproject.services.DependentService;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 

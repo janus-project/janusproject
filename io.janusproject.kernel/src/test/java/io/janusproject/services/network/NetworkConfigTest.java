@@ -19,9 +19,9 @@
  */
 package io.janusproject.services.network;
 
+import io.janusproject.kernel.services.gson.GsonEventSerializer;
+import io.janusproject.kernel.services.jdk.network.PlainTextEventEncrypter;
 import io.janusproject.services.network.NetworkConfig;
-import io.janusproject.services.network.event.GsonEventSerializer;
-import io.janusproject.services.network.event.PlainTextEventEncrypter;
 
 import java.util.Properties;
 

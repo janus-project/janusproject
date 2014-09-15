@@ -19,19 +19,18 @@
  */
 package io.janusproject.modules;
 
+import io.janusproject.kernel.services.arakhne.ArakhneLocaleLogService;
+import io.janusproject.kernel.services.jdk.spawn.StandardSpawnService;
 import io.janusproject.modules.executors.JdkExecutorModule;
 import io.janusproject.modules.hazelcast.HazelcastModule;
 import io.janusproject.modules.kernel.MandatoryKernelModule;
 import io.janusproject.services.contextspace.ContextSpaceService;
-import io.janusproject.services.contextspace.base.BaseContextSpaceService;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
 import io.janusproject.services.logging.LogService;
-import io.janusproject.services.logging.jdk.ArakhneLocaleLogService;
 import io.janusproject.services.network.NetworkService;
 import io.janusproject.services.spawn.SpawnService;
-import io.janusproject.services.spawn.base.BaseSpawnService;
 
 import com.google.common.util.concurrent.Service;
 import com.google.inject.AbstractModule;
@@ -63,8 +62,8 @@ public class StandardCoreModule extends AbstractModule {
 		install(new JdkExecutorModule());
 
 		bind(LogService.class).to(ArakhneLocaleLogService.class).in(Singleton.class);
-		bind(ContextSpaceService.class).to(BaseContextSpaceService.class).in(Singleton.class);
-		bind(SpawnService.class).to(BaseSpawnService.class).in(Singleton.class);
+		bind(ContextSpaceService.class).to(ContextSpaceService.class).in(Singleton.class);
+		bind(SpawnService.class).to(StandardSpawnService.class).in(Singleton.class);
 
 		// Check if all the services are binded
 		requireBinding(DistributedDataStructureService.class);

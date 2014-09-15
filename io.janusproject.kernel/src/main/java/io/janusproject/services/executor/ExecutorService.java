@@ -19,7 +19,7 @@
  */
 package io.janusproject.services.executor;
 
-import io.janusproject.services.api.DependentService;
+import io.janusproject.services.DependentService;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;

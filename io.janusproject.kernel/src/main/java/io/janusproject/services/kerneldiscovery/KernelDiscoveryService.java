@@ -19,7 +19,7 @@
  */
 package io.janusproject.services.kerneldiscovery;
 
-import io.janusproject.services.api.DependentService;
+import io.janusproject.services.DependentService;
 
 import java.net.URI;
 import java.util.Collection;

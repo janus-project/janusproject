@@ -19,7 +19,7 @@
  */
 package io.janusproject.services.contextspace;
 
-import io.janusproject.services.api.DependentService;
+import io.janusproject.services.DependentService;
 import io.sarl.lang.core.AgentContext;
 
 import java.util.Collection;

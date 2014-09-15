@@ -19,12 +19,12 @@
  */
 package io.janusproject.modules.executors;
 
+import io.janusproject.kernel.services.jdk.executors.JdkExecutorService;
+import io.janusproject.kernel.services.jdk.executors.JdkScheduledThreadPoolExecutor;
+import io.janusproject.kernel.services.jdk.executors.JdkThreadFactory;
+import io.janusproject.kernel.services.jdk.executors.JdkThreadPoolExecutor;
+import io.janusproject.kernel.services.jdk.executors.JdkUncaughtExceptionHandler;
 import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.executor.jdk.JdkExecutorService;
-import io.janusproject.services.executor.jdk.JdkScheduledThreadPoolExecutor;
-import io.janusproject.services.executor.jdk.JdkThreadFactory;
-import io.janusproject.services.executor.jdk.JdkThreadPoolExecutor;
-import io.janusproject.services.executor.jdk.JdkUncaughtExceptionHandler;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ScheduledExecutorService;

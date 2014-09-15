@@ -20,13 +20,13 @@
 package io.janusproject.modules.zeromq;
 
 import io.janusproject.JanusConfig;
+import io.janusproject.kernel.services.zeromq.ZeroMQNetworkService;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
 import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.EventSerializer;
 import io.janusproject.services.network.NetworkService;
-import io.janusproject.services.network.event.EventSerializer;
-import io.janusproject.services.network.zeromq.ZeroMQNetworkService;
 
 import java.net.URI;
 

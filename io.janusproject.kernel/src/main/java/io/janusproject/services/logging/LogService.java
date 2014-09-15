@@ -19,7 +19,7 @@
  */
 package io.janusproject.services.logging;
 
-import io.janusproject.services.api.DependentService;
+import io.janusproject.services.DependentService;
 
 import java.util.logging.Filter;
 import java.util.logging.Level;

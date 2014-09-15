@@ -19,7 +19,7 @@
  */
 package io.janusproject.services.network;
 
-import io.janusproject.services.api.DependentService;
+import io.janusproject.services.DependentService;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
