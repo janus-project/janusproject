@@ -124,7 +124,7 @@ public class StandardSpawnServiceTest extends Assert {
 		Mockito.when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
 		Mockito.when(this.agentContext.getDefaultSpace()).thenReturn(this.defaultSpace);
 		Mockito.when(this.defaultSpace.getAddress(Matchers.any(UUID.class))).thenReturn(Mockito.mock(Address.class));
-		Mockito.when(this.agentFactory.newInstance(Matchers.any(Class.class), Matchers.any(UUID.class))).thenReturn(this.agent);
+		Mockito.when(this.agentFactory.newInstance(Matchers.any(Class.class), Matchers.any(UUID.class), Matchers.any(UUID.class))).thenReturn(this.agent);
 		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
 		this.spawnService.addKernelAgentSpawnListener(this.kernelListener);
 		this.spawnService.addSpawnServiceListener(this.serviceListener);
@@ -155,10 +155,44 @@ public class StandardSpawnServiceTest extends Assert {
 	}
 
 	@Test
-	public void spawn() {
+	public void spawn_notNull() {
 		this.spawnService.startAsync().awaitRunning();
 		//
-		UUID agentId = this.spawnService.spawn(this.agentContext, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID aId = UUID.fromString(this.agentId.toString());
+		UUID agentId = this.spawnService.spawn(this.agentContext, aId, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		//
+		assertNotNull(agentId);
+		Set<UUID> agents = this.spawnService.getAgents();
+		assertEquals(1, agents.size());
+		assertTrue(agents.contains(agentId));
+		assertSame(this.agentId, agentId);
+		assertNotSame(aId, agentId);
+		assertEquals(aId, agentId);
+		//
+		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
+		ArgumentCaptor<Agent> argument2 = ArgumentCaptor.forClass(Agent.class);
+		ArgumentCaptor<Object[]> argument3 = ArgumentCaptor.forClass(Object[].class);
+		Mockito.verify(this.serviceListener, new Times(1)).agentSpawned(
+				argument1.capture(), argument2.capture(), argument3.capture());
+		assertSame(this.agentContext, argument1.getValue());
+		Agent ag = argument2.getValue();
+		assertNotNull(ag);
+		assertSame(agentId, ag.getID());
+		assertEquals("a", argument3.getValue()[0]); //$NON-NLS-1$
+		assertEquals("b", argument3.getValue()[1]); //$NON-NLS-1$
+		//
+		ArgumentCaptor<Event> argument4 = ArgumentCaptor.forClass(Event.class);
+		Mockito.verify(this.defaultSpace, new Times(1)).emit(argument4.capture());
+		assertTrue(argument4.getValue() instanceof AgentSpawned);
+		assertSame(agentId, ((AgentSpawned)argument4.getValue()).agentID);
+		assertEquals(ag.getClass().getName(), ((AgentSpawned)argument4.getValue()).agentType);
+	}
+
+	@Test
+	public void spawn_null() {
+		this.spawnService.startAsync().awaitRunning();
+		//
+		UUID agentId = this.spawnService.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		//
 		assertNotNull(agentId);
 		Set<UUID> agents = this.spawnService.getAgents();
@@ -191,7 +225,7 @@ public class StandardSpawnServiceTest extends Assert {
 		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(agIds, agIds));
 		this.spawnService.startAsync().awaitRunning();
-		UUID agentId = this.spawnService.spawn(this.agentContext, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID agentId = this.spawnService.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		agIds.add(agentId);
 		Agent ag = this.spawnService.getAgent(agentId);
 		assertNotNull(ag);
@@ -210,7 +244,7 @@ public class StandardSpawnServiceTest extends Assert {
 		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(agIds,agIds));
 		this.spawnService.startAsync().awaitRunning();
-		UUID agentId = this.spawnService.spawn(this.agentContext, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID agentId = this.spawnService.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		agIds.add(agentId);
 		Agent ag = this.spawnService.getAgent(agentId);
 		assertNotNull(ag);
@@ -222,7 +256,7 @@ public class StandardSpawnServiceTest extends Assert {
 	@Test
 	public void killAgent() throws AgentKillException {
 		this.spawnService.startAsync().awaitRunning();
-		UUID agentId = this.spawnService.spawn(this.agentContext, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID agentId = this.spawnService.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		Agent ag = this.spawnService.getAgent(agentId);
 		assertNotNull(ag);
 		//

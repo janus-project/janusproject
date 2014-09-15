@@ -94,14 +94,35 @@ public class LifecycleSkillTest extends Assert {
 		Object[] params = new Object[] {1,"String"}; //$NON-NLS-1$
 		this.skill.spawnInContext(type, context, params);
 		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
-		ArgumentCaptor<Class> argument2 = ArgumentCaptor.forClass(Class.class);
-		ArgumentCaptor<Integer> argument3 = ArgumentCaptor.forClass(Integer.class);
-		ArgumentCaptor<String> argument4 = ArgumentCaptor.forClass(String.class);
-		Mockito.verify(this.spawnService, new Times(1)).spawn(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture());
+		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
+		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
+		ArgumentCaptor<Integer> argument4 = ArgumentCaptor.forClass(Integer.class);
+		ArgumentCaptor<String> argument5 = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(this.spawnService, new Times(1)).spawn(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture(), argument5.capture());
 		assertSame(context, argument1.getValue());
-		assertEquals(Agent.class, argument2.getValue());
-		assertEquals(1, argument3.getValue().intValue());
-		assertEquals("String", argument4.getValue()); //$NON-NLS-1$
+		assertNull(argument2.getValue());
+		assertEquals(Agent.class, argument3.getValue());
+		assertEquals(1, argument4.getValue().intValue());
+		assertEquals("String", argument5.getValue()); //$NON-NLS-1$
+	}
+
+	@Test
+	public void spawnInContextWithID() {
+		Class type = Agent.class;
+		AgentContext context = Mockito.mock(AgentContext.class);
+		Object[] params = new Object[] {1,"String"}; //$NON-NLS-1$
+		this.skill.spawnInContextWithID(type, this.agentId, context, params);
+		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
+		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
+		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
+		ArgumentCaptor<Integer> argument4 = ArgumentCaptor.forClass(Integer.class);
+		ArgumentCaptor<String> argument5 = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(this.spawnService, new Times(1)).spawn(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture(), argument5.capture());
+		assertSame(context, argument1.getValue());
+		assertSame(this.agentId, argument2.getValue());
+		assertEquals(Agent.class, argument3.getValue());
+		assertEquals(1, argument4.getValue().intValue());
+		assertEquals("String", argument5.getValue()); //$NON-NLS-1$
 	}
 
 	@Test

@@ -81,7 +81,7 @@ public class KernelTest extends Assert {
 		//
 		Mockito.when(this.spawnService.isRunning()).thenReturn(true);
 		Mockito.when(this.spawnService.state()).thenReturn(State.RUNNING);
-		Mockito.when(this.spawnService.spawn(Matchers.any(AgentContext.class), Matchers.any(Class.class), Matchers.anyString(), Matchers.anyString())).thenReturn(this.uuid);
+		Mockito.when(this.spawnService.spawn(Matchers.any(AgentContext.class), Matchers.any(UUID.class), Matchers.any(Class.class), Matchers.anyString(), Matchers.anyString())).thenReturn(this.uuid);
 		Mockito.when(this.executorService.isRunning()).thenReturn(true);
 		Mockito.when(this.executorService.state()).thenReturn(State.RUNNING);
 		Mockito.when(this.contextService.isRunning()).thenReturn(true);
@@ -119,16 +119,43 @@ public class KernelTest extends Assert {
 		UUID id = this.kernel.spawn(Agent.class, "a", "b"); //$NON-NLS-1$//$NON-NLS-2$
 		assertSame(this.uuid, id);
 		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
-		ArgumentCaptor<Class> argument2 = ArgumentCaptor.forClass(Class.class);
-		ArgumentCaptor<String> argument3 = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
+		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<String> argument4 = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<String> argument5 = ArgumentCaptor.forClass(String.class);
 		Mockito.verify(this.spawnService).spawn(
 				argument1.capture(), argument2.capture(),
-				argument3.capture(), argument4.capture());
+				argument3.capture(), argument4.capture(),
+				argument5.capture());
 		assertSame(this.agentContext, argument1.getValue());
-		assertEquals(Agent.class, argument2.getValue());
-		assertEquals("a", argument3.getValue()); //$NON-NLS-1$
-		assertEquals("b", argument4.getValue()); //$NON-NLS-1$
+		assertNull(argument2.getValue());
+		assertEquals(Agent.class, argument3.getValue());
+		assertEquals("a", argument4.getValue()); //$NON-NLS-1$
+		assertEquals("b", argument5.getValue()); //$NON-NLS-1$
+	}
+
+	@Test
+	public void spawnWithAgentId() {
+		this.kernel.setJanusContext(this.agentContext);
+		//
+		UUID aId = UUID.fromString(this.uuid.toString());
+		UUID id = this.kernel.spawn(aId, Agent.class, "a", "b"); //$NON-NLS-1$//$NON-NLS-2$
+		assertSame(this.uuid, id);
+		assertEquals(aId, id);
+		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
+		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
+		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
+		ArgumentCaptor<String> argument4 = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<String> argument5 = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(this.spawnService).spawn(
+				argument1.capture(), argument2.capture(),
+				argument3.capture(), argument4.capture(),
+				argument5.capture());
+		assertSame(this.agentContext, argument1.getValue());
+		assertSame(aId, argument2.getValue());
+		assertEquals(Agent.class, argument3.getValue());
+		assertEquals("a", argument4.getValue()); //$NON-NLS-1$
+		assertEquals("b", argument5.getValue()); //$NON-NLS-1$
 	}
 
 	@Test

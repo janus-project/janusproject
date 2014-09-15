@@ -6,7 +6,7 @@
 
 <suppressions>
 
-    <suppress checks="MethodCount" files="BaseContextSpaceService.java"/>
+    <suppress checks="MethodCount" files="StandardContextSpaceService.java"/>
     
     <suppress checks="MagicNumber" files="AESEventEncrypter.java"/>
     

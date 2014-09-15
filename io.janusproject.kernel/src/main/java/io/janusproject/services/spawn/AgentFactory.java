@@ -37,10 +37,13 @@ public interface AgentFactory {
 	 *
 	 * @param <T> - type of the agent to create.
 	 * @param type - type of the agent to create.
+	 * @param agentID - id of the new agent, or <code>null</code>
+	 *                  if the agent identifier must be randomly
+	 *                  computed.
 	 * @param contextID - id of the parent context.
 	 * @return the agent.
 	 * @throws Exception - when the instance of the agent cannot be created.
 	 */
-	<T extends Agent> T newInstance(Class<T> type, UUID contextID) throws Exception;
+	<T extends Agent> T newInstance(Class<T> type, UUID agentID, UUID contextID) throws Exception;
 
 }

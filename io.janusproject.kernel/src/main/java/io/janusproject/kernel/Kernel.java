@@ -117,7 +117,20 @@ public class Kernel {
 	 * @return the identifier of the agent, never <code>null</code>.
 	 */
 	public UUID spawn(Class<? extends Agent> agent, Object... params) {
-		return this.spawnService.spawn(this.janusContext, agent, params);
+		return this.spawnService.spawn(this.janusContext, null, agent, params);
+	}
+
+	/**
+	 * Spawn an agent of the given type, and pass the parameters to its initialization function.
+	 *
+	 * @param agentID - the identifier of the agent to spawn. If <code>null</code>
+	 *                  the identifier is randomly selected.
+	 * @param agent - the type of the agent to spawn.
+	 * @param params - the list of the parameters to pass to the agent initialization function.
+	 * @return the identifier of the agent, never <code>null</code>.
+	 */
+	public UUID spawn(UUID agentID, Class<? extends Agent> agent, Object... params) {
+		return this.spawnService.spawn(this.janusContext, agentID, agent, params);
 	}
 
 	/** Replies a kernel service that is alive.

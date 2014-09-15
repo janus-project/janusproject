@@ -112,10 +112,10 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized UUID spawn(AgentContext parent, Class<? extends Agent> agentClazz, Object... params) {
+	public synchronized UUID spawn(AgentContext parent, UUID agentID, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
 			try {
-				Agent agent = this.agentFactory.newInstance(agentClazz, parent.getID());
+				Agent agent = this.agentFactory.newInstance(agentClazz, agentID, parent.getID());
 				assert (agent != null);
 				this.agents.put(agent.getID(), agent);
 				fireAgentSpawned(parent, agent, params);
@@ -454,7 +454,7 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 
 		@Override
-		public <T extends Agent> T newInstance(Class<T> type, UUID contextID) throws Exception {
+		public <T extends Agent> T newInstance(Class<T> type, UUID agentID, UUID contextID) throws Exception {
 			Agent agent = type.getConstructor(UUID.class).newInstance(contextID);
 			assert (agent != null);
 			this.injector.injectMembers(agent);
