@@ -20,6 +20,7 @@
 package io.janusproject.modules;
 
 import io.janusproject.kernel.services.arakhne.ArakhneLocaleLogService;
+import io.janusproject.kernel.services.jdk.contextspace.StandardContextSpaceService;
 import io.janusproject.kernel.services.jdk.spawn.StandardSpawnService;
 import io.janusproject.modules.executors.JdkExecutorModule;
 import io.janusproject.modules.hazelcast.HazelcastModule;
@@ -62,7 +63,7 @@ public class StandardCoreModule extends AbstractModule {
 		install(new JdkExecutorModule());
 
 		bind(LogService.class).to(ArakhneLocaleLogService.class).in(Singleton.class);
-		bind(ContextSpaceService.class).to(ContextSpaceService.class).in(Singleton.class);
+		bind(ContextSpaceService.class).to(StandardContextSpaceService.class).in(Singleton.class);
 		bind(SpawnService.class).to(StandardSpawnService.class).in(Singleton.class);
 
 		// Check if all the services are binded
