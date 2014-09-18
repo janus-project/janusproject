@@ -180,61 +180,109 @@ public final class Boot {
 			throw new Error();
 		}
 	}
+
+	/** Show an error message, and exit.
+	 *
+	 * @param message - the description of the error.
+	 * @param e - the cause of the error.
+	 */
+	protected static void showError(String message, Throwable e) {
+		if (message != null && !message.isEmpty()) {
+			//CHECKSTYLE:OFF
+			System.err.println(message);
+			//CHECKSTYLE:ON
+		}
+		if (e != null) {
+			//CHECKSTYLE:OFF
+			e.printStackTrace();
+			//CHECKSTYLE:ON
+		}
+		showHelp();
+	}
+
+	private static Class<? extends Agent> loadAgentClass(String fullyQualifiedName) {
+		Class<?> type;
+		try {
+			type = Class.forName(fullyQualifiedName);
+		} catch (Exception e) {
+			showError(
+					Locale.getString(
+							"INVALID_AGENT_QUALIFIED_NAME", //$NON-NLS-1$
+							fullyQualifiedName,
+							System.getProperty("java.class.path")), //$NON-NLS-1$
+					null);
+			return null;
+		}
+		// The following test is needed because the
+		// cast to Class<? extends Agent> is not checking
+		// the Agent type (it is a generic type, not
+		// tested at runtime).
+		if (Agent.class.isAssignableFrom(type)) {
+			return type.asSubclass(Agent.class);
+		}
+
+		showError(
+			Locale.getString("INVALID_AGENT_TYPE", //$NON-NLS-1$
+				 fullyQualifiedName),
+			null);
+		return null;
+	}
+
 	/** Main function that is parsing the command line and launching
 	 * the first agent.
 	 *
 	 * @param args - command line arguments
 	 * @see #startJanus(Class, Class, Object...)
 	 */
-	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		try {
 			List<URL> propertyFiles = new ArrayList<>();
 			Object[] freeArgs = parseCommandLine(args, propertyFiles);
+			if (JanusConfig.getSystemPropertyAsBoolean(
+					JanusConfig.JANUS_LOGO_SHOW_NAME,
+					JanusConfig.JANUS_LOGO_SHOW)) {
+				showJanusLogo();
+				return;
+			}
+			if (freeArgs.length == 0) {
+				showError(
+						Locale.getString("NO_AGENT_QUALIFIED_NAME"), //$NON-NLS-1$
+						null);
+			}
 			String agentToLaunch = freeArgs[0].toString();
 			freeArgs = Arrays.copyOfRange(
 					freeArgs,
 					1, freeArgs.length,
 					String[].class);
-			if (JanusConfig.getSystemPropertyAsBoolean(
-					JanusConfig.JANUS_LOGO_SHOW_NAME,
-					JanusConfig.JANUS_LOGO_SHOW)) {
-				showJanusLogo();
-			}
-			Class<?> agent = Class.forName(agentToLaunch);
-			// The following test is needed because the
-			// cast to Class<? extends Agent> is not checking
-			// the Agent type (it is a generic type, not
-			// tested at runtime).
-			if (Agent.class.isAssignableFrom(agent)) {
-				// Load property files
-				Properties systemProperties = System.getProperties();
-				for (URL url : propertyFiles) {
-					try (InputStream stream = url.openStream()) {
-						systemProperties.load(stream);
-					}
+			// Load the agent class
+			Class<? extends Agent> agent = loadAgentClass(agentToLaunch);
+			assert (agent != null);
+			// Load property files
+			Properties systemProperties = System.getProperties();
+			for (URL url : propertyFiles) {
+				try (InputStream stream = url.openStream()) {
+					systemProperties.load(stream);
 				}
-				// Set the boot agent classname
-				System.setProperty(JanusConfig.BOOT_AGENT, agent.getCanonicalName());
-
-				// Get the start-up injection module
-				Class<? extends Module> startupModule = JanusConfig.getSystemPropertyAsClass(
-						Module.class, JanusConfig.INJECTION_MODULE_NAME,
-						JanusConfig.INJECTION_MODULE_NAME_VALUE);
-
-				startJanus(
-						startupModule,
-						(Class<? extends Agent>) agent,
-						freeArgs);
-			} else {
-				throw new ClassCastException(
-						Locale.getString("INVALID_AGENT_TYPE", agentToLaunch)); //$NON-NLS-1$
 			}
+			// Set the boot agent classname
+			System.setProperty(JanusConfig.BOOT_AGENT, agent.getCanonicalName());
+
+			// Get the start-up injection module
+			Class<? extends Module> startupModule = JanusConfig.getSystemPropertyAsClass(
+					Module.class, JanusConfig.INJECTION_MODULE_NAME,
+					JanusConfig.INJECTION_MODULE_NAME_VALUE);
+
+			startJanus(
+					startupModule,
+					(Class<? extends Agent>) agent,
+					freeArgs);
 		} catch (Exception e) {
-			//CHECKSTYLE:OFF
-			e.printStackTrace();
-			//CHECKSTYLE:ON
-			showHelp();
+			showError(
+					Locale.getString(
+							"LAUNCHING_ERROR", //$NON-NLS-1$
+							e.getLocalizedMessage()),
+					e);
+			return;
 		}
 	}
 	/** Replies the command line options supported by this boot class.
@@ -311,7 +359,8 @@ public final class Boot {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(
 				Boot.class.getName()
-				+ " [OPTIONS] <agent_classname>", //$NON-NLS-1$
+				+ " " //$NON-NLS-1$
+				+ Locale.getString(Boot.class, "CLI_PARAM_SYNOPTIC"), //$NON-NLS-1$
 				getOptions());
 		System.exit(ERROR_EXIT_CODE);
 	}
