@@ -242,7 +242,6 @@ public final class Boot {
 					JanusConfig.JANUS_LOGO_SHOW_NAME,
 					JanusConfig.JANUS_LOGO_SHOW)) {
 				showJanusLogo();
-				return;
 			}
 			if (freeArgs.length == 0) {
 				showError(
