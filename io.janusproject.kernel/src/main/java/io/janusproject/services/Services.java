@@ -120,6 +120,8 @@ public final class Services {
 			Map<Class<? extends Service>, DependencyNode> dependentServices,
 			List<DependencyNode> roots) {
 		Class<? extends Service> type = depServ.getServiceType();
+		assert (type != null);
+		assert (type.isInterface()) : type.getName();
 		DependencyNode node = dependentServices.get(type);
 		if (node == null) {
 			node = new DependencyNode(depServ, type);
@@ -321,6 +323,7 @@ public final class Services {
 		private final Collection<WeakReference<DependencyNode>> asyncStateServices = new ArrayList<>();
 
 		public DependencyNode(DependentService service, Class<? extends Service> type) {
+			assert (service != null);
 			this.service = service;
 			this.type = type;
 		}
@@ -358,7 +361,10 @@ public final class Services {
 		 */
 		@Override
 		public String toString() {
-			return this.service == null ? null : this.service.toString();
+			if (this.service == null) {
+				return "!!!" + this.type.getName(); //$NON-NLS-1$
+			}
+			return this.service.toString();
 		}
 
 	}

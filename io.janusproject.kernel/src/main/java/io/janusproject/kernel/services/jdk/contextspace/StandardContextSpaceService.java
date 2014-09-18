@@ -104,7 +104,7 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 
 	@Override
 	public final Class<? extends Service> getServiceType() {
-		return StandardContextSpaceService.class;
+		return ContextSpaceService.class;
 	}
 
 	@Override

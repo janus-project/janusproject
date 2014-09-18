@@ -19,14 +19,14 @@
  */
 package io.janusproject.kernel.services.hazelcast;
 
-import io.janusproject.kernel.services.hazelcast.HazelcastDistributedDataStructureService;
+import io.janusproject.kernel.services.AbstractServiceImplementationTest;
 import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DMultiMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
 
 import java.util.UUID;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -47,7 +47,8 @@ import com.hazelcast.core.ISet;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc","static-access","unchecked"})
-public class HazelcastDistributedDataStructureFactoryTest extends Assert {
+public class HazelcastDistributedDataStructureFactoryTest
+extends AbstractServiceImplementationTest<DistributedDataStructureService> {
 
 	private HazelcastInstance hz;
 	private IList<Object> list;
@@ -57,6 +58,17 @@ public class HazelcastDistributedDataStructureFactoryTest extends Assert {
 	private ISemaphore semaphore;
 	private ISet<Object> set;
 	private HazelcastDistributedDataStructureService factory;
+	
+	public HazelcastDistributedDataStructureFactoryTest() {
+		super(DistributedDataStructureService.class);
+	}
+	
+	/** {@inheritDoc}
+	 */
+	@Override
+	protected DistributedDataStructureService getTestedService() {
+		return this.factory;
+	}
 	
 	@Before
 	public void setUp() {

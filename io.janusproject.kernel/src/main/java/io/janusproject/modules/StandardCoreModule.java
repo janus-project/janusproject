@@ -56,15 +56,15 @@ public class StandardCoreModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
-		// Install the elements for the Janus kernel
-		install(new MandatoryKernelModule());
+		bind(LogService.class).to(ArakhneLocaleLogService.class).in(Singleton.class);
+		bind(ContextSpaceService.class).to(StandardContextSpaceService.class).in(Singleton.class);
+		bind(SpawnService.class).to(StandardSpawnService.class).in(Singleton.class);
 
 		install(new HazelcastModule());
 		install(new JdkExecutorModule());
 
-		bind(LogService.class).to(ArakhneLocaleLogService.class).in(Singleton.class);
-		bind(ContextSpaceService.class).to(StandardContextSpaceService.class).in(Singleton.class);
-		bind(SpawnService.class).to(StandardSpawnService.class).in(Singleton.class);
+		// Install the elements for the Janus kernel
+		install(new MandatoryKernelModule());
 
 		// Check if all the services are binded
 		requireBinding(DistributedDataStructureService.class);

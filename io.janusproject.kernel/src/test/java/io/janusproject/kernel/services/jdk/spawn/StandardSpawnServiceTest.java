@@ -19,11 +19,12 @@
  */
 package io.janusproject.kernel.services.jdk.spawn;
 
-import io.janusproject.kernel.services.jdk.spawn.StandardSpawnService;
+import io.janusproject.kernel.services.AbstractServiceImplementationTest;
 import io.janusproject.services.spawn.AgentFactory;
 import io.janusproject.services.spawn.KernelAgentSpawnListener;
-import io.janusproject.services.spawn.SpawnServiceListener;
+import io.janusproject.services.spawn.SpawnService;
 import io.janusproject.services.spawn.SpawnService.AgentKillException;
+import io.janusproject.services.spawn.SpawnServiceListener;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ExternalContextAccess;
@@ -45,7 +46,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -66,7 +66,8 @@ import com.google.inject.Injector;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc","unchecked","synthetic-access"})
-public class StandardSpawnServiceTest extends Assert {
+public class StandardSpawnServiceTest
+extends AbstractServiceImplementationTest<SpawnService> {
 
 	private UUID agentId;
 	
@@ -103,6 +104,18 @@ public class StandardSpawnServiceTest extends Assert {
 	
 	@InjectMocks
 	private StandardSpawnService spawnService;
+	
+	/**
+	 * 
+	 */
+	public StandardSpawnServiceTest() {
+		super(SpawnService.class);
+	}
+	
+	@Override
+	protected SpawnService getTestedService() {
+		return this.spawnService;
+	}
 	
 	@Before
 	public void setUp() throws Exception {

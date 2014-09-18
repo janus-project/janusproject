@@ -19,11 +19,9 @@
  */
 package io.janusproject.kernel.services.jdk.contextspace;
 
-import io.janusproject.kernel.services.jdk.contextspace.Context;
-import io.janusproject.kernel.services.jdk.contextspace.ContextFactory;
-import io.janusproject.kernel.services.jdk.contextspace.StandardContextSpaceService;
-import io.janusproject.kernel.services.jdk.contextspace.SpaceRepositoryFactory;
+import io.janusproject.kernel.services.AbstractServiceImplementationTest;
 import io.janusproject.services.contextspace.ContextRepositoryListener;
+import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.contextspace.SpaceRepositoryListener;
 import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
@@ -44,7 +42,6 @@ import java.util.UUID;
 import javassist.Modifier;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -66,7 +63,8 @@ import com.google.inject.Injector;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc","static-method"})
-public class StandardContextSpaceServiceTest extends Assert {
+public class StandardContextSpaceServiceTest
+extends AbstractServiceImplementationTest<ContextSpaceService> {
 
 	private UUID contextId;
 	private SpaceID spaceId;
@@ -94,6 +92,17 @@ public class StandardContextSpaceServiceTest extends Assert {
 	private ContextRepositoryListener contextListener;
 
 	private StandardContextSpaceService service;
+	
+	/**
+	 */
+	public StandardContextSpaceServiceTest() {
+		super(ContextSpaceService.class);
+	}
+	
+	@Override
+	protected ContextSpaceService getTestedService() {
+		return this.service;
+	}
 	
 	@Before
 	public void setUp() {

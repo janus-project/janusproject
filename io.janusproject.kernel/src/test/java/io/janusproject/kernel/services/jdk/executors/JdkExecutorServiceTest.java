@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.kernel.services.jdk.executors.JdkExecutorService;
+import io.janusproject.kernel.services.AbstractServiceImplementationTest;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +27,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -45,7 +44,8 @@ import org.mockito.internal.verification.Times;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc","unchecked","rawtypes"})
-public class JdkExecutorServiceTest extends Assert {
+public class JdkExecutorServiceTest
+extends AbstractServiceImplementationTest<io.janusproject.services.executor.ExecutorService> {
 
 	@Mock
 	private Runnable runnable;
@@ -62,6 +62,18 @@ public class JdkExecutorServiceTest extends Assert {
 	@InjectMocks
 	private JdkExecutorService service;
 
+	/**
+	 * 
+	 */
+	public JdkExecutorServiceTest() {
+		super(io.janusproject.services.executor.ExecutorService.class);
+	}
+	
+	@Override
+	protected io.janusproject.services.executor.ExecutorService getTestedService() {
+		return this.service;
+	}
+	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);

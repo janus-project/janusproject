@@ -19,8 +19,9 @@
  */
 package io.janusproject.kernel.services.hazelcast;
 
-import io.janusproject.kernel.services.hazelcast.HazelcastKernelDiscoveryService;
+import io.janusproject.kernel.services.AbstractServiceImplementationTest;
 import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
 import io.janusproject.services.logging.LogService;
 import io.janusproject.services.network.NetworkService;
 import io.janusproject.services.network.NetworkUtil;
@@ -36,7 +37,6 @@ import java.util.UUID;
 import javassist.Modifier;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -58,7 +58,8 @@ import com.hazelcast.core.Member;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc","static-method"})
-public class HazelcastKernelDiscoveryServiceTest extends Assert {
+public class HazelcastKernelDiscoveryServiceTest
+extends AbstractServiceImplementationTest<KernelDiscoveryService> {
 
 	private URI kernelURI;
 	private URI hazelcastURI;
@@ -70,6 +71,17 @@ public class HazelcastKernelDiscoveryServiceTest extends Assert {
 	private ExecutorService executorService;
 	private LogService logger;
 
+	/**
+	 */
+	public HazelcastKernelDiscoveryServiceTest() {
+		super(KernelDiscoveryService.class);
+	}
+
+	@Override
+	protected KernelDiscoveryService getTestedService() {
+		return this.service;
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 		this.hazelcastURI = NetworkUtil.toURI("tcp://123.124.125.126:5023"); //$NON-NLS-1$
