@@ -99,6 +99,9 @@
 						<manifest>
 							<mainClass>io.janusproject.Boot</mainClass>
 						</manifest>
+						<manifestEntries>
+							<SARL-Spec-Version>${sarl.spec.version}</SARL-Spec-Version>
+						</manifestEntries>
 					</archive>
 				</configuration>
 				<executions>

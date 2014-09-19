@@ -39,6 +39,7 @@
 		<copyrighters>Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND</copyrighters>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sarl.version.range>[0.1.0-SNAPSHOT,0.2.0-SNAPSHOT)</sarl.version.range>
+		<sarl.spec.version>0.1</sarl.spec.version>
 		<guice.version>4.0-beta4</guice.version>
 		<guava.version>17.0.1</guava.version>
 		<jeromq.version>0.3.4</jeromq.version>
