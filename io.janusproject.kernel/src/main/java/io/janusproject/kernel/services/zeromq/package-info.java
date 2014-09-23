@@ -19,7 +19,8 @@
  */
 
 /**
- * ZeroMQ implementation of the network service.
+ * Implementation of services based on
+ * <a href="http://www.zeromq.org/">ZeroMQ</a>.
  */
 package io.janusproject.kernel.services.zeromq;
 

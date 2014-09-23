@@ -17,9 +17,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.janusproject.services.network;
+
+import java.util.UUID;
 
 /**
- * Classes and tools for implementing spaces in the Janus platform.
+ * Abstract implementation of an event encrypter.
+ *
+ * @author $Author: sgalland$
+ * @author $Author: ngaud$
+ * @version $FullVersion$
+ * @mavengroupid $GroupId$
+ * @mavenartifactid $ArtifactId$
  */
-package io.janusproject.kernel.space;
+public abstract class AbstractEventEncrypter implements EventEncrypter {
 
+	/** {@inheritDoc}
+	 */
+	@Override
+	public byte[] encryptUUID(UUID uuid) {
+		return NetworkUtil.toByteArray(uuid);
+	}
+
+}

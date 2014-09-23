@@ -19,7 +19,8 @@
  */
 
 /**
- * Classes and tools for implementing spaces in the Janus platform.
+ * Implementation of services based on
+ * the standard Java Development Kit.
  */
-package io.janusproject.kernel.space;
+package io.janusproject.kernel.services.jdk;
 

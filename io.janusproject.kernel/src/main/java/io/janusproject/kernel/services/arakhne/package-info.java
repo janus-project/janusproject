@@ -19,7 +19,8 @@
  */
 
 /**
- * Classes and tools for implementing spaces in the Janus platform.
+ * Implementation of services based on the
+ * <a href="http://www.arakhne.org/afc/">Arakhne Foundation Classes</a>.
  */
-package io.janusproject.kernel.space;
+package io.janusproject.kernel.services.arakhne;
 

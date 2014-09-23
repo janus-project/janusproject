@@ -19,7 +19,8 @@
  */
 
 /**
- * Classes and tools for implementing spaces in the Janus platform.
+ * Implementation of services based on
+ * <a href="https://code.google.com/p/google-gson/">Gson</a>.
  */
-package io.janusproject.kernel.space;
+package io.janusproject.kernel.services.gson;
 

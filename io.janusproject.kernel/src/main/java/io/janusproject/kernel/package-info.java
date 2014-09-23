@@ -19,7 +19,7 @@
  */
 
 /**
- * Janus micro-kernel.
+ * The Janus micro-kernel.
  */
 package io.janusproject.kernel;
 
