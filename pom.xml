@@ -602,6 +602,11 @@
 			<name>SARL Repository</name>
 			<url>http://maven.sarl.io/</url>
 		</repository>
+		<repository>
+			<id>io.janusproject.maven</id>
+			<name>Janus Repository</name>
+			<url>http://maven.janusproject.io/</url>
+		</repository>
 	</repositories>
 
 	<!-- ======================================= -->
