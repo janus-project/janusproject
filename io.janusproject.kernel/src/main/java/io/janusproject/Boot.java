@@ -19,9 +19,10 @@
  */
 package io.janusproject;
 import io.janusproject.kernel.Kernel;
-import io.janusproject.network.NetworkConfig;
+import io.janusproject.services.network.NetworkConfig;
 import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -40,6 +42,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.arakhne.afc.vmutil.locale.Locale;
+
+import com.google.inject.Module;
 /** This is the class that permits to boot the Janus platform.
  * <p>
  * This class provides the "main" function for the platform.
@@ -104,10 +108,10 @@ public final class Boot {
 	}
 	private static void parseCommandLineForVerbosity(CommandLine cmd) {
 		// The order of the options is important.
+		int verbose = LoggerCreator.toInt(JanusConfig.VERBOSE_LEVEL_VALUE);
 		if (cmd.hasOption('v') || cmd.hasOption('q') || cmd.hasOption('l')) {
 			@SuppressWarnings("unchecked")
 			Iterator<Option> optIterator = cmd.iterator();
-			int verbose = LoggerCreator.toInt(JanusConfig.VERBOSE_LEVEL_VALUE);
 			while (optIterator.hasNext()) {
 				Option opt = optIterator.next();
 				switch(opt.getOpt()) {
@@ -126,6 +130,13 @@ public final class Boot {
 			System.setProperty(
 					JanusConfig.VERBOSE_LEVEL_NAME,
 					Integer.toString(verbose));
+		}
+
+		// Show the Janus logo?
+		if (cmd.hasOption("nologo") || verbose == 0) { //$NON-NLS-1$
+			System.setProperty(
+					JanusConfig.JANUS_LOGO_SHOW_NAME,
+					Boolean.FALSE.toString());
 		}
 	}
 	/** Parse the command line.
@@ -169,52 +180,108 @@ public final class Boot {
 			throw new Error();
 		}
 	}
+
+	/** Show an error message, and exit.
+	 *
+	 * @param message - the description of the error.
+	 * @param e - the cause of the error.
+	 */
+	protected static void showError(String message, Throwable e) {
+		if (message != null && !message.isEmpty()) {
+			//CHECKSTYLE:OFF
+			System.err.println(message);
+			//CHECKSTYLE:ON
+		}
+		if (e != null) {
+			//CHECKSTYLE:OFF
+			e.printStackTrace();
+			//CHECKSTYLE:ON
+		}
+		showHelp();
+	}
+
+	private static Class<? extends Agent> loadAgentClass(String fullyQualifiedName) {
+		Class<?> type;
+		try {
+			type = Class.forName(fullyQualifiedName);
+		} catch (Exception e) {
+			showError(
+					Locale.getString(
+							"INVALID_AGENT_QUALIFIED_NAME", //$NON-NLS-1$
+							fullyQualifiedName,
+							System.getProperty("java.class.path")), //$NON-NLS-1$
+					null);
+			return null;
+		}
+		// The following test is needed because the
+		// cast to Class<? extends Agent> is not checking
+		// the Agent type (it is a generic type, not
+		// tested at runtime).
+		if (Agent.class.isAssignableFrom(type)) {
+			return type.asSubclass(Agent.class);
+		}
+
+		showError(
+			Locale.getString("INVALID_AGENT_TYPE", //$NON-NLS-1$
+				 fullyQualifiedName),
+			null);
+		return null;
+	}
+
 	/** Main function that is parsing the command line and launching
 	 * the first agent.
 	 *
 	 * @param args - command line arguments
-	 * @see #startJanus(Class, Object...)
+	 * @see #startJanus(Class, Class, Object...)
 	 */
-	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		try {
 			List<URL> propertyFiles = new ArrayList<>();
-			String[] freeArgs = parseCommandLine(args, propertyFiles);
-			String agentToLaunch = freeArgs[0];
-			showJanusLogo();
-			Class<?> agent = Class.forName(agentToLaunch);
-			// The following test is needed because the
-			// cast to Class<? extends Agent> is not checking
-			// the Agent type (it is a generic type, not
-			// tested at runtime).
-			if (Agent.class.isAssignableFrom(agent)) {
-				// Load property files
-				Properties systemProperties = System.getProperties();
-				for (URL url : propertyFiles) {
-					try (InputStream stream = url.openStream()) {
-						systemProperties.load(stream);
-					}
-				}
-				// Set the boot agent classname
-				System.setProperty(JanusConfig.BOOT_AGENT, agent.getCanonicalName());
-				//CHECKSTYLE:OFF
-				System.out.println(Locale.getString("LAUNCHING_AGENT", agentToLaunch)); //$NON-NLS-1$
-				//CHECKSTYLE:ON
-				startJanus(
-						(Class<? extends Agent>) agent,
-						Arrays.copyOfRange(
-								freeArgs,
-								1, freeArgs.length,
-								Object[].class));
-			} else {
-				throw new ClassCastException(
-						Locale.getString("INVALID_AGENT_TYPE", agentToLaunch)); //$NON-NLS-1$
+			Object[] freeArgs = parseCommandLine(args, propertyFiles);
+			if (JanusConfig.getSystemPropertyAsBoolean(
+					JanusConfig.JANUS_LOGO_SHOW_NAME,
+					JanusConfig.JANUS_LOGO_SHOW)) {
+				showJanusLogo();
 			}
-		} catch (IOException | ClassNotFoundException e) {
-			//CHECKSTYLE:OFF
-			e.printStackTrace();
-			//CHECKSTYLE:ON
-			showHelp();
+			if (freeArgs.length == 0) {
+				showError(
+						Locale.getString("NO_AGENT_QUALIFIED_NAME"), //$NON-NLS-1$
+						null);
+			}
+			String agentToLaunch = freeArgs[0].toString();
+			freeArgs = Arrays.copyOfRange(
+					freeArgs,
+					1, freeArgs.length,
+					String[].class);
+			// Load the agent class
+			Class<? extends Agent> agent = loadAgentClass(agentToLaunch);
+			assert (agent != null);
+			// Load property files
+			Properties systemProperties = System.getProperties();
+			for (URL url : propertyFiles) {
+				try (InputStream stream = url.openStream()) {
+					systemProperties.load(stream);
+				}
+			}
+			// Set the boot agent classname
+			System.setProperty(JanusConfig.BOOT_AGENT, agent.getCanonicalName());
+
+			// Get the start-up injection module
+			Class<? extends Module> startupModule = JanusConfig.getSystemPropertyAsClass(
+					Module.class, JanusConfig.INJECTION_MODULE_NAME,
+					JanusConfig.INJECTION_MODULE_NAME_VALUE);
+
+			startJanus(
+					startupModule,
+					(Class<? extends Agent>) agent,
+					freeArgs);
+		} catch (Exception e) {
+			showError(
+					Locale.getString(
+							"LAUNCHING_ERROR", //$NON-NLS-1$
+							e.getLocalizedMessage()),
+					e);
+			return;
 		}
 	}
 	/** Replies the command line options supported by this boot class.
@@ -224,30 +291,42 @@ public final class Boot {
 	public static Options getOptions() {
 		Option opt;
 		Options options = new Options();
-		options.addOption("h", "help", false, //$NON-NLS-1$//$NON-NLS-2$
-				Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$
-		options.addOption("f", "file", true,  //$NON-NLS-1$//$NON-NLS-2$
-				Locale.getString("CLI_HELP_F"));  //$NON-NLS-1$
-		options.addOption("o", "offline", false,  //$NON-NLS-1$//$NON-NLS-2$
-				Locale.getString("CLI_HELP_O", JanusConfig.OFFLINE));  //$NON-NLS-1$
+
 		options.addOption("B", "bootid", false, //$NON-NLS-1$//$NON-NLS-2$
 				Locale.getString("CLI_HELP_B",  //$NON-NLS-1$
 						JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME,
 						JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME));
+
+		options.addOption("f", "file", true,  //$NON-NLS-1$//$NON-NLS-2$
+				Locale.getString("CLI_HELP_F"));  //$NON-NLS-1$
+
+		options.addOption("h", "help", false, //$NON-NLS-1$//$NON-NLS-2$
+				Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$
+
+		options.addOption("nologo", false,  //$NON-NLS-1$
+				Locale.getString("CLI_HELP_NOLOGO"));  //$NON-NLS-1$
+
+		options.addOption("o", "offline", false,  //$NON-NLS-1$//$NON-NLS-2$
+				Locale.getString("CLI_HELP_O", JanusConfig.OFFLINE));  //$NON-NLS-1$
+
+		options.addOption("q", "quiet", false, //$NON-NLS-1$//$NON-NLS-2$
+				Locale.getString("CLI_HELP_Q"));  //$NON-NLS-1$
+
 		options.addOption("R", "randomid", false, //$NON-NLS-1$//$NON-NLS-2$
 				Locale.getString("CLI_HELP_R",  //$NON-NLS-1$
 						JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME,
 						JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME));
+
+		options.addOption("s", "showdefaults", false, //$NON-NLS-1$//$NON-NLS-2$
+				Locale.getString("CLI_HELP_S"));  //$NON-NLS-1$
+
+		options.addOption("v", "verbose", false, //$NON-NLS-1$//$NON-NLS-2$
+				Locale.getString("CLI_HELP_V")); //$NON-NLS-1$
+
 		options.addOption("W", "worldid", false, //$NON-NLS-1$//$NON-NLS-2$
 				Locale.getString("CLI_HELP_W", //$NON-NLS-1$
 						JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME,
 						JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME));
-		options.addOption("q", "quiet", false, //$NON-NLS-1$//$NON-NLS-2$
-				Locale.getString("CLI_HELP_Q"));  //$NON-NLS-1$
-		options.addOption("v", "verbose", false, //$NON-NLS-1$//$NON-NLS-2$
-				Locale.getString("CLI_HELP_V")); //$NON-NLS-1$
-		options.addOption("s", "showdefaults", false, //$NON-NLS-1$//$NON-NLS-2$
-				Locale.getString("CLI_HELP_S"));  //$NON-NLS-1$
 		StringBuilder b = new StringBuilder();
 		int l = 0;
 		for (String logLevel : LoggerCreator.getLevelStrings()) {
@@ -261,7 +340,7 @@ public final class Boot {
 			++l;
 		}
 		opt = new Option("l", "log", true, Locale.getString("CLI_HELP_L",  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					JanusConfig.VERBOSE_LEVEL_VALUE, b));
+				JanusConfig.VERBOSE_LEVEL_VALUE, b));
 		opt.setArgs(1);
 		options.addOption(opt);
 		opt = new Option("D", true, Locale.getString("CLI_HELP_D"));  //$NON-NLS-1$//$NON-NLS-2$
@@ -279,10 +358,12 @@ public final class Boot {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(
 				Boot.class.getName()
-				+ " [OPTIONS] <agent_classname>", //$NON-NLS-1$
+				+ " " //$NON-NLS-1$
+				+ Locale.getString(Boot.class, "CLI_PARAM_SYNOPTIC"), //$NON-NLS-1$
 				getOptions());
 		System.exit(ERROR_EXIT_CODE);
 	}
+
 	/** Show the default values of the system properties.
 	 * This function never returns.
 	 */
@@ -299,6 +380,7 @@ public final class Boot {
 		}
 		System.exit(ERROR_EXIT_CODE);
 	}
+
 	/** Show the heading logo of the Janus platform.
 	 */
 	public static void showJanusLogo() {
@@ -306,6 +388,7 @@ public final class Boot {
 		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
 		//CHECKSTYLE:ON
 	}
+
 	/** Launch the first agent of the Janus kernel.
 	 * <p>
 	 * Thus function does not parse the command line.
@@ -313,12 +396,24 @@ public final class Boot {
 	 * When this function is called, it is assumed that all the
 	 * system's properties are correctly set.
 	 *
+	 * @param platformModule - type of the injection module to use for initializing the platform.
 	 * @param agentCls - type of the first agent to launch.
 	 * @param params - parameters to pass to the agent as its initliazation parameters.
+	 * @throws Exception - if it is impossible to start the platform.
 	 * @see #main(String[])
 	 */
-	public static void startJanus(Class<? extends Agent> agentCls, Object... params) {
-		Kernel k = Kernel.create(new JanusDefaultModule());
+	public static void startJanus(
+			Class<? extends Module> platformModule,
+			Class<? extends Agent> agentCls,
+			Object... params) throws Exception {
+		assert (platformModule != null) : "No platform injection module"; //$NON-NLS-1$
+		Kernel k = Kernel.create(platformModule.newInstance());
+		if (LoggerCreator.getLoggingLevelFromProperties().intValue() > 0) {
+			//CHECKSTYLE:OFF
+			System.out.println(Locale.getString("LAUNCHING_AGENT", agentCls.getName())); //$NON-NLS-1$
+			//CHECKSTYLE:ON
+		}
 		k.spawn(agentCls, params);
 	}
+
 }

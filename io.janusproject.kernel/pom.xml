@@ -28,11 +28,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.google.inject.extensions</groupId>
 			<artifactId>guice-multibindings</artifactId>
 		</dependency>
@@ -104,6 +99,15 @@
 						<manifest>
 							<mainClass>io.janusproject.Boot</mainClass>
 						</manifest>
+						<manifestSections>
+							<manifestSection>
+								<name>SARL-Runtime-Environment</name>
+								<manifestEntries>
+									<SARL-Spec-Version>${sarl.spec.version}</SARL-Spec-Version>
+									<SRE-Name>${project.name}</SRE-Name>
+								</manifestEntries>
+							</manifestSection>
+						</manifestSections>
 					</archive>
 				</configuration>
 				<executions>

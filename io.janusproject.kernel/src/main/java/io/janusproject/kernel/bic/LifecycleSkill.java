@@ -19,8 +19,8 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.kernel.executor.ChuckNorrisException;
-import io.janusproject.services.agentplatform.SpawnService;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.spawn.SpawnService;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
@@ -56,17 +56,22 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 	@Override
 	public UUID spawnInContext(Class<? extends Agent> aAgent, AgentContext context, Object... params) {
-		return this.spawnService.spawn(context, aAgent, params);
+		return this.spawnService.spawn(context, null, aAgent, params);
+	}
+
+	@Override
+	public UUID spawnInContextWithID(Class<? extends Agent> agentClass,
+			UUID agentID, AgentContext context, Object... params) {
+		return this.spawnService.spawn(context, agentID, agentClass, params);
 	}
 
 	@Override
 	public void killMe() {
-		try {
-			this.spawnService.killAgent(getOwner().getID());
-			throw new ChuckNorrisException();
-		} catch (io.janusproject.services.agentplatform.SpawnService.AgentKillException e) {
-			throw new AgentKillException(e);
-		}
+		// The agent should be killed by a specific asynchronous event.
+		// This event is supported by the internal event bus implementation.
+		InternalEventBusCapacity busCapacity = getSkill(InternalEventBusCapacity.class);
+		busCapacity.selfEvent(new AsynchronousAgentKillingEvent());
+		throw new ChuckNorrisException();
 	}
 
 	/** This runtie exception is thrown when an agent cannot be killed.
@@ -83,7 +88,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 		/**
 		 * @param e - cause
 		 */
-		AgentKillException(io.janusproject.services.agentplatform.SpawnService.AgentKillException e) {
+		AgentKillException(io.janusproject.services.spawn.SpawnService.AgentKillException e) {
 			super(e.getMessage(), e);
 		}
 
@@ -92,7 +97,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 		 * @return the agent.
 		 */
 		public UUID getAgent() {
-			return ((io.janusproject.services.agentplatform.SpawnService.AgentKillException) getCause()).getAgent();
+			return ((io.janusproject.services.spawn.SpawnService.AgentKillException) getCause()).getAgent();
 		}
 
 	}

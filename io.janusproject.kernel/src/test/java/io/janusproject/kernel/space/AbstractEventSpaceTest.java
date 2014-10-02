@@ -19,9 +19,10 @@
  */
 package io.janusproject.kernel.space;
 
-import io.janusproject.repository.DistributedDataStructureFactory;
-import io.janusproject.services.agentplatform.ExecutorService;
-import io.janusproject.services.agentplatform.NetworkService;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.testutils.MapMock;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -40,6 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -58,7 +60,7 @@ import org.mockito.stubbing.Answer;
 public class AbstractEventSpaceTest extends Assert {
 
 	private UUID agentId;
-	private DistributedDataStructureFactory factory;
+	private DistributedDataStructureService service;
 	private SpaceID spaceId;
 	private Address address;
 	private EventListener listener;
@@ -73,7 +75,8 @@ public class AbstractEventSpaceTest extends Assert {
 	public void setUp() {
 		this.agentId = UUID.randomUUID();
 		
-		this.factory = Mockito.mock(DistributedDataStructureFactory.class);
+		this.service = Mockito.mock(DistributedDataStructureService.class);
+		Mockito.when(this.service.getMap(Matchers.anyString())).thenReturn(new MapMock<>());
 		
 		this.spaceId = new SpaceID(
 				UUID.randomUUID(),
@@ -82,7 +85,7 @@ public class AbstractEventSpaceTest extends Assert {
 		
 		this.address = new Address(this.spaceId, this.agentId);
 		
-		this.space = new AbstractEventSpace(this.spaceId, this.factory) {
+		this.space = new AbstractEventSpace(this.spaceId, this.service) {
 			//
 		};
 
@@ -109,7 +112,7 @@ public class AbstractEventSpaceTest extends Assert {
 		this.space = null;
 		this.address = null;
 		this.spaceId = null;
-		this.factory = null;
+		this.service = null;
 		this.listener = null;
 	}
 

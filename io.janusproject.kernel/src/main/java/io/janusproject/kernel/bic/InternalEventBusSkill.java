@@ -19,8 +19,10 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.services.agentplatform.LogService;
-import io.sarl.core.DefaultContextInteractions;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.services.spawn.SpawnService.AgentKillException;
+import io.sarl.core.AgentSpawned;
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
 import io.sarl.lang.core.Address;
@@ -71,6 +73,9 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	@Inject
 	private LogService logger;
 
+	@Inject
+	private SpawnService spawnService;
+
 	/** Address of the agent in the inner space.
 	 */
 	private final Address agentAddressInInnerDefaultSpace;
@@ -98,6 +103,11 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		return super.attributesToString()
 				+ ", state = " + this.state //$NON-NLS-1$
 				+ ", addressInDefaultspace = " + this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
+	}
+
+	@Override
+	public OwnerState getOwnerState() {
+		return this.state.get();
 	}
 
 	@Override
@@ -143,43 +153,34 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		}
 	}
 
-	/**
-	 * Internal event dispatching. This methods post the event in the internal
-	 * eventbus without modifying it (i.e. as is)
-	 *
-	 * This method is called when: - A behavior wakes other behaviors and the
-	 * event is returned from the inner default Space. - The
-	 * {@link DefaultContextInteractions} receives an event.
-	 *
-	 * Do not call directly
-	 *
-	 * @param event
-	 */
-	private synchronized void internalReceiveEvent(Event event) {
-		this.eventBus.post(event);
-	}
-
 	@Override
 	public synchronized void selfEvent(Event event) {
+		// Ensure that the event source is the agent itself!
 		event.setSource(getInnerDefaultSpaceAddress());
+		// If the event must be fired only by the
+		// agent itself, it is treated in this function.
+		// Otherwise, it is given to the asynchronous
+		// listener.
 		if (event instanceof Initialize) {
 			//Immediate synchronous dispatching of Initialize event
 			this.eventBus.fire(event);
 			this.state.set(OwnerState.RUNNING);
-			this.agentAsEventListener.agentInitialized();
 		} else if (event instanceof Destroy) {
 			//Immediate synchronous dispatching of Destroy event
-			this.eventBus.fire(event);
 			this.state.set(OwnerState.DESTROYED);
+			this.eventBus.fire(event);
+		} else if (event instanceof AsynchronousAgentKillingEvent) {
+			//Asynchronous kill of the event.
+			this.agentAsEventListener.killOrMarkAsKilled();
 		} else {
 			//Asynchronous parallel dispatching of this event
-			internalReceiveEvent(event);
+			this.agentAsEventListener.receiveEvent(event);
 		}
 		this.logger.debug("SELF_EVENT", event); //$NON-NLS-1$
 	}
 
 	@Override
-	public synchronized EventListener asEventListener() {
+	public final EventListener asEventListener() {
 		return this.agentAsEventListener;
 	}
 
@@ -192,11 +193,13 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	 */
 	private static class AgentEventListener implements EventListener {
 
-		private final Queue<Event> buffer = Queues.newConcurrentLinkedQueue();
+		private Queue<Event> buffer = Queues.newConcurrentLinkedQueue();
 
 		private final WeakReference<InternalEventBusSkill> skill;
 
 		private final UUID aid;
+
+		private boolean isKilled;
 
 		@SuppressWarnings("synthetic-access")
 		public AgentEventListener(InternalEventBusSkill skill) {
@@ -212,18 +215,34 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void receiveEvent(Event event) {
+			assert ((!(event instanceof Initialize))
+					&& (!(event instanceof Destroy))
+					&& (!(event instanceof AsynchronousAgentKillingEvent)))
+					: "Unsupported type of event: " + event; //$NON-NLS-1$
 			InternalEventBusSkill s = this.skill.get();
 			synchronized (s) {
+				if (event instanceof AgentSpawned
+					&& this.aid.equals(((AgentSpawned) event).agentID)) {
+					// This permits to ensure that the killing event
+					// is correctly treated when fired from the initialization
+					// handler.
+					fireEnqueuedEvents(s);
+					if (this.isKilled) {
+						killOwner(s);
+						return;
+					}
+				}
 				switch(s.state.get()) {
 				case NEW:
 					this.buffer.add(event);
 					break;
 				case RUNNING:
-					s.internalReceiveEvent(event);
+					fireEnqueuedEvents(s);
+					s.eventBus.post(event);
 					break;
 				case DESTROYED:
 					// Dropping messages since agent is dying
-					s.logger.warning(InternalEventBusSkill.class,
+					s.logger.debug(InternalEventBusSkill.class,
 									"EVENT_DROP_WARNING", event); //$NON-NLS-1$
 					break;
 				default:
@@ -233,25 +252,37 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		}
 
 		@SuppressWarnings("synthetic-access")
-		void agentInitialized() {
-			InternalEventBusSkill s = this.skill.get();
-			synchronized (s) {
-				for (Event evt : this.buffer) {
-					s.internalReceiveEvent(evt);
+		private void fireEnqueuedEvents(InternalEventBusSkill s) {
+			Queue<Event> q = this.buffer;
+			if (q != null && !q.isEmpty()) {
+				this.buffer = null;
+				for (Event evt : q) {
+					s.eventBus.post(evt);
 				}
 			}
 		}
 
-	}
+		@SuppressWarnings("synthetic-access")
+		private void killOwner(InternalEventBusSkill s) {
+			try {
+				s.spawnService.killAgent(this.aid);
+			} catch (AgentKillException e) {
+				s.logger.error(InternalEventBusSkill.class,
+						"CANNOT_KILL_AGENT", this.aid, e); //$NON-NLS-1$
+			}
+		}
 
-	/**
-	 * @author $Author: sgalland$
-	 * @version $FullVersion$
-	 * @mavengroupid $GroupId$
-	 * @mavenartifactid $ArtifactId$
-	 */
-	private static enum OwnerState {
-		NEW, RUNNING, DESTROYED
+		@SuppressWarnings("synthetic-access")
+		void killOrMarkAsKilled() {
+			InternalEventBusSkill s = this.skill.get();
+			synchronized (s) {
+				this.isKilled = true;
+				if (s.state.get() != OwnerState.NEW) {
+					killOwner(s);
+				}
+			}
+		}
+
 	}
 
 }

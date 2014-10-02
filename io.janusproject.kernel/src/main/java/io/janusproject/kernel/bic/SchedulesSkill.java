@@ -19,9 +19,9 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.kernel.executor.JanusScheduledFutureTask;
-import io.janusproject.services.agentplatform.ExecutorService;
-import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.executor.JanusScheduledFutureTask;
+import io.janusproject.services.logging.LogService;
 import io.sarl.core.AgentTask;
 import io.sarl.core.Schedules;
 import io.sarl.lang.core.Agent;
@@ -112,12 +112,15 @@ class SchedulesSkill extends Skill implements Schedules {
 				// Ignore the cancelation of the future.
 				// It is assumed that a ChuckNorrisException will be thrown later.
 				this.logger.fineInfo(
+						SchedulesSkill.class,
 						"SKIP_CANCELED_TASK_ON_CURRENT_THREAD", //$NON-NLS-1$
 						futureDescription.getKey(),
 						future);
 			} else {
 				future.cancel(true);
-				this.logger.fineInfo("CANCELED_TASK", futureDescription.getKey(), future); //$NON-NLS-1$
+				this.logger.fineInfo(
+						SchedulesSkill.class,
+						"CANCELED_TASK", futureDescription.getKey(), future); //$NON-NLS-1$
 			}
 		}
 		this.futures.clear();

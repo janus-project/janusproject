@@ -19,7 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
-import io.janusproject.services.agentplatform.LogService;
+import io.janusproject.services.logging.LogService;
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
 import io.sarl.lang.core.Address;
@@ -128,7 +128,17 @@ public class InternalEventBusSkillTest extends Assert {
 	}
 
 	@Test
-	public void selfEvent_other() {
+	public void selfEvent_other_notinitialized() {
+		Event event = Mockito.mock(Event.class);
+		this.skill.selfEvent(event);
+		Mockito.verifyZeroInteractions(this.eventBus);
+	}
+
+	@Test
+	public void selfEvent_other_initialized() {
+		Initialize initEvent = Mockito.mock(Initialize.class);
+		this.skill.selfEvent(initEvent);
+		//
 		Event event = Mockito.mock(Event.class);
 		this.skill.selfEvent(event);
 		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
