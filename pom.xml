@@ -591,25 +591,6 @@
 	</profiles>
 
 	<!-- ======================================= -->
-	<!-- ==== Third-Party Repositories === -->
-	<!-- ==== Should be removed when all === -->
-	<!-- ==== dependencies are available on === -->
-	<!-- ==== central === -->
-	<!-- ======================================= -->
-	<repositories>
-		<repository>
-			<id>io.sarl.maven</id>
-			<name>SARL Repository</name>
-			<url>http://maven.sarl.io/</url>
-		</repository>
-		<repository>
-			<id>io.janusproject.maven</id>
-			<name>Janus Repository</name>
-			<url>http://maven.janusproject.io/</url>
-		</repository>
-	</repositories>
-
-	<!-- ======================================= -->
 	<!-- ==== Organization Information === -->
 	<!-- ======================================= -->
 
