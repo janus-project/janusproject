@@ -30,9 +30,12 @@ import io.sarl.lang.core.SpaceSpecification;
 import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.util.Collections3;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -157,8 +160,19 @@ class SpaceRepository {
 		this.spaces.put(id, space);
 		this.spacesBySpec.put(id.getSpaceSpecification(), id);
 		if (isLocalCreation) {
-			this.spaceIDs.putIfAbsent(id,
-					(creationParams != null && creationParams.length > 0) ? creationParams : NO_PARAMETERS);
+			Object[] sharedParams = NO_PARAMETERS;
+			if (creationParams != null) {
+				List<Object> serializableParameters = new ArrayList<>(creationParams.length);
+				for (Object creationParameter : creationParams) {
+					if (creationParameter instanceof Serializable) {
+						serializableParameters.add(creationParameter);
+					}
+				}
+				if (!serializableParameters.isEmpty()) {
+					sharedParams = serializableParameters.toArray();
+				}
+			}
+			this.spaceIDs.putIfAbsent(id, sharedParams);
 		}
 		fireSpaceAdded(space, isLocalCreation);
 		return space;
