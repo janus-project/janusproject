@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import com.google.common.eventbus.AnnotationModule;
 import com.google.common.eventbus.AsyncSyncEventBus;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.common.util.concurrent.Service;
@@ -67,9 +66,6 @@ public class MandatoryKernelModule extends AbstractModule {
 		requireBinding(Key.get(UUID.class, Names.named(JanusConfig.DEFAULT_SPACE_ID_NAME)));
 		requireBinding(Logger.class);
 
-		// Guava
-		install(new AnnotationModule(Percept.class));
-
 		// Built-in Capacities
 		bind(BuiltinCapacitiesProvider.class).to(StandardBuiltinCapacitiesProvider.class).in(Singleton.class);
 
@@ -97,7 +93,7 @@ public class MandatoryKernelModule extends AbstractModule {
 			Injector injector,
 			java.util.concurrent.ExecutorService service,
 			SubscriberExceptionHandler exceptionHandler) {
-		AsyncSyncEventBus aeb = new AsyncSyncEventBus(service, exceptionHandler);
+		AsyncSyncEventBus aeb = new AsyncSyncEventBus(service, exceptionHandler,Percept.class);
 		// to be able to inject the SubscriberFindingStrategy
 		injector.injectMembers(aeb);
 		return aeb;
