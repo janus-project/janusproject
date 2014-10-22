@@ -93,7 +93,7 @@ public class MandatoryKernelModule extends AbstractModule {
 			Injector injector,
 			java.util.concurrent.ExecutorService service,
 			SubscriberExceptionHandler exceptionHandler) {
-		AsyncSyncEventBus aeb = new AsyncSyncEventBus(service, exceptionHandler,Percept.class);
+		AsyncSyncEventBus aeb = new AsyncSyncEventBus(service, exceptionHandler, Percept.class);
 		// to be able to inject the SubscriberFindingStrategy
 		injector.injectMembers(aeb);
 		return aeb;
