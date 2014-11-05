@@ -455,7 +455,12 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 
 		@Override
 		public <T extends Agent> T newInstance(Class<T> type, UUID agentID, UUID contextID) throws Exception {
-			Agent agent = type.getConstructor(UUID.class).newInstance(contextID);
+			Agent agent;
+			if (agentID == null) {
+				agent = type.getConstructor(UUID.class).newInstance(contextID);
+			} else {
+				agent = type.getConstructor(UUID.class, UUID.class).newInstance(contextID, agentID);
+			}
 			assert (agent != null);
 			this.injector.injectMembers(agent);
 			return type.cast(agent);
