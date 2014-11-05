@@ -41,7 +41,7 @@ import org.arakhne.afc.vmutil.locale.Locale;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 
 /** Skill that permits to execute tasks with an executor service.
@@ -252,7 +252,7 @@ class SchedulesSkill extends Skill implements Schedules {
 		 */
 		@Override
 		public String toString() {
-			return Objects.toStringHelper(this).add(
+			return MoreObjects.toStringHelper(this).add(
 					"name", this.agentTaskRef.get().getName()) //$NON-NLS-1$
 					.add("agent", getOwner().getID()).toString(); //$NON-NLS-1$
 		}
