@@ -418,7 +418,7 @@ public final class Boot {
 					JanusConfig.INJECTION_MODULE_NAME_VALUE);
 		}
 		assert (startupModule != null) : "No platform injection module"; //$NON-NLS-1$
-		Kernel k = Kernel.create(platformModule.newInstance());
+		Kernel k = Kernel.create(startupModule.newInstance());
 		if (LoggerCreator.getLoggingLevelFromProperties().intValue() > 0) {
 			//CHECKSTYLE:OFF
 			System.out.println(Locale.getString("LAUNCHING_AGENT", agentCls.getName())); //$NON-NLS-1$
