@@ -68,6 +68,7 @@ public class BootModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		// Custom logger
+		LoggerCreator.useJanusMessageFormat();
 		bindListener(Matchers.any(), new LoggerMemberListener());
 
 		// Bind the system properties.

@@ -30,6 +30,7 @@ import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.Initialize;
 import io.sarl.core.InnerContextAccess;
 import io.sarl.core.Lifecycle;
+import io.sarl.core.Logging;
 import io.sarl.core.Schedules;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
@@ -94,6 +95,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 				agent,
 				this.contextRepository.getContext(agent.getParentID()));
 		SchedulesSkill scheduleSkill = new SchedulesSkill(agent);
+		LoggingSkill loggingSkill = new LoggingSkill(agent);
 
 		this.injector.injectMembers(eventBusSkill);
 		this.injector.injectMembers(innerContextSkill);
@@ -102,6 +104,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		this.injector.injectMembers(externalContextSkill);
 		this.injector.injectMembers(interactionSkill);
 		this.injector.injectMembers(scheduleSkill);
+		this.injector.injectMembers(loggingSkill);
 
 		result.put(MicroKernelCapacity.class, microKernelSkill);
 		result.put(InternalEventBusCapacity.class, eventBusSkill);
@@ -111,6 +114,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		result.put(ExternalContextAccess.class, externalContextSkill);
 		result.put(DefaultContextInteractions.class, interactionSkill);
 		result.put(Schedules.class, scheduleSkill);
+		result.put(Logging.class, loggingSkill);
 
 		this.spawnService.addSpawnServiceListener(agent.getID(),
 				new AgentLifeCycleSupport(
@@ -123,7 +127,8 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 						lifecycleSkill,
 						externalContextSkill,
 						interactionSkill,
-						scheduleSkill));
+						scheduleSkill,
+						loggingSkill));
 
 		// Test if all the BICs are installed.
 		assert (result.get(Behaviors.class) != null);
@@ -134,6 +139,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		assert (result.get(Lifecycle.class) != null);
 		assert (result.get(Schedules.class) != null);
 		assert (result.get(MicroKernelCapacity.class) != null);
+		assert (result.get(Logging.class) != null);
 
 		return result;
 	}

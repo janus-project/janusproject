@@ -34,10 +34,32 @@ import java.util.logging.Logger;
  */
 public final class LoggerCreator {
 
+	private static final String FORMAT_PROPERTY_KEY = "java.util.logging.SimpleFormatter.format"; //$NON-NLS-1$
+
+	/** The parameters for the format string are: <ul>
+	 * <li><code>%1</code>: the date,</li>
+	 * <li><code>%2</code>: the name of the calling function,</li>
+	 * <li><code>%3</code>: the name of the logger,</li>
+	 * <li><code>%4</code>: the logging level,</li>
+	 * <li><code>%5</code>: the message, and</li>
+	 * <li><code>%6</code>: the throwable.</li>
+	 * </ul>
+	 */
+	private static final String JANUS_FORMAT = "%1$tb %1$td, %1$tY %1$tl:%1$tM:%1$tS %1$Tp %3$s%n%4$s: %5$s%6$s%n"; //$NON-NLS-1$
+
 	private static Level levelFromProperties;
 
 	private LoggerCreator() {
 		//
+	}
+
+	/** Change the configuration of the root logger for using the Janus format for the messages.
+	 */
+	public static void useJanusMessageFormat() {
+		String format = System.getProperty(FORMAT_PROPERTY_KEY, null);
+		if (format == null || format.isEmpty()) {
+			System.setProperty(FORMAT_PROPERTY_KEY, JANUS_FORMAT);
+		}
 	}
 
 	/** Create a logger with the given name.
@@ -50,6 +72,22 @@ public final class LoggerCreator {
 	public static Logger createLogger(String name) {
 		Logger logger = Logger.getLogger(name);
 		logger.setLevel(getLoggingLevelFromProperties());
+		return logger;
+	}
+
+	/** Create a logger with the given name.
+	 * <p>
+	 * The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
+	 *
+	 * @param name - the name of the new logger.
+	 * @param parent - the parent logger.
+	 * @return the logger.
+	 */
+	public static Logger createLogger(String name, Logger parent) {
+		Logger logger = Logger.getLogger(name);
+		logger.setParent(parent);
+		logger.setUseParentHandlers(true);
+		logger.setLevel(parent.getLevel());
 		return logger;
 	}
 

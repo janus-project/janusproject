@@ -149,4 +149,13 @@ public class LoggerCreatorTest extends Assert {
 		assertSame(expectedLevel, logger.getLevel());
 	}
 	
+	@Test
+	public void createLoggerWithParent() {
+		Logger parent = LoggerCreator.createLogger("parent"); //$NON-NLS-1$
+		String name = UUID.randomUUID().toString();
+		Level expectedLevel = LoggerCreator.getLoggingLevelFromProperties();
+		Logger logger = LoggerCreator.createLogger(name, parent);
+		assertSame(expectedLevel, logger.getLevel());
+	}
+
 }

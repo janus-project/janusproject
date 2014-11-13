@@ -14,6 +14,8 @@
     <suppress checks="ReturnCount" files="LoggerCreator.java"/>
     <suppress checks="NPathComplexity" files="LoggerCreator.java"/>
     <suppress checks="CyclomaticComplexity" files="LoggerCreator.java"/>
+    
+    <suppress checks="MethodLength" files="StandardBuiltinCapacitiesProvider.java"/>
 
 </suppressions>
 
