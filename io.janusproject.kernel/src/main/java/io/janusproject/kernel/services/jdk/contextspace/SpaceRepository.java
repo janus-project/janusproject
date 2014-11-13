@@ -132,10 +132,9 @@ class SpaceRepository {
 		// Delete the spaces. If this function is called, it
 		// means that the spaces seems to have no more participant.
 		// The process cannot be done through hazelcast.
-		Iterator<SpaceID> iterator = this.spaceIDs.keySet().iterator();
-		while (iterator.hasNext()) {
-			SpaceID spaceId = iterator.next();
-			iterator.remove();
+		List<SpaceID> ids = new ArrayList<>(this.spaceIDs.keySet());
+		this.spaceIDs.clear();
+		for (SpaceID spaceId : ids) {
 			removeLocalSpaceDefinition(spaceId, true);
 		}
 	}
@@ -147,7 +146,7 @@ class SpaceRepository {
 					Object[] creationParams) {
 		S space;
 		assert (spaceID.getSpaceSpecification() == null || spaceID.getSpaceSpecification().equals(spec))
-			: "The specification type is invalid"; //$NON-NLS-1$
+		: "The specification type is invalid"; //$NON-NLS-1$
 		// Split the call to create() to let the JVM to create the "empty" array for creation parameters.
 		if (creationParams != null) {
 			space = this.injector.getInstance(spec).create(spaceID, creationParams);
@@ -204,6 +203,31 @@ class SpaceRepository {
 		}
 	}
 
+	/** Remove all the remote spaces.
+	 *
+	 * @param isLocalDestruction - indicates if the destruction is initiated by
+	 * the local kernel.
+	 */
+	protected synchronized void removeLocalSpaceDefinitions(boolean isLocalDestruction) {
+		if (!this.spaces.isEmpty()) {
+			List<Space> removedSpaces = new ArrayList<>(this.spaces.size());
+			Iterator<Entry<SpaceID, Space>> iterator = this.spaces.entrySet().iterator();
+			Space space;
+			SpaceID id;
+			while (iterator.hasNext()) {
+				Entry<SpaceID, Space> entry = iterator.next();
+				id = entry.getKey();
+				space = entry.getValue();
+				iterator.remove();
+				this.spacesBySpec.remove(id.getSpaceSpecification(), id);
+				removedSpaces.add(space);
+			}
+			for (Space s : removedSpaces) {
+				fireSpaceRemoved(s, isLocalDestruction);
+			}
+		}
+	}
+
 	/** Create a space.
 	 *
 	 * @param <S> - the type of the space to reply.
@@ -216,7 +240,7 @@ class SpaceRepository {
 	public synchronized <S extends io.sarl.lang.core.Space> S createSpace(
 			SpaceID spaceID,
 			Class<? extends SpaceSpecification<S>> spec,
-			Object... creationParams) {
+					Object... creationParams) {
 		S space = (S) this.spaces.get(spaceID);
 		if (space == null) {
 			space = createSpaceInstance(spec, spaceID, true, creationParams);
@@ -235,8 +259,8 @@ class SpaceRepository {
 	@SuppressWarnings("unchecked")
 	public synchronized <S extends io.sarl.lang.core.Space> S getOrCreateSpace(
 			Class<? extends SpaceSpecification<S>> spec,
-			SpaceID spaceID,
-			Object... creationParams) {
+					SpaceID spaceID,
+					Object... creationParams) {
 		Collection<SpaceID> ispaces = this.spacesBySpec.get(spec);
 		S firstSpace;
 		if (ispaces == null || ispaces.isEmpty()) {
@@ -354,6 +378,13 @@ class SpaceRepository {
 		@Override
 		public void entryUpdated(SpaceID key, Object[] value) {
 			//
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void mapCleared(boolean localClearing) {
+			removeLocalSpaceDefinitions(false);
 		}
 
 	}

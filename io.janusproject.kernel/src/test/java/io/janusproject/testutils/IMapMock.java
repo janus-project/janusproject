@@ -472,4 +472,25 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 		throw new UnsupportedOperationException();
 	}
 
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void evictAll() {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void loadAll(boolean arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void loadAll(Set<K> arg0, boolean arg1) {
+		throw new UnsupportedOperationException();
+	}
+
 }

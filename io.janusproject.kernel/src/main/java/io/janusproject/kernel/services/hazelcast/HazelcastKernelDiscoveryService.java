@@ -46,6 +46,7 @@ import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.MapEvent;
 import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
@@ -283,14 +284,6 @@ implements KernelDiscoveryService, AsyncStateService {
 			}
 		}
 
-		private void fireDisconnected(EntryEvent<URI, URI> event) {
-			URI newPeer = event.getValue();
-			assert (newPeer != null);
-			if (!newPeer.equals(getCurrentKernel())) {
-				fireKernelDisconnected(newPeer);
-			}
-		}
-
 		/** {@inheritDoc}
 		 */
 		@Override
@@ -310,6 +303,28 @@ implements KernelDiscoveryService, AsyncStateService {
 		@Override
 		public void entryEvicted(EntryEvent<URI, URI> event) {
 			fireDisconnected(event);
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void mapCleared(MapEvent event) {
+			throw new UnsupportedOperationException("this exception should never occur"); //$NON-NLS-1$
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void mapEvicted(MapEvent event) {
+			throw new UnsupportedOperationException("this exception should never occur"); //$NON-NLS-1$
+		}
+
+		private void fireDisconnected(EntryEvent<URI, URI> event) {
+			URI oldPeer = event.getValue();
+			assert (oldPeer != null);
+			if (!oldPeer.equals(getCurrentKernel())) {
+				fireKernelDisconnected(oldPeer);
+			}
 		}
 
 	}

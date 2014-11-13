@@ -54,4 +54,11 @@ public interface DMapListener<K, V> extends EventListener {
 	 */
 	void entryRemoved(K key, V value);
 
+	/** Invoked when the map was cleared.
+	 *
+	 * @param localClearing - indicates if the clear in local (<code>true</code>)
+	 * or for all the nodes on the network (<code>false</code>).
+	 */
+	void mapCleared(boolean localClearing);
+
 }

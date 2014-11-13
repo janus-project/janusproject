@@ -80,11 +80,6 @@ class LoggingSkill extends Skill implements Logging {
 	}
 
 	@Override
-	protected void uninstall() {
-		this.logger = null;
-	}
-
-	@Override
 	public void setLoggingName(String name) {
 		String n = name;
 		if (n == null || n.isEmpty()) {

@@ -30,6 +30,7 @@ import org.junit.Assert;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.Data;
 import com.hazelcast.nio.serialization.StreamSerializer;
 
 
@@ -201,6 +202,20 @@ abstract class AbstractSerializerTest extends Assert {
 		 */
 		@Override
 		public ByteOrder getByteOrder() {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void writeByteArray(byte[] arg0) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void writeData(Data arg0) throws IOException {
 			throw new UnsupportedOperationException();
 		}
 		
@@ -388,6 +403,20 @@ abstract class AbstractSerializerTest extends Assert {
 		 */
 		@Override
 		public ByteOrder getByteOrder() {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public byte[] readByteArray() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public Data readData() throws IOException {
 			throw new UnsupportedOperationException();
 		}
 		

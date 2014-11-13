@@ -92,7 +92,6 @@ public class LoggingSkillTest extends Assert {
 
 	@After
 	public void tearDown() throws Exception {
-		this.skill.uninstall();
 		this.skill = null;
 	}
 
@@ -105,7 +104,8 @@ public class LoggingSkillTest extends Assert {
 		this.skill.error(message);
 		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
 		assertSame(Level.SEVERE, argument1.getValue());
-		Mockito.verifyZeroInteractions(this.parentLogger);
+		Mockito.verify(this.parentLogger, Mockito.times(1)).getLevel();
+		Mockito.verifyNoMoreInteractions(this.parentLogger);
 	}
 
 	@Test
@@ -143,7 +143,8 @@ public class LoggingSkillTest extends Assert {
 		this.skill.error(message, ex);
 		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
 		assertSame(Level.SEVERE, argument1.getValue());
-		Mockito.verifyZeroInteractions(this.parentLogger);
+		Mockito.verify(this.parentLogger, Mockito.times(1)).getLevel();
+		Mockito.verifyNoMoreInteractions(this.parentLogger);
 	}
 
 	@Test
@@ -183,7 +184,8 @@ public class LoggingSkillTest extends Assert {
 		this.skill.warning(message);
 		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
 		assertSame(Level.WARNING, argument1.getValue());
-		Mockito.verifyZeroInteractions(this.parentLogger);
+		Mockito.verify(this.parentLogger, Mockito.times(1)).getLevel();
+		Mockito.verifyNoMoreInteractions(this.parentLogger);
 	}
 
 	@Test
@@ -221,7 +223,8 @@ public class LoggingSkillTest extends Assert {
 		this.skill.warning(message, ex);
 		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
 		assertSame(Level.WARNING, argument1.getValue());
-		Mockito.verifyZeroInteractions(this.parentLogger);
+		Mockito.verify(this.parentLogger, Mockito.times(1)).getLevel();
+		Mockito.verifyNoMoreInteractions(this.parentLogger);
 	}
 
 	@Test
@@ -261,7 +264,8 @@ public class LoggingSkillTest extends Assert {
 		this.skill.info(message);
 		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
 		assertSame(Level.INFO, argument1.getValue());
-		Mockito.verifyZeroInteractions(this.parentLogger);
+		Mockito.verify(this.parentLogger, Mockito.times(1)).getLevel();
+		Mockito.verifyNoMoreInteractions(this.parentLogger);
 	}
 
 	@Test
@@ -308,7 +312,8 @@ public class LoggingSkillTest extends Assert {
 		this.skill.debug(message);
 		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
 		assertSame(Level.CONFIG, argument1.getValue());
-		Mockito.verifyZeroInteractions(this.parentLogger);
+		Mockito.verify(this.parentLogger, Mockito.times(1)).getLevel();
+		Mockito.verifyNoMoreInteractions(this.parentLogger);
 	}
 
 	@Test

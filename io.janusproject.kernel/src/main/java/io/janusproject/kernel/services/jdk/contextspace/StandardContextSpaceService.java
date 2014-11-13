@@ -433,6 +433,13 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 			//
 		}
 
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void mapCleared(boolean localClearing) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 	/**

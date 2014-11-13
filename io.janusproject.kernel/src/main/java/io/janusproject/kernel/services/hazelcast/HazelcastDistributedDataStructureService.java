@@ -36,6 +36,7 @@ import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.MapEvent;
 import com.hazelcast.core.MultiMap;
 
 /**
@@ -351,6 +352,20 @@ implements DistributedDataStructureService {
 		@Override
 		public void entryUpdated(EntryEvent<K, V> event) {
 			this.dmapListener.entryUpdated(event.getKey(), event.getValue());
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void mapCleared(MapEvent event) {
+			this.dmapListener.mapCleared(true);
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void mapEvicted(MapEvent event) {
+			this.dmapListener.mapCleared(false);
 		}
 
 	}
