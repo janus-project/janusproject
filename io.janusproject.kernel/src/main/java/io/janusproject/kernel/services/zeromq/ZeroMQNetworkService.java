@@ -786,5 +786,5 @@ public class ZeroMQNetworkService extends AbstractNetworkingExecutionThreadServi
 		}
 
 	}
-	
+
 }
