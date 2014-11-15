@@ -696,10 +696,16 @@ public class ZeroMQNetworkService extends AbstractNetworkingExecutionThreadServi
 					}
 					if (!isUsed) {
 						// The space was not used to be connected to a remote host => put in a buffer.
-						ZeroMQNetworkService.this.bufferedSpaces.put(
-								space.getID(),
-								new BufferedSpace(space.getID(),
-								(NetworkEventReceivingListener) space));
+						if (space instanceof NetworkEventReceivingListener) {
+							ZeroMQNetworkService.this.bufferedSpaces.put(
+									space.getID(),
+									new BufferedSpace(space.getID(),
+											(NetworkEventReceivingListener) space));
+						} else {
+							ZeroMQNetworkService.this.logger.error(
+									ZeroMQNetworkService.class,
+									"NOT_DISTRIBUTABLE_SPACE", space); //$NON-NLS-1$
+						}
 					} else {
 						// The buffer was consumed by the "magicConnect"
 						ZeroMQNetworkService.this.bufferedSpaces.clear();
@@ -780,5 +786,5 @@ public class ZeroMQNetworkService extends AbstractNetworkingExecutionThreadServi
 		}
 
 	}
-
+	
 }
