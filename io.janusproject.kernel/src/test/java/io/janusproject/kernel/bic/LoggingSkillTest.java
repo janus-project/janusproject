@@ -79,6 +79,7 @@ public class LoggingSkillTest extends Assert {
 		this.owner = Mockito.spy(this.owner);
 		this.skill = new LoggingSkill(this.owner);
 		MockitoAnnotations.initMocks(this);
+		this.skill = Mockito.spy(this.skill);
 		//
 		Mockito.when(this.logService.getLogger()).thenReturn(this.parentLogger);
 		//
@@ -93,6 +94,12 @@ public class LoggingSkillTest extends Assert {
 	@After
 	public void tearDown() throws Exception {
 		this.skill = null;
+		this.logger = null;
+		this.owner = null;
+		this.handler = null;
+		this.logService = null;
+		this.parentLogger = null;
+		
 	}
 
 	@Test

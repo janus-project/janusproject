@@ -25,6 +25,7 @@ import io.sarl.core.Logging;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Skill;
 
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,9 +75,9 @@ class LoggingSkill extends Skill implements Logging {
 
 	@Override
 	protected void install() {
-		this.logger = LoggerCreator.createLogger(
-				Locale.getString(LoggingSkill.class, "AGENT_NAME", getOwner().getID()), //$NON-NLS-1$
-				this.logService.getLogger());
+		UUID agentId = getOwner().getID();
+		String loggerName = Locale.getString(LoggingSkill.class, "AGENT_NAME", agentId); //$NON-NLS-1$
+		this.logger = LoggerCreator.createLogger(loggerName, this.logService.getLogger());
 	}
 
 	@Override
