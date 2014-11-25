@@ -19,7 +19,6 @@
  */
 package io.janusproject.kernel.services.jdk.contextspace;
 
-import io.janusproject.kernel.services.jdk.contextspace.SpaceRepository;
 import io.janusproject.services.contextspace.SpaceRepositoryListener;
 import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
@@ -50,6 +49,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.Times;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.google.inject.Injector;
 
@@ -280,7 +281,7 @@ public class SpaceRepositoryTest extends Assert {
 		OpenEventSpace space2 = this.repository.createSpace(this.spaceID, OpenEventSpaceSpecification.class, this.params);
 		//
 		assertSame(this.space, space1);
-		assertSame(this.space, space2);
+		assertNull(space2);
 		ArgumentCaptor<SpaceID> argument1 = ArgumentCaptor.forClass(SpaceID.class);
 		ArgumentCaptor<Object[]> argument2 = ArgumentCaptor.forClass(Object[].class);
 		Mockito.verify(this.spaceSpecification, new Times(1)).create(argument1.capture(), argument2.capture());
@@ -295,11 +296,13 @@ public class SpaceRepositoryTest extends Assert {
 	}
 
 	@Test
-	public void getOrCreateSpace_singlecreation() {
+	public void getOrCreateSpaceWithSpec_singlecreation() {
 		baseInit();
 		//
-		OpenEventSpace space = this.repository.getOrCreateSpace(
-				OpenEventSpaceSpecification.class, this.spaceID, this.params);
+		OpenEventSpace space = this.repository.getOrCreateSpaceWithSpec(
+				this.spaceID,
+				OpenEventSpaceSpecification.class,
+				this.params);
 		//
 		assertSame(this.space, space);
 		ArgumentCaptor<SpaceID> argument1 = ArgumentCaptor.forClass(SpaceID.class);
@@ -317,13 +320,62 @@ public class SpaceRepositoryTest extends Assert {
 	}
 
 	@Test
-	public void getOrCreateSpace_doublecreation() {
+	public void getOrCreateSpaceWithSpec_doublecreation() {
 		baseInit();
 		//
-		OpenEventSpace space1 = this.repository.getOrCreateSpace(
-				OpenEventSpaceSpecification.class, this.spaceID, this.params);
-		OpenEventSpace space2 = this.repository.getOrCreateSpace(
-				OpenEventSpaceSpecification.class, this.spaceID, this.params);
+		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithSpec(
+				this.spaceID, OpenEventSpaceSpecification.class, this.params);
+		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithSpec(
+				this.spaceID, OpenEventSpaceSpecification.class, this.params);
+		//
+		assertSame(this.space, space1);
+		assertSame(this.space, space2);
+		ArgumentCaptor<SpaceID> argument1 = ArgumentCaptor.forClass(SpaceID.class);
+		ArgumentCaptor<Object[]> argument2 = ArgumentCaptor.forClass(Object[].class);
+		Mockito.verify(this.spaceSpecification, new Times(1)).create(argument1.capture(), argument2.capture());
+		assertSame(this.spaceID, argument1.getValue());
+		assertEquals("PARAM", argument2.getValue()); //$NON-NLS-1$
+		assertSame(this.space, this.repository.getSpace(this.spaceID));
+		//
+		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture(), argument4.capture());
+		assertSame(this.space, argument3.getValue());
+		assertTrue(argument4.getValue());
+	}
+
+	@Test
+	public void getOrCreateSpaceWithID_singlecreation() {
+		baseInit();
+		//
+		OpenEventSpace space = this.repository.getOrCreateSpaceWithID(
+				this.spaceID,
+				OpenEventSpaceSpecification.class,
+				this.params);
+		//
+		assertSame(this.space, space);
+		ArgumentCaptor<SpaceID> argument1 = ArgumentCaptor.forClass(SpaceID.class);
+		ArgumentCaptor<Object[]> argument2 = ArgumentCaptor.forClass(Object[].class);
+		Mockito.verify(this.spaceSpecification, new Times(1)).create(argument1.capture(), argument2.capture());
+		assertSame(this.spaceID, argument1.getValue());
+		assertEquals("PARAM", argument2.getValue()); //$NON-NLS-1$
+		assertSame(this.space, this.repository.getSpace(this.spaceID));
+		//
+		ArgumentCaptor<Space> argument3 = ArgumentCaptor.forClass(Space.class);
+		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
+		Mockito.verify(this.listener, new Times(1)).spaceCreated(argument3.capture(), argument4.capture());
+		assertSame(this.space, argument3.getValue());
+		assertTrue(argument4.getValue());
+	}
+
+	@Test
+	public void getOrCreateSpaceWithID_doublecreation() {
+		baseInit();
+		//
+		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithID(
+				this.spaceID, OpenEventSpaceSpecification.class, this.params);
+		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithID(
+				this.spaceID, OpenEventSpaceSpecification.class, this.params);
 		//
 		assertSame(this.space, space1);
 		assertSame(this.space, space2);
@@ -384,6 +436,123 @@ public class SpaceRepositoryTest extends Assert {
 		Mockito.verify(this.listener, new Times(1)).spaceDestroyed(argument.capture(), argument4.capture());
 		assertSame(this.space, argument.getValue());
 		assertTrue(argument4.getValue());
+	}
+
+	@Test
+	public void createSpace_bug92() {
+		initMocks();
+		//
+		final UUID contextID = UUID.randomUUID();
+		Mockito.when(this.spaceSpecification.create(Matchers.any(SpaceID.class))).thenAnswer(new Answer<Space>() {
+			@Override
+			public Space answer(InvocationOnMock invocation) throws Throwable {
+				Space sp = Mockito.mock(OpenEventSpace.class);
+				SpaceID spId = (SpaceID) invocation.getArguments()[0];
+				Mockito.when(sp.getID()).thenReturn(spId);
+				Mockito.when(sp.toString()).thenReturn(spId.toString());
+				return sp;
+			}
+		});
+		//
+		OpenEventSpace space1 = this.repository.createSpace(
+				new SpaceID(contextID,
+						UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		OpenEventSpace space2 = this.repository.createSpace(
+				new SpaceID(contextID,
+						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		OpenEventSpace space3 = this.repository.createSpace(
+				new SpaceID(contextID,
+						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		//
+		assertNotNull(space1);
+		assertNotNull(space2);
+		assertNull(space3);
+		assertNotSame(space1, space2);
+		assertNotEquals(space1.getID(), space2.getID());
+	}
+	
+	@Test
+	public void getOrCreateSpaceWithSpec_bug92() {
+		initMocks();
+		//
+		final UUID contextID = UUID.randomUUID();
+		Mockito.when(this.spaceSpecification.create(Matchers.any(SpaceID.class))).thenAnswer(new Answer<Space>() {
+			@Override
+			public Space answer(InvocationOnMock invocation) throws Throwable {
+				Space sp = Mockito.mock(OpenEventSpace.class);
+				SpaceID spId = (SpaceID) invocation.getArguments()[0];
+				Mockito.when(sp.getID()).thenReturn(spId);
+				Mockito.when(sp.toString()).thenReturn(spId.toString());
+				return sp;
+			}
+		});
+		//
+		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithSpec(
+				new SpaceID(contextID,
+						UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithSpec(
+				new SpaceID(contextID,
+						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		OpenEventSpace space3 = this.repository.getOrCreateSpaceWithSpec(
+				new SpaceID(contextID,
+						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		//
+		assertNotNull(space1);
+		assertNotNull(space2);
+		assertNotNull(space3);
+		assertSame(space1, space2);
+		assertSame(space2, space3);
+	}
+
+	@Test
+	public void getOrCreateSpaceWithID_bug92() {
+		initMocks();
+		//
+		final UUID contextID = UUID.randomUUID();
+		Mockito.when(this.spaceSpecification.create(Matchers.any(SpaceID.class))).thenAnswer(new Answer<Space>() {
+			@Override
+			public Space answer(InvocationOnMock invocation) throws Throwable {
+				Space sp = Mockito.mock(OpenEventSpace.class);
+				SpaceID spId = (SpaceID) invocation.getArguments()[0];
+				Mockito.when(sp.getID()).thenReturn(spId);
+				Mockito.when(sp.toString()).thenReturn(spId.toString());
+				return sp;
+			}
+		});
+		//
+		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithID(
+				new SpaceID(contextID,
+						UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithID(
+				new SpaceID(contextID,
+						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		OpenEventSpace space3 = this.repository.getOrCreateSpaceWithID(
+				new SpaceID(contextID,
+						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class),
+				OpenEventSpaceSpecification.class);
+		//
+		assertNotNull(space1);
+		assertNotNull(space2);
+		assertNotNull(space3);
+		assertNotSame(space1, space2);
+		assertSame(space2, space3);
 	}
 
 }

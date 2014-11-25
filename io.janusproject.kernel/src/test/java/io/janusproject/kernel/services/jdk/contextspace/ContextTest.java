@@ -70,14 +70,14 @@ public class ContextTest extends Assert {
 	private UUID contextId;
 	private UUID spaceId;
 	private Map<UUID,OpenEventSpace> spaces;
-	
+
 	private SpaceRepository spaceRepository;
-	
+
 	private Context context;
-	
+
 	private SpaceRepositoryListener spaceListener;
 	private SpaceRepositoryListener privateListener;
-	
+
 	@Before
 	public void setUp() {
 		this.contextId = UUID.randomUUID();
@@ -86,36 +86,54 @@ public class ContextTest extends Assert {
 		this.spaceListener = Mockito.mock(SpaceRepositoryListener.class);
 		this.spaceRepository = Mockito.mock(SpaceRepository.class);
 		Mockito.when(this.spaceRepository.createSpace(Matchers.any(SpaceID.class), Matchers.any(Class.class)))
-			.thenAnswer(new Answer<Space>() {
-				@Override
-				public Space answer(InvocationOnMock invocation)
-						throws Throwable {
-					OpenEventSpace space = Mockito.mock(OpenEventSpace.class);
-					Mockito.when(space.getID()).thenReturn((SpaceID)invocation.getArguments()[0]);
-					ContextTest.this.spaces.put(((SpaceID)invocation.getArguments()[0]).getID(), space);
-					assert(ContextTest.this.privateListener!=null);
-					ContextTest.this.privateListener.spaceCreated(space, true);
-					return space;
-				}
-			});
-		Mockito.when(this.spaceRepository.getOrCreateSpace(Matchers.any(Class.class), Matchers.any(SpaceID.class)))
-			.thenAnswer(new Answer<Space>() {
-				@Override
-				public Space answer(InvocationOnMock invocation)
-						throws Throwable {
-					for(Space s : ContextTest.this.spaces.values()) {
-						if (s.getID().equals(invocation.getArguments()[1])) {
-							return s;
-						}
+		.thenAnswer(new Answer<Space>() {
+			@Override
+			public Space answer(InvocationOnMock invocation)
+					throws Throwable {
+				OpenEventSpace space = Mockito.mock(OpenEventSpace.class);
+				Mockito.when(space.getID()).thenReturn((SpaceID)invocation.getArguments()[0]);
+				ContextTest.this.spaces.put(((SpaceID)invocation.getArguments()[0]).getID(), space);
+				assert(ContextTest.this.privateListener!=null);
+				ContextTest.this.privateListener.spaceCreated(space, true);
+				return space;
+			}
+		});
+		Mockito.when(this.spaceRepository.getOrCreateSpaceWithSpec(Matchers.any(SpaceID.class), Matchers.any(Class.class)))
+		.thenAnswer(new Answer<Space>() {
+			@Override
+			public Space answer(InvocationOnMock invocation)
+					throws Throwable {
+				for(Space s : ContextTest.this.spaces.values()) {
+					if (s.getID().equals(invocation.getArguments()[0])) {
+						return s;
 					}
-					OpenEventSpace space = Mockito.mock(OpenEventSpace.class);
-					Mockito.when(space.getID()).thenReturn((SpaceID)invocation.getArguments()[1]);
-					ContextTest.this.spaces.put(((SpaceID)invocation.getArguments()[1]).getID(), space);
-					assert(ContextTest.this.privateListener!=null);
-					ContextTest.this.privateListener.spaceCreated(space, true);
-					return space;
 				}
-			});
+				OpenEventSpace space = Mockito.mock(OpenEventSpace.class);
+				Mockito.when(space.getID()).thenReturn((SpaceID)invocation.getArguments()[0]);
+				ContextTest.this.spaces.put(((SpaceID)invocation.getArguments()[0]).getID(), space);
+				assert(ContextTest.this.privateListener!=null);
+				ContextTest.this.privateListener.spaceCreated(space, true);
+				return space;
+			}
+		});
+		Mockito.when(this.spaceRepository.getOrCreateSpaceWithID(Matchers.any(SpaceID.class), Matchers.any(Class.class)))
+		.thenAnswer(new Answer<Space>() {
+			@Override
+			public Space answer(InvocationOnMock invocation)
+					throws Throwable {
+				for(Space s : ContextTest.this.spaces.values()) {
+					if (s.getID().equals(invocation.getArguments()[0])) {
+						return s;
+					}
+				}
+				OpenEventSpace space = Mockito.mock(OpenEventSpace.class);
+				Mockito.when(space.getID()).thenReturn((SpaceID)invocation.getArguments()[0]);
+				ContextTest.this.spaces.put(((SpaceID)invocation.getArguments()[0]).getID(), space);
+				assert(ContextTest.this.privateListener!=null);
+				ContextTest.this.privateListener.spaceCreated(space, true);
+				return space;
+			}
+		});
 		Mockito.when(this.spaceRepository.getSpaces(Matchers.any(Class.class)))
 		.thenAnswer(new Answer<SynchronizedCollection<? extends Space>>() {
 			@Override
@@ -164,7 +182,7 @@ public class ContextTest extends Assert {
 				this.contextId, this.spaceId, spaceRepoFactory, this.spaceListener);
 		this.context.postConstruction();
 	}
-	
+
 	@After
 	public void tearDown() {
 		this.contextId = null;
@@ -189,7 +207,7 @@ public class ContextTest extends Assert {
 			}
 		}
 	}
-	
+
 	@Test
 	public void postConstruction() {
 		ArgumentCaptor<SpaceID> argument1 = ArgumentCaptor.forClass(SpaceID.class);
@@ -248,10 +266,10 @@ public class ContextTest extends Assert {
 	}
 
 	@Test
-	public void getOrCreateSpace() {
+	public void getOrCreateSpaceWithSpec() {
 		Collection<? extends Space> c;
 		UUID id = UUID.randomUUID();
-		OpenEventSpace space = this.context.getOrCreateSpace(OpenEventSpaceSpecification.class, id);
+		OpenEventSpace space = this.context.getOrCreateSpaceWithSpec(OpenEventSpaceSpecification.class, id);
 		//
 		assertNotNull(space);
 		assertEquals(id, space.getID().getID());
@@ -281,9 +299,47 @@ public class ContextTest extends Assert {
 		assertThat(argument3.getValue(), new IsInstanceOf(SpaceCreated.class));
 		assertEquals(id, ((SpaceCreated)argument3.getValue()).spaceID.getID());
 		//
-		OpenEventSpace space2 = this.context.getOrCreateSpace(OpenEventSpaceSpecification.class, id);
+		OpenEventSpace space2 = this.context.getOrCreateSpaceWithSpec(OpenEventSpaceSpecification.class, id);
 		assertSame(space, space2);
+	}
+
+	@Test
+	public void getOrCreateSpaceWithID() {
+		Collection<? extends Space> c;
+		UUID id = UUID.randomUUID();
+		OpenEventSpace space = this.context.getOrCreateSpaceWithID(id, OpenEventSpaceSpecification.class);
+		//
+		assertNotNull(space);
+		assertEquals(id, space.getID().getID());
+		c = this.context.getSpaces();
+		assertNotNull(c);
+		assertEquals(2, c.size());
+		Collection<UUID> ids = new ArrayList<>();
+		ids.add(this.spaceId);
+		ids.add(id);
+		for(Space sp: c) {
+			ids.remove(sp.getID().getID());
 		}
+		assertTrue(ids.isEmpty());
+		//
+		assertNotNull(this.privateListener);
+		ArgumentCaptor<Space> argument1 = ArgumentCaptor.forClass(Space.class);
+		ArgumentCaptor<Boolean> argument2 = ArgumentCaptor.forClass(Boolean.class);
+		// CAUTION: invoked two times due to the default space and the created space.
+		Mockito.verify(this.spaceListener, new Times(2)).spaceCreated(argument1.capture(), argument2.capture());
+		assertSame(space, argument1.getValue());
+		assertTrue(argument2.getValue());
+		//
+		OpenEventSpace defSpace = this.spaces.get(this.spaceId);
+		assertNotNull(defSpace);
+		ArgumentCaptor<Event> argument3 = ArgumentCaptor.forClass(Event.class);
+		Mockito.verify(defSpace, new Times(1)).emit(argument3.capture());
+		assertThat(argument3.getValue(), new IsInstanceOf(SpaceCreated.class));
+		assertEquals(id, ((SpaceCreated)argument3.getValue()).spaceID.getID());
+		//
+		OpenEventSpace space2 = this.context.getOrCreateSpaceWithID(id, OpenEventSpaceSpecification.class);
+		assertSame(space, space2);
+	}
 
 	@Test
 	public void getSpaces() {
@@ -342,5 +398,5 @@ public class ContextTest extends Assert {
 		this.context.destroy();
 		Mockito.verify(this.spaceRepository, new Times(1)).destroy();
 	}
-	
+
 }

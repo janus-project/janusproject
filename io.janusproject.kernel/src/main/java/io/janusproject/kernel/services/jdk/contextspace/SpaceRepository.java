@@ -148,7 +148,7 @@ class SpaceRepository {
 		assert (spaceID.getSpaceSpecification() == null || spaceID.getSpaceSpecification().equals(spec))
 		: "The specification type is invalid"; //$NON-NLS-1$
 		// Split the call to create() to let the JVM to create the "empty" array for creation parameters.
-		if (creationParams != null) {
+		if (creationParams != null && creationParams.length > 0) {
 			space = this.injector.getInstance(spec).create(spaceID, creationParams);
 		} else {
 			space = this.injector.getInstance(spec).create(spaceID);
@@ -160,7 +160,7 @@ class SpaceRepository {
 		this.spacesBySpec.put(id.getSpaceSpecification(), id);
 		if (isLocalCreation) {
 			Object[] sharedParams = NO_PARAMETERS;
-			if (creationParams != null) {
+			if (creationParams != null && creationParams.length > 0) {
 				List<Object> serializableParameters = new ArrayList<>(creationParams.length);
 				for (Object creationParameter : creationParams) {
 					if (creationParameter instanceof Serializable) {
@@ -234,33 +234,31 @@ class SpaceRepository {
 	 * @param spaceID - ID of the space.
 	 * @param spec - specification of the space.
 	 * @param creationParams - creation parameters.
-	 * @return the new space.
+	 * @return the new space, or <code>null</code> if the space already exists.
 	 */
-	@SuppressWarnings("unchecked")
 	public synchronized <S extends io.sarl.lang.core.Space> S createSpace(
 			SpaceID spaceID,
 			Class<? extends SpaceSpecification<S>> spec,
-					Object... creationParams) {
-		S space = (S) this.spaces.get(spaceID);
-		if (space == null) {
-			space = createSpaceInstance(spec, spaceID, true, creationParams);
+			Object... creationParams) {
+		if (!this.spaces.containsKey(spaceID)) {
+			return createSpaceInstance(spec, spaceID, true, creationParams);
 		}
-		return space;
+		return null;
 	}
 
-	/** Retrive the first space of the given specification, or create a space if none.
+	/** Retrieve the first space of the given specification, or create a space if none.
 	 *
 	 * @param <S> - the type of the space to reply.
-	 * @param spec - specification of the space.
 	 * @param spaceID - ID of the space (used only when creating a space).
+	 * @param spec - specification of the space.
 	 * @param creationParams - creation parameters (used only when creating a space).
 	 * @return the new space.
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized <S extends io.sarl.lang.core.Space> S getOrCreateSpace(
+	public synchronized <S extends io.sarl.lang.core.Space> S getOrCreateSpaceWithSpec(
+			SpaceID spaceID,
 			Class<? extends SpaceSpecification<S>> spec,
-					SpaceID spaceID,
-					Object... creationParams) {
+			Object... creationParams) {
 		Collection<SpaceID> ispaces = this.spacesBySpec.get(spec);
 		S firstSpace;
 		if (ispaces == null || ispaces.isEmpty()) {
@@ -270,6 +268,27 @@ class SpaceRepository {
 		}
 		assert (firstSpace != null);
 		return firstSpace;
+	}
+
+	/** Retrieve the first space of the given identifier, or create a space if none.
+	 *
+	 * @param <S> - the type of the space to reply.
+	 * @param spaceID - ID of the space.
+	 * @param spec - specification of the space.
+	 * @param creationParams - creation parameters (used only when creating a space).
+	 * @return the new space.
+	 */
+	@SuppressWarnings("unchecked")
+	public synchronized <S extends io.sarl.lang.core.Space> S getOrCreateSpaceWithID(
+			SpaceID spaceID,
+			Class<? extends SpaceSpecification<S>> spec,
+			Object... creationParams) {
+		Space space = this.spaces.get(spaceID);
+		if (space == null) {
+			space = createSpaceInstance(spec, spaceID, true, creationParams);
+		}
+		assert (space != null);
+		return (S) space;
 	}
 
 	/**
