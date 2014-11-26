@@ -19,6 +19,10 @@
  */
 package io.janusproject.kernel;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import io.janusproject.services.IServiceManager;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.executor.ExecutorService;
@@ -39,12 +43,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.State;
-
 
 /**
  * @author $Author: sgalland$
@@ -68,28 +70,29 @@ public class KernelTest extends Assert {
 	@Before
 	public void setUp() {
 		this.uuid = UUID.randomUUID();
-		this.spawnService = Mockito.mock(SpawnService.class);
-		this.executorService = Mockito.mock(ExecutorService.class);
-		this.contextService = Mockito.mock(ContextSpaceService.class);
+		this.spawnService = mock(SpawnService.class);
+		this.executorService = mock(ExecutorService.class);
+		this.contextService = mock(ContextSpaceService.class);
 		this.services = ImmutableMultimap.<State,Service>of(
 				State.RUNNING, this.spawnService,
 				State.RUNNING, this.executorService,
 				State.RUNNING, this.contextService);
-		this.agentContext = Mockito.mock(AgentContext.class);
-		this.exceptionHandler = Mockito.mock(UncaughtExceptionHandler.class);
-		this.serviceManager = Mockito.mock(IServiceManager.class);
+		this.agentContext = mock(AgentContext.class);
+		this.exceptionHandler = mock(UncaughtExceptionHandler.class);
+		this.serviceManager = mock(IServiceManager.class);
 		//
-		Mockito.when(this.spawnService.isRunning()).thenReturn(true);
-		Mockito.when(this.spawnService.state()).thenReturn(State.RUNNING);
-		Mockito.when(this.spawnService.spawn(Matchers.any(AgentContext.class), Matchers.any(UUID.class), Matchers.any(Class.class), Matchers.anyString(), Matchers.anyString())).thenReturn(this.uuid);
-		Mockito.when(this.executorService.isRunning()).thenReturn(true);
-		Mockito.when(this.executorService.state()).thenReturn(State.RUNNING);
-		Mockito.when(this.contextService.isRunning()).thenReturn(true);
-		Mockito.when(this.contextService.state()).thenReturn(State.RUNNING);
-		Mockito.when(this.serviceManager.servicesByState()).thenReturn(this.services);
+		when(this.spawnService.isRunning()).thenReturn(true);
+		when(this.spawnService.state()).thenReturn(State.RUNNING);
+		when(this.spawnService.spawn(Matchers.any(AgentContext.class), Matchers.any(UUID.class), Matchers.any(Class.class),
+				Matchers.anyVararg())).thenReturn(this.uuid);
+		when(this.executorService.isRunning()).thenReturn(true);
+		when(this.executorService.state()).thenReturn(State.RUNNING);
+		when(this.contextService.isRunning()).thenReturn(true);
+		when(this.contextService.state()).thenReturn(State.RUNNING);
+		when(this.serviceManager.servicesByState()).thenReturn(this.services);
 		//
 		this.kernel = new Kernel(this.serviceManager, this.spawnService, this.exceptionHandler);
-		this.kernel = Mockito.spy(this.kernel);
+		this.kernel = spy(this.kernel);
 	}
 	
 	@After
@@ -122,16 +125,13 @@ public class KernelTest extends Assert {
 		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
 		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<String> argument4 = ArgumentCaptor.forClass(String.class);
-		ArgumentCaptor<String> argument5 = ArgumentCaptor.forClass(String.class);
-		Mockito.verify(this.spawnService).spawn(
-				argument1.capture(), argument2.capture(),
-				argument3.capture(), argument4.capture(),
-				argument5.capture());
+		verify(this.spawnService).spawn(
+				argument1.capture(), argument2.capture(), argument3.capture(),
+				argument4.capture());
 		assertSame(this.agentContext, argument1.getValue());
 		assertNull(argument2.getValue());
 		assertEquals(Agent.class, argument3.getValue());
-		assertEquals("a", argument4.getValue()); //$NON-NLS-1$
-		assertEquals("b", argument5.getValue()); //$NON-NLS-1$
+		assertArrayEquals(new String[] { "a", "b" }, argument4.getAllValues().toArray()); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	@Test
@@ -146,16 +146,13 @@ public class KernelTest extends Assert {
 		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
 		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<String> argument4 = ArgumentCaptor.forClass(String.class);
-		ArgumentCaptor<String> argument5 = ArgumentCaptor.forClass(String.class);
-		Mockito.verify(this.spawnService).spawn(
+		verify(this.spawnService).spawn(
 				argument1.capture(), argument2.capture(),
-				argument3.capture(), argument4.capture(),
-				argument5.capture());
+				argument3.capture(), argument4.capture());
 		assertSame(this.agentContext, argument1.getValue());
 		assertSame(aId, argument2.getValue());
 		assertEquals(Agent.class, argument3.getValue());
-		assertEquals("a", argument4.getValue()); //$NON-NLS-1$
-		assertEquals("b", argument5.getValue()); //$NON-NLS-1$
+		assertArrayEquals(new String[] { "a", "b" }, argument4.getAllValues().toArray()); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	@Test

@@ -19,6 +19,10 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
@@ -39,7 +43,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.mockito.internal.verification.Times;
 
 /**
@@ -66,13 +69,13 @@ public class DefaultContextInteractionsSkillTest extends Assert {
 						EventSpaceSpecification.class),
 				UUID.randomUUID());
 		
-		this.defaultSpace = Mockito.mock(EventSpace.class);
-		Mockito.when(this.defaultSpace.getAddress(Matchers.any(UUID.class))).thenReturn(this.address);
+		this.defaultSpace = mock(EventSpace.class);
+		when(this.defaultSpace.getAddress(Matchers.any(UUID.class))).thenReturn(this.address);
 		
-		this.parentContext = Mockito.mock(AgentContext.class);
-		Mockito.when(this.parentContext.getDefaultSpace()).thenReturn(this.defaultSpace);
+		this.parentContext = mock(AgentContext.class);
+		when(this.parentContext.getDefaultSpace()).thenReturn(this.defaultSpace);
 		
-		this.lifeCapacity = Mockito.mock(Lifecycle.class);
+		this.lifeCapacity = mock(Lifecycle.class);
 		
 		Agent agent = new Agent(UUID.randomUUID()) {
 			@Override
@@ -120,47 +123,44 @@ public class DefaultContextInteractionsSkillTest extends Assert {
 	@Test
 	public void emitEventScope() {
 		this.skill.install();
-		Event event = Mockito.mock(Event.class);
+		Event event = mock(Event.class);
 		Scope<Address> scope = Scopes.allParticipants();
 		this.skill.emit(event, scope);
 		ArgumentCaptor<Event> argument1 = ArgumentCaptor.forClass(Event.class);
 		ArgumentCaptor<Scope> argument2 = ArgumentCaptor.forClass(Scope.class);
-		Mockito.verify(this.defaultSpace, new Times(1)).emit(argument1.capture(), argument2.capture());
+		verify(this.defaultSpace, new Times(1)).emit(argument1.capture(), argument2.capture());
 		assertSame(event, argument1.getValue());
 		assertSame(scope, argument2.getValue());
 		ArgumentCaptor<Address> argument3 = ArgumentCaptor.forClass(Address.class);
-		Mockito.verify(event).setSource(argument3.capture());
+		verify(event).setSource(argument3.capture());
 		assertEquals(this.address, argument3.getValue());
 	}
 
 	@Test
 	public void emitEvent() {
 		this.skill.install();
-		Event event = Mockito.mock(Event.class);
+		Event event = mock(Event.class);
 		this.skill.emit(event);
 		ArgumentCaptor<Event> argument1 = ArgumentCaptor.forClass(Event.class);
-		Mockito.verify(this.defaultSpace, new Times(1)).emit(argument1.capture());
+		verify(this.defaultSpace, new Times(1)).emit(argument1.capture());
 		assertSame(event, argument1.getValue());
 		ArgumentCaptor<Address> argument2 = ArgumentCaptor.forClass(Address.class);
-		Mockito.verify(event).setSource(argument2.capture());
+		verify(event).setSource(argument2.capture());
 		assertEquals(this.address, argument2.getValue());
 	}
 
 	@Test
 	public void spawn() {
 		this.skill.install();
-		this.skill.spawn(Agent.class, "a", "b", "c"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		this.skill.spawn(Agent.class, "a", "b", "c"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		ArgumentCaptor<Class> argument1 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<AgentContext> argument2 = ArgumentCaptor.forClass(AgentContext.class);
-		ArgumentCaptor<Object> argument3 = ArgumentCaptor.forClass(Object.class);
-		ArgumentCaptor<Object> argument4 = ArgumentCaptor.forClass(Object.class);
-		ArgumentCaptor<Object> argument5 = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(this.lifeCapacity, new Times(1)).spawnInContext(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture(), argument5.capture());
+		ArgumentCaptor<String> argument3 = ArgumentCaptor.forClass(String.class);
+		verify(this.lifeCapacity, times(1)).spawnInContext(argument1.capture(),
+				argument2.capture(), argument3.capture());
 		assertEquals(Agent.class, argument1.getValue());
 		assertSame(this.parentContext, argument2.getValue());
-		assertEquals("a", argument3.getValue()); //$NON-NLS-1$
-		assertEquals("b", argument4.getValue()); //$NON-NLS-1$
-		assertEquals("c", argument5.getValue()); //$NON-NLS-1$
+		assertArrayEquals(new String[] { "a", "b", "c" }, argument3.getAllValues().toArray()); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 	}
 		
 }

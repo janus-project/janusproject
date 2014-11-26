@@ -19,6 +19,9 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import io.janusproject.services.executor.ChuckNorrisException;
 import io.janusproject.services.spawn.SpawnService;
 import io.sarl.lang.core.Agent;
@@ -36,9 +39,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.verification.Times;
 
 /**
  * @author $Author: srodriguez$
@@ -90,39 +91,35 @@ public class LifecycleSkillTest extends Assert {
 	@Test
 	public void spawnInContext() {
 		Class type = Agent.class;
-		AgentContext context = Mockito.mock(AgentContext.class);
-		Object[] params = new Object[] {1,"String"}; //$NON-NLS-1$
-		this.skill.spawnInContext(type, context, params);
+		AgentContext context = mock(AgentContext.class);
+		this.skill.spawnInContext(type, context, 1, "String"); //$NON-NLS-1$
 		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
 		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
 		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
-		ArgumentCaptor<Integer> argument4 = ArgumentCaptor.forClass(Integer.class);
-		ArgumentCaptor<String> argument5 = ArgumentCaptor.forClass(String.class);
-		Mockito.verify(this.spawnService, new Times(1)).spawn(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture(), argument5.capture());
+		ArgumentCaptor<Object> argument4 = ArgumentCaptor.forClass(Object.class);
+		verify(this.spawnService, times(1)).spawn(argument1.capture(), argument2.capture(),
+				argument3.capture(), argument4.capture());
 		assertSame(context, argument1.getValue());
 		assertNull(argument2.getValue());
 		assertEquals(Agent.class, argument3.getValue());
-		assertEquals(1, argument4.getValue().intValue());
-		assertEquals("String", argument5.getValue()); //$NON-NLS-1$
+		assertArrayEquals(new Object[] { 1, "String" }, argument4.getAllValues().toArray()); //$NON-NLS-1$
 	}
 
 	@Test
 	public void spawnInContextWithID() {
 		Class type = Agent.class;
-		AgentContext context = Mockito.mock(AgentContext.class);
-		Object[] params = new Object[] {1,"String"}; //$NON-NLS-1$
-		this.skill.spawnInContextWithID(type, this.agentId, context, params);
+		AgentContext context = mock(AgentContext.class);
+		this.skill.spawnInContextWithID(type, this.agentId, context, 1, "String"); //$NON-NLS-1$
 		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
 		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
 		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
-		ArgumentCaptor<Integer> argument4 = ArgumentCaptor.forClass(Integer.class);
-		ArgumentCaptor<String> argument5 = ArgumentCaptor.forClass(String.class);
-		Mockito.verify(this.spawnService, new Times(1)).spawn(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture(), argument5.capture());
+		ArgumentCaptor<Object> argument4 = ArgumentCaptor.forClass(Object.class);
+		verify(this.spawnService, times(1)).spawn(argument1.capture(), argument2.capture(),
+				argument3.capture(), argument4.capture());
 		assertSame(context, argument1.getValue());
 		assertSame(this.agentId, argument2.getValue());
 		assertEquals(Agent.class, argument3.getValue());
-		assertEquals(1, argument4.getValue().intValue());
-		assertEquals("String", argument5.getValue()); //$NON-NLS-1$
+		assertArrayEquals(new Object[] { 1, "String" }, argument4.getAllValues().toArray()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -138,7 +135,7 @@ public class LifecycleSkillTest extends Assert {
 			throw e;
 		}
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
-		Mockito.verify(this.eventBus, new Times(1)).selfEvent(argument.capture());
+		verify(this.eventBus, times(1)).selfEvent(argument.capture());
 		assertThat(argument.getValue(), IsInstanceOf.instanceOf(AsynchronousAgentKillingEvent.class));
 	}
 
