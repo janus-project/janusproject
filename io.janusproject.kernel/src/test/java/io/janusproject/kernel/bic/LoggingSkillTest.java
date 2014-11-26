@@ -53,7 +53,6 @@ public class LoggingSkillTest extends Assert {
 	@Mock
 	protected Handler handler;
 	
-	@Mock
 	protected Agent owner;
 	
 	@Mock
