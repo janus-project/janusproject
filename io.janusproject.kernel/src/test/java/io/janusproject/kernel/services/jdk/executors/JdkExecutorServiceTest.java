@@ -186,5 +186,5 @@ extends AbstractServiceImplementationTest<io.janusproject.services.executor.Exec
 		Mockito.verify(this.scheduledExecutorService, new Times(1)).shutdownNow();
 		Mockito.verify(this.executorService, new Times(1)).shutdownNow();
 	}
-
+	
 }

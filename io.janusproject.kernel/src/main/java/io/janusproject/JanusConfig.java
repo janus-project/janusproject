@@ -163,6 +163,18 @@ public final class JanusConfig {
 	 */
 	public static final String INJECTION_MODULE_NAME_VALUE = StandardJanusPlatformModule.class.getName();
 
+	/** Name of the property that contains the numbers of seconds between two purges of
+	 * the terminated threads by the kernel.
+	 * @see #KERNEL_THREAD_PURGE_DELAY_VALUE
+	 */
+	public static final String KERNEL_THREAD_PURGE_DELAY_NAME = "janus.executors.purgeDelay"; //$NON-NLS-1$
+
+	/** Indicates the numbers of seconds between two purges of
+	 * the terminated threads by the kernel.
+	 * @see #KERNEL_THREAD_PURGE_DELAY_NAME
+	 */
+	public static final int KERNEL_THREAD_PURGE_DELAY_VALUE = 30;
+
 	private JanusConfig() {
 		//
 	}
@@ -185,6 +197,7 @@ public final class JanusConfig {
 		defaultValues.put(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
 				Integer.toString(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE));
 		defaultValues.put(KERNEL_THREAD_TIMEOUT_NAME, Integer.toString(KERNEL_THREAD_TIMEOUT_VALUE));
+		defaultValues.put(KERNEL_THREAD_PURGE_DELAY_NAME, Integer.toString(KERNEL_THREAD_PURGE_DELAY_VALUE));
 		defaultValues.put(INJECTION_MODULE_NAME, INJECTION_MODULE_NAME_VALUE);
 		defaultValues.put(JANUS_LOGO_SHOW_NAME, JANUS_LOGO_SHOW.toString());
 	}

@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.Service;
@@ -45,16 +46,33 @@ import com.google.inject.Singleton;
 @Singleton
 public class JdkExecutorService extends AbstractDependentService implements io.janusproject.services.executor.ExecutorService {
 
-	@Inject
 	private ScheduledExecutorService schedules;
-
-	@Inject
 	private ExecutorService exec;
+
+	private ScheduledFuture<?> purgeTask;
 
 	/**
 	 */
 	public JdkExecutorService() {
 		//
+	}
+
+	/** Change the JRE service for scheduled tasks.
+	 *
+	 * @param service - the JRE service.
+	 */
+	@Inject
+	void setScheduledExecutorService(ScheduledExecutorService service) {
+		this.schedules = service;
+	}
+
+	/** Change the JRE service for scheduled tasks.
+	 *
+	 * @param service - the JRE service.
+	 */
+	@Inject
+	void setExecutorService(ExecutorService service) {
+		this.exec = service;
 	}
 
 	@Override
@@ -66,6 +84,18 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 	 */
 	@Override
 	protected void doStart() {
+		assert (this.schedules != null);
+		assert (this.exec != null);
+		// Launch a periodic task that is purging the executor pools.
+		if ((this.schedules instanceof ThreadPoolExecutor)
+				|| (this.exec instanceof ThreadPoolExecutor)) {
+			int delay = JanusConfig.getSystemPropertyAsInteger(
+					JanusConfig.KERNEL_THREAD_PURGE_DELAY_NAME,
+					JanusConfig.KERNEL_THREAD_PURGE_DELAY_VALUE);
+			this.purgeTask = this.schedules.scheduleWithFixedDelay(
+					new Purger(),
+					delay, delay, TimeUnit.SECONDS);
+		}
 		notifyStarted();
 	}
 
@@ -73,6 +103,10 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 	 */
 	@Override
 	protected void doStop() {
+		if (this.purgeTask != null) {
+			this.purgeTask.cancel(true);
+			this.purgeTask = null;
+		}
 		this.exec.shutdown();
 		this.schedules.shutdown();
 		try {
@@ -150,6 +184,76 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 	@Override
 	public ExecutorService getExecutorService() {
 		return this.exec;
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public void purge() {
+		if (this.exec instanceof ThreadPoolExecutor) {
+			((ThreadPoolExecutor) this.exec).purge();
+		}
+		if (this.schedules instanceof ThreadPoolExecutor) {
+			((ThreadPoolExecutor) this.schedules).purge();
+		}
+	}
+
+	/** Task that is purging the thread pools.
+	 *
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private class Purger implements Runnable {
+
+		private String oldThreadName;
+
+		/**
+		 */
+		public Purger() {
+			//
+		}
+
+		private boolean setName() {
+			if (this.oldThreadName != null) {
+				return false;
+			}
+			Thread t = Thread.currentThread();
+			this.oldThreadName = t.getName();
+			t.setName(toString());
+			return true;
+		}
+
+		private boolean restoreName() {
+			if (this.oldThreadName == null) {
+				return false;
+			}
+			Thread t = Thread.currentThread();
+			t.setName(this.oldThreadName);
+			this.oldThreadName = null;
+			return true;
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void run() {
+			assert (setName());
+			try {
+				purge();
+			} finally {
+				assert (restoreName());
+			}
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public String toString() {
+			return "Janus Thread Purger"; //$NON-NLS-1$
+		}
+
 	}
 
 }

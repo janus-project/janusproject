@@ -126,4 +126,8 @@ public interface ExecutorService extends DependentService {
 	ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay,
 			long delay, TimeUnit unit);
 
+	/** Remove any canceled/terminated tasks from the lists of tasks.
+	 */
+	void purge();
+
 }

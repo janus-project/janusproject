@@ -234,7 +234,7 @@ public class Kernel {
 		@Override
 		public Thread newThread(Runnable r) {
 			Thread t = Executors.defaultThreadFactory().newThread(r);
-			t.setName("Janus shutdown"); //$NON-NLS-1$
+			t.setName("Janus kernel shutdown"); //$NON-NLS-1$
 			t.setDaemon(false);
 			t.setUncaughtExceptionHandler(this);
 			return t;
