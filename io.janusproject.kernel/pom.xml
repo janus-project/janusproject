@@ -92,6 +92,9 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
+						<manifest>
+							<mainClass>io.janusproject.Boot</mainClass>
+						</manifest>
 						<manifestSections>
 							<manifestSection>
 								<name>SARL-Runtime-Environment</name>
