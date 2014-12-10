@@ -24,6 +24,7 @@ import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -84,25 +85,20 @@ public final class Boot {
 	}
 	private static void parseCommandLineForSystemProperties(CommandLine cmd) {
 		if (cmd.hasOption('o')) {
-			System.setProperty(JanusConfig.OFFLINE, Boolean.TRUE.toString());
+			setOffline(true);
 		}
 		if (cmd.hasOption('R')) {
-			System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
-			System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.TRUE.toString());
+			setRandomContextUUID();
 		} else if (cmd.hasOption('B')) {
-			System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.TRUE.toString());
-			System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
+			setBootAgentTypeContextUUID();
 		} else if (cmd.hasOption('W')) {
-			System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
-			System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
+			setDefaultContextUUID();
 		}
 		// Define the system properties, if not already done by the JRE.
 		Properties props = cmd.getOptionProperties("D"); //$NON-NLS-1$
 		if (props != null) {
 			for (Entry<Object, Object> entry : props.entrySet()) {
-				System.setProperty(
-						entry.getKey().toString(),
-						entry.getValue().toString());
+				setProperty(entry.getKey().toString(), entry.getValue().toString());
 			}
 		}
 	}
@@ -127,14 +123,12 @@ public final class Boot {
 				default:
 				}
 			}
-			System.setProperty(
-					JanusConfig.VERBOSE_LEVEL_NAME,
-					Integer.toString(verbose));
+			setVerboseLevel(verbose);
 		}
 
 		// Show the Janus logo?
 		if (cmd.hasOption("nologo") || verbose == 0) { //$NON-NLS-1$
-			System.setProperty(
+			setProperty(
 					JanusConfig.JANUS_LOGO_SHOW_NAME,
 					Boolean.FALSE.toString());
 		}
@@ -243,28 +237,28 @@ public final class Boot {
 					JanusConfig.JANUS_LOGO_SHOW)) {
 				showJanusLogo();
 			}
+			
 			if (freeArgs.length == 0) {
 				showError(
 						Locale.getString("NO_AGENT_QUALIFIED_NAME"), //$NON-NLS-1$
 						null);
 			}
+			
 			String agentToLaunch = freeArgs[0].toString();
 			freeArgs = Arrays.copyOfRange(
 					freeArgs,
 					1, freeArgs.length,
 					String[].class);
+			
+			// Load property files
+			for (URL url : propertyFiles) {
+				setPropertiesFrom(url);
+			}
+			
 			// Load the agent class
 			Class<? extends Agent> agent = loadAgentClass(agentToLaunch);
 			assert (agent != null);
-			// Load property files
-			Properties systemProperties = System.getProperties();
-			for (URL url : propertyFiles) {
-				try (InputStream stream = url.openStream()) {
-					systemProperties.load(stream);
-				}
-			}
-			// Set the boot agent classname
-			System.setProperty(JanusConfig.BOOT_AGENT, agent.getCanonicalName());
+			
 
 			startJanus(
 					null,
@@ -383,6 +377,135 @@ public final class Boot {
 		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
 		//CHECKSTYLE:ON
 	}
+	
+	/** Set offline flag of the Janus platform.
+	 *
+	 * This function is equivalent to the command line option <code>-o</code>.
+	 *
+	 * This function must be called before launching the Janus platform.
+	 *
+	 * @param isOffline - the offline flag.
+	 * @since 2.0.2.0
+	 * @see JanusConfig#OFFLINE
+	 */
+	public static void setOffline(boolean isOffline) {
+		System.setProperty(JanusConfig.OFFLINE, Boolean.toString(isOffline));
+	}
+	
+	/** Force the Janus platform to use a random identifier for its default context.
+	 *
+	 * This function is equivalent to the command line option <code>-R</code>.
+	 *
+	 * This function must be called before launching the Janus platform.
+	 *
+	 * @see JanusConfig#BOOT_DEFAULT_CONTEXT_ID_NAME
+	 * @see JanusConfig#RANDOM_DEFAULT_CONTEXT_ID_NAME
+	 * @since 2.0.2.0
+	 */
+	public static void setRandomContextUUID() {
+		System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
+		System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.TRUE.toString());
+	}
+	
+	/** Force the Janus platform to use a default context identifier that tis build upon the
+	 * classname of the boot agent.
+	 * It means that the UUID is always the same for a given classname.
+	 *
+	 * This function is equivalent to the command line option <code>-B</code>.
+	 *
+	 * @see JanusConfig#BOOT_DEFAULT_CONTEXT_ID_NAME
+	 * @see JanusConfig#RANDOM_DEFAULT_CONTEXT_ID_NAME
+	 * @since 2.0.2.0
+	 */
+	public static void setBootAgentTypeContextUUID() {
+		System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.TRUE.toString());
+		System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
+	}
+
+	/** Force the Janus platform to use the identifier hard-coded in the source code for its
+	 * default context.
+	 *
+	 * This function is equivalent to the command line option <code>-W</code>.
+	 *
+	 * This function must be called before launching the Janus platform.
+	 *
+	 * @see JanusConfig#BOOT_DEFAULT_CONTEXT_ID_NAME
+	 * @see JanusConfig#RANDOM_DEFAULT_CONTEXT_ID_NAME
+	 * @since 2.0.2.0
+	 */
+	public static void setDefaultContextUUID() {
+		System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
+		System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
+	}
+	
+	/** Force the 
+	 *
+	 * This function must be called before launching the Janus platform.
+	 *
+	 * @param level - the verbosity level.
+	 * @see JanusConfig#VERBOSE_LEVEL_NAME
+	 * @since 2.0.2.0
+	 */
+	public static void setVerboseLevel(int level) {
+		System.setProperty(JanusConfig.VERBOSE_LEVEL_NAME, Integer.toString(level));
+	}
+
+	/** Set the system property.
+	 * This function is an helper for setting a system property usually accessible with
+	 * {@link System}.
+	 *
+	 * This function must be called before launching the Janus platform.
+	 * 
+	 * @param name - the name of the property.
+	 * @param value - the value of the property.
+	 *                If the value is <code>null</code> or empty, the property is removed.
+	 * @see System#setProperty(String, String)
+	 * @see System#getProperties()
+	 * @since 2.0.2.0
+	 */
+	public static void setProperty(String name, String value) {
+		if (name != null && !name.isEmpty()) {
+			if (value == null || value.isEmpty()) {
+				System.getProperties().remove(name);
+			} else {
+				System.setProperty(name, value);
+			}
+		}
+	}
+	
+	/** Set the system property from the content of the file with the given URL.
+	 * This function is an helper for setting the system properties usually accessible with
+	 * {@link System}.
+	 * 
+	 * @param propertyFile - the URL from which a stream is opened.
+	 * @throws IOException - if the stream cannot be read.
+	 * @see System#getProperties()
+	 * @see Properties#load(InputStream)
+	 * @since 2.0.2.0
+	 */
+	public static void setPropertiesFrom(URL propertyFile) throws IOException {
+		Properties systemProperties = System.getProperties();
+		try (InputStream stream = propertyFile.openStream()) {
+			systemProperties.load(stream);
+		}
+	}
+	
+	/** Set the system property from the content of the file with the given URL.
+	 * This function is an helper for setting the system properties usually accessible with
+	 * {@link System}.
+	 * 
+	 * @param propertyFile - the URL from which a stream is opened.
+	 * @throws IOException - if the stream cannot be read.
+	 * @see System#getProperties()
+	 * @see Properties#load(InputStream)
+	 * @since 2.0.2.0
+	 */
+	public static void setPropertiesFrom(File propertyFile) throws IOException {
+		Properties systemProperties = System.getProperties();
+		try (InputStream stream = new FileInputStream(propertyFile)) {
+			systemProperties.load(stream);
+		}
+	}
 
 	/** Launch the Janus kernel and the first agent in the kernel.
 	 * <p>
@@ -410,6 +533,8 @@ public final class Boot {
 			Class<? extends Module> platformModule,
 			Class<? extends Agent> agentCls,
 			Object... params) throws Exception {
+		// Set the boot agent classname
+		System.setProperty(JanusConfig.BOOT_AGENT, agentCls.getCanonicalName());
 		// Get the start-up injection module
 		Class<? extends Module> startupModule = platformModule;
 		if (startupModule == null) {
