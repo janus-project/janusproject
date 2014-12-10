@@ -18,6 +18,7 @@
  * limitations under the License.
  */
 package io.janusproject;
+
 import io.janusproject.kernel.Kernel;
 import io.janusproject.services.network.NetworkConfig;
 import io.janusproject.util.LoggerCreator;
@@ -34,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.UUID;
+import java.util.logging.Level;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -45,6 +48,7 @@ import org.apache.commons.cli.ParseException;
 import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.inject.Module;
+
 /** This is the class that permits to boot the Janus platform.
  * <p>
  * This class provides the "main" function for the platform.
@@ -204,7 +208,7 @@ public final class Boot {
 							"INVALID_AGENT_QUALIFIED_NAME", //$NON-NLS-1$
 							fullyQualifiedName,
 							System.getProperty("java.class.path")), //$NON-NLS-1$
-					null);
+							null);
 			return null;
 		}
 		// The following test is needed because the
@@ -216,9 +220,9 @@ public final class Boot {
 		}
 
 		showError(
-			Locale.getString("INVALID_AGENT_TYPE", //$NON-NLS-1$
-				 fullyQualifiedName),
-			null);
+				Locale.getString("INVALID_AGENT_TYPE", //$NON-NLS-1$
+						fullyQualifiedName),
+						null);
 		return null;
 	}
 
@@ -237,28 +241,27 @@ public final class Boot {
 					JanusConfig.JANUS_LOGO_SHOW)) {
 				showJanusLogo();
 			}
-			
+
 			if (freeArgs.length == 0) {
 				showError(
 						Locale.getString("NO_AGENT_QUALIFIED_NAME"), //$NON-NLS-1$
 						null);
 			}
-			
+
 			String agentToLaunch = freeArgs[0].toString();
 			freeArgs = Arrays.copyOfRange(
 					freeArgs,
 					1, freeArgs.length,
 					String[].class);
-			
+
 			// Load property files
 			for (URL url : propertyFiles) {
 				setPropertiesFrom(url);
 			}
-			
+
 			// Load the agent class
 			Class<? extends Agent> agent = loadAgentClass(agentToLaunch);
 			assert (agent != null);
-			
 
 			startJanus(
 					null,
@@ -269,7 +272,7 @@ public final class Boot {
 					Locale.getString(
 							"LAUNCHING_ERROR", //$NON-NLS-1$
 							e.getLocalizedMessage()),
-					e);
+							e);
 			return;
 		}
 	}
@@ -377,7 +380,7 @@ public final class Boot {
 		System.out.println(Locale.getString("JANUS_TEXT_LOGO")); //$NON-NLS-1$
 		//CHECKSTYLE:ON
 	}
-	
+
 	/** Set offline flag of the Janus platform.
 	 *
 	 * This function is equivalent to the command line option <code>-o</code>.
@@ -391,7 +394,7 @@ public final class Boot {
 	public static void setOffline(boolean isOffline) {
 		System.setProperty(JanusConfig.OFFLINE, Boolean.toString(isOffline));
 	}
-	
+
 	/** Force the Janus platform to use a random identifier for its default context.
 	 *
 	 * This function is equivalent to the command line option <code>-R</code>.
@@ -406,7 +409,7 @@ public final class Boot {
 		System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
 		System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.TRUE.toString());
 	}
-	
+
 	/** Force the Janus platform to use a default context identifier that tis build upon the
 	 * classname of the boot agent.
 	 * It means that the UUID is always the same for a given classname.
@@ -437,8 +440,8 @@ public final class Boot {
 		System.setProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
 		System.setProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME, Boolean.FALSE.toString());
 	}
-	
-	/** Force the 
+
+	/** Force the verbosity level.
 	 *
 	 * This function must be called before launching the Janus platform.
 	 *
@@ -455,7 +458,7 @@ public final class Boot {
 	 * {@link System}.
 	 *
 	 * This function must be called before launching the Janus platform.
-	 * 
+	 *
 	 * @param name - the name of the property.
 	 * @param value - the value of the property.
 	 *                If the value is <code>null</code> or empty, the property is removed.
@@ -472,11 +475,11 @@ public final class Boot {
 			}
 		}
 	}
-	
+
 	/** Set the system property from the content of the file with the given URL.
 	 * This function is an helper for setting the system properties usually accessible with
 	 * {@link System}.
-	 * 
+	 *
 	 * @param propertyFile - the URL from which a stream is opened.
 	 * @throws IOException - if the stream cannot be read.
 	 * @see System#getProperties()
@@ -489,11 +492,11 @@ public final class Boot {
 			systemProperties.load(stream);
 		}
 	}
-	
+
 	/** Set the system property from the content of the file with the given URL.
 	 * This function is an helper for setting the system properties usually accessible with
 	 * {@link System}.
-	 * 
+	 *
 	 * @param propertyFile - the URL from which a stream is opened.
 	 * @throws IOException - if the stream cannot be read.
 	 * @see System#getProperties()
@@ -507,19 +510,42 @@ public final class Boot {
 		}
 	}
 
+	/** Replies the identifier of the boot agent from the system's properties.
+	 * The boot agent is launched with {@link #startJanus(Class, Class, Object...)}.
+	 *
+	 * @return the identifier of the boot agent, or <code>null</code> if it is unknown.
+	 * @since 2.0.2.0
+	 * @see JanusConfig#BOOT_AGENT_ID
+	 * @see #startJanus(Class, Class, Object...)
+	 */
+	public static UUID getBootAgentIdentifier() {
+		String id = JanusConfig.getSystemProperty(JanusConfig.BOOT_AGENT_ID);
+		if (id != null && !id.isEmpty()) {
+			try {
+				return UUID.fromString(id);
+			} catch (Throwable _) {
+				//
+			}
+		}
+		return null;
+	}
+
 	/** Launch the Janus kernel and the first agent in the kernel.
-	 * <p>
+	 *
 	 * Thus function does not parse the command line.
 	 * See {@link #main(String[])} for the command line management.
 	 * When this function is called, it is assumed that all the
 	 * system's properties are correctly set.
-	 * <p>
+	 *
 	 * The platformModule parameter permits to specify the injection module to use.
 	 * The injection module is in change of creating/injecting all the components
 	 * of the platform. The default injection module is retreived from the system
 	 * property with the name stored in {@link JanusConfig#INJECTION_MODULE_NAME}.
 	 * The default type for the injection module is stored in the constant
 	 * {@link JanusConfig#INJECTION_MODULE_NAME_VALUE}.
+	 *
+	 * The function {@link #getBootAgentIdentifier()} permits to retreive the identifier
+	 * of the launched agent.
 	 *
 	 * @param platformModule - type of the injection module to use for initializing the platform,
 	 *                         if <code>null</code> the default module will be used.
@@ -528,6 +554,7 @@ public final class Boot {
 	 * @return the kernel that was launched.
 	 * @throws Exception - if it is impossible to start the platform.
 	 * @see #main(String[])
+	 * @see #getBootAgentIdentifier()
 	 */
 	public static Kernel startJanus(
 			Class<? extends Module> platformModule,
@@ -544,12 +571,17 @@ public final class Boot {
 		}
 		assert (startupModule != null) : "No platform injection module"; //$NON-NLS-1$
 		Kernel k = Kernel.create(startupModule.newInstance());
-		if (LoggerCreator.getLoggingLevelFromProperties().intValue() > 0) {
+		if (LoggerCreator.getLoggingLevelFromProperties().intValue() <= Level.INFO.intValue()) {
 			//CHECKSTYLE:OFF
 			System.out.println(Locale.getString("LAUNCHING_AGENT", agentCls.getName())); //$NON-NLS-1$
 			//CHECKSTYLE:ON
 		}
-		k.spawn(agentCls, params);
+		UUID id = k.spawn(agentCls, params);
+		if (id != null) {
+			System.setProperty(JanusConfig.BOOT_AGENT_ID, id.toString());
+		} else {
+			System.getProperties().remove(JanusConfig.BOOT_AGENT_ID);
+		}
 		return k;
 	}
 

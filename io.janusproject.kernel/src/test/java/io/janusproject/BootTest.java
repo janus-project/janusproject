@@ -19,8 +19,12 @@
  */
 package io.janusproject;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
+
+import io.janusproject.kernel.Kernel;
+import io.sarl.lang.core.Agent;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +33,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -41,6 +46,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+
+import com.google.inject.Binder;
+import com.google.inject.Inject;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+
+import static org.mockito.Mockito.*;
 
 /**
  * @author $Author: sgalland$
@@ -50,11 +65,15 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    BootTest.BootCommandLineParserTests.class,
-    BootTest.OptionSetterTests.class,
+	BootTest.BootCommandLineParserTests.class,
+	BootTest.OptionSetterTests.class,
+	BootTest.StartTests.class,
+	BootTest.Start2Tests.class,
 })
 @SuppressWarnings("all")
 public class BootTest extends Assert {
+
+	static final UUID ID = UUID.fromString("63ee52ee-4739-47b1-9e73-0a7986d17bc5");
 
 	private static String[] args(String... strings) {
 		return strings;
@@ -75,6 +94,55 @@ public class BootTest extends Assert {
 	private static void assertFalseProperty(String name) {
 		assertFalseStr(System.getProperty(name));
 	}
+	
+	protected static void resetProperties() {
+		Properties tmp = new Properties();
+		JanusConfig.getDefaultValues(tmp);
+		Properties props = System.getProperties();
+		for(Object name : tmp.keySet()) {
+			props.remove(name);
+		}
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class AgentMock extends Agent {
+		/**
+		 */
+		public AgentMock() {
+			super(null);
+		}
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class TestModule implements Module {
+
+		public TestModule() {
+			//
+		}
+
+		@Override
+		public void configure(Binder binder) {
+			//
+		}
+
+		@Provides
+		public Kernel createKernel() {
+			Kernel k = mock(Kernel.class);
+			when(k.spawn(any(Class.class), anyVararg())).thenReturn(ID);
+			return k;
+		}
+
+	}
 
 	/**
 	 * @author $Author: sgalland$
@@ -83,13 +151,23 @@ public class BootTest extends Assert {
 	 * @mavenartifactid $ArtifactId$
 	 */
 	public static class OptionSetterTests {
-			
+
+		@Before
+		public void setUp() {
+			resetProperties();
+		}
+		
+		@After
+		public void tearDown() {
+			resetProperties();
+		}
+
 		@Test
 		public void setOffline_true() {
 			Boot.setOffline(true);
 			assertTrueProperty(JanusConfig.OFFLINE);
 		}
-		
+
 		@Test
 		public void setOffline_false() {
 			Boot.setOffline(false);
@@ -109,7 +187,7 @@ public class BootTest extends Assert {
 			assertTrueProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME);
 			assertFalseProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME);
 		}
-	
+
 		public void setDefaultContextUUID() {
 			Boot.setDefaultContextUUID();
 			assertFalseProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME);
@@ -141,7 +219,7 @@ public class BootTest extends Assert {
 			assertEquals("my value 1", System.getProperty("io.janusproject.tests.MY_PROPERTY_1"));
 			assertEquals("my value 2", System.getProperty("io.janusproject.tests.MY_PROPERTY_2"));
 		}
-		
+
 		@Test
 		public void setPropertiesFromFile() throws IOException {
 			URL resource = Resources.getResource(getClass(), "Test2.properties");
@@ -154,7 +232,7 @@ public class BootTest extends Assert {
 		}
 
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -171,8 +249,14 @@ public class BootTest extends Assert {
 		 */
 		@Before
 		public void setUp() throws Exception {
+			resetProperties();
 			this.janusOptions = Boot.getOptions();
 			this.parser = new BasicParser();
+		}
+
+		@After
+		public void tearDown() {
+			resetProperties();
 		}
 
 		@Test
@@ -185,35 +269,35 @@ public class BootTest extends Assert {
 			assertTrue(cmd.hasOption('h'));
 			cmd = this.parser.parse(this.janusOptions, args("--help"));
 			assertTrue(cmd.hasOption('h'));
-			
+
 			cmd = this.parser.parse(this.janusOptions, args("-f", "thefile"));
 			assertTrue(cmd.hasOption('f'));
 			cmd = this.parser.parse(this.janusOptions, args("-file", "thefile"));
 			assertTrue(cmd.hasOption('f'));
 			cmd = this.parser.parse(this.janusOptions, args("--file", "thefile"));
 			assertTrue(cmd.hasOption('f'));
-			
+
 			cmd = this.parser.parse(this.janusOptions, args("-B", "uid"));
 			assertTrue(cmd.hasOption('B'));
 			cmd = this.parser.parse(this.janusOptions, args("-bootid", "uid"));
 			assertTrue(cmd.hasOption('B'));
 			cmd = this.parser.parse(this.janusOptions, args("--bootid", "uid"));
 			assertTrue(cmd.hasOption('B'));
-			
+
 			cmd = this.parser.parse(this.janusOptions, args("-R", "uid"));
 			assertTrue(cmd.hasOption('R'));
 			cmd = this.parser.parse(this.janusOptions, args("-randomid", "uid"));
 			assertTrue(cmd.hasOption('R'));
 			cmd = this.parser.parse(this.janusOptions, args("--randomid", "uid"));
 			assertTrue(cmd.hasOption('R'));
-			
+
 			cmd = this.parser.parse(this.janusOptions, args("-W", "uid"));
 			assertTrue(cmd.hasOption('W'));
 			cmd = this.parser.parse(this.janusOptions, args("-worldid", "uid"));
 			assertTrue(cmd.hasOption('W'));
 			cmd = this.parser.parse(this.janusOptions, args("--worldid", "uid"));
 			assertTrue(cmd.hasOption('W'));
-			
+
 			cmd = this.parser.parse(this.janusOptions, args("-D", "name=value"));
 			assertTrue(cmd.hasOption('D'));
 			cmd = this.parser.parse(this.janusOptions, args("-D", "name"));
@@ -239,6 +323,84 @@ public class BootTest extends Assert {
 			assertEquals("12", cmd.getArgs()[1]);
 			assertEquals("hola", cmd.getArgs()[2]);
 
+		}
+
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class StartTests {
+
+		@Before
+		public void setUp() {
+			resetProperties();
+		}
+
+		@After
+		public void tearDown() {
+			resetProperties();
+		}
+
+		@Test
+		public void startJanus() throws Exception {
+			Kernel kernel = Boot.startJanus(TestModule.class, AgentMock.class, "param1", "param2", "param3");
+
+			assertNotNull(kernel);
+
+			ArgumentCaptor<Class> agentType = ArgumentCaptor.forClass(Class.class);
+			ArgumentCaptor<String> parameters = ArgumentCaptor.forClass(String.class);
+			verify(kernel).spawn(agentType.capture(), parameters.capture());
+			assertEquals(AgentMock.class, agentType.getValue());
+			assertArrayEquals(new String[] {
+					"param1", "param2", "param3"
+			}, parameters.getAllValues().toArray());
+
+			assertEquals(AgentMock.class.getCanonicalName(), System.getProperty(JanusConfig.BOOT_AGENT));
+			String sid = System.getProperty(JanusConfig.BOOT_AGENT_ID);
+			assertNotNull(sid);
+			assertEquals(ID.toString(), sid);
+		}
+
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class Start2Tests {
+
+		@Before
+		public void setUp() {
+			resetProperties();
+		}
+
+		@After
+		public void tearDown() {
+			resetProperties();
+		}
+
+		@Test
+		public void getBootAgentIdentifier_notStarted() throws Exception {
+			assertNull(Boot.getBootAgentIdentifier());
+		}
+
+		@Test
+		public void getBootAgentIdentifier_started() throws Exception {
+			Boot.startJanus(TestModule.class, AgentMock.class);
+			assertEquals(ID, Boot.getBootAgentIdentifier());
+		}
+
+		@Test
+		public void getBootAgentIdentifier_startedAgain() throws Exception {
+			Boot.startJanus(TestModule.class, AgentMock.class);
+			assertEquals(ID, Boot.getBootAgentIdentifier());
+			assertEquals(ID, Boot.getBootAgentIdentifier());
 		}
 
 	}

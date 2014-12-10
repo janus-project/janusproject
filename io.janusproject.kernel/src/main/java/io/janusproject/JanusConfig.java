@@ -126,6 +126,10 @@ public final class JanusConfig {
 	 */
 	public static final String BOOT_AGENT = "janus.boot.agent"; //$NON-NLS-1$
 
+	/** Name of the property that contains the identifier of the boot agent.
+	 */
+	public static final String BOOT_AGENT_ID = "janus.boot.agent.id"; //$NON-NLS-1$
+
 	/** Name of the property that contains the public network URI.
 	 */
 	public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
@@ -185,6 +189,7 @@ public final class JanusConfig {
 	 */
 	public static void getDefaultValues(Properties defaultValues) {
 		defaultValues.put(BOOT_AGENT, ""); //$NON-NLS-1$
+		defaultValues.put(BOOT_AGENT_ID, ""); //$NON-NLS-1$
 		defaultValues.put(BOOT_DEFAULT_CONTEXT_ID_NAME, BOOT_DEFAULT_CONTEXT_ID_VALUE.toString());
 		defaultValues.put(DEFAULT_CONTEXT_ID_NAME, DEFAULT_CONTEXT_ID_VALUE);
 		defaultValues.put(DEFAULT_SPACE_ID_NAME, DEFAULT_SPACE_ID_VALUE);

@@ -21,11 +21,13 @@ package io.janusproject.util;
 
 import io.janusproject.JanusConfig;
 
+import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 
@@ -37,6 +39,16 @@ import org.junit.Test;
  */
 @SuppressWarnings({"javadoc","static-method"})
 public class LoggerCreatorTest extends Assert {
+
+	@Before
+	public void resetProperties() {
+		Properties tmp = new Properties();
+		JanusConfig.getDefaultValues(tmp);
+		Properties props = System.getProperties();
+		for(Object name : tmp.keySet()) {
+			props.remove(name);
+		}
+	}
 
 	@Test
 	public void getLevelStrings() {
@@ -138,7 +150,7 @@ public class LoggerCreatorTest extends Assert {
 		String propertyValue = JanusConfig.getSystemProperty(JanusConfig.VERBOSE_LEVEL_NAME, JanusConfig.VERBOSE_LEVEL_VALUE);
 		Level expectedLevel = LoggerCreator.parseLoggingLevel(propertyValue);
 		Level level = LoggerCreator.getLoggingLevelFromProperties();
-		assertSame(expectedLevel, level);
+		assertEquals(expectedLevel, level);
 	}
 
 	@Test
@@ -146,7 +158,7 @@ public class LoggerCreatorTest extends Assert {
 		String name = UUID.randomUUID().toString();
 		Level expectedLevel = LoggerCreator.getLoggingLevelFromProperties();
 		Logger logger = LoggerCreator.createLogger(name);
-		assertSame(expectedLevel, logger.getLevel());
+		assertEquals(expectedLevel, logger.getLevel());
 	}
 	
 	@Test
@@ -155,7 +167,7 @@ public class LoggerCreatorTest extends Assert {
 		String name = UUID.randomUUID().toString();
 		Level expectedLevel = LoggerCreator.getLoggingLevelFromProperties();
 		Logger logger = LoggerCreator.createLogger(name, parent);
-		assertSame(expectedLevel, logger.getLevel());
+		assertEquals(expectedLevel, logger.getLevel());
 	}
 
 }
