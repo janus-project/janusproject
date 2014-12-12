@@ -688,6 +688,17 @@
 				<enabled>true</enabled>
 			</releases>
 		</repository>
+		<repository>
+			<id>org.arakhne.maven</id>
+			<name>Arakhne Snapshots</name>
+			<url>http://download.tuxfamily.org/arakhne/maven</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
