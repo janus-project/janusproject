@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +38,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -158,44 +159,23 @@ public final class Boot {
 					}
 					File file = new File(rawFilename);
 					if (!file.canRead()) {
-						//CHECKSTYLE:OFF
-						System.err.println(Locale.getString(
+						showError(Locale.getString(
 								"INVALID_PROPERTY_FILENAME", //$NON-NLS-1$
-								rawFilename));
-						//CHECKSTYLE:ON
-						System.exit(ERROR_EXIT_CODE);
+								rawFilename), null);
+						// Event if showError never returns, add the return statement for
+						// avoiding compilation error.
+						return null;
 					}
 					propertyFiles.add(file.toURI().toURL());
 				}
 			}
 			return cmd.getArgs();
 		} catch (IOException | ParseException e) {
-			//CHECKSTYLE:OFF
-			e.printStackTrace();
-			//CHECKSTYLE:ON
-			showHelp();
-			// Only to avoid compilation errors
-			throw new Error();
+			showError(e.getLocalizedMessage(), e);
+			// Event if showError never returns, add the return statement for
+			// avoiding compilation error.
+			return null;
 		}
-	}
-
-	/** Show an error message, and exit.
-	 *
-	 * @param message - the description of the error.
-	 * @param e - the cause of the error.
-	 */
-	protected static void showError(String message, Throwable e) {
-		if (message != null && !message.isEmpty()) {
-			//CHECKSTYLE:OFF
-			System.err.println(message);
-			//CHECKSTYLE:ON
-		}
-		if (e != null) {
-			//CHECKSTYLE:OFF
-			e.printStackTrace();
-			//CHECKSTYLE:ON
-		}
-		showHelp();
 	}
 
 	private static Class<? extends Agent> loadAgentClass(String fullyQualifiedName) {
@@ -209,6 +189,8 @@ public final class Boot {
 							fullyQualifiedName,
 							System.getProperty("java.class.path")), //$NON-NLS-1$
 							null);
+			// Event if showError never returns, add the return statement for
+			// avoiding compilation error.
 			return null;
 		}
 		// The following test is needed because the
@@ -223,6 +205,8 @@ public final class Boot {
 				Locale.getString("INVALID_AGENT_TYPE", //$NON-NLS-1$
 						fullyQualifiedName),
 						null);
+		// Event if showError never returns, add the return statement for
+		// avoiding compilation error.
 		return null;
 	}
 
@@ -246,6 +230,9 @@ public final class Boot {
 				showError(
 						Locale.getString("NO_AGENT_QUALIFIED_NAME"), //$NON-NLS-1$
 						null);
+				// Event if showError never returns, add the return statement for
+				// avoiding compilation error.
+				return;
 			}
 
 			String agentToLaunch = freeArgs[0].toString();
@@ -273,9 +260,20 @@ public final class Boot {
 							"LAUNCHING_ERROR", //$NON-NLS-1$
 							e.getLocalizedMessage()),
 							e);
+			// Event if showError never returns, add the return statement for
+			// avoiding compilation error.
 			return;
 		}
 	}
+
+	/** Replies the console stream for logging messages from the boot mechanism.
+	 *
+	 * @return the console logger.
+	 */
+	public static OutputStream getConsoleLogger() {
+		return System.err;
+	}
+
 	/** Replies the command line options supported by this boot class.
 	 *
 	 * @return the command line options.
@@ -343,16 +341,47 @@ public final class Boot {
 		return options;
 	}
 
+	/** Show an error message, and exit.
+	 *
+	 * This function never returns.
+	 *
+	 * @param message - the description of the error.
+	 * @param e - the cause of the error.
+	 */
+	protected static void showError(String message, Throwable e) {
+		try (PrintWriter logger = new PrintWriter(getConsoleLogger())) {
+			if (message != null && !message.isEmpty()) {
+				logger.println(message);
+			}
+			if (e != null) {
+				//CHECKSTYLE:OFF
+				e.printStackTrace(logger);
+				//CHECKSTYLE:ON
+			}
+			showHelp(logger);
+		}
+	}
+
 	/** Show the help message on the standard console.
 	 * This function never returns.
 	 */
 	public static void showHelp() {
+		showHelp(new PrintWriter(getConsoleLogger()));
+	}
+
+	private static void showHelp(PrintWriter logger) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(
+				logger,
+				HelpFormatter.DEFAULT_WIDTH,
 				Boot.class.getName()
 				+ " " //$NON-NLS-1$
 				+ Locale.getString(Boot.class, "CLI_PARAM_SYNOPTIC"), //$NON-NLS-1$
-				getOptions());
+				"", //$NON-NLS-1$
+				getOptions(),
+				HelpFormatter.DEFAULT_LEFT_PAD,
+				HelpFormatter.DEFAULT_DESC_PAD,
+				""); //$NON-NLS-1$
 		System.exit(ERROR_EXIT_CODE);
 	}
 
@@ -363,9 +392,9 @@ public final class Boot {
 		Properties defaultValues = new Properties();
 		JanusConfig.getDefaultValues(defaultValues);
 		NetworkConfig.getDefaultValues(defaultValues);
-		try {
-			defaultValues.storeToXML(System.out, null);
-		} catch (IOException e) {
+		try (OutputStream os = getConsoleLogger()) {
+			defaultValues.storeToXML(os, null);
+		} catch (Throwable e) {
 			//CHECKSTYLE:OFF
 			e.printStackTrace();
 			//CHECKSTYLE:ON
@@ -571,11 +600,7 @@ public final class Boot {
 		}
 		assert (startupModule != null) : "No platform injection module"; //$NON-NLS-1$
 		Kernel k = Kernel.create(startupModule.newInstance());
-		if (LoggerCreator.getLoggingLevelFromProperties().intValue() <= Level.INFO.intValue()) {
-			//CHECKSTYLE:OFF
-			System.out.println(Locale.getString("LAUNCHING_AGENT", agentCls.getName())); //$NON-NLS-1$
-			//CHECKSTYLE:ON
-		}
+		k.getLogger().info(Locale.getString("LAUNCHING_AGENT", agentCls.getName())); //$NON-NLS-1$
 		UUID id = k.spawn(agentCls, params);
 		if (id != null) {
 			System.setProperty(JanusConfig.BOOT_AGENT_ID, id.toString());
