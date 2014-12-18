@@ -19,23 +19,23 @@
  */
 package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.kernel.services.AbstractServiceImplementationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.AvoidServiceStartForTest;
+import io.janusproject.testutils.StartServiceForTest;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
-
 
 /**
  * @author $Author: sgalland$
@@ -43,9 +43,10 @@ import org.mockito.internal.verification.Times;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked","rawtypes"})
-public class JdkExecutorServiceTest
-extends AbstractServiceImplementationTest<io.janusproject.services.executor.ExecutorService> {
+@SuppressWarnings("all")
+@StartServiceForTest
+public final class JdkExecutorServiceTest
+extends AbstractDependentServiceTest<JdkExecutorService> {
 
 	@Mock
 	private Runnable runnable;
@@ -59,9 +60,6 @@ extends AbstractServiceImplementationTest<io.janusproject.services.executor.Exec
 	@Mock
 	private ExecutorService executorService;
 	
-	@InjectMocks
-	private JdkExecutorService service;
-
 	/**
 	 * 
 	 */
@@ -70,22 +68,18 @@ extends AbstractServiceImplementationTest<io.janusproject.services.executor.Exec
 	}
 	
 	@Override
-	protected io.janusproject.services.executor.ExecutorService getTestedService() {
-		return this.service;
+	public JdkExecutorService newService() {
+		return new JdkExecutorService();
 	}
 	
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
+	@Override
+	public void getServiceDependencies() {
+		assertContains(this.service.getServiceDependencies());
 	}
-	
-	@After
-	public void tearDown() {
-		this.scheduledExecutorService = null;
-		this.executorService = null;
-		this.service = null;
-		this.runnable = null;
-		this.callable = null;
+
+	@Override
+	public void getServiceWeakDependencies() {
+		assertContains(this.service.getServiceWeakDependencies());
 	}
 
 	@Test
@@ -167,13 +161,15 @@ extends AbstractServiceImplementationTest<io.janusproject.services.executor.Exec
 		assertSame(TimeUnit.MILLISECONDS, argument4.getValue());
 	}
 
+	@AvoidServiceStartForTest
 	@Test
 	public void getExecutorService() {
 		assertSame(this.executorService, this.service.getExecutorService());
 	}
 
+	@AvoidServiceStartForTest
 	@Test
-	public void doStop() {
+	public void doStop_noinit() {
 		try {
 			this.service.doStop();
 			fail("IllegalStateException is expected"); //$NON-NLS-1$
@@ -187,4 +183,13 @@ extends AbstractServiceImplementationTest<io.janusproject.services.executor.Exec
 		Mockito.verify(this.executorService, new Times(1)).shutdownNow();
 	}
 	
+	@Test
+	public void doStop_init() {
+		this.service.doStop();
+		Mockito.verify(this.scheduledExecutorService, new Times(1)).shutdown();
+		Mockito.verify(this.executorService, new Times(1)).shutdown();
+		Mockito.verify(this.scheduledExecutorService, new Times(1)).shutdownNow();
+		Mockito.verify(this.executorService, new Times(1)).shutdownNow();
+	}
+
 }

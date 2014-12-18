@@ -19,8 +19,12 @@
  */
 package io.janusproject.kernel.services.jdk.network;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import io.janusproject.services.network.EventDispatch;
 import io.janusproject.services.network.EventEnvelope;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
@@ -31,7 +35,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,20 +47,42 @@ import org.junit.Test;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc"})
-public class JavaBinaryEventSerializerTest extends Assert {
+public class JavaBinaryEventSerializerTest extends AbstractJanusTest {
 
+	@Nullable
 	private JavaBinaryEventSerializer serializer;
 
+	@Nullable
 	private UUID rawContextId;
+
+	@Nullable
 	private byte[] serializedContextId;
+
+	@Nullable
 	private UUID rawSpaceId;
+
+	@Nullable
 	private byte[] serializedSpaceId;
+
+	@Nullable
 	private Scope<?> rawScope;
+
+	@Nullable
 	private byte[] serializedScope;
+
+	@Nullable
 	private Map<String,String> rawSimpleHeader;
+
+	@Nullable
 	private Map<String,String> rawAutofilledHeader;
+
+	@Nullable
 	private byte[] serializedHeader;
+
+	@Nullable
 	private Event rawEvent;
+
+	@Nullable
 	private byte[] serializedEvent;
 
 	@Before

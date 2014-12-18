@@ -19,21 +19,27 @@
  */
 package io.janusproject;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Assume;
-
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import io.janusproject.kernel.Kernel;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Agent;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -41,21 +47,18 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.arakhne.afc.vmutil.FileSystem;
 import org.arakhne.afc.vmutil.Resources;
+import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import com.google.inject.Binder;
-import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-
-import static org.mockito.Mockito.*;
 
 /**
  * @author $Author: sgalland$
@@ -71,7 +74,7 @@ import static org.mockito.Mockito.*;
 	BootTest.Start2Tests.class,
 })
 @SuppressWarnings("all")
-public class BootTest extends Assert {
+public class BootTest extends AbstractJanusTest {
 
 	static final UUID ID = UUID.fromString("63ee52ee-4739-47b1-9e73-0a7986d17bc5");
 
@@ -129,16 +132,17 @@ public class BootTest extends Assert {
 		public TestModule() {
 			//
 		}
-
+		
 		@Override
 		public void configure(Binder binder) {
 			//
 		}
-
+		
 		@Provides
 		public Kernel createKernel() {
 			Kernel k = mock(Kernel.class);
 			when(k.spawn(any(Class.class), anyVararg())).thenReturn(ID);
+			when(k.getLogger()).thenReturn(mock(Logger.class));
 			return k;
 		}
 

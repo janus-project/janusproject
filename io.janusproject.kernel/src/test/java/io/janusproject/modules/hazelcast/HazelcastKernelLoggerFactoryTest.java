@@ -19,15 +19,19 @@
  */
 package io.janusproject.modules.hazelcast;
 
-import io.janusproject.modules.hazelcast.HazelcastKernelLoggerFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -35,26 +39,21 @@ import org.mockito.Mockito;
 
 import com.hazelcast.logging.ILogger;
 
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
-public class HazelcastKernelLoggerFactoryTest extends Assert {
+@SuppressWarnings("all")
+public class HazelcastKernelLoggerFactoryTest extends AbstractJanusTest {
 
+	@Nullable
 	private HazelcastKernelLoggerFactory factory;
 	
 	@Before
 	public void setUp() {
 		this.factory = new HazelcastKernelLoggerFactory();
-	}
-	
-	@After
-	public void tearDown() {
-		this.factory = null;
 	}
 	
 	@Test

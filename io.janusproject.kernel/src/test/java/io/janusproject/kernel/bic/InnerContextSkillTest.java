@@ -19,7 +19,13 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
@@ -35,8 +41,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -53,9 +59,10 @@ import org.mockito.internal.verification.Times;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","synthetic-access"})
-public class InnerContextSkillTest extends Assert {
+@SuppressWarnings("all")
+public class InnerContextSkillTest extends AbstractJanusTest {
 
+	@Nullable
 	private UUID agentId;
 	
 	@Mock
@@ -77,6 +84,7 @@ public class InnerContextSkillTest extends Assert {
 	private InnerContextSkill skill;
 	
 	// It is an attribute to avoid to loose the weak references (eg. in AgentTraits).
+	@Nullable
 	private Agent agent;
 	
 	@Before
@@ -107,18 +115,6 @@ public class InnerContextSkillTest extends Assert {
 				Collections3.<UUID>synchronizedSingleton(this.agentId));
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		this.agentId = null;
-		this.skill = null;
-		this.contextService = null;
-		this.innerContext = null;
-		this.innerSpace = null;
-		this.eventListener = null;
-		this.busCapacity = null;
-		this.agent = null;
-	}
-	
 	@Test
 	public void getInnerContext() {
 		// Things are already injected

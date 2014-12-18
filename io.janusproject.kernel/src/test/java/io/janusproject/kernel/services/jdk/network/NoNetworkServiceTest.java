@@ -19,10 +19,19 @@
  */
 package io.janusproject.kernel.services.jdk.network;
 
-import io.janusproject.kernel.services.AbstractServiceImplementationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import io.janusproject.services.network.NetworkService;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.AvoidServiceStartForTest;
+import io.janusproject.testutils.StartServiceForTest;
 
-import org.junit.Before;
+import java.net.InetAddress;
+import java.net.URI;
+
+import org.junit.Assume;
+import org.junit.Test;
 
 /** 
  * @author $Author: sgalland$
@@ -30,26 +39,67 @@ import org.junit.Before;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class NoNetworkServiceTest extends AbstractServiceImplementationTest<NetworkService> {
+@StartServiceForTest
+@SuppressWarnings("all")
+public class NoNetworkServiceTest extends AbstractDependentServiceTest<NoNetworkService> {
 
-	private NoNetworkService service;
-
-	/**
-	 */
 	public NoNetworkServiceTest() {
 		super(NetworkService.class);
 	}
 
 	@Override
-	protected final NetworkService getTestedService() {
-		return this.service;
+	public final NoNetworkService newService() {
+		return new NoNetworkService();
 	}
 
-	/**
-	 */
-	@Before
-	public void setUp() {
-		this.service = new NoNetworkService();
+	@Override
+	public void getServiceDependencies() {
+		assertContains(this.service.getServiceDependencies());
 	}
-	
+
+	@Override
+	public void getServiceWeakDependencies() {
+		assertContains(this.service.getServiceWeakDependencies());
+	}
+
+	@AvoidServiceStartForTest
+	@Test
+	public void getURI_notStarted() throws Exception {
+		assertNull(this.service.getURI());
+	}
+
+	@Test
+	public void getURI_started_loopback() throws Exception {
+		InetAddress adr = NetworkUtil.getLoopbackAddress();
+		Assume.assumeNotNull(adr);
+		assertEquals(new URI("tcp://" + adr.getHostAddress() + ":0"), this.service.getURI());
+	}
+
+	@Test
+	public void getURI_started_noLoopback() throws Exception {
+		InetAddress adr = NetworkUtil.getLoopbackAddress();
+		Assume.assumeTrue(adr == null);
+		assertEquals(new URI("tcp://127.0.0.1:0"), this.service.getURI());
+	}
+
+	@Test
+	public void publish() throws Exception {
+		this.service.publish(null, null);
+	}
+
+	@Test
+	public void connectToRemoteSpaces() throws Exception {
+		this.service.connectToRemoteSpaces(null, null, null);
+	}
+
+	@Test
+	public void disconnectFromRemoteSpace() throws Exception {
+		this.service.disconnectFromRemoteSpace(null, null);
+	}
+
+	@Test
+	public void disconnectPeer() throws Exception {
+		this.service.disconnectPeer(null);
+	}
+
 }

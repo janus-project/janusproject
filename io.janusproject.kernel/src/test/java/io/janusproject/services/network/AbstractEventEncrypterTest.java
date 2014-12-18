@@ -19,13 +19,13 @@
  */
 package io.janusproject.services.network;
 
-import io.janusproject.services.network.AbstractEventEncrypter;
-import io.janusproject.services.network.EventEnvelope;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.UUID;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,8 +35,8 @@ import org.junit.Test;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
-public class AbstractEventEncrypterTest extends Assert {
+@SuppressWarnings("all")
+public class AbstractEventEncrypterTest extends AbstractJanusTest {
 
 	private static AbstractEventEncrypter encrypter;
 	

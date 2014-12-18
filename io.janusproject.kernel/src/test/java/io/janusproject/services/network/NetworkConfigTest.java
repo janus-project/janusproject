@@ -19,13 +19,13 @@
  */
 package io.janusproject.services.network;
 
+import static org.junit.Assert.assertEquals;
 import io.janusproject.kernel.services.gson.GsonEventSerializer;
 import io.janusproject.kernel.services.jdk.network.PlainTextEventEncrypter;
-import io.janusproject.services.network.NetworkConfig;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.Properties;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.base.Charsets;
@@ -36,8 +36,8 @@ import com.google.common.base.Charsets;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
-public class NetworkConfigTest extends Assert {
+@SuppressWarnings("all")
+public class NetworkConfigTest extends AbstractJanusTest {
 
 	@Test
 	public void getDefaultValues() {

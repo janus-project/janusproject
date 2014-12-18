@@ -19,17 +19,17 @@
  */
 package io.janusproject.modules.hazelcast;
 
-import io.janusproject.modules.hazelcast.AddressSerializer;
+import static org.junit.Assert.assertEquals;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpaceSpecification;
 
 import java.util.UUID;
 
-import org.junit.After;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
-
 
 /**
  * @author $Author: sgalland$
@@ -40,6 +40,7 @@ import org.junit.Test;
 @SuppressWarnings({"javadoc"})
 public class AddressSerializerTest extends AbstractSerializerTest {
 
+	@Nullable
 	private AddressSerializer serializer;
 	
 	@Before
@@ -47,11 +48,6 @@ public class AddressSerializerTest extends AbstractSerializerTest {
 		this.serializer = new AddressSerializer();
 	}
 	
-	@After
-	public void tearDown() {
-		this.serializer = null;
-	}
-
 	@Test
 	public void getTypeId() {
 		assertEquals(AddressSerializer.ADDRESS_CLASS_TYPE, this.serializer.getTypeId());

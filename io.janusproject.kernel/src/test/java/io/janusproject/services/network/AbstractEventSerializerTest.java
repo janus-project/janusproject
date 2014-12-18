@@ -19,15 +19,14 @@
  */
 package io.janusproject.services.network;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import io.janusproject.kernel.services.jdk.network.PlainTextEventEncrypter;
-import io.janusproject.services.network.AbstractEventSerializer;
-import io.janusproject.services.network.EventDispatch;
-import io.janusproject.services.network.EventEnvelope;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.UUID;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,8 +36,8 @@ import org.junit.Test;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
-public class AbstractEventSerializerTest extends Assert {
+@SuppressWarnings("all")
+public class AbstractEventSerializerTest extends AbstractJanusTest {
 
 	private static AbstractEventSerializer serializer;
 	

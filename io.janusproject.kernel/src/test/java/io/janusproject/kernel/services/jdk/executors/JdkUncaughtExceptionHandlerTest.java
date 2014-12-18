@@ -19,17 +19,19 @@
  */
 package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.kernel.services.jdk.executors.JdkUncaughtExceptionHandler;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import io.janusproject.services.executor.ChuckNorrisException;
 import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Event;
 
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,10 +48,15 @@ import com.google.common.eventbus.SubscriberExceptionContext;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc"})
-public class JdkUncaughtExceptionHandlerTest extends Assert {
+public class JdkUncaughtExceptionHandlerTest extends AbstractJanusTest {
 
+	@Nullable
 	private LogService logger;
+
+	@Nullable
 	private JdkUncaughtExceptionHandler handler;
+
+	@Nullable
 	private SubscriberExceptionContext exceptionContext;
 	
 	@Before
@@ -66,13 +73,6 @@ public class JdkUncaughtExceptionHandlerTest extends Assert {
 		Mockito.when(this.exceptionContext.getEvent()).thenReturn(event);
 				
 		this.handler = new JdkUncaughtExceptionHandler(this.logger);
-	}
-	
-	@After
-	public void tearDown() {
-		this.logger = null;
-		this.handler = null;
-		this.exceptionContext = null;
 	}
 	
 	@Test

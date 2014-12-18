@@ -19,6 +19,7 @@
  */
 package io.janusproject.kernel.bic;
 
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Agent;
@@ -31,12 +32,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static org.junit.Assert.*;
 
 /**
  * @author $Author: sgalland$
@@ -44,11 +48,16 @@ import org.mockito.Mockito;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","synthetic-access"})
-public class BuiltinCapacityUtilTest extends Assert {
+@SuppressWarnings("all")
+public class BuiltinCapacityUtilTest extends AbstractJanusTest {
 
+	@Nullable
 	private InnerContextAccess innerSkill;
+
+	@Nullable
 	private ExternalContextAccess contextSkill;
+
+	@Nullable
 	private Agent agent;
 	
 	@Before
@@ -66,13 +75,6 @@ public class BuiltinCapacityUtilTest extends Assert {
 			}
 		};
 		this.agent = Mockito.spy(this.agent);
-	}
-	
-	@After
-	public void tearDown() {
-		this.agent = null;
-		this.innerSkill = null;
-		this.contextSkill = null;
 	}
 
 	@Test

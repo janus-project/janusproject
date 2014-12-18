@@ -19,6 +19,9 @@
  */
 package io.janusproject.modules.hazelcast;
 
+import static org.junit.Assert.assertEquals;
+import io.janusproject.testutils.AbstractJanusTest;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,13 +29,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteOrder;
 
-import org.junit.Assert;
-
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.Data;
 import com.hazelcast.nio.serialization.StreamSerializer;
-
 
 /**
  * @author $Author: sgalland$
@@ -40,8 +40,8 @@ import com.hazelcast.nio.serialization.StreamSerializer;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked"})
-abstract class AbstractSerializerTest extends Assert {
+@SuppressWarnings("all")
+abstract class AbstractSerializerTest extends AbstractJanusTest {
 
 	protected static <S> void assertWriteRead(S expected, StreamSerializer<S> serializer) throws Exception {
 		byte[] content;

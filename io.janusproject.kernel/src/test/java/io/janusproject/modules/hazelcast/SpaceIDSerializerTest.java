@@ -19,16 +19,16 @@
  */
 package io.janusproject.modules.hazelcast;
 
-import io.janusproject.modules.hazelcast.SpaceIDSerializer;
+import static org.junit.Assert.assertEquals;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpaceSpecification;
 
 import java.util.UUID;
 
-import org.junit.After;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
-
 
 /**
  * @author $Author: sgalland$
@@ -39,6 +39,7 @@ import org.junit.Test;
 @SuppressWarnings({"javadoc"})
 public class SpaceIDSerializerTest extends AbstractSerializerTest {
 
+	@Nullable
 	private SpaceIDSerializer serializer;
 	
 	@Before
@@ -46,11 +47,6 @@ public class SpaceIDSerializerTest extends AbstractSerializerTest {
 		this.serializer = new SpaceIDSerializer();
 	}
 	
-	@After
-	public void tearDown() {
-		this.serializer = null;
-	}
-
 	@Test
 	public void getTypeId() {
 		assertEquals(SpaceIDSerializer.SPACE_ID_CLASS_TYPE, this.serializer.getTypeId());

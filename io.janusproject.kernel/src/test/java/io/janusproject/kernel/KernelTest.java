@@ -19,6 +19,12 @@
  */
 package io.janusproject.kernel;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -26,7 +32,9 @@ import static org.mockito.Mockito.when;
 import io.janusproject.services.IServiceManager;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.logging.LogService;
 import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
@@ -37,8 +45,8 @@ import java.util.UUID;
 
 import javassist.Modifier;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -54,17 +62,37 @@ import com.google.common.util.concurrent.Service.State;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked","rawtypes","static-method"})
-public class KernelTest extends Assert {
+@SuppressWarnings("all")
+public class KernelTest extends AbstractJanusTest {
 
+	@Nullable
 	private ImmutableMultimap<State,Service> services;
+
+	@Nullable
 	private SpawnService spawnService;
+
+	@Nullable
 	private ExecutorService executorService;
+
+	@Nullable
+	private LogService loggingService;
+
+	@Nullable
 	private ContextSpaceService contextService;
+
+	@Nullable
 	private IServiceManager serviceManager;
+
+	@Nullable
 	private UncaughtExceptionHandler exceptionHandler;
+
+	@Nullable
 	private AgentContext agentContext;
+
+	@Nullable
 	private Kernel kernel;
+
+	@Nullable
 	private UUID uuid;
 	
 	@Before
@@ -72,6 +100,7 @@ public class KernelTest extends Assert {
 		this.uuid = UUID.randomUUID();
 		this.spawnService = mock(SpawnService.class);
 		this.executorService = mock(ExecutorService.class);
+		this.loggingService = mock(LogService.class);
 		this.contextService = mock(ContextSpaceService.class);
 		this.services = ImmutableMultimap.<State,Service>of(
 				State.RUNNING, this.spawnService,
@@ -91,23 +120,10 @@ public class KernelTest extends Assert {
 		when(this.contextService.state()).thenReturn(State.RUNNING);
 		when(this.serviceManager.servicesByState()).thenReturn(this.services);
 		//
-		this.kernel = new Kernel(this.serviceManager, this.spawnService, this.exceptionHandler);
+		this.kernel = new Kernel(this.serviceManager, this.spawnService, this.loggingService, this.exceptionHandler);
 		this.kernel = spy(this.kernel);
 	}
 	
-	@After
-	public void tearDown() {
-		this.kernel = null;
-		this.agentContext = null;
-		this.serviceManager = null;
-		this.spawnService = null;
-		this.executorService = null;
-		this.contextService = null;
-		this.exceptionHandler = null;
-		this.services = null;
-		this.uuid = null;
-	}
-
 	@Test
 	public void getService() {
 		assertSame(this.spawnService, this.kernel.getService(SpawnService.class));

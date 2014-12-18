@@ -19,7 +19,9 @@
  */
 package io.janusproject.services.network;
 
-import io.janusproject.services.network.EventDispatch;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
@@ -27,8 +29,9 @@ import io.sarl.lang.core.SpaceID;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -39,13 +42,22 @@ import org.mockito.Mockito;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
-public class EventDispatchTest extends Assert {
+@SuppressWarnings("all")
+public class EventDispatchTest extends AbstractJanusTest {
 
+	@Nullable
 	private SpaceID spaceId;
+
+	@Nullable
 	private Event event;
+
+	@Nullable
 	private Scope<?> scope;
+
+	@Nullable
 	private Map<String,String> headers;
+
+	@Nullable
 	private EventDispatch dispatch;
 	
 	@Before
@@ -55,15 +67,6 @@ public class EventDispatchTest extends Assert {
 		this.scope = Mockito.mock(Scope.class);
 		this.headers= new HashMap<>();
 		this.dispatch = new EventDispatch(this.spaceId, this.event, this.scope, this.headers);
-	}
-	
-	@After
-	public void tearDown() {
-		this.dispatch = null;
-		this.scope = null;
-		this.event = null;
-		this.spaceId = null;
-		this.headers = null;
 	}
 	
 	@Test

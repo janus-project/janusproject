@@ -19,12 +19,14 @@
  */
 package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.kernel.services.jdk.executors.JdkThreadFactory;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -36,21 +38,18 @@ import org.mockito.Mockito;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc"})
-public class JdkThreadFactoryTest extends Assert {
+public class JdkThreadFactoryTest extends AbstractJanusTest {
 
+	@Nullable
 	private UncaughtExceptionHandler handler;
+
+	@Nullable
 	private JdkThreadFactory factory;
 	
 	@Before
 	public void setUp() {
 		this.handler = Mockito.mock(UncaughtExceptionHandler.class);
 		this.factory = new JdkThreadFactory(this.handler);
-	}
-	
-	@After
-	public void tearDown() {
-		this.factory = null;
-		this.handler = null;
 	}
 	
 	@Test

@@ -19,13 +19,29 @@
  */
 package io.janusproject.kernel.services.zeromq;
 
-import io.janusproject.kernel.services.AbstractServiceImplementationTest;
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.EventSerializer;
 import io.janusproject.services.network.NetworkService;
 import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.AvoidServiceStartForTest;
+import io.janusproject.testutils.StartServiceForTest;
 
 import java.net.InetAddress;
+import java.net.URI;
 
+import javax.annotation.Nullable;
+
+import org.junit.After;
 import org.junit.Before;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.google.inject.Inject;
 
 /** 
  * @author $Author: sgalland$
@@ -33,10 +49,30 @@ import org.junit.Before;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class ZeroMQNetworkServiceTest
-extends AbstractServiceImplementationTest<NetworkService> {
+@StartServiceForTest(startAfterSetUp = true, createAfterSetUp = true)
+@SuppressWarnings("all")
+public class ZeroMQNetworkServiceTest extends AbstractDependentServiceTest<ZeroMQNetworkService> {
 
-	private ZeroMQNetworkService service;
+	@Nullable
+	private URI uri;
+	
+	@Mock
+	private LogService logService;
+	
+	@Mock
+	private LogService logger;
+
+	@Mock
+	private KernelDiscoveryService kernelService;
+
+	@Mock
+	private ContextSpaceService spaceService;
+
+	@Mock
+	private ExecutorService executorService;
+
+	@Mock
+	private EventSerializer serializer;
 
 	/**
 	 */
@@ -44,18 +80,30 @@ extends AbstractServiceImplementationTest<NetworkService> {
 		super(NetworkService.class);
 	}
 
-	@Override
-	protected final NetworkService getTestedService() {
-		return this.service;
-	}
-
-	/**
-	 */
 	@Before
 	public void setUp() {
 		InetAddress adr = NetworkUtil.getLoopbackAddress();
-		this.service = new ZeroMQNetworkService(
-				NetworkUtil.toURI(adr, -1));
+		this.uri = NetworkUtil.toURI(adr, -1);
+	}
+
+	@Override
+	public ZeroMQNetworkService newService() {
+		return new ZeroMQNetworkService(this.uri);
 	}
 	
+	@AvoidServiceStartForTest
+	@Override
+	public void getServiceDependencies() {
+		assertContains(this.service.getServiceDependencies(),
+				LogService.class,
+				ExecutorService.class);
+	}
+	
+	@AvoidServiceStartForTest
+	@Override
+	public void getServiceWeakDependencies() {
+		assertContains(this.service.getServiceWeakDependencies(),
+				KernelDiscoveryService.class);
+	}
+
 }

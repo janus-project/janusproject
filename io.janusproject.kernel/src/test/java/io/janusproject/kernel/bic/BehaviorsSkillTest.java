@@ -19,6 +19,9 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
@@ -33,8 +36,8 @@ import io.sarl.lang.core.SpaceID;
 
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -47,14 +50,25 @@ import org.mockito.Mockito;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","synthetic-access"})
-public class BehaviorsSkillTest extends Assert {
+@SuppressWarnings("all")
+public class BehaviorsSkillTest extends AbstractJanusTest {
 
+	@Nullable
 	private EventListener eventListener;
+
+	@Nullable
 	private InternalEventBusCapacity busCapacity;
+
+	@Nullable
 	private InnerContextAccess innerCapacity;
+
+	@Nullable
 	private EventSpace innerSpace;
+
+	@Nullable
 	private Address address;
+
+	@Nullable
 	private BehaviorsSkill skill;
 	
 	@Before
@@ -89,17 +103,6 @@ public class BehaviorsSkillTest extends Assert {
 		
 		this.skill = new BehaviorsSkill(agent, 	this.address);
 	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.address = null;
-		this.skill = null;
-		this.eventListener = null;
-		this.busCapacity = null;
-		this.innerCapacity = null;
-		this.innerSpace = null;
-	}
-
 
 	@Test
 	public void asEventListener() {

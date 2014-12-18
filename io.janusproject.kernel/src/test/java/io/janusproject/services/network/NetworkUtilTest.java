@@ -19,7 +19,10 @@
  */
 package io.janusproject.services.network;
 
-import io.janusproject.services.network.NetworkUtil;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -27,7 +30,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.UUID;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -36,8 +38,8 @@ import org.junit.Test;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
-public class NetworkUtilTest extends Assert {
+@SuppressWarnings("all")
+public class NetworkUtilTest extends AbstractJanusTest {
 
 	@Test
 	public void toByteArrayUUID() {

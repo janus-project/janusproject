@@ -19,14 +19,19 @@
  */
 package io.janusproject.kernel.services.hazelcast;
 
-import io.janusproject.kernel.services.AbstractServiceImplementationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DMultiMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.StartServiceForTest;
 
+import java.util.Comparator;
 import java.util.UUID;
 
-import org.junit.After;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -38,7 +43,7 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ISemaphore;
 import com.hazelcast.core.ISet;
-
+import com.hazelcast.core.MultiMap;
 
 /**
  * @author $Author: sgalland$
@@ -46,61 +51,53 @@ import com.hazelcast.core.ISet;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-access","unchecked"})
+@SuppressWarnings("all")
+@StartServiceForTest(startAfterSetUp = true)
 public class HazelcastDistributedDataStructureFactoryTest
-extends AbstractServiceImplementationTest<DistributedDataStructureService> {
+extends AbstractDependentServiceTest<HazelcastDistributedDataStructureService> {
 
+	@Nullable
 	private HazelcastInstance hz;
-	private IList<Object> list;
+
+	@Nullable
 	private IMap<Object,Object> imap;
-	private com.hazelcast.core.MultiMap<Object,Object> multimap;
-	private IQueue<Object> queue;
-	private ISemaphore semaphore;
-	private ISet<Object> set;
+
+	@Nullable
+	private MultiMap<Object,Object> multimap;
+
+	@Nullable
 	private HazelcastDistributedDataStructureService factory;
 	
 	public HazelcastDistributedDataStructureFactoryTest() {
 		super(DistributedDataStructureService.class);
 	}
 	
-	/** {@inheritDoc}
-	 */
 	@Override
-	protected DistributedDataStructureService getTestedService() {
-		return this.factory;
+	public HazelcastDistributedDataStructureService newService() {
+		return new HazelcastDistributedDataStructureService();
 	}
 	
 	@Before
 	public void setUp() {
-		this.list = Mockito.mock(IList.class);
 		this.imap = Mockito.mock(IMap.class);
 		this.multimap = Mockito.mock(com.hazelcast.core.MultiMap.class);
-		this.queue = Mockito.mock(IQueue.class);
-		this.semaphore = Mockito.mock(ISemaphore.class);
-		this.set = Mockito.mock(ISet.class);
 		this.hz = Mockito.mock(HazelcastInstance.class);
 		Mockito.when(this.hz.getMap(Mockito.any(String.class))).thenReturn(this.imap);
 		Mockito.when(this.hz.getMultiMap(Mockito.any(String.class))).thenReturn(this.multimap);
-		Mockito.when(this.hz.getQueue(Mockito.any(String.class))).thenReturn(this.queue);
-		Mockito.when(this.hz.getSemaphore(Mockito.any(String.class))).thenReturn(this.semaphore);
-		Mockito.when(this.hz.getSet(Mockito.any(String.class))).thenReturn(this.set);
-		Mockito.when(this.hz.getList(Mockito.any(String.class))).thenReturn(this.list);
 		this.factory = new HazelcastDistributedDataStructureService();
 		this.factory.setHazelcastInstance(this.hz);
 	}
 	
-	@After
-	public void tearDown() {
-		this.factory = null;
-		this.hz = null;
-		this.list = null;
-		this.imap = null;
-		this.multimap = null;
-		this.queue = null;
-		this.semaphore = null;
-		this.set = null;
+	@Override
+	public void getServiceDependencies() {
+		assertContains(this.service.getServiceDependencies());
 	}
-	
+
+	@Override
+	public void getServiceWeakDependencies() {
+		assertContains(this.service.getServiceWeakDependencies());
+	}
+
 	@Test
 	public void getMap() {
 		DMap<Object,Object> m = this.factory.getMap(UUID.randomUUID().toString());
@@ -122,6 +119,71 @@ extends AbstractServiceImplementationTest<DistributedDataStructureService> {
 		Mockito.verify(this.multimap).put(argument1.capture(), argument2.capture());
 		assertEquals("a", argument1.getValue()); //$NON-NLS-1$
 		assertEquals("b", argument2.getValue()); //$NON-NLS-1$
+	}
+
+	@Test
+	public void getMapComparator_null() {
+		DMap<Object,Object> m = this.factory.getMap(UUID.randomUUID().toString(), null);
+		assertNotNull(m);
+		m.put("a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		ArgumentCaptor<Object> argument1 = ArgumentCaptor.forClass(Object.class);
+		ArgumentCaptor<Object> argument2 = ArgumentCaptor.forClass(Object.class);
+		Mockito.verify(this.imap).put(argument1.capture(), argument2.capture());
+		assertEquals("a", argument1.getValue()); //$NON-NLS-1$
+		assertEquals("b", argument2.getValue()); //$NON-NLS-1$
+	}
+
+	@Test
+	public void getMultiMapComparator_null() {
+		DMultiMap<Object,Object> m = this.factory.getMultiMap(UUID.randomUUID().toString(), null);
+		m.put("a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		ArgumentCaptor<Object> argument1 = ArgumentCaptor.forClass(Object.class);
+		ArgumentCaptor<Object> argument2 = ArgumentCaptor.forClass(Object.class);
+		Mockito.verify(this.multimap).put(argument1.capture(), argument2.capture());
+		assertEquals("a", argument1.getValue()); //$NON-NLS-1$
+		assertEquals("b", argument2.getValue()); //$NON-NLS-1$
+	}
+
+	@Test
+	public void getMapComparator_notNull() {
+		DMap<Object,Object> m = this.factory.getMap(UUID.randomUUID().toString(), new ComparableComparator());
+		assertNotNull(m);
+		m.put("a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		ArgumentCaptor<Object> argument1 = ArgumentCaptor.forClass(Object.class);
+		ArgumentCaptor<Object> argument2 = ArgumentCaptor.forClass(Object.class);
+		Mockito.verify(this.imap).put(argument1.capture(), argument2.capture());
+		assertEquals("a", argument1.getValue()); //$NON-NLS-1$
+		assertEquals("b", argument2.getValue()); //$NON-NLS-1$
+	}
+
+	@Test
+	public void getMultiMapComparator_notNull() {
+		DMultiMap<Object,Object> m = this.factory.getMultiMap(UUID.randomUUID().toString(), new ComparableComparator());
+		m.put("a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		ArgumentCaptor<Object> argument1 = ArgumentCaptor.forClass(Object.class);
+		ArgumentCaptor<Object> argument2 = ArgumentCaptor.forClass(Object.class);
+		Mockito.verify(this.multimap).put(argument1.capture(), argument2.capture());
+		assertEquals("a", argument1.getValue()); //$NON-NLS-1$
+		assertEquals("b", argument2.getValue()); //$NON-NLS-1$
+	}
+	
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class ComparableComparator implements Comparator<Object> {
+
+		public ComparableComparator() {
+			//
+		}
+
+		@Override
+		public int compare(Object o1, Object o2) {
+			return System.identityHashCode(o1) - System.identityHashCode(o2);
+		}
+		
 	}
 
 }

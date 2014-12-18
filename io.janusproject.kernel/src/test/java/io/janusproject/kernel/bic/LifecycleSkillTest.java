@@ -24,12 +24,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import io.janusproject.services.executor.ChuckNorrisException;
 import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.AgentTraitUnitTestAccessor;
 import io.sarl.lang.core.Event;
 
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
@@ -41,6 +44,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.junit.Assert.*;
+
 /**
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -48,9 +53,10 @@ import org.mockito.MockitoAnnotations;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","rawtypes","unchecked"})
-public class LifecycleSkillTest extends Assert {
+@SuppressWarnings("all")
+public class LifecycleSkillTest extends AbstractJanusTest {
 
+	@Nullable
 	private UUID agentId;
 	
 	@Mock
@@ -79,13 +85,6 @@ public class LifecycleSkillTest extends Assert {
 			}
 		};
 		AgentTraitUnitTestAccessor.setOwner(this.skill, agent);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.spawnService = null;
-		this.skill = null;
-		this.agentId = null;
 	}
 
 	@Test

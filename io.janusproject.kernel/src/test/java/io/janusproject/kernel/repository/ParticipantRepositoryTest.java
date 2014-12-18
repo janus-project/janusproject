@@ -19,7 +19,13 @@
  */
 package io.janusproject.kernel.repository;
 
-import io.janusproject.kernel.repository.ParticipantRepository;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.EventListener;
 
 import java.util.Collection;
@@ -28,8 +34,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -40,10 +46,13 @@ import org.mockito.Mockito;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
-public class ParticipantRepositoryTest extends Assert {
+@SuppressWarnings("all")
+public class ParticipantRepositoryTest extends AbstractJanusTest {
 
+	@Nullable
 	private ParticipantRepository<String> repository;
+
+	@Nullable
 	private Map<String,EventListener> listeners;
 	
 	@Before
@@ -57,12 +66,6 @@ public class ParticipantRepositoryTest extends Assert {
 		this.listeners.put("c", Mockito.mock(EventListener.class)); //$NON-NLS-1$
 		this.listeners.put("d", Mockito.mock(EventListener.class)); //$NON-NLS-1$
 		this.listeners.put("e", Mockito.mock(EventListener.class)); //$NON-NLS-1$
-	}
-	
-	@After
-	public void tearDown() {
-		this.repository = null;
-		this.listeners = null;
 	}
 	
 	private void addListenerMocks() {

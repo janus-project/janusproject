@@ -19,9 +19,18 @@
  */
 package io.janusproject.kernel.services.jdk.contextspace;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.contextspace.SpaceRepositoryListener;
 import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
@@ -36,13 +45,14 @@ import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.UUID;
 
 import javassist.Modifier;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -54,24 +64,40 @@ import org.mockito.stubbing.Answer;
 
 import com.google.inject.Injector;
 
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked","static-method"})
-public class SpaceRepositoryTest extends Assert {
+@SuppressWarnings("all")
+public class SpaceRepositoryTest extends AbstractJanusTest {
 
+	@Nullable
 	private DMap<SpaceID,Object[]> spaceIDs;
+
+	@Nullable
 	private DistributedDataStructureService dds;
+
+	@Nullable
 	private Injector injector;
+
+	@Nullable
 	private SpaceRepositoryListener listener;
+
+	@Nullable
 	private SpaceRepository repository;
+
+	@Nullable
 	private SpaceID spaceID;
+
+	@Nullable
 	private Object[] params;
+
+	@Nullable
 	private OpenEventSpaceSpecification spaceSpecification;
+
+	@Nullable
 	private OpenEventSpace space;
 	
 	@Before
@@ -83,6 +109,7 @@ public class SpaceRepositoryTest extends Assert {
 		this.spaceID = new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class);
 		this.params = new Object[]{"PARAM"}; //$NON-NLS-1$
 		//
+		Mockito.when(this.dds.<SpaceID,Object[]>getMap(Matchers.anyString(), Matchers.any(Comparator.class))).thenReturn(this.spaceIDs);
 		Mockito.when(this.dds.<SpaceID,Object[]>getMap(Matchers.anyString())).thenReturn(this.spaceIDs);
 		//
 		this.repository = new SpaceRepository(
@@ -90,19 +117,6 @@ public class SpaceRepositoryTest extends Assert {
 				this.dds,
 				this.injector,
 				this.listener);		
-	}
-	
-	@After
-	public void tearDown() {
-		this.space = null;
-		this.spaceSpecification = null;
-		this.params = null;
-		this.spaceID = null;
-		this.listener = null;
-		this.injector = null;
-		this.dds = null;
-		this.repository = null;
-		this.spaceIDs = null;
 	}
 	
 	private void initMocks() {

@@ -19,12 +19,17 @@
  */
 package io.janusproject.kernel.repository;
 
+import io.janusproject.kernel.services.jdk.distributeddata.DMapView;
+import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.testutils.MapMock;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.EventListener;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -32,28 +37,47 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static org.junit.Assert.*;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
-public class UniqueAddressParticipantRepositoryTest extends Assert {
+@SuppressWarnings("all")
+public class UniqueAddressParticipantRepositoryTest extends AbstractJanusTest {
 
+	@Nullable
 	private String distributedName;
+
+	@Nullable
 	private UniqueAddressParticipantRepository<String> repository;
+
+	@Nullable
 	private DistributedDataStructureService service;
+
+	@Nullable
 	private UUID id1;
+
+	@Nullable
 	private UUID id2;
+
+	@Nullable
 	private EventListener listener1;
+
+	@Nullable
 	private EventListener listener2;
 
 	@Before
 	public void setUp() {
 		this.distributedName = getClass().getName()+UUID.randomUUID().toString();
 		this.service = Mockito.mock(DistributedDataStructureService.class);
-		Mockito.when(this.service.getMap(this.distributedName)).thenReturn(new MapMock<>());
+		DMap<Object, Object> mapMock = new DMapView<>(
+				UUID.randomUUID().toString(),
+				new HashMap<>());
+		Mockito.when(this.service.getMap(this.distributedName, null)).thenReturn(mapMock);
+		Mockito.when(this.service.getMap(this.distributedName)).thenReturn(mapMock);
 		this.repository = new UniqueAddressParticipantRepository<>(this.distributedName, this.service);
 		this.id1 = UUID.randomUUID();
 		this.id2 = UUID.randomUUID();
@@ -61,15 +85,6 @@ public class UniqueAddressParticipantRepositoryTest extends Assert {
 		Mockito.when(this.listener1.getID()).thenReturn(this.id1);
 		this.listener2 = Mockito.mock(EventListener.class);
 		Mockito.when(this.listener2.getID()).thenReturn(this.id2);
-	}
-
-	@After
-	public void tearDown() {
-		this.repository = null;
-		this.distributedName = null;
-		this.service = null;
-		this.id1 = this.id2 = null;
-		this.listener1 = this.listener2 = null;
 	}
 
 	@Test

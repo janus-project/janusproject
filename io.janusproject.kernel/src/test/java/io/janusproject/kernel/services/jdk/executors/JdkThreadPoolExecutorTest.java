@@ -19,10 +19,14 @@
  */
 package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.kernel.services.jdk.executors.JdkTaskListener;
-import io.janusproject.kernel.services.jdk.executors.JdkThreadFactory;
-import io.janusproject.kernel.services.jdk.executors.JdkThreadPoolExecutor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.janusproject.testutils.FutureExceptionMatcher;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -31,8 +35,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.Nullable;
+
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,12 +51,17 @@ import org.mockito.exceptions.base.MockitoException;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc"})
-public class JdkThreadPoolExecutorTest extends Assert {
+public class JdkThreadPoolExecutorTest extends AbstractJanusTest {
 
 	static final Object VALUE = new Object();
 
+	@Nullable
 	private TerminationListener termListener;
+
+	@Nullable
 	private JdkThreadPoolExecutor executor;
+
+	@Nullable
 	private UncaughtExceptionHandler handler;
 
 	@Before
@@ -66,9 +76,6 @@ public class JdkThreadPoolExecutorTest extends Assert {
 	public void tearDown() {
 		this.executor.shutdownNow();
 		this.executor.removeTaskListener(this.termListener);
-		this.handler = null;
-		this.executor = null;
-		this.termListener = null;
 	}
 
 	@Test

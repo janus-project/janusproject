@@ -19,6 +19,8 @@
  */
 package io.janusproject.kernel.space;
 
+import static org.junit.Assert.assertEquals;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
@@ -27,9 +29,7 @@ import io.sarl.util.OpenEventSpaceSpecification;
 
 import java.util.UUID;
 
-import org.junit.Assert;
 import org.junit.Test;
-
 
 /**
  * @author $Author: sgalland$
@@ -37,8 +37,8 @@ import org.junit.Test;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
-public class SpaceBaseTest extends Assert {
+@SuppressWarnings("all")
+public class SpaceBaseTest extends AbstractJanusTest {
 
 	@Test
 	public void getID() {

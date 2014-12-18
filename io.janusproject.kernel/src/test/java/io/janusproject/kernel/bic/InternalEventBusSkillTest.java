@@ -19,7 +19,10 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
 import io.sarl.lang.core.Address;
@@ -27,8 +30,6 @@ import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -47,7 +48,7 @@ import com.google.common.eventbus.AsyncSyncEventBus;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc"})
-public class InternalEventBusSkillTest extends Assert {
+public class InternalEventBusSkillTest extends AbstractJanusTest {
 
 	@Mock
 	private AsyncSyncEventBus eventBus;
@@ -67,13 +68,6 @@ public class InternalEventBusSkillTest extends Assert {
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.agent = null;
-		this.eventBus = null;
-		this.skill = null;
 	}
 	
 	@Test

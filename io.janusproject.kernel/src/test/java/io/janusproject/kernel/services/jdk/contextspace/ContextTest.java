@@ -19,11 +19,16 @@
  */
 package io.janusproject.kernel.services.jdk.contextspace;
 
-import io.janusproject.kernel.services.jdk.contextspace.Context;
-import io.janusproject.kernel.services.jdk.contextspace.SpaceRepository;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.contextspace.SpaceRepositoryListener;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.core.SpaceCreated;
 import io.sarl.lang.core.Event;
@@ -43,9 +48,9 @@ import java.util.UUID;
 
 import javassist.Modifier;
 
+import javax.annotation.Nullable;
+
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -57,25 +62,37 @@ import org.mockito.stubbing.Answer;
 
 import com.google.inject.Injector;
 
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method","unchecked","synthetic-access","rawtypes"})
-public class ContextTest extends Assert {
+@SuppressWarnings("all")
+public class ContextTest extends AbstractJanusTest {
 
+	@Nullable
 	private UUID contextId;
+
+	@Nullable
 	private UUID spaceId;
+
+	@Nullable
 	private Map<UUID,OpenEventSpace> spaces;
 
+
+	@Nullable
 	private SpaceRepository spaceRepository;
 
+
+	@Nullable
 	private Context context;
 
+
+	@Nullable
 	private SpaceRepositoryListener spaceListener;
+
+	@Nullable
 	private SpaceRepositoryListener privateListener;
 
 	@Before
@@ -181,16 +198,6 @@ public class ContextTest extends Assert {
 		this.context = new Context(
 				this.contextId, this.spaceId, spaceRepoFactory, this.spaceListener);
 		this.context.postConstruction();
-	}
-
-	@After
-	public void tearDown() {
-		this.contextId = null;
-		this.spaceId = null;
-		this.context = null;
-		this.spaceRepository = null;
-		this.spaces = null;
-		this.spaceListener = this.privateListener = null;
 	}
 
 	@Test

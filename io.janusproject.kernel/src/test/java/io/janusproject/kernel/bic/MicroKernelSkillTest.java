@@ -19,11 +19,12 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import io.janusproject.kernel.Kernel;
 import io.janusproject.services.network.NetworkService;
+import io.janusproject.testutils.AbstractJanusTest;
 
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -38,8 +39,8 @@ import org.mockito.MockitoAnnotations;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked"})
-public class MicroKernelSkillTest extends Assert {
+@SuppressWarnings("all")
+public class MicroKernelSkillTest extends AbstractJanusTest {
 
 	@Mock
 	private NetworkService service;
@@ -54,13 +55,6 @@ public class MicroKernelSkillTest extends Assert {
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		Mockito.when(this.kernel.getService(Matchers.any(Class.class))).thenReturn(this.service);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.skill = null;
-		this.kernel = null;
-		this.service = null;
 	}
 
 	@Test

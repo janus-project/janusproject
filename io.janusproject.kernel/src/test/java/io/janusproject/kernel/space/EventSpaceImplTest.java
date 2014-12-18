@@ -19,10 +19,18 @@
  */
 package io.janusproject.kernel.space;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import io.janusproject.kernel.services.jdk.distributeddata.DMapView;
+import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.network.NetworkService;
-import io.janusproject.testutils.MapMock;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -31,12 +39,14 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpaceSpecification;
 import io.sarl.util.Scopes;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -49,25 +59,36 @@ import org.mockito.internal.verification.Times;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-access","rawtypes"})
-public class EventSpaceImplTest extends Assert {
+@SuppressWarnings("all")
+public class EventSpaceImplTest extends AbstractJanusTest {
 
+	@Nullable
 	private UUID agentId;
+
+	@Nullable
 	private DistributedDataStructureService service;
+
+	@Nullable
 	private SpaceID spaceId;
+
+	@Nullable
 	private Address address;
+
+	@Nullable
 	private EventListener listener;
+
 	@Mock
 	private NetworkService network;
+
 	@Mock
 	private ExecutorService executor;
+
 	@InjectMocks
 	private EventSpaceImpl space;
 	
@@ -76,7 +97,11 @@ public class EventSpaceImplTest extends Assert {
 		this.agentId = UUID.randomUUID();
 		
 		this.service = Mockito.mock(DistributedDataStructureService.class);
-		Mockito.when(this.service.getMap(Matchers.anyString())).thenReturn(new MapMock<>());
+		DMap<Object, Object> mapMock = new DMapView<>(
+				UUID.randomUUID().toString(),
+				new HashMap<>());
+		Mockito.when(this.service.getMap(Matchers.anyString(), Matchers.any(Comparator.class))).thenReturn(mapMock);
+		Mockito.when(this.service.getMap(Matchers.anyString())).thenReturn(mapMock);
 		
 		this.spaceId = new SpaceID(
 				UUID.randomUUID(),
@@ -102,16 +127,6 @@ public class EventSpaceImplTest extends Assert {
 					}
 				}
 		);
-	}
-	
-	@After
-	public void tearDown() {
-		this.agentId =null;
-		this.space = null;
-		this.address = null;
-		this.spaceId = null;
-		this.service = null;
-		this.listener = null;
 	}
 
 	private void register() {

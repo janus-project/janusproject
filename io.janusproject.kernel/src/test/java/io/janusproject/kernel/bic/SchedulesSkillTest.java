@@ -19,8 +19,15 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.AgentTask;
 import io.sarl.lang.core.Agent;
 
@@ -29,9 +36,9 @@ import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -50,9 +57,10 @@ import org.mockito.stubbing.Answer;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked","rawtypes"})
-public class SchedulesSkillTest extends Assert {
+@SuppressWarnings("all")
+public class SchedulesSkillTest extends AbstractJanusTest {
 
+	@Nullable
 	private UUID agentId;
 	
 	@Mock
@@ -103,14 +111,6 @@ public class SchedulesSkillTest extends Assert {
 				});
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		this.logger = null;
-		this.skill = null;
-		this.agent = null;
-		this.agentId = null;
-	}
-	
 	@Test
 	public void task() {
 		AgentTask task = this.skill.task("thename"); //$NON-NLS-1$

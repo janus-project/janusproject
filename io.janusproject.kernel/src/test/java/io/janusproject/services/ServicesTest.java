@@ -19,21 +19,22 @@
  */
 package io.janusproject.services;
 
-import io.janusproject.services.IServiceManager;
-import io.janusproject.services.Services;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
 import io.janusproject.services.logging.LogService;
 import io.janusproject.services.network.NetworkService;
 import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -52,16 +53,33 @@ import com.google.common.util.concurrent.Service.State;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc"})
-public class ServicesTest extends Assert {
+public class ServicesTest extends AbstractJanusTest {
 
+	@Nullable
 	private Multimap<State,Service> services;
+	
+	@Nullable
 	private IServiceManager serviceManager;
+	
+	@Nullable
 	private List<Service> encounteredServices;
+	
+	@Nullable
 	private ContextSpaceService s1;
+	
+	@Nullable
 	private ExecutorService s2;
+	
+	@Nullable
 	private KernelDiscoveryService s3;
+	
+	@Nullable
 	private LogService s4;
+	
+	@Nullable
 	private NetworkService s5;
+	
+	@Nullable
 	private SpawnService s6;
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -129,19 +147,6 @@ public class ServicesTest extends Assert {
 		Mockito.when(this.serviceManager.servicesByState()).thenReturn(this.services);
 	}
 	
-	@After
-	public void tearDown() {
-		this.serviceManager = null;
-		this.services = null;
-		this.encounteredServices = null;
-		this.s1 = null;
-		this.s2 = null;
-		this.s3 = null;
-		this.s4 = null;
-		this.s5 = null;
-		this.s6 = null;
-	}
-
 	@Test
 	public void startServices() {
 		Services.startServices(this.serviceManager);

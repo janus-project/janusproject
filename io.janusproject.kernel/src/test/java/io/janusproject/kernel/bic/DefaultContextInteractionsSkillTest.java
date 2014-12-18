@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
@@ -37,6 +38,8 @@ import io.sarl.util.Scopes;
 
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,19 +48,30 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.internal.verification.Times;
 
+import static org.junit.Assert.*;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked","rawtypes","synthetic-access"})
-public class DefaultContextInteractionsSkillTest extends Assert {
+@SuppressWarnings("all")
+public class DefaultContextInteractionsSkillTest extends AbstractJanusTest {
 
+	@Nullable
 	private EventSpace defaultSpace;
+
+	@Nullable
 	private AgentContext parentContext;
+
+	@Nullable
 	private DefaultContextInteractionsSkill skill;
+
+	@Nullable
 	private Address address;
+
+	@Nullable
 	private Lifecycle lifeCapacity;
 
 	@Before
@@ -84,15 +98,6 @@ public class DefaultContextInteractionsSkillTest extends Assert {
 			}
 		};
 		this.skill = new DefaultContextInteractionsSkill(agent, this.parentContext);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.skill = null;
-		this.defaultSpace = null;
-		this.parentContext = null;
-		this.address = null;
-		this.lifeCapacity = null;
 	}
 
 	@Test

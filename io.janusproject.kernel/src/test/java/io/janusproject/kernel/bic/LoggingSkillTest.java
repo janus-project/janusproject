@@ -19,7 +19,14 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Capacity;
@@ -30,8 +37,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -47,12 +54,13 @@ import org.mockito.internal.verification.Times;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
-public class LoggingSkillTest extends Assert {
+@SuppressWarnings("all")
+public class LoggingSkillTest extends AbstractJanusTest {
 
 	@Mock
 	protected Handler handler;
 	
+	@Nullable
 	protected Agent owner;
 	
 	@Mock
@@ -64,6 +72,7 @@ public class LoggingSkillTest extends Assert {
 	@InjectMocks
 	protected LoggingSkill skill;
 	
+	@Nullable
 	protected Logger logger;
 	
 	@Before
@@ -88,17 +97,6 @@ public class LoggingSkillTest extends Assert {
 		//
 		this.logger = Mockito.spy(this.skill.getLogger());
 		this.skill.setLogger(this.logger);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.skill = null;
-		this.logger = null;
-		this.owner = null;
-		this.handler = null;
-		this.logService = null;
-		this.parentLogger = null;
-		
 	}
 
 	@Test

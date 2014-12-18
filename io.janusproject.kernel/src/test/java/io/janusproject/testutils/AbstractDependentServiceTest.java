@@ -17,11 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services;
+package io.janusproject.testutils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.DependentService;
 
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 
@@ -36,36 +38,47 @@ import com.google.common.util.concurrent.Service;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class AbstractServiceImplementationTest<S extends DependentService> extends Assert {
+@SuppressWarnings("all")
+public abstract class AbstractDependentServiceTest<S extends DependentService> extends AbstractServiceTest<S> {
 
 	/** Type of the testing service.
 	 */
-	protected final Class<S> serviceType;
+	protected final Class<? super S> serviceType;
 
 	/**
 	 * @param type - the type of the service to test. 
 	 */
-	public AbstractServiceImplementationTest(Class<S> type) {
+	public AbstractDependentServiceTest(Class<? super S> type) {
 		Assume.assumeNotNull(type);
 		this.serviceType = type;
 	}
 
-	/** Replies the instance of the service under test.
-	 *
-	 * @return the tested service.
-	 */
-	protected abstract S getTestedService();
-
-	/**
-	 */
+	@AvoidServiceStartForTest
 	@Test
 	public void getServiceType() {
-		S serv = getTestedService();
-		assertNotNull(serv);
-		Class<? extends Service> servType = serv.getServiceType();
+		assertNotNull(this.service);
+		Class<? extends Service> servType = this.service.getServiceType();
 		assertNotNull(servType);
 		assertTrue(servType.isInterface());
 		assertEquals(this.serviceType, servType);
 	}
+
+	/**
+	 * Test the dependencies.
+	 * 
+	 * The weak dependencies are defined in {@link DependentService#getServiceDependencies()}.
+	 */
+	@AvoidServiceStartForTest
+	@Test
+	public abstract void getServiceDependencies();
+
+	/**
+	 * Test the weak dependencies.
+	 * 
+	 * The weak dependencies are defined in {@link DependentService#getServiceWeakDependencies()}.
+	 */
+	@AvoidServiceStartForTest
+	@Test
+	public abstract void getServiceWeakDependencies();
 
 }

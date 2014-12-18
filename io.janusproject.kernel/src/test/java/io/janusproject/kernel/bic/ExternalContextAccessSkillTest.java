@@ -19,7 +19,13 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.Behaviors;
 import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;
@@ -39,8 +45,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -59,11 +65,12 @@ import org.mockito.stubbing.Answer;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked","rawtypes","synthetic-access"})
-public class ExternalContextAccessSkillTest extends Assert {
+@SuppressWarnings("all")
+public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 
 	private static final Object MUTEX = new Object();
 
+	@Nullable
 	private List<AgentContext> contexts;
 	
 	@Mock
@@ -72,10 +79,19 @@ public class ExternalContextAccessSkillTest extends Assert {
 	@InjectMocks
 	private ExternalContextAccessSkill skill;
 
+	@Nullable
 	private InternalEventBusCapacity busCapacity;
+
+	@Nullable
 	private Behaviors behaviorCapacity;
+
+	@Nullable
 	private OpenEventSpace defaultSpace;
+
+	@Nullable
 	private Agent agent;
+
+	@Nullable
 	private EventListener eventListener;
 
 	@Before
@@ -146,18 +162,6 @@ public class ExternalContextAccessSkillTest extends Assert {
 				return null;
 			}
 		});
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.skill = null;
-		this.contexts = null;
-		this.contextRepository = null;
-		this.busCapacity = null;
-		this.behaviorCapacity = null;
-		this.defaultSpace = null;
-		this.agent = null;
-		this.eventListener = null;
 	}
 		
 	@Test

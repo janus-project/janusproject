@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -55,6 +56,8 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 
 	private static final long serialVersionUID = -2482265223106773425L;
 
+	private final UUID name = UUID.randomUUID();
+	
 	/**
 	 */
 	public IMapMock() {
@@ -72,14 +75,14 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 	 */
 	@Override
 	public Object getId() {
-		throw new UnsupportedOperationException();
+		return this.name;
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
 	public String getName() {
-		throw new UnsupportedOperationException();
+		return this.name.toString();
 	}
 
 	/** {@inheritDoc}
@@ -100,31 +103,28 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 	 */
 	@Override
 	public String addEntryListener(EntryListener<K, V> arg0, boolean arg1) {
-		throw new UnsupportedOperationException();
+		return UUID.randomUUID().toString();
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
-	public String addEntryListener(EntryListener<K, V> arg0, K arg1,
-			boolean arg2) {
-		throw new UnsupportedOperationException();
+	public String addEntryListener(EntryListener<K, V> arg0, K arg1, boolean arg2) {
+		return UUID.randomUUID().toString();
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
-	public String addEntryListener(EntryListener<K, V> arg0,
-			Predicate<K, V> arg1, boolean arg2) {
-		throw new UnsupportedOperationException();
+	public String addEntryListener(EntryListener<K, V> arg0, Predicate<K, V> arg1, boolean arg2) {
+		return UUID.randomUUID().toString();
 	}
 
 	/** {@inheritDoc}
 	 */
 	@Override
-	public String addEntryListener(EntryListener<K, V> arg0,
-			Predicate<K, V> arg1, K arg2, boolean arg3) {
-		throw new UnsupportedOperationException();
+	public String addEntryListener(EntryListener<K, V> arg0, Predicate<K, V> arg1, K arg2, boolean arg3) {
+		return UUID.randomUUID().toString();
 	}
 
 	/** {@inheritDoc}
@@ -377,7 +377,7 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 	 */
 	@Override
 	public boolean removeEntryListener(String arg0) {
-		throw new UnsupportedOperationException();
+		return true;
 	}
 
 	/** {@inheritDoc}

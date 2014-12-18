@@ -19,14 +19,25 @@
  */
 package io.janusproject.kernel.services.jdk.contextspace;
 
-import io.janusproject.kernel.services.AbstractServiceImplementationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import io.janusproject.kernel.services.jdk.distributeddata.DMapView;
 import io.janusproject.services.contextspace.ContextRepositoryListener;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.contextspace.SpaceRepositoryListener;
 import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
 import io.janusproject.services.logging.LogService;
-import io.janusproject.testutils.MapMock;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.AvoidServiceStartForTest;
+import io.janusproject.testutils.StartServiceForTest;
 import io.janusproject.util.TwoStepConstruction;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.EventSpace;
@@ -37,7 +48,11 @@ import io.sarl.util.OpenEventSpaceSpecification;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import javassist.Modifier;
 
@@ -48,13 +63,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.inject.Injector;
-
 
 /**
  * @author $Author: sgalland$
@@ -62,12 +75,16 @@ import com.google.inject.Injector;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
+@SuppressWarnings("all")
+@StartServiceForTest(startAfterSetUp = true)
 public class StandardContextSpaceServiceTest
-extends AbstractServiceImplementationTest<ContextSpaceService> {
+extends AbstractDependentServiceTest<StandardContextSpaceService> {
 
+	@Nullable
 	private UUID contextId;
+	@Nullable
 	private SpaceID spaceId;
+	@Nullable
 	private DMap<Object,Object> innerData; 
 	
 	@Mock
@@ -91,8 +108,6 @@ extends AbstractServiceImplementationTest<ContextSpaceService> {
 	@Mock
 	private ContextRepositoryListener contextListener;
 
-	private StandardContextSpaceService service;
-	
 	/**
 	 */
 	public StandardContextSpaceServiceTest() {
@@ -100,15 +115,29 @@ extends AbstractServiceImplementationTest<ContextSpaceService> {
 	}
 	
 	@Override
-	protected ContextSpaceService getTestedService() {
-		return this.service;
+	public StandardContextSpaceService newService() {
+		return new StandardContextSpaceService();
 	}
-	
+
+	@Override
+	public void getServiceDependencies() {
+		assertContains(this.service.getServiceDependencies(),
+				DistributedDataStructureService.class,
+				NetworkService.class,
+				KernelDiscoveryService.class);
+	}
+
+	@Override
+	public void getServiceWeakDependencies() {
+		assertContains(this.service.getServiceWeakDependencies());
+	}
+
 	@Before
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
 		this.contextId = UUID.randomUUID();
-		this.innerData = new MapMock<>();
+		this.innerData = new DMapView<>(
+				UUID.randomUUID().toString(),
+				new HashMap<>());
 		this.spaceId = new SpaceID(this.contextId, UUID.randomUUID(), OpenEventSpaceSpecification.class);
 		Mockito.when(this.context.postConstruction()).thenReturn(this.defaultSpace);
 		Mockito.when(this.context.getID()).thenReturn(this.contextId);
@@ -132,25 +161,11 @@ extends AbstractServiceImplementationTest<ContextSpaceService> {
 						return ctx;
 					}
 				});
+		Mockito.when(this.dds.getMap(Matchers.anyString(), Matchers.any(Comparator.class))).thenReturn(this.innerData);
 		Mockito.when(this.dds.getMap(Matchers.anyString())).thenReturn(this.innerData);
-		this.service = new StandardContextSpaceService();
 		this.service.postConstruction(this.contextId, this.dds, this.logger, this.injector);
 		this.service.setContextFactory(this.contextFactory);
 		this.service.addContextRepositoryListener(this.contextListener);
-	}
-	
-	@After
-	public void tearDown() {
-		this.defaultSpace = null;
-		this.context = null;
-		this.contextId = null;
-		this.spaceId = null;
-		this.service = null;
-		this.dds = null;
-		this.logger = null;
-		this.injector = null;
-		this.contextFactory = null;
-		this.innerData = null;
 	}
 	
 	private AgentContext createOneTestingContext(UUID id) {
@@ -417,6 +432,7 @@ extends AbstractServiceImplementationTest<ContextSpaceService> {
 		assertTrue(c.contains(ctx1));
 	}
 
+	@AvoidServiceStartForTest
 	@Test
 	public void doStop_noinit() {
 		try {
@@ -434,13 +450,7 @@ extends AbstractServiceImplementationTest<ContextSpaceService> {
 		AgentContext ctx1 = createOneTestingContext(UUID.randomUUID());
 		AgentContext ctx2 = createOneTestingContext(UUID.randomUUID());
 		//
-		try {
-			this.service.doStop();
-			fail("Expecting IllegalStateException"); //$NON-NLS-1$
-		}
-		catch(IllegalStateException _) {
-			// Expected excpetion fired by notifyStopped()
-		}
+		this.service.doStop();
 		ArgumentCaptor<AgentContext> argument = ArgumentCaptor.forClass(AgentContext.class);
 		Mockito.verify(this.contextListener, new Times(2)).contextDestroyed(argument.capture());
 		if (ctx1.getID().compareTo(ctx2.getID())<=0) {

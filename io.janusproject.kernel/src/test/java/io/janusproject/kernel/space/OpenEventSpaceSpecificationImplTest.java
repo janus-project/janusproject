@@ -19,16 +19,21 @@
  */
 package io.janusproject.kernel.space;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.testutils.MapMock;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpace;
 
+import java.util.Comparator;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -39,22 +44,24 @@ import org.mockito.MockitoAnnotations;
 
 import com.google.inject.Injector;
 
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"all"})
-public class OpenEventSpaceSpecificationImplTest extends Assert {
+@SuppressWarnings("all")
+public class OpenEventSpaceSpecificationImplTest extends AbstractJanusTest {
 
+	@Nullable
 	private SpaceID spaceId;
 
 	@Mock
 	private DistributedDataStructureService structureFactory;
+
 	@Mock
 	private Injector injector;
+
 	@InjectMocks
 	private OpenEventSpaceSpecificationImpl specification;
 	
@@ -66,15 +73,11 @@ public class OpenEventSpaceSpecificationImplTest extends Assert {
 				EventSpaceSpecification.class);
 		MockitoAnnotations.initMocks(this);
 		Mockito.when(this.injector.getInstance(Matchers.any(Class.class))).thenReturn(this.structureFactory);
-		Mockito.when(this.structureFactory.getMap(Matchers.anyString())).thenReturn(new MapMock<>());
+		DMap<Object, Object> mapMock = mock(DMap.class);
+		Mockito.when(this.structureFactory.getMap(Matchers.anyString(), Matchers.any(Comparator.class))).thenReturn(mapMock);
+		Mockito.when(this.structureFactory.getMap(Matchers.anyString())).thenReturn(mapMock);
 	}
 	
-	@After
-	public void tearDown() {
-		this.specification = null;
-		this.spaceId = null;
-	}
-
 	@Test
 	public void create() {
 		OpenEventSpace space = this.specification.create(this.spaceId, "a", "b", "c");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +37,8 @@ import org.junit.Test;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
-public class JanusConfigTest {
+@SuppressWarnings("all")
+public class JanusConfigTest extends AbstractJanusTest {
 
 	private static final String DEFAULT_VALUE = UUID.randomUUID().toString();
 	private static final float FLOAT_EPSILON = 0.000001f;

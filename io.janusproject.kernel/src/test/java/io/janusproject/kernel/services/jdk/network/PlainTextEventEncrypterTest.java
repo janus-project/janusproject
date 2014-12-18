@@ -19,11 +19,12 @@
  */
 package io.janusproject.kernel.services.jdk.network;
 
-import io.janusproject.kernel.services.jdk.network.PlainTextEventEncrypter;
+import static org.junit.Assert.assertSame;
 import io.janusproject.services.network.EventEnvelope;
+import io.janusproject.testutils.AbstractJanusTest;
 
-import org.junit.After;
-import org.junit.Assert;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,15 +34,28 @@ import org.junit.Test;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
-public class PlainTextEventEncrypterTest extends Assert {
+@SuppressWarnings("all")
+public class PlainTextEventEncrypterTest extends AbstractJanusTest {
 
+	@Nullable
 	private byte[] contextId;
+
+	@Nullable
 	private byte[] spaceId;
+
+	@Nullable
 	private byte[] event;
+
+	@Nullable
 	private byte[] scope;
+
+	@Nullable
 	private byte[] headers;
+
+	@Nullable
 	private EventEnvelope envelope;
+
+	@Nullable
 	private PlainTextEventEncrypter encrypter;
 	
 	@Before
@@ -53,17 +67,6 @@ public class PlainTextEventEncrypterTest extends Assert {
 		this.headers= new byte[] { 18, 19, 20, 21 };
 		this.envelope = new EventEnvelope(this.contextId, this.spaceId, this.scope, this.headers, this.event);
 		this.encrypter = new PlainTextEventEncrypter();
-	}
-	
-	@After
-	public void tearDown() {
-		this.encrypter = null;
-		this.envelope = null;
-		this.scope = null;
-		this.event = null;
-		this.spaceId = null;
-		this.contextId = null;
-		this.headers = null;
 	}
 
 	@Test

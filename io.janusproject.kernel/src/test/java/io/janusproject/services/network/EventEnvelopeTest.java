@@ -19,10 +19,13 @@
  */
 package io.janusproject.services.network;
 
-import io.janusproject.services.network.EventEnvelope;
+import static org.junit.Assert.assertSame;
+
+import javax.annotation.Nullable;
+
+import io.janusproject.testutils.AbstractJanusTest;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,14 +35,25 @@ import org.junit.Test;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
-public class EventEnvelopeTest extends Assert {
+@SuppressWarnings("all")
+public class EventEnvelopeTest extends AbstractJanusTest {
 
+	@Nullable
 	private byte[] contextId;
+
+	@Nullable
 	private byte[] spaceId;
+
+	@Nullable
 	private byte[] event;
+
+	@Nullable
 	private byte[] scope;
+
+	@Nullable
 	private byte[] headers;
+
+	@Nullable
 	private EventEnvelope envelope;
 	
 	@Before
@@ -52,16 +66,6 @@ public class EventEnvelopeTest extends Assert {
 		this.envelope = new EventEnvelope(this.contextId, this.spaceId, this.scope, this.headers, this.event);
 	}
 	
-	@After
-	public void tearDown() {
-		this.envelope = null;
-		this.scope = null;
-		this.event = null;
-		this.spaceId = null;
-		this.contextId = null;
-		this.headers = null;
-	}
-
 	@Test
 	public void getCustomHeaders() {
 		assertSame(this.headers, this.envelope.getCustomHeaders());

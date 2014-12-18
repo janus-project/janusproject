@@ -19,12 +19,25 @@
  */
 package io.janusproject.kernel.services.jdk.spawn;
 
-import io.janusproject.kernel.services.AbstractServiceImplementationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.network.NetworkService;
 import io.janusproject.services.spawn.AgentFactory;
 import io.janusproject.services.spawn.KernelAgentSpawnListener;
 import io.janusproject.services.spawn.SpawnService;
 import io.janusproject.services.spawn.SpawnService.AgentKillException;
 import io.janusproject.services.spawn.SpawnServiceListener;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.AvoidServiceStartForTest;
+import io.janusproject.testutils.StartServiceForTest;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ExternalContextAccess;
@@ -45,11 +58,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.After;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -58,22 +71,28 @@ import org.mockito.internal.verification.Times;
 
 import com.google.inject.Injector;
 
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","unchecked","synthetic-access"})
-public class StandardSpawnServiceTest
-extends AbstractServiceImplementationTest<SpawnService> {
+@SuppressWarnings("all")
+@StartServiceForTest(startAfterSetUp = true)
+public class StandardSpawnServiceTest extends AbstractDependentServiceTest<StandardSpawnService> {
 
+	@Nullable
 	private UUID agentId;
-	
+
+	@Nullable
+	private Agent agent;
+
+	@Nullable
+	private OpenEventSpace innerSpace;
+
 	@Mock
 	private ExternalContextAccess contextAccess;
-	
+
 	@Mock
 	private InnerContextAccess innerAccess;
 
@@ -82,39 +101,34 @@ extends AbstractServiceImplementationTest<SpawnService> {
 
 	@Mock
 	private AgentContext agentContext;
-	
+
 	@Mock
 	private EventSpace defaultSpace;
 
 	@Mock
 	private KernelAgentSpawnListener kernelListener;
-	
+
 	@Mock
 	private SpawnServiceListener serviceListener;
-	
-	private Agent agent;
-	
-	private OpenEventSpace innerSpace;
 
 	@Mock
 	private AgentFactory agentFactory;
 
 	@Mock
 	private Injector injector;
-	
-	@InjectMocks
-	private StandardSpawnService spawnService;
-	
+
 	/**
 	 * 
 	 */
 	public StandardSpawnServiceTest() {
 		super(SpawnService.class);
 	}
-	
+
+	/** {@inheritDoc}
+	 */
 	@Override
-	protected SpawnService getTestedService() {
-		return this.spawnService;
+	public StandardSpawnService newService() {
+		return new StandardSpawnService(this.injector);
 	}
 	
 	@Before
@@ -139,43 +153,36 @@ extends AbstractServiceImplementationTest<SpawnService> {
 		Mockito.when(this.defaultSpace.getAddress(Matchers.any(UUID.class))).thenReturn(Mockito.mock(Address.class));
 		Mockito.when(this.agentFactory.newInstance(Matchers.any(Class.class), Matchers.any(UUID.class), Matchers.any(UUID.class))).thenReturn(this.agent);
 		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
-		this.spawnService.addKernelAgentSpawnListener(this.kernelListener);
-		this.spawnService.addSpawnServiceListener(this.serviceListener);
-		this.spawnService.setAgentFactory(this.agentFactory);
+		this.service.addKernelAgentSpawnListener(this.kernelListener);
+		this.service.addSpawnServiceListener(this.serviceListener);
+		this.service.setAgentFactory(this.agentFactory);
 	}
-	
-	@After
-	public void tearDown() {
-		this.agentId = null;
-		this.injector = null;
-		this.spawnService = null;
-		this.kernelListener = null;
-		this.agent = null;
-		this.agentContext = null;
-		this.agentFactory = null;
-		this.defaultSpace = null;
-		this.serviceListener = null;
-		this.contextAccess = null;
-		this.innerAccess = null;
-		this.innerSpace = null;
+
+	@Override
+	public void getServiceDependencies() {
+		assertContains(this.service.getServiceDependencies(),
+				ContextSpaceService.class);
+	}
+
+	@Override
+	public void getServiceWeakDependencies() {
+		assertContains(this.service.getServiceWeakDependencies());
 	}
 
 	@Test
 	public void getAgents() {
-		SynchronizedSet<UUID> agents = this.spawnService.getAgents();
+		SynchronizedSet<UUID> agents = this.service.getAgents();
 		assertNotNull(agents);
 		assertTrue(agents.isEmpty());
 	}
 
 	@Test
 	public void spawn_notNull() {
-		this.spawnService.startAsync().awaitRunning();
-		//
 		UUID aId = UUID.fromString(this.agentId.toString());
-		UUID agentId = this.spawnService.spawn(this.agentContext, aId, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID agentId = this.service.spawn(this.agentContext, aId, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		//
 		assertNotNull(agentId);
-		Set<UUID> agents = this.spawnService.getAgents();
+		Set<UUID> agents = this.service.getAgents();
 		assertEquals(1, agents.size());
 		assertTrue(agents.contains(agentId));
 		assertSame(this.agentId, agentId);
@@ -203,12 +210,10 @@ extends AbstractServiceImplementationTest<SpawnService> {
 
 	@Test
 	public void spawn_null() {
-		this.spawnService.startAsync().awaitRunning();
-		//
-		UUID agentId = this.spawnService.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID agentId = this.service.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		//
 		assertNotNull(agentId);
-		Set<UUID> agents = this.spawnService.getAgents();
+		Set<UUID> agents = this.service.getAgents();
 		assertEquals(1, agents.size());
 		assertTrue(agents.contains(agentId));
 		assertSame(this.agentId, agentId);
@@ -232,21 +237,23 @@ extends AbstractServiceImplementationTest<SpawnService> {
 		assertEquals(ag.getClass().getName(), ((AgentSpawned)argument4.getValue()).agentType);
 	}
 
+	@AvoidServiceStartForTest
 	@Test
 	public void canKillAgent_oneagentinsideinnercontext() {
 		Set<UUID> agIds = new HashSet<>();
 		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(agIds, agIds));
-		this.spawnService.startAsync().awaitRunning();
-		UUID agentId = this.spawnService.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		this.service.startAsync().awaitRunning();
+		UUID agentId = this.service.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		agIds.add(agentId);
-		Agent ag = this.spawnService.getAgent(agentId);
+		Agent ag = this.service.getAgent(agentId);
 		assertNotNull(ag);
 		assertSame(this.agent, ag);
 		//
-		assertTrue(this.spawnService.canKillAgent(ag));
+		assertTrue(this.service.canKillAgent(ag));
 	}
-	
+
+	@AvoidServiceStartForTest
 	@Test
 	public void canKillAgent_twoagentsinsideinnercontext() {
 		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
@@ -256,26 +263,25 @@ extends AbstractServiceImplementationTest<SpawnService> {
 		Set<UUID> agIds = new HashSet<>();
 		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(agIds,agIds));
-		this.spawnService.startAsync().awaitRunning();
-		UUID agentId = this.spawnService.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		this.service.startAsync().awaitRunning();
+		UUID agentId = this.service.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		agIds.add(agentId);
-		Agent ag = this.spawnService.getAgent(agentId);
+		Agent ag = this.service.getAgent(agentId);
 		assertNotNull(ag);
 		assertSame(this.agent, ag);
 		//
-		assertFalse(this.spawnService.canKillAgent(ag));
+		assertFalse(this.service.canKillAgent(ag));
 	}
 
 	@Test
 	public void killAgent() throws AgentKillException {
-		this.spawnService.startAsync().awaitRunning();
-		UUID agentId = this.spawnService.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
-		Agent ag = this.spawnService.getAgent(agentId);
+		UUID agentId = this.service.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		Agent ag = this.service.getAgent(agentId);
 		assertNotNull(ag);
 		//
-		this.spawnService.killAgent(agentId);
+		this.service.killAgent(agentId);
 		//
-		Set<UUID> agents = this.spawnService.getAgents();
+		Set<UUID> agents = this.service.getAgents();
 		assertTrue(agents.isEmpty());
 		//
 		ArgumentCaptor<Agent> argument4 = ArgumentCaptor.forClass(Agent.class);
@@ -290,10 +296,11 @@ extends AbstractServiceImplementationTest<SpawnService> {
 		Mockito.verify(this.kernelListener, new Times(1)).kernelAgentDestroy();
 	}
 
+	@AvoidServiceStartForTest
 	@Test
 	public void doStart() {
 		try {
-			this.spawnService.doStart();
+			this.service.doStart();
 			fail("Expecting IllegalStateException"); //$NON-NLS-1$
 		}
 		catch(IllegalStateException _) {
@@ -301,5 +308,5 @@ extends AbstractServiceImplementationTest<SpawnService> {
 		}
 		Mockito.verify(this.kernelListener, new Times(1)).kernelAgentSpawn();
 	}
-	
+
 }

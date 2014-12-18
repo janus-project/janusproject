@@ -19,13 +19,18 @@
  */
 package io.janusproject.kernel.services.hazelcast;
 
-import io.janusproject.kernel.services.AbstractServiceImplementationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
 import io.janusproject.services.logging.LogService;
 import io.janusproject.services.network.NetworkService;
 import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractDependentServiceTest;
 import io.janusproject.testutils.IMapMock;
+import io.janusproject.testutils.StartServiceForTest;
 import io.janusproject.util.TwoStepConstruction;
 
 import java.lang.reflect.Method;
@@ -36,7 +41,8 @@ import java.util.UUID;
 
 import javassist.Modifier;
 
-import org.junit.After;
+import javax.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -50,25 +56,39 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
+@StartServiceForTest(createAfterSetUp = true)
+@SuppressWarnings("all")
 public class HazelcastKernelDiscoveryServiceTest
-extends AbstractServiceImplementationTest<KernelDiscoveryService> {
+extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 
+	@Nullable
 	private URI kernelURI;
+
+	@Nullable
 	private URI hazelcastURI;
+
+	@Nullable
 	private UUID contextId;
+
+	@Nullable
 	private IMap<Object,Object> kernels;
-	private HazelcastKernelDiscoveryService service;
+
+	@Nullable
 	private HazelcastInstance hzInstance;
+
+	@Nullable
 	private NetworkService networkService;
+
+	@Nullable
 	private ExecutorService executorService;
+
+	@Nullable
 	private LogService logger;
 
 	/**
@@ -78,8 +98,11 @@ extends AbstractServiceImplementationTest<KernelDiscoveryService> {
 	}
 
 	@Override
-	protected KernelDiscoveryService getTestedService() {
-		return this.service;
+	public HazelcastKernelDiscoveryService newService() {
+		HazelcastKernelDiscoveryService serv = new HazelcastKernelDiscoveryService(this.contextId);
+		serv.postConstruction(this.hzInstance, this.networkService,
+				this.executorService, this.logger);
+		return serv;
 	}
 	
 	@Before
@@ -102,24 +125,20 @@ extends AbstractServiceImplementationTest<KernelDiscoveryService> {
 		Mockito.when(this.networkService.getURI()).thenReturn(this.kernelURI);
 		this.executorService = Mockito.mock(ExecutorService.class);
 		this.logger = Mockito.mock(LogService.class);
-		this.service = new HazelcastKernelDiscoveryService(this.contextId);
-		this.service.postConstruction(this.hzInstance, this.networkService,
-				this.executorService, this.logger);
 	}
 	
-	@After
-	public void tearDown() {
-		this.contextId = null;
-		this.kernels = null;
-		this.service = null;
-		this.hzInstance = null;
-		this.networkService = null;
-		this.executorService = null;
-		this.logger = null;
-		this.kernelURI = null;
-		this.hazelcastURI = null;
+	@Override
+	public void getServiceDependencies() {
+		assertContains(this.service.getServiceDependencies(),
+				LogService.class,
+				ExecutorService.class);
 	}
-	
+
+	@Override
+	public void getServiceWeakDependencies() {
+		assertContains(this.service.getServiceWeakDependencies());
+	}
+
 	@Test
 	public void postConstruction() {
 		ArgumentCaptor<Listener> argument1 = ArgumentCaptor.forClass(Listener.class);

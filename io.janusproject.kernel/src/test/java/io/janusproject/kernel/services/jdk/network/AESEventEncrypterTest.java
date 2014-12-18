@@ -19,11 +19,11 @@
  */
 package io.janusproject.kernel.services.jdk.network;
 
-import io.janusproject.kernel.services.jdk.network.AESEventEncrypter;
+import static org.junit.Assert.assertArrayEquals;
 import io.janusproject.services.network.EventEnvelope;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ import org.junit.Test;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc"})
-public class AESEventEncrypterTest extends Assert {
+public class AESEventEncrypterTest extends AbstractJanusTest {
 
 	private AESEventEncrypter encrypter;
 	

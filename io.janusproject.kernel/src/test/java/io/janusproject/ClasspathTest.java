@@ -19,45 +19,17 @@
  */
 package io.janusproject;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Assume;
-
-import io.janusproject.kernel.Kernel;
-import io.sarl.lang.core.Agent;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import io.janusproject.testutils.AbstractJanusTest;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Properties;
-import java.util.UUID;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.logging.Level;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.arakhne.afc.vmutil.FileSystem;
-import org.arakhne.afc.vmutil.Resources;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-
-import com.google.inject.Binder;
-import com.google.inject.Inject;
-import com.google.inject.Module;
-import com.google.inject.Provides;
-
-import static org.mockito.Mockito.*;
 
 /**
  * @author $Author: sgalland$
@@ -66,7 +38,7 @@ import static org.mockito.Mockito.*;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings("all")
-public class ClasspathTest extends Assert {
+public class ClasspathTest extends AbstractJanusTest {
 
 	@Test
 	public void onlyJanusGuavaInClasspath() throws Exception {
