@@ -21,6 +21,10 @@ package io.janusproject.modules;
 
 import io.janusproject.JanusConfig;
 import io.janusproject.modules.eventserial.NetworkEventModule;
+import io.janusproject.modules.hazelcast.HazelcastModule;
+import io.janusproject.modules.kernel.LocalDistributedDataStructureServiceModule;
+import io.janusproject.modules.kernel.LocalInfrastructureServiceModule;
+import io.janusproject.modules.kernel.LocalKernelDiscoveryServiceModule;
 import io.janusproject.modules.nonetwork.NoNetworkModule;
 import io.janusproject.modules.zeromq.ZeroMQNetworkModule;
 
@@ -42,10 +46,21 @@ public class StandardJanusPlatformModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
+		boolean isNetworkEnabled = !JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false);
+
 		install(new BootModule());
+
+		if (isNetworkEnabled) {
+			install(new HazelcastModule());
+		} else {
+			install(new LocalInfrastructureServiceModule());
+			install(new LocalDistributedDataStructureServiceModule());
+			install(new LocalKernelDiscoveryServiceModule());
+		}
+
 		install(new StandardCoreModule());
 
-		if (!JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false)) {
+		if (isNetworkEnabled) {
 			install(new NetworkEventModule());
 			install(new ZeroMQNetworkModule());
 		} else {
