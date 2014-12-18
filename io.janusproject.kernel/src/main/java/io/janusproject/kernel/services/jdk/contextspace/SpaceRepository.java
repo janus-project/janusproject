@@ -108,7 +108,7 @@ class SpaceRepository {
 		this.externalListener = listener;
 		this.spaces = new TreeMap<>();
 		this.spacesBySpec = TreeMultimap.create(ClassComparator.SINGLETON, ObjectReferenceComparator.SINGLETON);
-		this.spaceIDs = distributedDataStructureService.getMap(this.distributedSpaceSetName);
+		this.spaceIDs = distributedDataStructureService.getMap(this.distributedSpaceSetName, null);
 	}
 
 	/** Finalize the initialization: ensure that the events are fired outside the scope of the SpaceRepository constructor.

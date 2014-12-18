@@ -26,10 +26,16 @@ import io.janusproject.services.distributeddata.DMultiMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
 
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Multiset;
 import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.hazelcast.core.EntryEvent;
@@ -83,7 +89,16 @@ implements DistributedDataStructureService {
 	public <K, V> DMap<K, V> getMap(String name) {
 		IMap<K, V> m = this.hazelcastInstance.getMap(name);
 		if (m != null) {
-			return new MapWrapper<>(m);
+			return new MapView<>(name, m);
+		}
+		return null;
+	}
+
+	@Override
+	public <K, V> DMap<K, V> getMap(String name, Comparator<? super K> comparator) {
+		IMap<K, V> m = this.hazelcastInstance.getMap(name);
+		if (m != null) {
+			return new MapView<>(name, m);
 		}
 		return null;
 	}
@@ -92,7 +107,16 @@ implements DistributedDataStructureService {
 	public <K, V> DMultiMap<K, V> getMultiMap(String name) {
 		MultiMap<K, V> m = this.hazelcastInstance.getMultiMap(name);
 		if (m != null) {
-			return new MultiMapWrapper<>(m);
+			return new MultiMapView<>(name, m);
+		}
+		return null;
+	}
+
+	@Override
+	public <K, V> DMultiMap<K, V> getMultiMap(String name, Comparator<? super K> comparator) {
+		MultiMap<K, V> m = this.hazelcastInstance.getMultiMap(name);
+		if (m != null) {
+			return new MultiMapView<>(name, m);
 		}
 		return null;
 	}
@@ -105,13 +129,25 @@ implements DistributedDataStructureService {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static final class MapWrapper<K, V> implements DMap<K, V> {
+	private static final class MapView<K, V> implements DMap<K, V> {
 
+		private final String name;
 		private final IMap<K, V> map;
 
-		public MapWrapper(IMap<K, V> map) {
+		public MapView(String name, IMap<K, V> map) {
 			assert (map != null);
+			this.name = name;
 			this.map = map;
+		}
+
+		@Override
+		public boolean isBackedCollection() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return this.name;
 		}
 
 		@Override
@@ -180,7 +216,7 @@ implements DistributedDataStructureService {
 		}
 
 		@Override
-		public void addDMapListener(DMapListener<K, V> listener) {
+		public void addDMapListener(DMapListener<? super K, ? super V> listener) {
 			EntryListenerWrapper<K, V> w = new EntryListenerWrapper<>(listener);
 			String k = this.map.addEntryListener(w, true);
 			w.setHazelcastListener(k);
@@ -189,7 +225,7 @@ implements DistributedDataStructureService {
 		/** {@inheritDoc}
 		 */
 		@Override
-		public void removeDMapListener(DMapListener<K, V> listener) {
+		public void removeDMapListener(DMapListener<? super K, ? super V> listener) {
 			if (listener instanceof EntryListenerWrapper) {
 				String k = ((EntryListenerWrapper<?, ?>) listener).getHazelcastListener();
 				if (k != null) {
@@ -208,13 +244,26 @@ implements DistributedDataStructureService {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static final class MultiMapWrapper<K, V> implements DMultiMap<K, V> {
+	@SuppressWarnings("unchecked")
+	private static final class MultiMapView<K, V> implements DMultiMap<K, V> {
 
+		private final String name;
 		private final MultiMap<K, V> map;
 
-		public MultiMapWrapper(MultiMap<K, V> map) {
+		public MultiMapView(String name, MultiMap<K, V> map) {
+			this.name = name;
 			assert (map != null);
 			this.map = map;
+		}
+
+		@Override
+		public boolean isBackedCollection() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return this.name;
 		}
 
 		@Override
@@ -233,7 +282,7 @@ implements DistributedDataStructureService {
 		}
 
 		@Override
-		public Collection<V> remove(Object key) {
+		public Collection<V> removeAll(Object key) {
 			return this.map.remove(key);
 		}
 
@@ -243,18 +292,27 @@ implements DistributedDataStructureService {
 		}
 
 		@Override
+		public Multiset<K> keys() {
+			return new SetMultiset();
+		}
+
+		@Override
 		public Collection<V> values() {
 			return this.map.values();
 		}
 
 		@Override
-		public Set<Entry<K, V>> entrySet() {
+		public Collection<Entry<K, V>> entries() {
 			return this.map.entrySet();
 		}
 
 		@Override
-		public boolean containsKey(K key) {
-			return this.map.containsKey(key);
+		public boolean containsKey(Object key) {
+			try {
+				return this.map.containsKey((K) key);
+			} catch (ClassCastException _) {
+				return false;
+			}
 		}
 
 		@Override
@@ -263,8 +321,12 @@ implements DistributedDataStructureService {
 		}
 
 		@Override
-		public boolean containsEntry(K key, V value) {
-			return this.map.containsEntry(key, value);
+		public boolean containsEntry(Object key, Object value) {
+			try {
+				return this.map.containsEntry((K) key, (V) value);
+			} catch (ClassCastException _) {
+				return false;
+			}
 		}
 
 		@Override
@@ -283,20 +345,266 @@ implements DistributedDataStructureService {
 		}
 
 		@Override
-		public void addDMapListener(DMapListener<K, V> listener) {
+		public void addDMapListener(DMapListener<? super K, ? super V> listener) {
 			EntryListenerWrapper<K, V> w = new EntryListenerWrapper<>(listener);
 			String k = this.map.addEntryListener(w, true);
 			w.setHazelcastListener(k);
 		}
 
 		@Override
-		public void removeDMapListener(DMapListener<K, V> listener) {
+		public void removeDMapListener(DMapListener<? super K, ? super V> listener) {
 			if (listener instanceof EntryListenerWrapper) {
 				String k = ((EntryListenerWrapper<?, ?>) listener).getHazelcastListener();
 				if (k != null) {
 					this.map.removeEntryListener(k);
 				}
 			}
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return this.map.size() == 0;
+		}
+
+		@Override
+		public Collection<V> replaceValues(K key, Iterable<? extends V> values) {
+			Collection<V> oldValues = this.map.remove(key);
+			for (V value : values) {
+				this.map.put(key, value);
+			}
+			return oldValues;
+		}
+
+		@Override
+		public boolean putAll(Multimap<? extends K, ? extends V> multimap) {
+			boolean changed = false;
+			for (Entry<? extends K, ? extends V> value : multimap.entries()) {
+				changed = this.map.put(value.getKey(), value.getValue()) && changed;
+			}
+			return changed;
+		}
+
+		@Override
+		public boolean putAll(K key, Iterable<? extends V> values) {
+			boolean changed = false;
+			for (V value : values) {
+				changed = this.map.put(key, value) && changed;
+			}
+			return changed;
+		}
+
+		@Override
+		public Map<K, Collection<V>> asMap() {
+			return Multimaps.asMap(this);
+		}
+
+		/**
+		 * @author $Author: sgalland$
+		 * @version $FullVersion$
+		 * @mavengroupid $GroupId$
+		 * @mavenartifactid $ArtifactId$
+		 */
+		private class SetMultiset implements Multiset<K> {
+
+			/**
+			 */
+			public SetMultiset() {
+				//
+			}
+
+			@Override
+			public int size() {
+				return MultiMapView.this.size();
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return MultiMapView.this.isEmpty();
+			}
+
+			@Override
+			public Object[] toArray() {
+				Object[] tab = new Object[MultiMapView.this.size()];
+				int i = 0;
+				for (Map.Entry<K, ?> e : MultiMapView.this.entries()) {
+					tab[i] = e.getKey();
+					++i;
+				}
+				return tab;
+			}
+
+			@Override
+			public <T> T[] toArray(T[] a) {
+				T[] tab = a;
+				if (tab == null || tab.length < MultiMapView.this.size()) {
+					tab = (T[]) new Object[MultiMapView.this.size()];
+					int i = 0;
+					for (Map.Entry<K, ?> e : MultiMapView.this.entries()) {
+						tab[i] = (T) e.getKey();
+						++i;
+					}
+				}
+				return tab;
+			}
+
+			@Override
+			public void clear() {
+				MultiMapView.this.clear();
+			}
+
+			@Override
+			public int count(Object element) {
+				int c = 0;
+				for (Map.Entry<K, ?> e : MultiMapView.this.entries()) {
+					if (Objects.equal(element, e.getKey())) {
+						++c;
+					}
+				}
+				return c;
+			}
+
+			@Override
+			public int add(K element, int occurrences) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public int remove(Object element, int occurrences) {
+				if (occurrences < 0) {
+					throw new IllegalArgumentException();
+				}
+				try {
+					Collection<?> values = MultiMapView.this.get((K) element);
+					int old = values.size();
+					Iterator<?> iterator = values.iterator();
+					for (int i = 0; i < occurrences && iterator.hasNext(); ++i) {
+						iterator.next();
+						iterator.remove();
+					}
+					return old;
+				} catch (ClassCastException _) {
+					return 0;
+				}
+			}
+
+			@Override
+			public int setCount(K element, int count) {
+				if (count < 0) {
+					throw new IllegalArgumentException();
+				}
+				Collection<?> values = MultiMapView.this.get(element);
+				int old = values.size();
+				if (count > old) {
+					throw new UnsupportedOperationException();
+				}
+				try {
+					Iterator<?> iterator = values.iterator();
+					int toRemove = old - count;
+					for (int i = 0; i < toRemove && iterator.hasNext(); ++i) {
+						iterator.next();
+						iterator.remove();
+					}
+					return old;
+				} catch (ClassCastException _) {
+					return 0;
+				}
+			}
+
+			@Override
+			public boolean setCount(K element, int oldCount, int newCount) {
+				if (oldCount < 0 || newCount < 0) {
+					throw new IllegalArgumentException();
+				}
+				Collection<?> values = MultiMapView.this.get(element);
+				int old = values.size();
+				if (oldCount == old) {
+					if (newCount > old) {
+						throw new UnsupportedOperationException();
+					}
+					try {
+						Iterator<?> iterator = values.iterator();
+						int toRemove = old - newCount;
+						if (toRemove > 0) {
+							for (int i = 0; i < toRemove && iterator.hasNext(); ++i) {
+								iterator.next();
+								iterator.remove();
+							}
+							return true;
+						}
+					} catch (ClassCastException _) {
+						//
+					}
+				}
+				return false;
+			}
+
+			@Override
+			public boolean addAll(Collection<? extends K> c) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public Set<K> elementSet() {
+				return MultiMapView.this.keySet();
+			}
+
+			@Override
+			public Set<com.google.common.collect.Multiset.Entry<K>> entrySet() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Iterator<K> iterator() {
+				final Iterator<Map.Entry<K, V>> entries = MultiMapView.this.entries().iterator();
+				return new Iterator<K>() {
+					@Override
+					public boolean hasNext() {
+						return entries.hasNext();
+					}
+					@Override
+					public K next() {
+						return entries.next().getKey();
+					}
+					@Override
+					public void remove() {
+						entries.remove();
+					}
+
+				};
+			}
+
+			@Override
+			public boolean contains(Object element) {
+				return MultiMapView.this.containsKey(element);
+			}
+
+			@Override
+			public boolean containsAll(Collection<?> elements) {
+				return MultiMapView.this.keySet().containsAll(elements);
+			}
+
+			@Override
+			public boolean add(K element) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean remove(Object element) {
+				Collection<?> values = MultiMapView.this.removeAll(element);
+				return values != null && !values.isEmpty();
+			}
+
+			@Override
+			public boolean removeAll(Collection<?> c) {
+				return MultiMapView.this.keySet().removeAll(c);
+			}
+
+			@Override
+			public boolean retainAll(Collection<?> c) {
+				return MultiMapView.this.keySet().retainAll(c);
+			}
+
 		}
 
 	}
@@ -311,10 +619,10 @@ implements DistributedDataStructureService {
 	 */
 	private static class EntryListenerWrapper<K, V> implements EntryListener<K, V> {
 
-		private final DMapListener<K, V> dmapListener;
+		private final DMapListener<? super K, ? super V> dmapListener;
 		private String key;
 
-		public EntryListenerWrapper(DMapListener<K, V> listener) {
+		public EntryListenerWrapper(DMapListener<? super K, ? super V> listener) {
 			this.dmapListener = listener;
 		}
 

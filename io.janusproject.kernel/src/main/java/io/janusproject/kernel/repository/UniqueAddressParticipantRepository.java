@@ -70,7 +70,7 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 			DistributedDataStructureService repositoryImplFactory) {
 		super();
 		this.distributedParticipantMapName = distributedParticipantMapName;
-		this.participants = repositoryImplFactory.getMap(this.distributedParticipantMapName);
+		this.participants = repositoryImplFactory.getMap(this.distributedParticipantMapName, null);
 	}
 
 	/**

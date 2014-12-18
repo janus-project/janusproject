@@ -91,6 +91,8 @@ implements KernelDiscoveryService, AsyncStateService {
 
 	private final HazelcastListener hzListener = new HazelcastListener();
 
+	private NetworkStartListener networkStartListener = new NetworkStartListener();
+
 	/** Constructs a <code>KernelRepositoryService</code>.
 	 *
 	 * @param janusID - injected identifier of the Janus context.
@@ -140,7 +142,7 @@ implements KernelDiscoveryService, AsyncStateService {
 		this.logger = logger;
 		this.network = networkService;
 		this.kernels = hazelcastInstance.getMap(this.janusID.toString() + "-kernels"); //$NON-NLS-1$
-		this.network.addListener(new NetworkStartListener(), this.executorService.getExecutorService());
+		this.network.addListener(this.networkStartListener, this.executorService.getExecutorService());
 	}
 
 	/** {@inheritDoc}

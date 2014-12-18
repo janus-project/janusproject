@@ -68,7 +68,7 @@ public final class MultipleAddressParticipantRepository<ADDRESS extends Serializ
 			DistributedDataStructureService repositoryImplFactory) {
 		super();
 		this.distributedParticipantMapName = distributedParticipantMapName;
-		this.participants = repositoryImplFactory.getMultiMap(this.distributedParticipantMapName);
+		this.participants = repositoryImplFactory.getMultiMap(this.distributedParticipantMapName, null);
 	}
 
 	/** Add a participant in this repository.

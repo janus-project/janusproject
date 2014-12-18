@@ -32,6 +32,21 @@ import java.util.Map;
  */
 public interface DMap<K, V> extends Map<K, V> {
 
+	/** Replies the name of the map.
+	 *
+	 * @return the name of the map.
+	 */
+	String getName();
+
+	/** Replies if changes to the returned collections will update the underlying map,
+	 * and vice versa. However, changes to the returned collection are not
+	 * possible.
+	 *
+	 * @return <code>true</code> if the changes are applied to the
+	 * underlying map, otherwise <code>false</code>.
+	 */
+	boolean isBackedCollection();
+
 	/** Put the value if the given key is not inside
 	 * the map.
 	 *
@@ -45,12 +60,12 @@ public interface DMap<K, V> extends Map<K, V> {
 	 *
 	 * @param listener - the listener
 	 */
-	void addDMapListener(DMapListener<K, V> listener);
+	void addDMapListener(DMapListener<? super K, ? super V> listener);
 
 	/** Remove listener on events on the DMap.
 	 *
 	 * @param listener - the listener
 	 */
-	void removeDMapListener(DMapListener<K, V> listener);
+	void removeDMapListener(DMapListener<? super K, ? super V> listener);
 
 }

@@ -174,7 +174,7 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		this.logger = logService;
 		this.contextFactory = new DefaultContextFactory();
 		this.spaceRepositoryFactory = new Context.DefaultSpaceRepositoryFactory(injector, dataStructureService, logService);
-		this.defaultSpaces = dataStructureService.getMap(janusID.toString());
+		this.defaultSpaces = dataStructureService.getMap(janusID.toString(), null);
 	}
 
 	/** {@inheritDoc}

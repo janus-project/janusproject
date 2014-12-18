@@ -17,5 +17,10 @@
     
     <suppress checks="MethodLength" files="StandardBuiltinCapacitiesProvider.java"/>
 
+    <suppress checks="MethodCount" files="ArakhneLocaleLogService.java"/>
+
+    <suppress checks="AnonInnerLength" files="MultisetView.java"/>
+    <suppress checks="MethodLength" files="MultisetView.java"/>
+
 </suppressions>
 

@@ -46,21 +46,21 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 		//
 	}
 
-	/** Replies the log service.
+	/** Replies the log service using by Hazelcast.
 	 *
 	 * @return the log service.
 	 */
-	static LogService getLogService() {
+	public static LogService getLogService() {
 		synchronized (HazelcastKernelLoggerFactory.class) {
 			return logger;
 		}
 	}
 
-	/** Set the log service.
+	/** Set the log service used by Hazelcast.
 	 *
 	 * @param service - the log service.
 	 */
-	static void setLogService(LogService service) {
+	public static void setLogService(LogService service) {
 		synchronized (HazelcastKernelLoggerFactory.class) {
 			logger = service;
 		}
