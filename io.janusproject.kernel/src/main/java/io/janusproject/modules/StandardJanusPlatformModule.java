@@ -19,6 +19,8 @@
  */
 package io.janusproject.modules;
 
+import org.arakhne.afc.vmutil.OperatingSystem;
+
 import io.janusproject.JanusConfig;
 import io.janusproject.modules.eventserial.NetworkEventModule;
 import io.janusproject.modules.hazelcast.HazelcastModule;
@@ -46,10 +48,14 @@ public class StandardJanusPlatformModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
-		boolean isNetworkEnabled = !JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false);
+		boolean isNetworkEnabled =
+				!JanusConfig.getSystemPropertyAsBoolean(JanusConfig.OFFLINE, false)
+				&& !OperatingSystem.ANDROID.isCurrentOS();
 
+		// install the module for the Janus boot loader
 		install(new BootModule());
 
+		// Install the modules for network-based services, except NetworkService
 		if (isNetworkEnabled) {
 			install(new HazelcastModule());
 		} else {
@@ -58,8 +64,10 @@ public class StandardJanusPlatformModule extends AbstractModule {
 			install(new LocalKernelDiscoveryServiceModule());
 		}
 
+		// Install the Janus core modules.
 		install(new StandardCoreModule());
 
+		// Install the NetworkService module.
 		if (isNetworkEnabled) {
 			install(new NetworkEventModule());
 			install(new ZeroMQNetworkModule());

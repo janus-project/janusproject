@@ -108,7 +108,7 @@ public abstract class AbstractJanusTest {
 	 * @param actual - the collection to test.
 	 * @param expected - the expected objects.
 	 */
-	protected void assertContains(Iterable<?> actual, Object... expected) {
+	public static void assertContains(Iterable<?> actual, Object... expected) {
 		assertContainsCollection(actual, Arrays.asList(expected));
 	}
 
@@ -117,12 +117,12 @@ public abstract class AbstractJanusTest {
 	 * @param actual - the collection to test.
 	 * @param expected - the expected objects.
 	 */
-	protected void assertContainsCollection(Iterable<?> actual, Collection<?> expected) {
+	public static void assertContainsCollection(Iterable<?> actual, Iterable<?> expected) {
 		assertNotNull(actual);
 		Collection<Object> la = new ArrayList<>();
 		Iterables.addAll(la, actual);
 		Collection<Object> le = new ArrayList<>();
-		le.addAll(expected);
+		Iterables.addAll(le, expected);
 
 		Iterator<?> it1 = la.iterator();
 		while (it1.hasNext()) {
