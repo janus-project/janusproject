@@ -29,15 +29,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -48,7 +47,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.arakhne.afc.vmutil.locale.Locale;
 
+import com.google.common.base.Strings;
 import com.google.inject.Module;
+import com.hazelcast.logging.LoggingService;
 
 /** This is the class that permits to boot the Janus platform.
  * <p>
@@ -76,84 +77,49 @@ import com.google.inject.Module;
  * @mavenartifactid $ArtifactId$
  */
 public final class Boot {
+
 	private static final int ERROR_EXIT_CODE = 255;
+
+	private static PrintStream consoleLogger;
+	private static Exiter applicationExiter;
+
 	private Boot() {
 		//
 	}
-	private static void parseCommandForInfoOptions(CommandLine cmd) {
-		if (cmd.hasOption('h') || cmd.getArgs().length == 0) {
-			showHelp();
-		}
-		if (cmd.hasOption('s')) {
-			showDefaults();
-		}
-	}
-	private static void parseCommandLineForSystemProperties(CommandLine cmd) {
-		if (cmd.hasOption('o')) {
-			setOffline(true);
-		}
-		if (cmd.hasOption('R')) {
-			setRandomContextUUID();
-		} else if (cmd.hasOption('B')) {
-			setBootAgentTypeContextUUID();
-		} else if (cmd.hasOption('W')) {
-			setDefaultContextUUID();
-		}
-		// Define the system properties, if not already done by the JRE.
-		Properties props = cmd.getOptionProperties("D"); //$NON-NLS-1$
-		if (props != null) {
-			for (Entry<Object, Object> entry : props.entrySet()) {
-				setProperty(entry.getKey().toString(), entry.getValue().toString());
+
+	/** Parse the command line.
+	 *
+	 * @param args - the CLI arguments given to the program.
+	 * @return the arguments that are not recognized as CLI options.
+	 */
+	@SuppressWarnings("unchecked")
+	public static String[] parseCommandLine(String[] args) {
+		CommandLineParser parser = new GnuParser();
+		try {
+			CommandLine cmd = parser.parse(getOptions(), args);
+
+			// Show the help when there is no argument.
+			if (cmd.getArgs().length == 0) {
+				showHelp();
+				return null;
 			}
-		}
-	}
-	private static void parseCommandLineForVerbosity(CommandLine cmd) {
-		// The order of the options is important.
-		int verbose = LoggerCreator.toInt(JanusConfig.VERBOSE_LEVEL_VALUE);
-		if (cmd.hasOption('v') || cmd.hasOption('q') || cmd.hasOption('l')) {
-			@SuppressWarnings("unchecked")
+
+			boolean noLogo = false;
+			int verbose = LoggerCreator.toInt(JanusConfig.VERBOSE_LEVEL_VALUE);
+
 			Iterator<Option> optIterator = cmd.iterator();
 			while (optIterator.hasNext()) {
 				Option opt = optIterator.next();
 				switch(opt.getOpt()) {
-				case "l": //$NON-NLS-1$
-					verbose = LoggerCreator.toInt(opt.getValue());
-					break;
-				case "q": //$NON-NLS-1$
-					--verbose;
-					break;
-				case "v": //$NON-NLS-1$
-					++verbose;
-					break;
-				default:
-				}
-			}
-			setVerboseLevel(verbose);
-		}
-
-		// Show the Janus logo?
-		if (cmd.hasOption("nologo") || verbose == 0) { //$NON-NLS-1$
-			setProperty(
-					JanusConfig.JANUS_LOGO_SHOW_NAME,
-					Boolean.FALSE.toString());
-		}
-	}
-	/** Parse the command line.
-	 *
-	 * @param args - the CLI arguments given to the program.
-	 * @param propertyFiles - files that may be filled with the filenames given on the CLI.
-	 * @return the arguments that are not recognized as CLI options.
-	 */
-	public static String[] parseCommandLine(String[] args, List<URL> propertyFiles) {
-		CommandLineParser parser = new GnuParser();
-		try {
-			CommandLine cmd = parser.parse(getOptions(), args);
-			parseCommandForInfoOptions(cmd);
-			parseCommandLineForSystemProperties(cmd);
-			parseCommandLineForVerbosity(cmd);
-			// Retreive the list of the property files given on CLI
-			if (cmd.hasOption('f')) {
-				for (String rawFilename : cmd.getOptionValues('f')) {
+				case "h": //$NON-NLS-1$
+					showHelp();
+					return null;
+				case "s": //$NON-NLS-1$
+					showDefaults();
+					return null;
+				case "f": //$NON-NLS-1$
+				{
+					String rawFilename = opt.getValue();
 					if (rawFilename == null || "".equals(rawFilename)) { //$NON-NLS-1$
 						showHelp();
 					}
@@ -162,12 +128,56 @@ public final class Boot {
 						showError(Locale.getString(
 								"INVALID_PROPERTY_FILENAME", //$NON-NLS-1$
 								rawFilename), null);
-						// Event if showError never returns, add the return statement for
-						// avoiding compilation error.
 						return null;
 					}
-					propertyFiles.add(file.toURI().toURL());
+					setPropertiesFrom(file);
+					break;
 				}
+				case "o": //$NON-NLS-1$
+					setOffline(true);
+					break;
+				case "R": //$NON-NLS-1$
+					setRandomContextUUID();
+					break;
+				case "B": //$NON-NLS-1$
+					setBootAgentTypeContextUUID();
+					break;
+				case "W": //$NON-NLS-1$
+					setDefaultContextUUID();
+					break;
+				case "D": //$NON-NLS-1$
+				{
+					String name = opt.getValue(0);
+					if (!Strings.isNullOrEmpty(name)) {
+						setProperty(name, Strings.emptyToNull(opt.getValue(1)));
+					}
+					break;
+				}
+				case "l": //$NON-NLS-1$
+					verbose = Math.max(LoggerCreator.toInt(opt.getValue()), 0);
+					break;
+				case "q": //$NON-NLS-1$
+					if (verbose > 0) {
+						--verbose;
+					}
+					break;
+				case "v": //$NON-NLS-1$
+					++verbose;
+					break;
+				case "nologo": //$NON-NLS-1$
+					noLogo = true;
+					break;
+				default:
+				}
+			}
+
+			// Change the verbosity
+			setVerboseLevel(verbose);
+			// Show the Janus logo?
+			if (noLogo || verbose == 0) {
+				setProperty(
+						JanusConfig.JANUS_LOGO_SHOW_NAME,
+						Boolean.FALSE.toString());
 			}
 			return cmd.getArgs();
 		} catch (IOException | ParseException e) {
@@ -218,8 +228,7 @@ public final class Boot {
 	 */
 	public static void main(String[] args) {
 		try {
-			List<URL> propertyFiles = new ArrayList<>();
-			Object[] freeArgs = parseCommandLine(args, propertyFiles);
+			Object[] freeArgs = parseCommandLine(args);
 			if (JanusConfig.getSystemPropertyAsBoolean(
 					JanusConfig.JANUS_LOGO_SHOW_NAME,
 					JanusConfig.JANUS_LOGO_SHOW)) {
@@ -241,17 +250,12 @@ public final class Boot {
 					1, freeArgs.length,
 					String[].class);
 
-			// Load property files
-			for (URL url : propertyFiles) {
-				setPropertiesFrom(url);
-			}
-
 			// Load the agent class
 			Class<? extends Agent> agent = loadAgentClass(agentToLaunch);
 			assert (agent != null);
 
 			startJanus(
-					null,
+					(Class<? extends Module>)null,
 					(Class<? extends Agent>) agent,
 					freeArgs);
 		} catch (Exception e) {
@@ -268,10 +272,28 @@ public final class Boot {
 
 	/** Replies the console stream for logging messages from the boot mechanism.
 	 *
+	 * The console stream is independent of the stream used by the
+	 * {@link LoggingService logging service} of the platform.
+	 * Indeed, the console stream is used for displaying information,
+	 * warnings and messages before the Janus platform is realy launched.
+	 *
 	 * @return the console logger.
 	 */
-	public static OutputStream getConsoleLogger() {
-		return System.err;
+	public static PrintStream getConsoleLogger() {
+		return consoleLogger == null ? System.err : consoleLogger;
+	}
+
+	/** Replies the console stream for logging messages from the boot mechanism.
+	 *
+	 * The console stream is independent of the stream used by the
+	 * {@link LoggingService logging service} of the platform.
+	 * Indeed, the console stream is used for displaying information,
+	 * warnings and messages before the Janus platform is realy launched.
+	 *
+	 * @param stream - the stream to use for the 
+	 */
+	public static void setConsoleLogger(PrintStream stream) {
+		consoleLogger = stream;
 	}
 
 	/** Replies the command line options supported by this boot class.
@@ -382,7 +404,7 @@ public final class Boot {
 				HelpFormatter.DEFAULT_LEFT_PAD,
 				HelpFormatter.DEFAULT_DESC_PAD,
 				""); //$NON-NLS-1$
-		System.exit(ERROR_EXIT_CODE);
+		getExiter().exit();
 	}
 
 	/** Show the default values of the system properties.
@@ -399,7 +421,7 @@ public final class Boot {
 			e.printStackTrace();
 			//CHECKSTYLE:ON
 		}
-		System.exit(ERROR_EXIT_CODE);
+		getExiter().exit();
 	}
 
 	/** Show the heading logo of the Janus platform.
@@ -589,9 +611,6 @@ public final class Boot {
 			Class<? extends Module> platformModule,
 			Class<? extends Agent> agentCls,
 			Object... params) throws Exception {
-		// Set the boot agent classname
-		System.setProperty(JanusConfig.BOOT_AGENT, agentCls.getCanonicalName());
-		// Get the start-up injection module
 		Class<? extends Module> startupModule = platformModule;
 		if (startupModule == null) {
 			startupModule = JanusConfig.getSystemPropertyAsClass(
@@ -599,8 +618,47 @@ public final class Boot {
 					JanusConfig.INJECTION_MODULE_NAME_VALUE);
 		}
 		assert (startupModule != null) : "No platform injection module"; //$NON-NLS-1$
-		Kernel k = Kernel.create(startupModule.newInstance());
-		k.getLogger().info(Locale.getString("LAUNCHING_AGENT", agentCls.getName())); //$NON-NLS-1$
+		return startJanus(startupModule.newInstance(), agentCls, params);
+	}
+
+	/** Launch the Janus kernel and the first agent in the kernel.
+	 *
+	 * Thus function does not parse the command line.
+	 * See {@link #main(String[])} for the command line management.
+	 * When this function is called, it is assumed that all the
+	 * system's properties are correctly set.
+	 *
+	 * The startupModule parameter permits to specify the injection module to use.
+	 * The injection module is in change of creating/injecting all the components
+	 * of the platform. The default injection module is retreived from the system
+	 * property with the name stored in {@link JanusConfig#INJECTION_MODULE_NAME}.
+	 * The default type for the injection module is stored in the constant
+	 * {@link JanusConfig#INJECTION_MODULE_NAME_VALUE}.
+	 *
+	 * The function {@link #getBootAgentIdentifier()} permits to retreive the identifier
+	 * of the launched agent.
+	 *
+	 * @param startupModule - the injection module to use for initializing the platform.
+	 * @param agentCls - type of the first agent to launch.
+	 * @param params - parameters to pass to the agent as its initliazation parameters.
+	 * @return the kernel that was launched.
+	 * @throws Exception - if it is impossible to start the platform.
+	 * @see #main(String[])
+	 * @see #getBootAgentIdentifier()
+	 */
+	public static Kernel startJanus(
+			Module startupModule,
+			Class<? extends Agent> agentCls,
+			Object... params) throws Exception {
+		// Set the boot agent classname
+		System.setProperty(JanusConfig.BOOT_AGENT, agentCls.getName());
+		// Get the start-up injection module
+		assert (startupModule != null) : "No platform injection module"; //$NON-NLS-1$
+		Kernel k = Kernel.create(startupModule);
+		Logger logger = k.getLogger();
+		if (logger != null) {
+			logger.info(Locale.getString("LAUNCHING_AGENT", agentCls.getName())); //$NON-NLS-1$
+		}
 		UUID id = k.spawn(agentCls, params);
 		if (id != null) {
 			System.setProperty(JanusConfig.BOOT_AGENT_ID, id.toString());
@@ -608,6 +666,57 @@ public final class Boot {
 			System.getProperties().remove(JanusConfig.BOOT_AGENT_ID);
 		}
 		return k;
+	}
+
+	/** Replies the tool for exiting the application.
+	 *
+	 * @return the tool for exiting the application.
+	 */
+	public static Exiter getExiter() {
+		return applicationExiter == null ? new StandardExiter() : applicationExiter;
+	}
+
+	/** Changes the tool that permits to stop the application.
+	 * 
+	 * @param exiter - the exit tool.
+	 */
+	public static void setExiter(Exiter exiter) {
+		applicationExiter = exiter;
+	}
+
+	/** Tool for exiting from the application.
+	 * 
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public interface Exiter {
+
+		/** Exit the application.
+		 */
+		void exit();
+
+	}
+
+	/** Tool for exiting from the application.
+	 * 
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class StandardExiter implements Exiter {
+
+		public StandardExiter() {
+			//
+		}
+
+		@Override
+		public void exit() {
+			System.exit(ERROR_EXIT_CODE);
+		}
+
 	}
 
 }

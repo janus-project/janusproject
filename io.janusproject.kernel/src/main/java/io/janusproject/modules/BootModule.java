@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import org.arakhne.afc.vmutil.FileSystem;
 
+import com.google.common.base.Strings;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
@@ -96,48 +97,41 @@ public class BootModule extends AbstractModule {
 	@Provides
 	@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME)
 	private static UUID getContextID() {
-		String defaultContextID = JanusConfig.getSystemProperty(JanusConfig.DEFAULT_CONTEXT_ID_NAME);
-		if (defaultContextID == null || "".equals(defaultContextID)) { //$NON-NLS-1$
+		String str = JanusConfig.getSystemProperty(JanusConfig.DEFAULT_CONTEXT_ID_NAME);
+		if (Strings.isNullOrEmpty(str)) {
 			Boolean v;
 
 			// From boot agent type
-			defaultContextID = JanusConfig.getSystemProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME);
-			if (defaultContextID == null) {
+			str = JanusConfig.getSystemProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME);
+			if (Strings.isNullOrEmpty(str)) {
 				v = JanusConfig.BOOT_DEFAULT_CONTEXT_ID_VALUE;
 			} else {
-				v = Boolean.valueOf(Boolean.parseBoolean(defaultContextID));
+				v = Boolean.valueOf(Boolean.parseBoolean(str));
 			}
 			if (v.booleanValue()) {
 				String bootClassname = JanusConfig.getSystemProperty(JanusConfig.BOOT_AGENT);
-				assert (bootClassname != null);
-				Class<?> bootClass;
-				try {
-					bootClass = Class.forName(bootClassname);
-				} catch (ClassNotFoundException e) {
-					throw new Error(e);
-				}
-				defaultContextID = UUID.nameUUIDFromBytes(bootClass.getCanonicalName().getBytes()).toString();
+				str = UUID.nameUUIDFromBytes(bootClassname.getBytes()).toString();
 			} else {
 				// Random
-				defaultContextID = JanusConfig.getSystemProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME);
-				if (defaultContextID == null) {
+				str = JanusConfig.getSystemProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME);
+				if (Strings.isNullOrEmpty(str)) {
 					v = JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_VALUE;
 				} else {
-					v = Boolean.valueOf(Boolean.parseBoolean(defaultContextID));
+					v = Boolean.valueOf(Boolean.parseBoolean(str));
 				}
 				if (v.booleanValue()) {
-					defaultContextID = UUID.randomUUID().toString();
+					str = UUID.randomUUID().toString();
 				} else {
-					defaultContextID = JanusConfig.DEFAULT_CONTEXT_ID_VALUE;
+					str = JanusConfig.DEFAULT_CONTEXT_ID_VALUE;
 				}
 			}
 
 			// Force the global value of the property to prevent to re-generate the UUID at the next call.
-			System.setProperty(JanusConfig.DEFAULT_CONTEXT_ID_NAME, defaultContextID);
+			System.setProperty(JanusConfig.DEFAULT_CONTEXT_ID_NAME, str);
 		}
 
-		assert (defaultContextID != null && !defaultContextID.isEmpty());
-		return UUID.fromString(defaultContextID);
+		assert (!Strings.isNullOrEmpty(str));
+		return UUID.fromString(str);
 	}
 
 	/**

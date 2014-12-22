@@ -19,17 +19,17 @@
  */
 package io.janusproject.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import io.janusproject.JanusConfig;
+import io.janusproject.testutils.AbstractJanusTest;
 
-import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
 
 /**
  * @author $Author: sgalland$
@@ -38,17 +38,7 @@ import org.junit.Test;
  * @mavenartifactid $ArtifactId$
  */
 @SuppressWarnings({"javadoc","static-method"})
-public class LoggerCreatorTest extends Assert {
-
-	@Before
-	public void resetProperties() {
-		Properties tmp = new Properties();
-		JanusConfig.getDefaultValues(tmp);
-		Properties props = System.getProperties();
-		for(Object name : tmp.keySet()) {
-			props.remove(name);
-		}
-	}
+public class LoggerCreatorTest extends AbstractJanusTest {
 
 	@Test
 	public void getLevelStrings() {

@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import io.janusproject.JanusConfig;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -36,6 +37,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -54,6 +56,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -61,7 +64,12 @@ import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.Listener;
 import com.google.common.util.concurrent.Service.State;
 
-/** Abstract class that clear the attributes.
+/** Abstract class that is providing useful tools for unit tests.
+ *
+ * This class provides assertion functions, clear the system properties
+ * related to Janus, and reset the attributes of the unit test that
+ * are marked <code>@Mock</code>, <code>@InjectMocks</code> or
+ * <code>@Nullable</code>.
  *
  * @param <S> - the type of the service.
  * @author $Author: sgalland$
@@ -76,7 +84,12 @@ public abstract class AbstractJanusTest {
 	 * at the end of the test.
 	 */
 	@Rule
-	public TestWatcher serviceTestWatcher = new TestWatcher() {
+	public TestWatcher rootJanusWatchter = new TestWatcher() {
+		@Override
+		protected void starting(Description description) {
+			// Clear the system properties
+			resetProperties();
+		}
 		@Override
 		protected void finished(Description description) {
 			// Clear the references to the mock objects or the injected objects
@@ -100,6 +113,8 @@ public abstract class AbstractJanusTest {
 				}
 				type = type.getSuperclass();
 			}
+			// Clear the system properties
+			resetProperties();
 		}
 	};
 
@@ -137,6 +152,113 @@ public abstract class AbstractJanusTest {
 		if (!le.isEmpty()) {
 			fail("Expecting the following elements:\n" + le.toString() + "\nbut was:\n" +
 					Iterables.toString(actual));
+		}
+	}
+
+	/** Assert if the value is the string representation of
+	 * the boolean vlaue <code>true</code>.
+	 *
+	 * @param actual - the value.
+	 */
+	public static void assertTrueStr(String actual) {
+		assertTrueStr(null, actual);
+	}
+
+	/** Assert if the value is the string representation of
+	 * the boolean vlaue <code>true</code>.
+	 *
+	 * @param message - the error message.
+	 * @param actual - the value.
+	 */
+	public static void assertTrueStr(String message, String actual) {
+		assertEquals(message, Boolean.TRUE.toString(), actual);
+	}
+
+	/** Assert if the value is the string representation of
+	 * the boolean vlaue <code>false</code>.
+	 *
+	 * @param actual - the value.
+	 */
+	public static void assertFalseStr(String actual) {
+		assertFalseStr(null, actual);
+	}
+
+	/** Assert if the value is the string representation of
+	 * the boolean vlaue <code>false</code>.
+	 *
+	 * @param message - the error message.
+	 * @param actual - the value.
+	 */
+	public static void assertFalseStr(String message, String actual) {
+		assertEquals(message, Boolean.FALSE.toString(), actual);
+	}
+
+	/** Assert if the system property with the given name has
+	 * the boolean value <code>true</code>.
+	 *
+	 * The property must be defined
+	 *
+	 * @param name - the name of the property.
+	 */
+	public static void assertTrueProperty(String name) {
+		String v = System.getProperty(name);
+		if (Strings.isNullOrEmpty(v)) {
+			fail("The property '" + name + "' is not defined.");
+		}
+		assertTrueStr("The property '" + name + "' is expected to be true.", v);
+	}
+
+	/** Assert if the system property with the given name has
+	 * the boolean value <code>false</code>.
+	 *
+	 * @param name - the name of the property.
+	 */
+	public static void assertFalseProperty(String name) {
+		String v = System.getProperty(name);
+		if (Strings.isNullOrEmpty(v)) {
+			fail("The property '" + name + "' is not defined.");
+		}
+		assertFalseStr("The property '" + name + "' is expected to be true.", v);
+	}
+
+	/** Assert if the system property with the given name has
+	 * the boolean value <code>false</code>.
+	 *
+	 * @param name - the name of the property.
+	 */
+	public static void assertNullProperty(String name) {
+		String v = System.getProperty(name);
+		if (!Strings.isNullOrEmpty(v)) {
+			fail("The property '" + name + "' is expected to be undefined; but is has the value: " + v);
+		}
+	}
+
+	/** Assert if the system property with the given name has
+	 * the given value.
+	 *
+	 * @param name - the name of the property.
+	 * @param value - the value of the property.
+	 */
+	public static void assertProperty(String name, String value) {
+		if (Strings.isNullOrEmpty(value)) {
+			assertNullProperty(name);
+		} else {
+			String v = System.getProperty(name);
+			if (Strings.isNullOrEmpty(v)) {
+				fail("The property '" + name + "' is expected to be defined." + v);
+			}
+			assertEquals(value, v);
+		}
+	}
+
+	/** Remove all the system properties related to Janus.
+	 */
+	public static void resetProperties() {
+		Properties tmp = new Properties();
+		JanusConfig.getDefaultValues(tmp);
+		Properties props = System.getProperties();
+		for(Object name : tmp.keySet()) {
+			props.remove(name);
 		}
 	}
 

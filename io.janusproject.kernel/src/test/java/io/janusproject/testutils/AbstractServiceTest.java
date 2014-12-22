@@ -79,7 +79,7 @@ public abstract class AbstractServiceTest<S extends Service> extends AbstractJan
 	 * 
 	 */
 	@Rule
-	public TestWatcher serviceTestWatcher = new TestWatcher() {
+	public TestWatcher serviceWatcher = new TestWatcher() {
 
 		private Statement nextStatement(Statement n) {
 			try {

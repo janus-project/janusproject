@@ -85,9 +85,13 @@ public final class LoggerCreator {
 	 */
 	public static Logger createLogger(String name, Logger parent) {
 		Logger logger = Logger.getLogger(name);
-		logger.setParent(parent);
+		if (parent != null) {
+			logger.setParent(parent);
+		}
 		logger.setUseParentHandlers(true);
-		logger.setLevel(parent.getLevel());
+		if (parent !=null) {
+			logger.setLevel(parent.getLevel());
+		}
 		return logger;
 	}
 

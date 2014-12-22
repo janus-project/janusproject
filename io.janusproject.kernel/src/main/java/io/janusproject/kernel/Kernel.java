@@ -33,6 +33,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -78,7 +79,8 @@ public class Kernel {
 	/** Logger used by the kernel, but not linked to the logging kernel's service.
 	 */
 	private Logger rawLogger;
-
+	
+	private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
 	/**
 	 * Constructs a Janus kernel.
@@ -108,7 +110,7 @@ public class Kernel {
 		// of the Janus agent are catched by the modules;
 		Services.startServices(this.serviceManager);
 	}
-
+	
 	/** Create an instance of {@link Kernel}.
 	 *
 	 * @param modules - modules to link to the new kernel.
@@ -118,6 +120,15 @@ public class Kernel {
 		Injector injector = Guice.createInjector(modules);
 		Kernel k = injector.getInstance(Kernel.class);
 		return k;
+	}
+	
+	/** Replies if the kernel is running or not.
+	 *
+	 * @return <code>true</code> if the kernel is running; <code>false</code>
+	 * otherwise.
+	 */
+	public boolean isRunning() {
+		return this.isRunning.get();
 	}
 
 	/**
@@ -165,7 +176,7 @@ public class Kernel {
 	 */
 	public Logger getLogger() {
 		Logger log = this.loggingService.getLogger();
-		if (!this.loggingService.isRunning()) {
+		if (log == null) {
 			if (this.rawLogger == null) {
 				this.rawLogger = LoggerCreator.createLogger(Kernel.class.getName());
 			}
@@ -250,6 +261,7 @@ public class Kernel {
 			logger.info(Locale.getString(Kernel.class, "STOP_KERNEL_SERVICES")); //$NON-NLS-1$
 			Services.stopServices(Kernel.this.serviceManager);
 			logger.info(Locale.getString(Kernel.class, "KERNEL_SERVICES_STOPPED")); //$NON-NLS-1$
+			Kernel.this.isRunning.set(false);
 		}
 
 		/** {@inheritDoc}
