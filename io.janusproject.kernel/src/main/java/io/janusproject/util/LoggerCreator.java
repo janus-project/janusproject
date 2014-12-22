@@ -89,7 +89,7 @@ public final class LoggerCreator {
 			logger.setParent(parent);
 		}
 		logger.setUseParentHandlers(true);
-		if (parent !=null) {
+		if (parent != null) {
 			logger.setLevel(parent.getLevel());
 		}
 		return logger;

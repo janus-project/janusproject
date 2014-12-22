@@ -42,7 +42,7 @@ import com.google.common.util.concurrent.Service;
 public class EmptyLogService extends AbstractService implements LogService {
 
 	private final Logger logger;
-	
+
 	/**
 	 */
 	public EmptyLogService() {

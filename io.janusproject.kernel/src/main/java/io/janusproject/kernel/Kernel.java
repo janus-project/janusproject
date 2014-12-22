@@ -79,7 +79,7 @@ public class Kernel {
 	/** Logger used by the kernel, but not linked to the logging kernel's service.
 	 */
 	private Logger rawLogger;
-	
+
 	private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
 	/**
@@ -110,7 +110,7 @@ public class Kernel {
 		// of the Janus agent are catched by the modules;
 		Services.startServices(this.serviceManager);
 	}
-	
+
 	/** Create an instance of {@link Kernel}.
 	 *
 	 * @param modules - modules to link to the new kernel.
@@ -121,7 +121,7 @@ public class Kernel {
 		Kernel k = injector.getInstance(Kernel.class);
 		return k;
 	}
-	
+
 	/** Replies if the kernel is running or not.
 	 *
 	 * @return <code>true</code> if the kernel is running; <code>false</code>

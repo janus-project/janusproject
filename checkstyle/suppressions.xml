@@ -22,5 +22,10 @@
     <suppress checks="AnonInnerLength" files="MultisetView.java"/>
     <suppress checks="MethodLength" files="MultisetView.java"/>
 
+    <suppress checks="ReturnCount" files="Boot.java"/>
+    <suppress checks="MethodLength" files="Boot.java"/>
+    <suppress checks="NPathComplexity" files="Boot.java"/>
+    <suppress checks="CyclomaticComplexity" files="Boot.java"/>
+
 </suppressions>
 

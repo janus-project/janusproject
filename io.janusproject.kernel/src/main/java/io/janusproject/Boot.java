@@ -118,7 +118,6 @@ public final class Boot {
 					showDefaults();
 					return null;
 				case "f": //$NON-NLS-1$
-				{
 					String rawFilename = opt.getValue();
 					if (rawFilename == null || "".equals(rawFilename)) { //$NON-NLS-1$
 						showHelp();
@@ -132,7 +131,6 @@ public final class Boot {
 					}
 					setPropertiesFrom(file);
 					break;
-				}
 				case "o": //$NON-NLS-1$
 					setOffline(true);
 					break;
@@ -146,13 +144,11 @@ public final class Boot {
 					setDefaultContextUUID();
 					break;
 				case "D": //$NON-NLS-1$
-				{
 					String name = opt.getValue(0);
 					if (!Strings.isNullOrEmpty(name)) {
 						setProperty(name, Strings.emptyToNull(opt.getValue(1)));
 					}
 					break;
-				}
 				case "l": //$NON-NLS-1$
 					verbose = Math.max(LoggerCreator.toInt(opt.getValue()), 0);
 					break;
@@ -255,7 +251,7 @@ public final class Boot {
 			assert (agent != null);
 
 			startJanus(
-					(Class<? extends Module>)null,
+					(Class<? extends Module>) null,
 					(Class<? extends Agent>) agent,
 					freeArgs);
 		} catch (Exception e) {
@@ -290,7 +286,7 @@ public final class Boot {
 	 * Indeed, the console stream is used for displaying information,
 	 * warnings and messages before the Janus platform is realy launched.
 	 *
-	 * @param stream - the stream to use for the 
+	 * @param stream - the stream to use for the console logging.
 	 */
 	public static void setConsoleLogger(PrintStream stream) {
 		consoleLogger = stream;
@@ -677,7 +673,7 @@ public final class Boot {
 	}
 
 	/** Changes the tool that permits to stop the application.
-	 * 
+	 *
 	 * @param exiter - the exit tool.
 	 */
 	public static void setExiter(Exiter exiter) {
@@ -685,7 +681,7 @@ public final class Boot {
 	}
 
 	/** Tool for exiting from the application.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -700,7 +696,7 @@ public final class Boot {
 	}
 
 	/** Tool for exiting from the application.
-	 * 
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
