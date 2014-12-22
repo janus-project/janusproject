@@ -980,7 +980,7 @@ public class BootTest {
 		@Test
 		public void defaultContextUUID() throws Exception {
 			Boot.setDefaultContextUUID();
-			runJanus(RCAgent.class);
+			runJanus(RCAgent.class, false);
 			UUID id = getResult(UUID.class, 0);
 			assertNotNull(id);
 			assertEquals(defaultID, id);
@@ -989,7 +989,7 @@ public class BootTest {
 		@Test
 		public void bootContextUUID() throws Exception {
 			Boot.setBootAgentTypeContextUUID();
-			runJanus(RCAgent.class);
+			runJanus(RCAgent.class, false);
 			UUID id = getResult(UUID.class, 0);
 			assertNotNull(id);
 			assertEquals(bootID, id);
@@ -998,7 +998,7 @@ public class BootTest {
 		@Test
 		public void randomContextUUID() throws Exception {
 			Boot.setRandomContextUUID();
-			runJanus(RCAgent.class);
+			runJanus(RCAgent.class, false);
 			UUID id = getResult(UUID.class, 0);
 			assertNotNull(id);
 			assertNotEquals(defaultID, id);

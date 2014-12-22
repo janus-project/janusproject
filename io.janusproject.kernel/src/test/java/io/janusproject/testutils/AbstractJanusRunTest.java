@@ -21,10 +21,8 @@ package io.janusproject.testutils;
 
 import static org.junit.Assert.assertNull;
 import io.janusproject.Boot;
-import io.janusproject.Boot.Exiter;
 import io.janusproject.kernel.Kernel;
 import io.janusproject.modules.StandardJanusPlatformModule;
-import io.janusproject.services.executor.ChuckNorrisException;
 import io.sarl.core.Initialize;
 import io.sarl.core.Lifecycle;
 import io.sarl.core.Schedules;
@@ -50,6 +48,7 @@ import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
+import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
 /** Abstract class for creating unit tests that needs
@@ -67,7 +66,7 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 	/** Reference to the instance of the Janus kernel.
 	 */
 	protected Kernel janusKernel;
-	
+
 	@Nullable
 	private List<Object> results;
 
@@ -78,7 +77,7 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 			JanusRun skipRun = description.getAnnotation(JanusRun.class);
 			if (skipRun != null) {
 				try {
-					runJanus(skipRun.value());
+					runJanus(skipRun.agent(), skipRun.enableLogging());
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
@@ -92,8 +91,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 			}
 		}
 	};
-	
-	/** Replies result at the given indx of the run of the agent.
+
+	/** Replies result at the given index of the run of the agent.
 	 * 
 	 * @param type - the type of the result.
 	 * @param index - the index of the result.
@@ -110,13 +109,47 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		return null;
 	}
 
+	/** Replies the index of the first result of the given type.
+	 * 
+	 * @param type - the type of the result.
+	 * @return the index; or <code>-1</code> if not found.
+	 */
+	protected int indexOfResult(Class<?> type) {
+		return indexOfResult(type, 0);
+	}
+
+	/** Replies the index of the first result of the given type starting
+	 * at the given index.
+	 * 
+	 * @param type - the type of the result.
+	 * @param fromIndex - the start index.
+	 * @return the index; or <code>-1</code> if not found.
+	 */
+	protected int indexOfResult(Class<?> type, int fromIndex) {
+		if (this.results != null) {
+			try {
+				for (int i = fromIndex; i < this.results.size(); ++i) {
+					Object r = this.results.get(i);
+					if (type.isInstance(r)) {
+						return i;
+					}
+				}
+			} catch (Throwable _) {
+				//
+			}
+		}
+		return -1;
+	}
+
 	/** Start the Janus platform.
-T	 * 
+	 * 
 	 * @param type - the type of the agent to launch at start-up.
+	 * @param enableLogging - indicates if the logging is enable or not.
 	 * @throws Exception - if the kernel cannot be launched.
 	 */
-	protected void runJanus(Class<? extends TestingAgent> type) throws Exception {
+	protected void runJanus(Class<? extends TestingAgent> type, boolean enableLogging) throws Exception {
 		assertNull("Janus already launched.", this.janusKernel);
+		Module module = new StandardJanusPlatformModule();
 		Boot.setConsoleLogger(new PrintStream(new OutputStream() {
 			@Override
 			public void write(int b) throws IOException {
@@ -124,9 +157,15 @@ T	 *
 			}
 		}));
 		this.results = new ArrayList<>();
+		if (!enableLogging) {
+			module = Modules.override(new StandardJanusPlatformModule()).with(new NoLogTestingModule());
+		} else {
+			module = Modules.override(new StandardJanusPlatformModule()).with(new ErrorLogTestingModule(this.results));
+		}
 		this.janusKernel = Boot.startJanus(
-				Modules.override(new StandardJanusPlatformModule()).with(new TestingModule()),
-				type, results);
+				module,
+				type,
+				results);
 		while (this.janusKernel.isRunning()) {
 			Thread.yield();
 		}
@@ -149,7 +188,14 @@ T	 *
 		 *
 		 * @return the type of the agent to launch.
 		 */
-		Class<? extends TestingAgent> value();
+		Class<? extends TestingAgent> agent();
+
+		/** Indicates if the logging is enabled.
+		 *
+		 * @return <code>true</code> if the logging is enabled;
+		 * <code>false</code> otherwise.
+		 */
+		boolean enableLogging() default false;
 
 	}
 
@@ -178,7 +224,7 @@ T	 *
 		public TestingAgent(UUID parentID, UUID agentID) {
 			super(parentID, agentID);
 		}
-		
+
 		/** Add a result.
 		 * 
 		 * @param result - the result.

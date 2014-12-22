@@ -19,10 +19,12 @@
  */
 package io.janusproject.testutils;
 
-import io.janusproject.kernel.services.jdk.logging.EmptyLogService;
 import io.janusproject.services.logging.LogService;
 
+import java.util.List;
+
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
 /**
@@ -33,11 +35,30 @@ import com.google.inject.Singleton;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class TestingModule extends AbstractModule {
+public class ErrorLogTestingModule extends AbstractModule {
 
+	private final List<Object> results;
+	
+	/**
+	 * @param results - the results to fill.
+	 */
+	public ErrorLogTestingModule(List<Object> results) {
+		this.results = results;
+	}
+	
 	@Override
 	protected void configure() {
-		bind(LogService.class).to(EmptyLogService.class).in(Singleton.class);
+		//
+	}
+	
+	/** Replies the log service.
+	 * 
+	 * @return the log service.
+	 */
+	@Singleton
+	@Provides
+	public LogService getLogService() {
+		return new ExceptionLogService(this.results);
 	}
 
 }

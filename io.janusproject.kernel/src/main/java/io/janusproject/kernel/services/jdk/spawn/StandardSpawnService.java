@@ -148,8 +148,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 			} else {
 				throw new AgentKillException(agentID);
 			}
-		} else {
-			throw new AgentKillException(agentID);
 		}
 	}
 
