@@ -107,6 +107,13 @@
 									<SARL-Spec-Version>${sarl.spec.version}</SARL-Spec-Version>
 									<SRE-Name>${project.name}</SRE-Name>
 									<Standalone-SRE>false</Standalone-SRE>
+									<CLI-Hide-Logo>--nologo</CLI-Hide-Logo>
+									<CLI-Hide-Info>--log=info</CLI-Hide-Info>
+									<CLI-Show-Info>--log=warning</CLI-Show-Info>
+									<CLI-Default-Context-ID>--worldid</CLI-Default-Context-ID>
+									<CLI-Random-Context-ID>--randomid</CLI-Random-Context-ID>
+									<CLI-BootAgent-Context-ID>--bootid</CLI-BootAgent-Context-ID>
+									<CLI-Offline>--offline</CLI-Offline>
 								</manifestEntries>
 							</manifestSection>
 						</manifestSections>
@@ -132,6 +139,13 @@
 									<SARL-Spec-Version>${sarl.spec.version}</SARL-Spec-Version>
 									<SRE-Name>${project.name}</SRE-Name>
 									<Standalone-SRE>true</Standalone-SRE>
+									<CLI-Hide-Logo>--nologo</CLI-Hide-Logo>
+									<CLI-Hide-Info>--log=info</CLI-Hide-Info>
+									<CLI-Show-Info>--log=warning</CLI-Show-Info>
+									<CLI-Default-Context-ID>--worldid</CLI-Default-Context-ID>
+									<CLI-Random-Context-ID>--randomid</CLI-Random-Context-ID>
+									<CLI-BootAgent-Context-ID>--bootid</CLI-BootAgent-Context-ID>
+									<CLI-Offline>--offline</CLI-Offline>
 								</manifestEntries>
 							</manifestSection>
 						</manifestSections>
