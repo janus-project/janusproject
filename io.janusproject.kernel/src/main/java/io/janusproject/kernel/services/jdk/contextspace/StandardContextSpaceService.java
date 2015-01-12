@@ -215,7 +215,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 			this.contexts.put(contextID, ctx);
 			fireContextCreated(ctx);
 			Space defaultSpace = ctx.postConstruction();
-			assert (defaultSpace != null) : "The default space in the context " + contextID + " cannot be null"; //$NON-NLS-1$ //$NON-NLS-2$
+			assert (defaultSpace != null) : "The default space in the context " //$NON-NLS-1$
+					+ contextID + " cannot be null"; //$NON-NLS-1$
 			this.defaultSpaces.putIfAbsent(ctx.getID(), defaultSpace.getID());
 			return ctx;
 		}
