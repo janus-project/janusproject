@@ -117,6 +117,9 @@ public final class Boot {
 				case "s": //$NON-NLS-1$
 					showDefaults();
 					return null;
+				case "cli": //$NON-NLS-1$
+					showCommandLineArguments(args);
+					return null;
 				case "f": //$NON-NLS-1$
 					String rawFilename = opt.getValue();
 					if (rawFilename == null || "".equals(rawFilename)) { //$NON-NLS-1$
@@ -327,6 +330,8 @@ public final class Boot {
 
 		options.addOption("s", "showdefaults", false, //$NON-NLS-1$//$NON-NLS-2$
 				Locale.getString("CLI_HELP_S"));  //$NON-NLS-1$
+		options.addOption("cli", false, //$NON-NLS-1$
+				Locale.getString("CLI_HELP_CLI"));  //$NON-NLS-1$
 
 		options.addOption("v", "verbose", false, //$NON-NLS-1$//$NON-NLS-2$
 				Locale.getString("CLI_HELP_V")); //$NON-NLS-1$
@@ -412,6 +417,26 @@ public final class Boot {
 		NetworkConfig.getDefaultValues(defaultValues);
 		try (OutputStream os = getConsoleLogger()) {
 			defaultValues.storeToXML(os, null);
+		} catch (Throwable e) {
+			//CHECKSTYLE:OFF
+			e.printStackTrace();
+			//CHECKSTYLE:ON
+		}
+		getExiter().exit();
+	}
+
+	/** Show the command line arguments.
+	 * This function never returns.
+	 *
+	 * @param args - the command line arguments.
+	 */
+	public static void showCommandLineArguments(String[] args) {
+		try (PrintStream os = getConsoleLogger()) {
+			for (int i = 0; i < args.length; ++i) {
+				os.println(i
+						+ ": " //$NON-NLS-1$
+						+ args[i]);
+			}
 		} catch (Throwable e) {
 			//CHECKSTYLE:OFF
 			e.printStackTrace();

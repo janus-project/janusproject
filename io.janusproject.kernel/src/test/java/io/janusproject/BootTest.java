@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -612,6 +613,54 @@ public class BootTest {
 			assertNullProperty("io.janusproject.tests.MY_PROPERTY_2");
 			assertProperty(JanusConfig.VERBOSE_LEVEL_NAME, "3");
 			assertContains(Arrays.asList(freeArgs), "-s", "-x", "-y");
+			verifyZeroInteractions(this.logger);
+			verifyZeroInteractions(this.exiter);
+		}
+
+		@Test
+		public void option_cli_valid() {
+			Object[] freeArgs = Boot.parseCommandLine(args("arg1", "--cli", "--", "-x", "arg2", "-y"));
+			// The properties are null since resetProperties() is invoked for resetting the properties in
+			// the start-up function inherited from AbstractJanusTest
+			assertNullProperty(JanusConfig.JANUS_LOGO_SHOW_NAME);
+			assertNullProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME);
+			assertNullProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME);
+			assertNullProperty(JanusConfig.OFFLINE);
+			assertNullProperty("io.janusproject.tests.MY_PROPERTY_0");
+			assertNullProperty("io.janusproject.tests.MY_PROPERTY_1");
+			assertNullProperty("io.janusproject.tests.MY_PROPERTY_2");
+			assertNullProperty(JanusConfig.VERBOSE_LEVEL_NAME);
+			assertNull(freeArgs);
+			verifyCli("arg1", "--cli", "--", "-x", "arg2", "-y");
+			verify(this.logger, times(1)).close();
+			verifyNoMoreInteractions(this.logger);
+			verify(this.exiter, only()).exit();
+		}
+		
+		private void verifyCli(String... text) {
+			ArgumentCaptor<String> arg = ArgumentCaptor.forClass(String.class);
+			verify(this.logger, times(text.length)).println(arg.capture());
+			List<String> list = arg.getAllValues();
+			assertEquals("invalid list size", text.length, list.size());
+			for (int i = 0; i < text.length; ++i) {
+				assertEquals("invalid element #" + i, i + ": " + text[i], list.get(i));
+			}
+		}
+
+		@Test
+		public void option_cli_asArg() {
+			Object[] freeArgs = Boot.parseCommandLine(args("arg1", "--", "--cli", "-x", "arg2", "-y"));
+			// The properties are null since resetProperties() is invoked for resetting the properties in
+			// the start-up function inherited from AbstractJanusTest
+			assertNullProperty(JanusConfig.JANUS_LOGO_SHOW_NAME);
+			assertNullProperty(JanusConfig.BOOT_DEFAULT_CONTEXT_ID_NAME);
+			assertNullProperty(JanusConfig.RANDOM_DEFAULT_CONTEXT_ID_NAME);
+			assertNullProperty(JanusConfig.OFFLINE);
+			assertNullProperty("io.janusproject.tests.MY_PROPERTY_0");
+			assertNullProperty("io.janusproject.tests.MY_PROPERTY_1");
+			assertNullProperty("io.janusproject.tests.MY_PROPERTY_2");
+			assertProperty(JanusConfig.VERBOSE_LEVEL_NAME, "3");
+			assertContains(Arrays.asList(freeArgs), "arg1", "-cli", "-x", "arg2", "-y");
 			verifyZeroInteractions(this.logger);
 			verifyZeroInteractions(this.exiter);
 		}
