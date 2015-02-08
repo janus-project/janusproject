@@ -31,7 +31,6 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.Skill;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -92,7 +91,7 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	 */
 	public InternalEventBusSkill(Agent agent, Address addressInInnerDefaultSpace) {
 		super(agent);
-		this.agentAsEventListener = new AgentEventListener(this);
+		this.agentAsEventListener = new AgentEventListener();
 		this.agentAddressInInnerDefaultSpace = addressInInnerDefaultSpace;
 	}
 
@@ -191,20 +190,17 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static class AgentEventListener implements EventListener {
+	private class AgentEventListener implements EventListener {
 
 		private Queue<Event> buffer = Queues.newConcurrentLinkedQueue();
-
-		private final WeakReference<InternalEventBusSkill> skill;
 
 		private final UUID aid;
 
 		private boolean isKilled;
 
 		@SuppressWarnings("synthetic-access")
-		public AgentEventListener(InternalEventBusSkill skill) {
-			this.skill = new WeakReference<>(skill);
-			this.aid = skill.getOwner().getID();
+		public AgentEventListener() {
+			this.aid = InternalEventBusSkill.this.getOwner().getID();
 		}
 
 		@Override
@@ -219,31 +215,30 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 					&& (!(event instanceof Destroy))
 					&& (!(event instanceof AsynchronousAgentKillingEvent)))
 					: "Unsupported type of event: " + event; //$NON-NLS-1$
-			InternalEventBusSkill s = this.skill.get();
-			synchronized (s) {
+			synchronized (InternalEventBusSkill.this) {
 				if (event instanceof AgentSpawned
-					&& this.aid.equals(((AgentSpawned) event).agentID)) {
+						&& this.aid.equals(((AgentSpawned) event).agentID)) {
 					// This permits to ensure that the killing event
 					// is correctly treated when fired from the initialization
 					// handler.
-					fireEnqueuedEvents(s);
+					fireEnqueuedEvents(InternalEventBusSkill.this);
 					if (this.isKilled) {
-						killOwner(s);
+						killOwner(InternalEventBusSkill.this);
 						return;
 					}
 				}
-				switch(s.state.get()) {
+				switch(InternalEventBusSkill.this.state.get()) {
 				case NEW:
 					this.buffer.add(event);
 					break;
 				case RUNNING:
-					fireEnqueuedEvents(s);
-					s.eventBus.post(event);
+					fireEnqueuedEvents(InternalEventBusSkill.this);
+					InternalEventBusSkill.this.eventBus.post(event);
 					break;
 				case DESTROYED:
 					// Dropping messages since agent is dying
-					s.logger.debug(InternalEventBusSkill.class,
-									"EVENT_DROP_WARNING", event); //$NON-NLS-1$
+					InternalEventBusSkill.this.logger.debug(InternalEventBusSkill.class,
+							"EVENT_DROP_WARNING", event); //$NON-NLS-1$
 					break;
 				default:
 					throw new IllegalStateException();
@@ -274,11 +269,10 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 
 		@SuppressWarnings("synthetic-access")
 		void killOrMarkAsKilled() {
-			InternalEventBusSkill s = this.skill.get();
-			synchronized (s) {
+			synchronized (InternalEventBusSkill.this) {
 				this.isKilled = true;
-				if (s.state.get() != OwnerState.NEW) {
-					killOwner(s);
+				if (InternalEventBusSkill.this.state.get() != OwnerState.NEW) {
+					killOwner(InternalEventBusSkill.this);
 				}
 			}
 		}
