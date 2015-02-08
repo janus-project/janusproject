@@ -34,7 +34,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
-/**
+/** Unit test for the issue #84: Problem with calling killMe in Initialize behavior of an agent.
+ *
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$

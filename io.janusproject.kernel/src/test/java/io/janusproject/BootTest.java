@@ -660,7 +660,7 @@ public class BootTest {
 			assertNullProperty("io.janusproject.tests.MY_PROPERTY_1");
 			assertNullProperty("io.janusproject.tests.MY_PROPERTY_2");
 			assertProperty(JanusConfig.VERBOSE_LEVEL_NAME, "3");
-			assertContains(Arrays.asList(freeArgs), "arg1", "-cli", "-x", "arg2", "-y");
+			assertContains(Arrays.asList(freeArgs), "arg1", "--cli", "-x", "arg2", "-y");
 			verifyZeroInteractions(this.logger);
 			verifyZeroInteractions(this.exiter);
 		}
