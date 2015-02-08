@@ -204,6 +204,7 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 	public synchronized AgentContext createContext(UUID contextID, UUID defaultSpaceUUID) {
 		assert (contextID != null) : "The contextID cannot be null"; //$NON-NLS-1$
 		assert (defaultSpaceUUID != null) : "The defaultSpaceUUID cannot be null"; //$NON-NLS-1$
+		assert (this.contexts != null) : "Internal Error: the context container must not be null"; //$NON-NLS-1$
 		AgentContext context = this.contexts.get(contextID);
 		if (context == null) {
 			Context ctx = this.contextFactory.newInstance(
@@ -212,6 +213,7 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 					this.spaceRepositoryFactory,
 					new SpaceEventProxy());
 			assert (ctx != null) : "The internal Context cannot be null"; //$NON-NLS-1$
+			assert (this.contexts != null) : "Internal Error: the context container must not be null"; //$NON-NLS-1$
 			this.contexts.put(contextID, ctx);
 			fireContextCreated(ctx);
 			Space defaultSpace = ctx.postConstruction();
