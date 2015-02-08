@@ -114,6 +114,7 @@
 									<CLI-Random-Context-ID>--randomid</CLI-Random-Context-ID>
 									<CLI-BootAgent-Context-ID>--bootid</CLI-BootAgent-Context-ID>
 									<CLI-Offline>--offline</CLI-Offline>
+									<CLI-No-More-Option>--</CLI-No-More-Option>
 								</manifestEntries>
 							</manifestSection>
 						</manifestSections>
@@ -146,6 +147,7 @@
 									<CLI-Random-Context-ID>--randomid</CLI-Random-Context-ID>
 									<CLI-BootAgent-Context-ID>--bootid</CLI-BootAgent-Context-ID>
 									<CLI-Offline>--offline</CLI-Offline>
+									<CLI-No-More-Option>--</CLI-No-More-Option>
 								</manifestEntries>
 							</manifestSection>
 						</manifestSections>
