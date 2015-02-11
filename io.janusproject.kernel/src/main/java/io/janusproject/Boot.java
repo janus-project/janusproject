@@ -374,7 +374,7 @@ public final class Boot {
 	protected static void showError(String message, Throwable e) {
 		try (PrintWriter logger = new PrintWriter(getConsoleLogger())) {
 			if (message != null && !message.isEmpty()) {
-				logger.println(message);				
+				logger.println(message);
 			}
 			if (e != null) {
 				//CHECKSTYLE:OFF
@@ -443,7 +443,7 @@ public final class Boot {
 			//CHECKSTYLE:OFF
 			e.printStackTrace();
 			//CHECKSTYLE:ON
-		}		
+		}
 		getExiter().exit();
 	}
 
