@@ -197,7 +197,7 @@ public final class Boot {
 							"INVALID_AGENT_QUALIFIED_NAME", //$NON-NLS-1$
 							fullyQualifiedName,
 							System.getProperty("java.class.path")), //$NON-NLS-1$
-							null);
+							e);
 			// Event if showError never returns, add the return statement for
 			// avoiding compilation error.
 			return null;
@@ -374,13 +374,14 @@ public final class Boot {
 	protected static void showError(String message, Throwable e) {
 		try (PrintWriter logger = new PrintWriter(getConsoleLogger())) {
 			if (message != null && !message.isEmpty()) {
-				logger.println(message);
+				logger.println(message);				
 			}
 			if (e != null) {
 				//CHECKSTYLE:OFF
 				e.printStackTrace(logger);
 				//CHECKSTYLE:ON
 			}
+			logger.flush();
 			showHelp(logger);
 		}
 	}
@@ -437,11 +438,12 @@ public final class Boot {
 						+ ": " //$NON-NLS-1$
 						+ args[i]);
 			}
+			os.flush();
 		} catch (Throwable e) {
 			//CHECKSTYLE:OFF
 			e.printStackTrace();
 			//CHECKSTYLE:ON
-		}
+		}		
 		getExiter().exit();
 	}
 
