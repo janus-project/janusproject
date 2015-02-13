@@ -92,7 +92,13 @@ class Context implements AgentContext {
 	EventSpace postConstruction() {
 		this.spaceRepository.postConstruction();
 		this.defaultSpace = createSpace(OpenEventSpaceSpecification.class, this.defaultSpaceID);
-		return this.defaultSpace;
+		if (this.defaultSpace != null) {
+			return this.defaultSpace;
+		}
+		//Could have been created before thanks to Hazelcast, thus createSpace returns null because the space already exist,
+		//in this case we return the already existing version stored in the repository
+		return (EventSpace) this.spaceRepository.getSpace(new SpaceID(this.id, this.defaultSpaceID,
+				OpenEventSpaceSpecification.class));
 	}
 
 	/** Destroy any associated resources.
