@@ -423,6 +423,7 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		 */
 		@Override
 		public void entryAdded(UUID key, SpaceID value) {
+			assert (value != null);
 			ensureDefaultSpaceDefinition(value);
 		}
 
@@ -430,6 +431,7 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		 */
 		@Override
 		public void entryRemoved(UUID key, SpaceID value) {
+			assert (value != null);
 			removeDefaultSpaceDefinition(value);
 		}
 

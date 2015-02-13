@@ -649,12 +649,20 @@ implements DistributedDataStructureService {
 
 		@Override
 		public void entryEvicted(EntryEvent<K, V> event) {
-			this.dmapListener.entryRemoved(event.getKey(), event.getValue());
+			if (event.getValue() != null) {
+				this.dmapListener.entryRemoved(event.getKey(), event.getValue());
+			} else {
+				this.dmapListener.entryRemoved(event.getKey(), event.getOldValue());
+			}
 		}
 
 		@Override
 		public void entryRemoved(EntryEvent<K, V> event) {
-			this.dmapListener.entryRemoved(event.getKey(), event.getValue());
+			if (event.getValue() != null) {
+				this.dmapListener.entryRemoved(event.getKey(), event.getValue());
+			} else {
+				this.dmapListener.entryRemoved(event.getKey(), event.getOldValue());
+			}
 		}
 
 		@Override
