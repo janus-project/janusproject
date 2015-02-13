@@ -230,7 +230,7 @@ public final class Boot {
 			Object[] freeArgs = parseCommandLine(args);
 			if (JanusConfig.getSystemPropertyAsBoolean(
 					JanusConfig.JANUS_LOGO_SHOW_NAME,
-					JanusConfig.JANUS_LOGO_SHOW)) {
+					JanusConfig.JANUS_LOGO_SHOW.booleanValue())) {
 				showJanusLogo();
 			}
 
