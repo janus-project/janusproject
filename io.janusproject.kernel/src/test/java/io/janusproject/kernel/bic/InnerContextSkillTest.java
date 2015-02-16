@@ -19,19 +19,20 @@
  */
 package io.janusproject.kernel.bic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Capacity;
+import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
+import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
@@ -49,7 +50,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+
+import static org.mockito.Mockito.*;
+
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
 
@@ -87,6 +90,15 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 	@Nullable
 	private Agent agent;
 	
+	@Nullable
+	private UUID innerContextUUID;
+
+	@Nullable
+	private UUID innerSpaceUUID;
+
+	@Nullable
+	private SpaceID innerSpaceID;
+
 	@Before
 	public void setUp() throws Exception {
 		this.agentId = UUID.randomUUID();
@@ -102,17 +114,25 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 				return capacity.cast(InnerContextSkillTest.this.busCapacity);
 			}
 		};
-		this.agent = Mockito.spy(this.agent);
-		address = Mockito.spy(address);
+		this.agent = spy(this.agent);
+		address = spy(address);
 		this.skill = new InnerContextSkill(this.agent, address);
 		MockitoAnnotations.initMocks(this);
-		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
-		Mockito.when(this.contextService.createContext(Matchers.any(UUID.class), 
+		when(this.agent.getID()).thenReturn(this.agentId);
+		when(this.contextService.createContext(Matchers.any(UUID.class), 
 				Matchers.any(UUID.class))).thenReturn(this.innerContext);
-		Mockito.when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
-		Mockito.when(this.busCapacity.asEventListener()).thenReturn(this.eventListener);
-		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+		this.innerContextUUID = UUID.randomUUID();
+		when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
+		when(this.innerContext.getID()).thenReturn(this.innerContextUUID);
+		when(this.busCapacity.asEventListener()).thenReturn(this.eventListener);
+		when(this.innerSpace.getParticipants()).thenReturn(
 				Collections3.<UUID>synchronizedSingleton(this.agentId));
+		this.innerSpaceUUID = UUID.randomUUID();
+		this.innerSpaceID = new SpaceID(
+				this.innerContextUUID,
+				this.innerSpaceUUID,
+				EventSpaceSpecification.class);
+		when(this.innerSpace.getID()).thenReturn(this.innerSpaceID);
 	}
 
 	@Test
@@ -125,7 +145,7 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 		assertSame(this.innerContext, ctx);
 		assertTrue(this.skill.hasInnerContext());
 		ArgumentCaptor<EventListener> argument = ArgumentCaptor.forClass(EventListener.class);
-		Mockito.verify(this.innerSpace, new Times(1)).register(argument.capture());
+		verify(this.innerSpace, new Times(1)).register(argument.capture());
 		assertSame(this.eventListener, argument.getValue());
 	}
 
@@ -141,11 +161,11 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 		assertFalse(this.skill.hasInnerContext());
 		//
 		ArgumentCaptor<EventListener> argument = ArgumentCaptor.forClass(EventListener.class);
-		Mockito.verify(this.innerSpace, new Times(1)).unregister(argument.capture());
+		verify(this.innerSpace, new Times(1)).unregister(argument.capture());
 		assertSame(this.eventListener, argument.getValue());
 		//
 		ArgumentCaptor<AgentContext> argument2 = ArgumentCaptor.forClass(AgentContext.class);
-		Mockito.verify(this.contextService, new Times(1)).removeContext(argument2.capture());
+		verify(this.contextService, new Times(1)).removeContext(argument2.capture());
 		assertSame(this.innerContext, argument2.getValue());
 	}
 	
@@ -156,7 +176,7 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 
 	@Test
 	public void hasMemberAgent_member() {
-		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+		when(this.innerSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())), this));
 		assertTrue(this.skill.hasMemberAgent());
 	}
@@ -168,7 +188,7 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 	
 	@Test
 	public void getMemberAgentCount_member() {
-		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+		when(this.innerSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())), this));
 		assertEquals(1, this.skill.getMemberAgentCount());
 	}
@@ -183,13 +203,80 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 	@Test
 	public void getMemberAgents_member() {
 		UUID otherAgent = UUID.randomUUID();
-		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
+		when(this.innerSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, otherAgent)), this));
 		SynchronizedSet<UUID> set = this.skill.getMemberAgents();
 		assertNotNull(set);
 		assertFalse(set.isEmpty());
 		assertEquals(1, set.size());
 		assertTrue(set.contains(otherAgent));
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInnerDefaultSpaceSpace_null() {
+		this.skill.isInnerDefaultSpace((Space) null);
+	}
+
+	@Test
+	public void isInnerDefaultSpaceSpace_defaultSpace() {
+		assertTrue(this.skill.isInnerDefaultSpace(this.innerSpace));
+	}
+
+	@Test
+	public void isInnerDefaultSpaceSpace_otherSpace() {
+		UUID id = UUID.randomUUID();
+		SpaceID spaceId = mock(SpaceID.class);
+		when(spaceId.getID()).thenReturn(id);
+		EventSpace otherSpace = mock(EventSpace.class);
+		when(otherSpace.getID()).thenReturn(spaceId);
+		//
+		assertFalse(this.skill.isInnerDefaultSpace(otherSpace));
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInnerDefaultSpaceSpaceID_null() {
+		this.skill.isInnerDefaultSpace((SpaceID) null);
+	}
+
+	@Test
+	public void isInnerDefaultSpaceSpaceID_defaultSpace() {
+		assertTrue(this.skill.isInnerDefaultSpace(this.innerSpaceID));
+	}
+
+	@Test
+	public void isInnerDefaultSpaceSpaceID_otherSpace() {
+		UUID id = UUID.randomUUID();
+		SpaceID spaceId = mock(SpaceID.class);
+		when(spaceId.getID()).thenReturn(id);
+		//
+		assertFalse(this.skill.isInnerDefaultSpace(spaceId));
+	}
+
+	@Test
+	public void isInInnerDefaultSpaceEvent_null() {
+		assertFalse(this.skill.isInInnerDefaultSpace(null));
+	}
+
+	@Test
+	public void isInInnerDefaultSpaceEvent_inside() {
+		Event event = mock(Event.class);
+		Address adr = mock(Address.class);
+		when(adr.getSpaceId()).thenReturn(this.innerSpaceID);
+		when(event.getSource()).thenReturn(adr);
+		//
+		assertTrue(this.skill.isInInnerDefaultSpace(event));
+	}
+
+	@Test
+	public void isInInnerDefaultSpaceEvent_outside() {
+		Event event = mock(Event.class);
+		SpaceID spaceId = mock(SpaceID.class);
+		when(spaceId.getID()).thenReturn(UUID.randomUUID());
+		Address adr = mock(Address.class);
+		when(adr.getSpaceId()).thenReturn(spaceId);
+		when(event.getSource()).thenReturn(adr);
+		//
+		assertFalse(this.skill.isInInnerDefaultSpace(event));
 	}
 
 }

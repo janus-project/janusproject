@@ -28,8 +28,11 @@ import io.sarl.core.MemberJoined;
 import io.sarl.core.MemberLeft;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
+import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
@@ -206,6 +209,21 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 				defSpace.getAddress(getOwner().getID()),
 				getOwner().getID(),
 				getOwner().getClass().getName()));
+	}
+
+	@Override
+	public boolean isInSpace(Event event, Space space) {
+		return isInSpace(event, space.getID());
+	}
+
+	@Override
+	public boolean isInSpace(Event event, SpaceID spaceID) {
+		return isInSpace(event, spaceID.getID());
+	}
+
+	@Override
+	public boolean isInSpace(Event event, UUID spaceID) {
+		return spaceID.equals(event.getSource().getSpaceId().getID());
 	}
 
 }

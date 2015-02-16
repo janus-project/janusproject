@@ -24,8 +24,11 @@ import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.Skill;
+import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
@@ -176,6 +179,32 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 			return Collections3.synchronizedSet(members, members);
 		}
 		return Collections3.emptySynchronizedSet();
+	}
+
+	@Override
+	public boolean isInnerDefaultSpace(Space space) {
+		return isInnerDefaultSpace(space.getID());
+	}
+
+	@Override
+	public boolean isInnerDefaultSpace(SpaceID spaceID) {
+		return isInnerDefaultSpace(spaceID.getID());
+	}
+
+	@Override
+	public boolean isInnerDefaultSpace(UUID spaceID) {
+		return spaceID.equals(this.innerContext.getDefaultSpace().getID().getID());
+	}
+
+	@Override
+	public boolean isInInnerDefaultSpace(Event event) {
+		if (event != null) {
+			Address adr = event.getSource();
+			if (adr != null) {
+				return isInnerDefaultSpace(adr.getSpaceId());
+			}
+		}
+		return false;
 	}
 
 }

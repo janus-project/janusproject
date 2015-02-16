@@ -20,10 +20,15 @@
 package io.janusproject.kernel.bic;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.Behaviors;
@@ -31,12 +36,14 @@ import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;
 import io.sarl.core.MemberJoined;
 import io.sarl.core.MemberLeft;
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpace;
 
@@ -53,7 +60,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
 import org.mockito.invocation.InvocationOnMock;
@@ -72,10 +78,10 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 
 	@Nullable
 	private List<AgentContext> contexts;
-	
+
 	@Mock
 	private ContextSpaceService contextRepository;
-	
+
 	@InjectMocks
 	private ExternalContextAccessSkill skill;
 
@@ -97,25 +103,25 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 	@Before
 	public void setUp() throws Exception {
 		UUID parentId = UUID.randomUUID();
-		
-		this.eventListener = Mockito.mock(EventListener.class);
-		this.behaviorCapacity = Mockito.mock(Behaviors.class);
 
-		this.busCapacity = Mockito.mock(InternalEventBusCapacity.class);
-		Mockito.when(this.busCapacity.asEventListener()).thenReturn(this.eventListener);
+		this.eventListener = mock(EventListener.class);
+		this.behaviorCapacity = mock(Behaviors.class);
+
+		this.busCapacity = mock(InternalEventBusCapacity.class);
+		when(this.busCapacity.asEventListener()).thenReturn(this.eventListener);
 
 		this.contexts = new ArrayList<>();
 		for(int i=0; i<10; ++i) {
 			UUID contextId = i==0 ? parentId : UUID.randomUUID();
-			OpenEventSpace defaultSpace = Mockito.mock(OpenEventSpace.class);
+			OpenEventSpace defaultSpace = mock(OpenEventSpace.class);
 			if (i==0) {
 				this.defaultSpace = defaultSpace;
 			}
-			Mockito.when(defaultSpace.getID()).thenReturn(
+			when(defaultSpace.getID()).thenReturn(
 					new SpaceID(contextId, UUID.randomUUID(), EventSpaceSpecification.class));
-			AgentContext c = Mockito.mock(AgentContext.class);
-			Mockito.when(c.getID()).thenReturn(contextId);
-			Mockito.when(c.getDefaultSpace()).thenReturn(defaultSpace);
+			AgentContext c = mock(AgentContext.class);
+			when(c.getID()).thenReturn(contextId);
+			when(c.getDefaultSpace()).thenReturn(defaultSpace);
 			this.contexts.add(c);
 		}
 		this.agent = new Agent(UUID.randomUUID()) {
@@ -126,16 +132,16 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 				return capacity.cast(ExternalContextAccessSkillTest.this.busCapacity);
 			}
 		};
-		this.agent = Mockito.spy(this.agent);
-		Mockito.when(this.agent.getParentID()).thenReturn(parentId);
+		this.agent = spy(this.agent);
+		when(this.agent.getParentID()).thenReturn(parentId);
 
 		this.skill = new ExternalContextAccessSkill(this.agent);
-		
+
 		MockitoAnnotations.initMocks(this);
-		
-		Mockito.when(this.contextRepository.mutex()).thenReturn(MUTEX);
-		Mockito.when(this.contextRepository.getContexts()).thenReturn(this.contexts);
-		Mockito.when(this.contextRepository.getContexts(Matchers.anyCollection())).then(new Answer<Collection>() {
+
+		when(this.contextRepository.mutex()).thenReturn(MUTEX);
+		when(this.contextRepository.getContexts()).thenReturn(this.contexts);
+		when(this.contextRepository.getContexts(Matchers.anyCollection())).then(new Answer<Collection>() {
 			@Override
 			public Collection answer(InvocationOnMock invocation)
 					throws Throwable {
@@ -149,7 +155,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 				return l;
 			}
 		});
-		Mockito.when(this.contextRepository.getContext(Matchers.any(UUID.class))).then(new Answer<AgentContext>() {
+		when(this.contextRepository.getContext(Matchers.any(UUID.class))).then(new Answer<AgentContext>() {
 			@Override
 			public AgentContext answer(InvocationOnMock invocation)
 					throws Throwable {
@@ -163,7 +169,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			}
 		});
 	}
-		
+
 	@Test
 	public void getAllContexts() {
 		Collection<AgentContext> c = this.skill.getAllContexts();
@@ -187,7 +193,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			assertSame(c, ctx);
 			//
 			ArgumentCaptor<Event> argument1 = ArgumentCaptor.forClass(Event.class);
-			Mockito.verify(c.getDefaultSpace(), new Times(1)).emit(argument1.capture());
+			verify(c.getDefaultSpace(), new Times(1)).emit(argument1.capture());
 			Event evt = argument1.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof MemberJoined);
@@ -196,7 +202,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			//
 			ArgumentCaptor<Event> argument2 = ArgumentCaptor.forClass(Event.class);
 			++nb;
-			Mockito.verify(this.behaviorCapacity, new Times(nb)).wake(argument2.capture());
+			verify(this.behaviorCapacity, new Times(nb)).wake(argument2.capture());
 			evt = argument2.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof ContextJoined);
@@ -231,7 +237,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			//
 			ArgumentCaptor<Event> argument1 = ArgumentCaptor.forClass(Event.class);
 			// 2 times: 1 for MemberJoined, 1 for MemberLeft
-			Mockito.verify(c.getDefaultSpace(), new Times(2)).emit(argument1.capture());
+			verify(c.getDefaultSpace(), new Times(2)).emit(argument1.capture());
 			Event evt = argument1.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof MemberLeft);
@@ -240,7 +246,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			ArgumentCaptor<Event> argument2 = ArgumentCaptor.forClass(Event.class);
 			++nb;
 			// Nb times includes the joins and the leaves
-			Mockito.verify(this.behaviorCapacity, new Times(nb)).wake(argument2.capture());
+			verify(this.behaviorCapacity, new Times(nb)).wake(argument2.capture());
 			evt = argument2.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof ContextLeft);
@@ -254,7 +260,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 		assertNull(this.defaultSpace.getAddress(this.agent.getID()));
 		this.skill.install();
 		ArgumentCaptor<EventListener> argument = ArgumentCaptor.forClass(EventListener.class);
-		Mockito.verify(this.defaultSpace, new Times(1)).register(argument.capture());
+		verify(this.defaultSpace, new Times(1)).register(argument.capture());
 		assertSame(this.eventListener, argument.getValue());
 	}
 
@@ -263,8 +269,154 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 		this.skill.install();
 		this.skill.uninstall();
 		ArgumentCaptor<EventListener> argument = ArgumentCaptor.forClass(EventListener.class);
-		Mockito.verify(this.defaultSpace, new Times(1)).unregister(argument.capture());
+		verify(this.defaultSpace, new Times(1)).unregister(argument.capture());
 		assertSame(this.eventListener, argument.getValue());
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventSpace_null_null() {
+		this.skill.install();
+		this.skill.isInSpace(null, (Space) null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventSpace_notNull_null() {
+		this.skill.install();
+		this.skill.isInSpace(mock(Event.class), (Space) null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventSpace_null_notNull() {
+		this.skill.install();
+		this.skill.isInSpace(null, mock(Space.class));
+	}
+
+	@Test
+	public void isInSpaceEventSpace_inside() {
+		this.skill.install();
+		UUID id = UUID.randomUUID();
+		SpaceID spaceID = mock(SpaceID.class);
+		when(spaceID.getID()).thenReturn(id);
+		Space space = mock(Space.class);
+		when(space.getID()).thenReturn(spaceID);
+		Event event = mock(Event.class);
+		Address address = mock(Address.class);
+		when(address.getSpaceId()).thenReturn(spaceID);
+		when(event.getSource()).thenReturn(address);
+		//
+		assertTrue(this.skill.isInSpace(event, space));
+	}
+
+	@Test
+	public void isInSpaceEventSpace_outside() {
+		this.skill.install();
+		UUID id = UUID.randomUUID();
+		SpaceID spaceID = mock(SpaceID.class);
+		when(spaceID.getID()).thenReturn(id);
+		Space space = mock(Space.class);
+		when(space.getID()).thenReturn(spaceID);
+		Event event = mock(Event.class);
+		SpaceID spaceID2 = mock(SpaceID.class);
+		when(spaceID2.getID()).thenReturn(UUID.randomUUID());
+		Address address = mock(Address.class);
+		when(address.getSpaceId()).thenReturn(spaceID2);
+		when(event.getSource()).thenReturn(address);
+		//
+		assertFalse(this.skill.isInSpace(event, space));
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventSpaceID_null_null() {
+		this.skill.install();
+		this.skill.isInSpace(null, (SpaceID) null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventSpaceID_notNull_null() {
+		this.skill.install();
+		this.skill.isInSpace(mock(Event.class), (SpaceID) null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventSpaceID_null_notNull() {
+		this.skill.install();
+		this.skill.isInSpace(null, mock(SpaceID.class));
+	}
+
+	@Test
+	public void isInSpaceEventSpaceID_inside() {
+		this.skill.install();
+		UUID id = UUID.randomUUID();
+		SpaceID spaceID = mock(SpaceID.class);
+		when(spaceID.getID()).thenReturn(id);
+		Event event = mock(Event.class);
+		Address address = mock(Address.class);
+		when(address.getSpaceId()).thenReturn(spaceID);
+		when(event.getSource()).thenReturn(address);
+		//
+		assertTrue(this.skill.isInSpace(event, spaceID));
+	}
+
+	@Test
+	public void isInSpaceEventSpaceID_outside() {
+		this.skill.install();
+		UUID id = UUID.randomUUID();
+		SpaceID spaceID = mock(SpaceID.class);
+		when(spaceID.getID()).thenReturn(id);
+		Event event = mock(Event.class);
+		SpaceID spaceID2 = mock(SpaceID.class);
+		when(spaceID2.getID()).thenReturn(UUID.randomUUID());
+		Address address = mock(Address.class);
+		when(address.getSpaceId()).thenReturn(spaceID2);
+		when(event.getSource()).thenReturn(address);
+		//
+		assertFalse(this.skill.isInSpace(event, spaceID));
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventUUID_null_null() {
+		this.skill.install();
+		this.skill.isInSpace(null, (UUID) null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventUUID_notNull_null() {
+		this.skill.install();
+		this.skill.isInSpace(mock(Event.class), (UUID) null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void isInSpaceEventUUID_null_notNull() {
+		this.skill.install();
+		this.skill.isInSpace(null, UUID.randomUUID());
+	}
+
+	@Test
+	public void isInSpaceEventUUID_inside() {
+		this.skill.install();
+		UUID id = UUID.randomUUID();
+		SpaceID spaceID = mock(SpaceID.class);
+		when(spaceID.getID()).thenReturn(id);
+		Event event = mock(Event.class);
+		Address address = mock(Address.class);
+		when(address.getSpaceId()).thenReturn(spaceID);
+		when(event.getSource()).thenReturn(address);
+		//
+		assertTrue(this.skill.isInSpace(event, id));
+	}
+
+	@Test
+	public void isInSpaceEventUUID_outside() {
+		this.skill.install();
+		UUID id = UUID.randomUUID();
+		Event event = mock(Event.class);
+		SpaceID spaceID2 = mock(SpaceID.class);
+		when(spaceID2.getID()).thenReturn(UUID.randomUUID());
+		Address address = mock(Address.class);
+		when(address.getSpaceId()).thenReturn(spaceID2);
+		when(event.getSource()).thenReturn(address);
+		//
+		assertFalse(this.skill.isInSpace(event, id));
 	}
 
 }

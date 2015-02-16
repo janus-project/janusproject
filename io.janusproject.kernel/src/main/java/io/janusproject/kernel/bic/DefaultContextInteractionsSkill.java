@@ -28,6 +28,8 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Skill;
+import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
 import io.sarl.util.Scopes;
 
 import java.util.UUID;
@@ -114,6 +116,42 @@ DefaultContextInteractions {
 	@Override
 	public UUID spawn(Class<? extends Agent> aAgent, Object... params) {
 		return getSkill(Lifecycle.class).spawnInContext(aAgent, this.parentContext, params);
+	}
+
+	@Override
+	public boolean isDefaultSpace(Space space) {
+		return isDefaultSpace(space.getID());
+	}
+
+	@Override
+	public boolean isDefaultSpace(SpaceID space) {
+		return isDefaultSpace(space.getID());
+	}
+
+	@Override
+	public boolean isDefaultSpace(UUID space) {
+		return space.equals(this.defaultSpace.getID().getID());
+	}
+
+	@Override
+	public boolean isInDefaultSpace(Event event) {
+		if (event != null) {
+			Address adr = event.getSource();
+			if (adr != null) {
+				return isDefaultSpace(adr.getSpaceId());
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isDefaultContext(AgentContext context) {
+		return isDefaultContext(context.getID());
+	}
+
+	@Override
+	public boolean isDefaultContext(UUID contextID) {
+		return contextID.equals(this.defaultSpace.getID().getContextID());
 	}
 
 }
