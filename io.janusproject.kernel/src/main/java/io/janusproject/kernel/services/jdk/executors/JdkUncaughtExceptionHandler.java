@@ -21,6 +21,9 @@ package io.janusproject.kernel.services.jdk.executors;
 
 import io.janusproject.services.executor.ChuckNorrisException;
 import io.janusproject.services.logging.LogService;
+import io.janusproject.services.spawn.SpawnService;
+import io.sarl.core.Initialize;
+import io.sarl.lang.core.Agent;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.CancellationException;
@@ -46,6 +49,9 @@ import com.google.inject.Singleton;
 public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler, SubscriberExceptionHandler {
 
 	private final LogService logger;
+
+	@Inject
+	private SpawnService spawnService;
 
 	/**
 	 * @param logger - the logging service that must be used for output the errors.
@@ -112,12 +118,33 @@ public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler, Su
 		log(e, Long.toString(t.getId()), t.getName());
 	}
 
+	/** Replies if the given object is an event that may cause agent stop when an error occured in the event's handler.
+	 *
+	 * @param o - the event to test.
+	 * @return <code>true</code> if the agent must stop if an error occured in the handler for the given event.
+	 */
+	@SuppressWarnings("static-method")
+	public boolean isAutoKillEvent(Object o) {
+		return o instanceof Initialize;
+	}
+
 	/** {@inheritDoc}
 	 */
 	@Override
 	public void handleException(Throwable exception,
 			SubscriberExceptionContext context) {
 		log(exception, context.getEventBus().toString(), context.getEvent().toString());
+
+		// #91: Special case: when the agent cannot be initialized, it must be destroyed
+		if (isAutoKillEvent(context.getEvent())) {
+			Agent caller = (Agent) context.getSubscriber();
+			try {
+				// Do not call the equivalent of the agent's killMe since the agent was never initialized.
+				this.spawnService.killAgent(caller.getID());
+			} catch (Exception e) {
+				log(e, context.getEventBus().toString(), context.getEvent().toString());
+			}
+		}
 	}
 
 }

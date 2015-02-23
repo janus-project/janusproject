@@ -19,6 +19,7 @@
  */
 package io.janusproject.testutils;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import io.janusproject.Boot;
 import io.janusproject.kernel.Kernel;
@@ -92,6 +93,22 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 			}
 		}
 	};
+	
+	/** Replies the number of results provided by the ran platform.
+	 *
+	 * @return the number of results.
+	 */
+	protected int getNumberOfResults() {
+		return this.results.size();
+	}
+	
+	/** Test if the number of results provided by the Janus platform is equal to the given number.
+	 *
+	 * @param expected - the expected number of results.
+	 */
+	protected void assertNumberOfResults(int expected) {
+		assertEquals("Invalid number of results provided by the platform.", expected, this.results.size());
+	}
 
 	/** Replies result at the given index of the run of the agent.
 	 * 
@@ -142,7 +159,7 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		return -1;
 	}
 
-	/** Start the Janus platform.
+	/** Start the Janus platform offline.
 	 *
 	 * This function has no timeout for the end of the run.
 	 * 
@@ -151,10 +168,10 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 	 * @throws Exception - if the kernel cannot be launched.
 	 */
 	protected void runJanus(Class<? extends TestingAgent> type, boolean enableLogging) throws Exception {
-		runJanus(type, enableLogging, -1);
+		runJanus(type, enableLogging, true, -1);
 	}
 
-	/** Start the Janus platform.
+	/** Start the Janus platform offline with logging enabled.
 	 *
 	 * This function enables logging and has no timeout for the end of the run.
 	 * 
@@ -163,17 +180,18 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 	 * @throws Exception - if the kernel cannot be launched.
 	 */
 	protected void runJanus(Class<? extends TestingAgent> type) throws Exception {
-		runJanus(type, true, -1);
+		runJanus(type, true, true, -1);
 	}
 
 	/** Start the Janus platform.
 	 * 
 	 * @param type - the type of the agent to launch at start-up.
 	 * @param enableLogging - indicates if the logging is enable or not.
+	 * @param offline - indicates if the Janus platform is offline
 	 * @param timeout - the maximum waiting time in seconds, or <code>-1</code> to ignore the timeout.
 	 * @throws Exception - if the kernel cannot be launched.
 	 */
-	protected void runJanus(Class<? extends TestingAgent> type, boolean enableLogging, int timeout) throws Exception {
+	protected void runJanus(Class<? extends TestingAgent> type, boolean enableLogging, boolean offline, int timeout) throws Exception {
 		assertNull("Janus already launched.", this.janusKernel);
 		Module module = new StandardJanusPlatformModule();
 		Boot.setConsoleLogger(new PrintStream(new OutputStream() {
@@ -188,6 +206,7 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		} else {
 			module = Modules.override(new StandardJanusPlatformModule()).with(new ErrorLogTestingModule(this.results));
 		}
+		Boot.setOffline(offline);
 		this.janusKernel = Boot.startJanus(
 				module,
 				type,

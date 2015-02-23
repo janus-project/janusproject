@@ -19,7 +19,7 @@
  */
 package io.janusproject.testutils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -117,6 +117,30 @@ public abstract class AbstractJanusTest {
 			resetProperties();
 		}
 	};
+	
+	/** Test if the given exception has a cause of the given type.
+	 *
+	 * If the given exception has no cause, it is the cause.
+	 *
+	 * @param <T> - the type of the expected cause.
+	 * @param expected - the type of the expected cause.
+	 * @param actual - the exception to test.
+	 * @return the cause.
+	 */
+	public static <T extends Throwable> T assertCause(Class<T> expected, Throwable actual) {
+		Throwable cause = actual;
+		while (cause != null && cause.getCause() != null && cause.getCause() != cause) {
+			cause = cause.getCause();
+		}
+		if (cause == null) {
+			cause = actual;
+		}
+		assertTrue("Unexpected type of exception's cause. Expected: "
+				+ expected.getName() + ". Actual: "
+				+ cause.getClass().getName(),
+				expected.isInstance(cause));
+		return expected.cast(cause);
+	}
 
 	/** Test if the actual collection/iterable contains all the expected objects.
 	 * 
