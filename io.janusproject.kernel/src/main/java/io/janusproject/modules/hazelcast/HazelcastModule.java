@@ -133,18 +133,14 @@ public class HazelcastModule extends AbstractModule {
 		NetworkConfig networkConfig = config.getNetworkConfig();
 		MulticastConfig multicastConfig = networkConfig.getJoin().getMulticastConfig();
 
-		// FIXME: Remove when hazelcast/hazelcast#2594 is fixed
-		if (!enableMulticast || adr.isLoopbackAddress()) {
+		// The following block of code is fixing the issue hazelcast/hazelcast#2594.
+		if (enableMulticast) {
+			if (adr.isLoopbackAddress()) {
+				multicastConfig.setLoopbackModeEnabled(true);
+			}
+		} else {
 			multicastConfig.setEnabled(false);
 		}
-		// FIXME: Add when hazelcast/hazelcast#2594 is fixed
-		// The following block of code is fixing the issue hazelcast/hazelcast#2594.
-		//		if (enableMulticast) {
-		//			if (adr.isLoopbackAddress()) multicastConfig.setLoopbackModeEnabled(true);
-		//		}
-		//		else {
-		//			multicastConfig.setEnabled(false);
-		//		}
 
 		HazelcastKernelLoggerFactory.setLogService(logService);
 

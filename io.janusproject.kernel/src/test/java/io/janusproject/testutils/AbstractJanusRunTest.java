@@ -40,6 +40,7 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nullable;
 
@@ -142,12 +143,37 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 	}
 
 	/** Start the Janus platform.
+	 *
+	 * This function has no timeout for the end of the run.
 	 * 
 	 * @param type - the type of the agent to launch at start-up.
 	 * @param enableLogging - indicates if the logging is enable or not.
 	 * @throws Exception - if the kernel cannot be launched.
 	 */
 	protected void runJanus(Class<? extends TestingAgent> type, boolean enableLogging) throws Exception {
+		runJanus(type, enableLogging, -1);
+	}
+
+	/** Start the Janus platform.
+	 *
+	 * This function enables logging and has no timeout for the end of the run.
+	 * 
+	 * @param type - the type of the agent to launch at start-up.
+	 * @param enableLogging - indicates if the logging is enable or not.
+	 * @throws Exception - if the kernel cannot be launched.
+	 */
+	protected void runJanus(Class<? extends TestingAgent> type) throws Exception {
+		runJanus(type, true, -1);
+	}
+
+	/** Start the Janus platform.
+	 * 
+	 * @param type - the type of the agent to launch at start-up.
+	 * @param enableLogging - indicates if the logging is enable or not.
+	 * @param timeout - the maximum waiting time in seconds, or <code>-1</code> to ignore the timeout.
+	 * @throws Exception - if the kernel cannot be launched.
+	 */
+	protected void runJanus(Class<? extends TestingAgent> type, boolean enableLogging, int timeout) throws Exception {
 		assertNull("Janus already launched.", this.janusKernel);
 		Module module = new StandardJanusPlatformModule();
 		Boot.setConsoleLogger(new PrintStream(new OutputStream() {
@@ -166,10 +192,20 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 				module,
 				type,
 				results);
-		while (this.janusKernel.isRunning()) {
+		long endTime;
+		if (timeout >= 0) {
+			endTime = System.currentTimeMillis() + timeout * 1000;
+		} else {
+			endTime = -1;
+		}
+		while (this.janusKernel.isRunning() && (endTime == -1 || System.currentTimeMillis() <= endTime)) {
 			Thread.yield();
 		}
+		boolean isTimedOut = this.janusKernel.isRunning();
 		Boot.setConsoleLogger(null);
+		if (isTimedOut) {
+			throw new TimeoutException();
+		}
 	}
 
 	/** Interface that permits to mark a method that is manually launching the Janus.
@@ -252,7 +288,7 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 
 		/** Invoked to run the unit test.
 		 *
-		 * @return <code>true</code> for killing the agent.
+		 * @return <code>true</code> for killing the agent 1 second after its initialization.
 		 */
 		protected abstract boolean runAgentTest();
 
