@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public final class LoggerCreator {
 		if (level == null) {
 			return Level.INFO;
 		}
-		switch(level.toLowerCase()) {
+		switch (level.toLowerCase()) {
 		case "none": //$NON-NLS-1$
 		case "false": //$NON-NLS-1$
 		case "0": //$NON-NLS-1$
@@ -164,7 +164,7 @@ public final class LoggerCreator {
 	 * @return the logging level.
 	 */
 	public static Level fromInt(int num) {
-		switch(num) {
+		switch (num) {
 		case 0:
 			return Level.OFF;
 		case 1:
