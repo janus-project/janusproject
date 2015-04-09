@@ -24,14 +24,15 @@ The steps for releasing JANUS are:
 
     $> ./scripts/prepare-bundles-for-central
 
-6) Tag the Git with the version number.
-
-    $> git tag "vX.Y.Z"
-
-7) Commit and push to Github:
+6) Commit and push to Github:
 
     $> git commit
     $> git push --all
+
+7) Tag the Git with the version number.
+
+    $> git tag "vX.Y.Z"
+    $> git push --tags
 
 8) On Hudson, launch a build for updating the maven repositories and the Eclipse update sites.
    If failing, revert 5, fix the problem, and go back to 3.
