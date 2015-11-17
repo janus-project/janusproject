@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -92,9 +92,8 @@ public final class Boot {
 	 * @param args - the CLI arguments given to the program.
 	 * @return the arguments that are not recognized as CLI options.
 	 */
-	@SuppressWarnings("unchecked")
 	public static String[] parseCommandLine(String[] args) {
-		CommandLineParser parser = new GnuParser();
+		CommandLineParser parser = new DefaultParser();
 		try {
 			CommandLine cmd = parser.parse(getOptions(), args);
 

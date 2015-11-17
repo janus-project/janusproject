@@ -56,7 +56,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
@@ -268,7 +268,7 @@ public class BootTest {
 		@Before
 		public void setUp() throws Exception {
 			this.janusOptions = Boot.getOptions();
-			this.parser = new BasicParser();
+			this.parser = new DefaultParser();
 		}
 
 		@Test
