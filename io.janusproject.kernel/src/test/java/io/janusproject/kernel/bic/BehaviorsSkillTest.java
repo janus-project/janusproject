@@ -27,6 +27,7 @@ import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Behavior;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -90,7 +91,10 @@ public class BehaviorsSkillTest extends AbstractJanusTest {
 		this.innerCapacity = Mockito.mock(InnerContextAccess.class);
 		Mockito.when(this.innerCapacity.getInnerContext()).thenReturn(innerContext);
 		
-		Agent agent = new Agent(UUID.randomUUID()) {
+		Agent agent = new Agent(
+				Mockito.mock(BuiltinCapacitiesProvider.class),
+				UUID.randomUUID(),
+				null) {
 			/** {@inheritDoc}
 			 */
 			@Override

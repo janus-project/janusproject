@@ -28,6 +28,7 @@ import io.sarl.core.Initialize;
 import io.sarl.core.Lifecycle;
 import io.sarl.core.Schedules;
 import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Percept;
 
 import java.io.IOException;
@@ -49,6 +50,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.mockito.Mockito;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -269,7 +271,10 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		 * @param parentID - the identifier of the parent's agent.
 		 */
 		public TestingAgent(UUID parentID) {
-			super(parentID);
+			super(
+					Mockito.mock(BuiltinCapacitiesProvider.class),
+					parentID,
+					null);
 		}
 
 		/**
@@ -277,7 +282,9 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		 * @param agentID - the identifier of the agent.
 		 */
 		public TestingAgent(UUID parentID, UUID agentID) {
-			super(parentID, agentID);
+			super(
+					Mockito.mock(BuiltinCapacitiesProvider.class),
+					parentID, agentID);
 		}
 
 		/** Add a result.

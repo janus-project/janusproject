@@ -28,6 +28,7 @@ import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.AgentTraitUnitTestAccessor;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Event;
 
 import java.util.UUID;
@@ -42,6 +43,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.*;
@@ -72,7 +74,10 @@ public class LifecycleSkillTest extends AbstractJanusTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		this.agentId = UUID.randomUUID();
-		Agent agent = new Agent(UUID.randomUUID()) {
+		Agent agent = new Agent(
+				Mockito.mock(BuiltinCapacitiesProvider.class),
+				UUID.randomUUID(),
+				null) {
 			@SuppressWarnings("synthetic-access")
 			@Override
 			protected <S extends io.sarl.lang.core.Capacity> S getSkill(java.lang.Class<S> capacity) {

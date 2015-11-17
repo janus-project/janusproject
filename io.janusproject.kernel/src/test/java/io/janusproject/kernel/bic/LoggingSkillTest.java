@@ -29,6 +29,7 @@ import io.janusproject.services.logging.LogService;
 import io.janusproject.testutils.AbstractJanusTest;
 import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 
 import java.util.UUID;
@@ -78,7 +79,10 @@ public class LoggingSkillTest extends AbstractJanusTest {
 	@Before
 	public void setUp() throws Exception {
 		UUID agentId = UUID.randomUUID();
-		this.owner = new Agent(agentId) {
+		this.owner = new Agent(
+				Mockito.mock(BuiltinCapacitiesProvider.class),
+				agentId,
+				null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				return capacity.cast(LoggingSkillTest.this.skill);

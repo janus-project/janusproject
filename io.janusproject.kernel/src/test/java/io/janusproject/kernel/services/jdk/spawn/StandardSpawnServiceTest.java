@@ -45,6 +45,7 @@ import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
@@ -134,7 +135,10 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 	@Before
 	public void setUp() throws Exception {
 		this.agentId = UUID.randomUUID();
-		this.agent = Mockito.spy(new Agent(UUID.randomUUID()) {
+		this.agent = Mockito.spy(new Agent(
+				Mockito.mock(BuiltinCapacitiesProvider.class),
+				UUID.randomUUID(),
+				null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				if (ExternalContextAccess.class.equals(capacity))

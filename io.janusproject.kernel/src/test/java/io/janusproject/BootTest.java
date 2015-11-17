@@ -44,6 +44,7 @@ import io.janusproject.testutils.AbstractJanusRunTest;
 import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +73,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.google.inject.Binder;
@@ -112,7 +114,10 @@ public class BootTest {
 		/**
 		 */
 		public AgentMock() {
-			super(null);
+			super(
+					Mockito.mock(BuiltinCapacitiesProvider.class),
+					UUID.randomUUID(),
+					null);
 		}
 	}
 

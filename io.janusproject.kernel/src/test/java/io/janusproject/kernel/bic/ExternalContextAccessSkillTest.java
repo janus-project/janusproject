@@ -39,6 +39,7 @@ import io.sarl.core.MemberLeft;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -60,6 +61,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
 import org.mockito.invocation.InvocationOnMock;
@@ -124,7 +126,10 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			when(c.getDefaultSpace()).thenReturn(defaultSpace);
 			this.contexts.add(c);
 		}
-		this.agent = new Agent(UUID.randomUUID()) {
+		this.agent = new Agent(
+				Mockito.mock(BuiltinCapacitiesProvider.class),
+				UUID.randomUUID(),
+				null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				if (Behaviors.class.equals(capacity))
