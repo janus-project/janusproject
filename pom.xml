@@ -7,7 +7,7 @@
 
 	<groupId>io.janusproject</groupId>
 	<artifactId>io.janusproject</artifactId>
-	<version>2.1.0.0-SNAPSHOT</version>
+	<version>2.0.3.0-SNAPSHOT</version>
 
 
 	<name>Janus Project</name>
@@ -38,14 +38,14 @@
 		<year>2015</year>
 		<copyrighters>Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND</copyrighters>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<sarl.version.range>1.0.0-SNAPSHOT</sarl.version.range>
-		<sarl.spec.version>1.0</sarl.spec.version>
-		<guice.version>4.0-beta5</guice.version>
+		<sarl.version.range>0.3.0-SNAPSHOT</sarl.version.range>
+		<sarl.spec.version>0.3</sarl.spec.version>
+		<guice.version>4.0</guice.version>
 		<guava.version>19.0.0</guava.version>
 		<guava.tests.version>18.0</guava.tests.version>
-		<jeromq.version>0.3.4</jeromq.version>
-		<gson.version>2.3.1</gson.version>
-		<hazelcast.version>3.4.2</hazelcast.version>
+		<jeromq.version>0.3.5</jeromq.version>
+		<gson.version>2.4</gson.version>
+		<hazelcast.version>3.6-EA</hazelcast.version>
 		<afc.version>12.0</afc.version>
 	</properties>
 
@@ -123,7 +123,7 @@
 			<dependency>
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
-				<version>1.2</version>
+				<version>1.3.1</version>
 			</dependency>
 
 			<dependency>
@@ -154,14 +154,14 @@
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-api-mockito</artifactId>
-				<version>1.6.2</version>
+				<version>1.6.3</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-module-junit4</artifactId>
-				<version>1.6.2</version>
+				<version>1.6.3</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -205,7 +205,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>2.5.3</version>
+					<version>2.6</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -243,7 +243,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>2.15</version>
+					<version>2.17</version>
 					<executions>
 						<execution>
 							<phase>prepare-package</phase>
@@ -276,13 +276,13 @@
 				<plugin>
 					<groupId>org.arakhne.afc.maven</groupId>
 					<artifactId>tag-replacer</artifactId>
-					<version>11.0</version>
+					<version>12.0</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.2</version>
+					<version>2.10.3</version>
 					<configuration>
 						<docencoding>${project.build.sourceEncoding}</docencoding>
 						<encoding>${project.build.sourceEncoding}</encoding>
@@ -718,19 +718,6 @@
 			</releases>
 		</repository>
 	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>io.sarl.maven</id>
-			<name>Sarl.io Snapshots</name>
-			<url>http://maven.sarl.io/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</pluginRepository>
-	</pluginRepositories>
 
 	<!-- ==================== -->
 	<!-- ==== Development === -->
