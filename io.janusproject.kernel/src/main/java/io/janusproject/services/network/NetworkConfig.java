@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.network;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.modules.eventserial.NetworkEventModule;
+package io.janusproject.services.network;
 
 import java.nio.charset.Charset;
 import java.util.Properties;
 
 import com.google.common.base.Charsets;
 import com.google.inject.name.Named;
+import io.janusproject.JanusConfig;
+import io.janusproject.modules.eventserial.NetworkEventModule;
 
 /**
  * Public configuration properties for the network modules.
@@ -53,14 +53,16 @@ public final class NetworkConfig {
 	public static final String ENCRYPTER_CLASSNAME = "network.encrypter.class"; //$NON-NLS-1$
 
 	/** Name of the property for charset that must be used for string encoding.
+	 *
 	 * @see #BYTE_ARRAY_STRING_CHARSET_VALUE
 	 */
 	public static final String BYTE_ARRAY_STRING_CHARSET_NAME = "network.serializer.charset"; //$NON-NLS-1$
 
 	/** Charset that should be used for converting String to byte array or
 	 * byte array to String.
-	 * <p>
-	 * This constant was introduced to enforce the values on different platforms.
+	 *
+	 * <p>This constant was introduced to enforce the values on different platforms.
+	 *
 	 * @see #BYTE_ARRAY_STRING_CHARSET_NAME
 	 */
 	public static final Charset BYTE_ARRAY_STRING_CHARSET_VALUE = Charsets.UTF_8;
@@ -94,7 +96,7 @@ public final class NetworkConfig {
 					if (currentStringEncoding == null) {
 						currentStringEncoding = BYTE_ARRAY_STRING_CHARSET_VALUE;
 					}
-				} catch (Throwable _) {
+				} catch (Throwable exception) {
 					currentStringEncoding = BYTE_ARRAY_STRING_CHARSET_VALUE;
 				}
 			} else {

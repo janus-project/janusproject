@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.services.executor.ChuckNorrisException;
+package io.janusproject.kernel.services.jdk.executors;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ExecutionException;
+
+import io.janusproject.services.executor.ChuckNorrisException;
 
 
 /**
@@ -45,26 +46,25 @@ final class JdkExecutorUtil {
 	 * @param exception - the exception to log, or <code>null</code> if none.
 	 * @return <code>true</code> if ChuckNorrisException is detected.
 	 */
+	@SuppressWarnings("checkstyle:regexp")
 	public static boolean log(Thread thread, Throwable exception) {
 		if (exception != null) {
-			Throwable e = exception;
+			Throwable realException = exception;
 			// Get the cause of the exception
-			while (e instanceof ExecutionException) {
-				e = ((ExecutionException) e).getCause();
+			while (realException instanceof ExecutionException) {
+				realException = ((ExecutionException) realException).getCause();
 			}
-			if (!(e instanceof ChuckNorrisException)) {
+			if (!(realException instanceof ChuckNorrisException)) {
 				// Call the exception catcher
-				UncaughtExceptionHandler h = thread.getUncaughtExceptionHandler();
-				if (h == null) {
-					h = Thread.getDefaultUncaughtExceptionHandler();
+				UncaughtExceptionHandler handler = thread.getUncaughtExceptionHandler();
+				if (handler == null) {
+					handler = Thread.getDefaultUncaughtExceptionHandler();
 				}
-				if (h != null) {
-					h.uncaughtException(thread, e);
+				if (handler != null) {
+					handler.uncaughtException(thread, realException);
 				} else {
-					//CHECKSTYLE:OFF
-					System.err.println(e.toString());
-					e.printStackTrace();
-					//CHECKSTYLE:ON
+					System.err.println(realException.toString());
+					realException.printStackTrace();
 				}
 			} else {
 				return true;

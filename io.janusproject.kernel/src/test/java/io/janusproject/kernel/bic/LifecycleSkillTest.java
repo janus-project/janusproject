@@ -132,7 +132,7 @@ public class LifecycleSkillTest extends AbstractJanusTest {
 			this.skill.killMe();
 			fail("killMe() must never return!"); //$NON-NLS-1$
 		}
-		catch(ChuckNorrisException _) {
+		catch(ChuckNorrisException exception) {
 			// Expected exception
 		}
 		catch(Exception e) {

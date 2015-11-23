@@ -105,7 +105,7 @@ public class JanusConfigTest extends AbstractJanusTest {
 				try {
 					rv = Integer.parseInt(sv);
 				}
-				catch(Throwable _) {
+				catch(Throwable exception) {
 					rv = 567;
 				}
 				assertEquals(rv, v);
@@ -131,7 +131,7 @@ public class JanusConfigTest extends AbstractJanusTest {
 				try {
 					rv = Float.parseFloat(sv);
 				}
-				catch(Throwable _) {
+				catch(Throwable exception) {
 					rv = 567.8901f;
 				}
 				assertEquals(rv, v, FLOAT_EPSILON);

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,35 +17,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.logging;
 
-import io.janusproject.services.DependentService;
+package io.janusproject.services.logging;
 
 import java.util.logging.Filter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import io.janusproject.services.DependentService;
+
 /** This class enables to log information by ensuring
  * that the values of the parameters are not evaluated
  * until the information should be really log, according
  * to the log level.
- * <p>
- * The LogService considers the parameters of the functions as:<ul>
+ *
+ * <p>The LogService considers the parameters of the functions as:<ul>
  * <li>the messageKey is the name of the message in the property file;</li>
  * <li>the message parameters are the values that will replace the
  * strings {0}, {1}, {2}... in the text extracted from the ressource property;</li>
  * <li>the parameter propertyType is the class from which the filename of
  * the property file will be built.</li>
  * </ul>
- * <p>
- * If a <code>Throwable</code> is passed as parameter, the text of the
+ *
+ * <p>If a <code>Throwable</code> is passed as parameter, the text of the
  * exception is retreived.
- * <p>
- * If a <code>LogParam</code> is passed as parameter, the <code>toString</code>
+ *
+ * <p>If a <code>LogParam</code> is passed as parameter, the <code>toString</code>
  * function will be invoked.
- * <p>
- * For all the other objects, the {@link #toString()} function is invoked.
+ *
+ * <p>For all the other objects, the {@link #toString()} function is invoked.
  *
  *
  * @author $Author: sgalland$
@@ -59,7 +60,7 @@ public interface LogService extends DependentService {
 	 *
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 * @see #fineInfo(String, Object...)
 	 * @see #finerInfo(String, Object...)
 	 */
@@ -70,7 +71,7 @@ public interface LogService extends DependentService {
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 * @see #fineInfo(Class, String, Object...)
 	 * @see #finerInfo(Class, String, Object...)
 	 */
@@ -80,7 +81,7 @@ public interface LogService extends DependentService {
 	 *
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 * @see #info(String, Object...)
 	 * @see #finerInfo(String, Object...)
 	 */
@@ -91,7 +92,7 @@ public interface LogService extends DependentService {
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 * @see #info(Class, String, Object...)
 	 * @see #finerInfo(Class, String, Object...)
 	 */
@@ -101,7 +102,7 @@ public interface LogService extends DependentService {
 	 *
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 * @see #info(String, Object...)
 	 * @see #fineInfo(String, Object...)
 	 */
@@ -112,7 +113,7 @@ public interface LogService extends DependentService {
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 * @see #info(Class, String, Object...)
 	 * @see #fineInfo(Class, String, Object...)
 	 */
@@ -122,7 +123,7 @@ public interface LogService extends DependentService {
 	 *
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 */
 	void debug(String messageKey, Object... message);
 
@@ -131,7 +132,7 @@ public interface LogService extends DependentService {
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 */
 	void debug(Class<?> propertyType, String messageKey, Object... message);
 
@@ -140,7 +141,7 @@ public interface LogService extends DependentService {
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 */
 	void warning(Class<?> propertyType, String messageKey, Object... message);
 
@@ -148,7 +149,7 @@ public interface LogService extends DependentService {
 	 *
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 */
 	void warning(String messageKey, Object... message);
 
@@ -156,7 +157,7 @@ public interface LogService extends DependentService {
 	 *
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 */
 	void error(String messageKey, Object... message);
 
@@ -165,7 +166,7 @@ public interface LogService extends DependentService {
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 */
 	void error(Class<?> propertyType, String messageKey, Object... message);
 
@@ -181,7 +182,7 @@ public interface LogService extends DependentService {
 	 * @param propertyType - type that is used to retreive the property file.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 */
 	void log(Level level, Class<?> propertyType, String messageKey, Object... message);
 
@@ -190,7 +191,7 @@ public interface LogService extends DependentService {
 	 * @param level - level of logging for the message.
 	 * @param messageKey - key of the message in the properties.
 	 * @param message - the values to insert into the message in place of the
-	 * parameter marker (<code>{0}</code>, etc.)
+	 *     parameter marker (<code>{0}</code>, etc.)
 	 */
 	void log(Level level, String messageKey, Object... message);
 

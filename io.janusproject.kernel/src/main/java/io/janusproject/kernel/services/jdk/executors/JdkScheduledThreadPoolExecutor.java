@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.util.ListenerCollection;
+package io.janusproject.kernel.services.jdk.executors;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -31,6 +28,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import com.google.inject.Inject;
+import io.janusproject.JanusConfig;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.util.ListenerCollection;
 
 /**
  * Executor that support uncaucht exceptions and interruptable threads.
@@ -97,24 +97,18 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable,
 			RunnableScheduledFuture<V> task) {
 		return new JdkJanusScheduledFutureTask<>(task);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable,
 			RunnableScheduledFuture<V> task) {
 		return new JdkJanusScheduledFutureTask<>(task);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public <T> Future<T> submit(Runnable task, T result) {
         return schedule(
@@ -122,23 +116,19 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
                 0, TimeUnit.NANOSECONDS);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
-	protected void beforeExecute(Thread t, Runnable r) {
+	protected void beforeExecute(Thread thread, Runnable runnable) {
 		// Was the task submitted (if future task) or executed?
-		if (r instanceof JdkJanusScheduledFutureTask<?>) {
-			((JdkJanusScheduledFutureTask<?>) r).setThread(t);
+		if (runnable instanceof JdkJanusScheduledFutureTask<?>) {
+			((JdkJanusScheduledFutureTask<?>) runnable).setThread(thread);
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
-	protected void afterExecute(Runnable r, Throwable t) {
-		assert (t == null);
-		assert (r instanceof JdkJanusScheduledFutureTask<?>);
-		JdkJanusScheduledFutureTask<?> task = (JdkJanusScheduledFutureTask<?>) r;
+	protected void afterExecute(Runnable runnable, Throwable thread) {
+		assert (thread == null);
+		assert (runnable instanceof JdkJanusScheduledFutureTask<?>);
+		JdkJanusScheduledFutureTask<?> task = (JdkJanusScheduledFutureTask<?>) runnable;
 		assert (task.isDone() || task.isCancelled() || task.isPeriodic());
 		if (task.isDone() || task.isCancelled()) {
 			task.reportException(task.getThread());
@@ -146,34 +136,35 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
 		}
 	}
 
-	/**
+	/** Implementation of the result of a runnable.
+	 *
+	 * @param <V> type of the result.
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
-	 * @param <V>
 	 */
 	private static class ResultRunnable<V> implements Callable<V> {
 
 		private final Runnable runnable;
+
 		private final V result;
 
-		/**
-		 * @param runnable
-		 * @param result
+		/** Construct.
+		 *
+		 * @param runnable the runnable.
+		 * @param result the result.
 		 */
-		public ResultRunnable(Runnable runnable, V result) {
+		ResultRunnable(Runnable runnable, V result) {
 			this.runnable = runnable;
 			this.result = result;
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public V call() throws Exception {
 			try {
 				this.runnable.run();
-			} catch (ChuckNorrisException _) {
+			} catch (ChuckNorrisException exception) {
 				//
 			}
 			return this.result;

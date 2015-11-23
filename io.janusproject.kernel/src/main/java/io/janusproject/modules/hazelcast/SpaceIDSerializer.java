@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.modules.hazelcast;
 
-import io.sarl.lang.core.SpaceID;
-import io.sarl.lang.core.SpaceSpecification;
+package io.janusproject.modules.hazelcast;
 
 import java.io.IOException;
 import java.util.UUID;
 
-import org.arakhne.afc.vmutil.locale.Locale;
-
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.StreamSerializer;
+import org.arakhne.afc.vmutil.locale.Locale;
+
+import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.core.SpaceSpecification;
 
 /** Serializer of identifiers of spaces.
  *
@@ -73,8 +73,7 @@ class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 			if (cid != null && id != null && specCls != null) {
 				Class<?> type = Class.forName(specCls);
 				if (SpaceSpecification.class.isAssignableFrom(type)) {
-					SpaceID s = new SpaceID(cid, id, (Class<? extends SpaceSpecification<?>>) type);
-					return s;
+					return new SpaceID(cid, id, (Class<? extends SpaceSpecification<?>>) type);
 				}
 			}
 			throw new IOException(Locale.getString("BUILD_ERROR", cid, id, specCls)); //$NON-NLS-1$

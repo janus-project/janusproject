@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.services.executor.JanusScheduledFutureTask;
+package io.janusproject.kernel.services.jdk.executors;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CancellationException;
@@ -33,22 +31,27 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.executor.JanusScheduledFutureTask;
+
 /**
  * A {@link ScheduledFuture} that is {@link Runnable}. Successful
  * execution of the <tt>run</tt> method causes completion of the
  * <tt>Future</tt> and allows access to its results.
  *
  * @param <V> - type of the values supported by the task.
- * @see FutureTask
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
+ * @see FutureTask
  */
 class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 
 	private final AtomicBoolean treated = new AtomicBoolean(false);
+
 	private final RunnableScheduledFuture<V> task;
+
 	private WeakReference<Thread> thread;
 
 	/**
@@ -85,7 +88,7 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 				ex = e.getCause();
 			}
 			if (!(ex instanceof ChuckNorrisException)
-				&& !this.treated.getAndSet(true)) {
+					&& !this.treated.getAndSet(true)) {
 				JdkExecutorUtil.log(thread, ex);
 			}
 		} catch (InterruptedException | CancellationException e) {
@@ -105,36 +108,26 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 		return Thread.currentThread() == this.thread.get();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		this.task.run();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
 		return this.task.cancel(mayInterruptIfRunning);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public boolean isCancelled() {
 		return this.task.isCancelled();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public boolean isDone() {
 		return this.task.isDone();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public V get() throws InterruptedException, ExecutionException {
 		try {
@@ -151,8 +144,6 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public V get(long timeout, TimeUnit unit) throws InterruptedException,
 			ExecutionException, TimeoutException {
@@ -170,22 +161,16 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public long getDelay(TimeUnit unit) {
 		return this.task.getDelay(unit);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
-	public int compareTo(Delayed o) {
-		return this.task.compareTo(o);
+	public int compareTo(Delayed delayed) {
+		return this.task.compareTo(delayed);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public boolean isPeriodic() {
 		return this.task.isPeriodic();

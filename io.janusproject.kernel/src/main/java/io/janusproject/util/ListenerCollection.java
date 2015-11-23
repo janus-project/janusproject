@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.util;
 
 import java.io.IOException;
@@ -28,12 +29,12 @@ import java.util.EventListener;
 
 /**
  * A collection of listeners.
- * <p>
- * This collection is thread-safe.
- * <p>
- * This class is inspirated by <code>EventListenerList</code>.
- * <p>
- * This class is copied from the
+ *
+ * <p>This collection is thread-safe.
+ *
+ * <p>This class is inspirated by <code>EventListenerList</code>.
+ *
+ * <p>This class is copied from the
  * <a href="http://www.arakhne.org/afc">Arakhn&ecirc; Foundation Classes</a>.
  *
  * @param <L> is the type of listeners.
@@ -50,7 +51,7 @@ public class ListenerCollection<L extends EventListener> {
 	 */
 	protected transient Object[] listeners = NULL;
 
-	/**
+	/** Construct.
 	 */
 	public ListenerCollection() {
 		//
@@ -59,7 +60,7 @@ public class ListenerCollection<L extends EventListener> {
 	/** Replies if this collection is empty.
 	 *
 	 * @return <code>true</code> if this collection does not
-	 * contains any listener, otherwise <code>false</code>
+	 *     contains any listener, otherwise <code>false</code>
 	 */
 	public boolean isEmpty() {
 		return this.listeners == NULL;
@@ -81,8 +82,8 @@ public class ListenerCollection<L extends EventListener> {
 	 * array, so that no null-checking is required in
 	 * fire methods.  A zero-length array of Object should
 	 * be returned if there are currently no listeners.
-	 * <p>
-	 * WARNING!!! Absolutely NO modification of
+	 *
+	 * <p>WARNING!!! Absolutely NO modification of
 	 * the data contained in this array should be made -- if
 	 * any such manipulation is necessary, it should be done
 	 * on a copy of the array returned rather than the array
@@ -103,13 +104,13 @@ public class ListenerCollection<L extends EventListener> {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends EventListener> T[] getListeners(Class<T> type) {
-		Object[] l = this.listeners;
-		int n = getListenerCount(l, type);
-		T[] result = (T[]) Array.newInstance(type, n);
+		Object[] listeners = this.listeners;
+		int listenerCount = getListenerCount(listeners, type);
+		T[] result = (T[]) Array.newInstance(type, listenerCount);
 		int j = 0;
-		for (int i = l.length - 2; i >= 0; i -= 2) {
-			if (l[i] == type) {
-				result[j++] = type.cast(l[i + 1]);
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == type) {
+				result[j++] = type.cast(listeners[i + 1]);
 			}
 		}
 		return result;
@@ -130,16 +131,16 @@ public class ListenerCollection<L extends EventListener> {
 	 *
 	 * @param type - type of the listeners to consider.
 	 * @return the total number of listeners of the supplied type
-	 * for this listener list.
+	 *     for this listener list.
 	 */
 	public int getListenerCount(Class<?> type) {
 		return getListenerCount(this.listeners, type);
 	}
 
-	private static int getListenerCount(Object[] list, Class<?> t) {
+	private static int getListenerCount(Object[] list, Class<?> type) {
 		int count = 0;
 		for (int i = 0; i < list.length; i += 2) {
-			if (t == (Class<?>) list[i]) {
+			if (type == (Class<?>) list[i]) {
 				++count;
 			}
 		}
@@ -159,7 +160,7 @@ public class ListenerCollection<L extends EventListener> {
 			// if this is the first listener added,
 			// initialize the lists
 			this.listeners = new Object[] {
-					type, listener,
+				type, listener,
 			};
 		} else {
 			// Otherwise copy the array and add the new listener
@@ -210,54 +211,51 @@ public class ListenerCollection<L extends EventListener> {
 	}
 
 	// Serialization support.
-	private void writeObject(ObjectOutputStream s) throws IOException {
+	private void writeObject(ObjectOutputStream stream) throws IOException {
 		Object[] lList = this.listeners;
-		s.defaultWriteObject();
+		stream.defaultWriteObject();
 
 		// Save the non-null event listeners:
 		for (int i = 0; i < lList.length; i += 2) {
 			Class<?> t = (Class<?>) lList[i];
-			EventListener l = (EventListener) lList[i + 1];
-			if ((l != null) && (l instanceof Serializable)) {
-				s.writeObject(t.getName());
-				s.writeObject(l);
+			EventListener listener = (EventListener) lList[i + 1];
+			if ((listener != null) && (listener instanceof Serializable)) {
+				stream.writeObject(t.getName());
+				stream.writeObject(listener);
 			}
 		}
 
-		s.writeObject(null);
+		stream.writeObject(null);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void readObject(ObjectInputStream s)
+	private void readObject(ObjectInputStream stream)
 	throws IOException, ClassNotFoundException {
 		this.listeners = NULL;
-		s.defaultReadObject();
+		stream.defaultReadObject();
 		Object listenerTypeOrNull;
 
-		while (null != (listenerTypeOrNull = s.readObject())) {
+		while (null != (listenerTypeOrNull = stream.readObject())) {
 			ClassLoader cl = Thread.currentThread().getContextClassLoader();
-			EventListener l = (EventListener) s.readObject();
+			EventListener listener = (EventListener) stream.readObject();
 			add((Class<EventListener>) Class.forName(
 					(String) listenerTypeOrNull,
 					true,
 					cl),
-				l);
+					listener);
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String toString() {
 		Object[] lList = this.listeners;
-		String s = "EventListenerList: "; //$NON-NLS-1$
-		s += lList.length / 2 + " listeners: "; //$NON-NLS-1$
+		String txt = "EventListenerList: "; //$NON-NLS-1$
+		txt += lList.length / 2 + " listeners: "; //$NON-NLS-1$
 		for (int i = 0; i <= lList.length - 2; i += 2) {
-			s += " type " + ((Class<?>) lList[i]).getName(); //$NON-NLS-1$
-			s += " listener " + lList[i + 1]; //$NON-NLS-1$
+			txt += " type " + ((Class<?>) lList[i]).getName(); //$NON-NLS-1$
+			txt += " listener " + lList[i + 1]; //$NON-NLS-1$
 		}
-		return s;
+		return txt;
 	}
 
 }

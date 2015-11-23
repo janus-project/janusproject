@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.hazelcast;
 
-import io.janusproject.util.AbstractDMultiMapView;
-import io.janusproject.util.DataViewDelegate;
-import io.janusproject.util.DataViewDelegate.Delegator;
-import io.janusproject.util.MultisetView;
+package io.janusproject.kernel.services.hazelcast;
 
 import java.io.Serializable;
 import java.util.AbstractSet;
@@ -39,6 +35,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 import com.hazelcast.core.MultiMap;
+import io.janusproject.util.AbstractDMultiMapView;
+import io.janusproject.util.DataViewDelegate;
+import io.janusproject.util.DataViewDelegate.Delegator;
+import io.janusproject.util.MultisetView;
 
 /** A view from the Hazelcast multimap to DMultiMap.
  *
@@ -109,20 +109,22 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 
 	}
 
-	/**
+	/** Wrapper of a multimap.
+	 *
+	 * @param <K> the keys.
+	 * @param <V> the values.
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
-	 * @param <K>
-	 * @param <V>
 	 */
 	private static class Wrapper<K, V> implements Multimap<K, V> {
 
 		private final MultiMap<K, V> map;
+
 		private Map<K, Collection<V>> mapView;
 
-		public Wrapper(MultiMap<K, V> map) {
+		Wrapper(MultiMap<K, V> map) {
 			this.map = map;
 		}
 
@@ -156,7 +158,7 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 		public boolean containsKey(Object key) {
 			try {
 				return this.map.containsKey((K) key);
-			} catch (ClassCastException _) {
+			} catch (ClassCastException exception) {
 				return false;
 			}
 		}
@@ -171,7 +173,7 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 		public boolean containsEntry(Object key, Object value) {
 			try {
 				return this.map.containsEntry((K) key, (V) value);
-			} catch (ClassCastException _) {
+			} catch (ClassCastException exception) {
 				return false;
 			}
 		}
@@ -308,7 +310,7 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 	 * @mavenartifactid $ArtifactId$
 	 */
 	protected class EntryCollectionView extends AbstractSet<Entry<K, V>>
-				implements Serializable, Delegator<Collection<Entry<K, V>>> {
+			implements Serializable, Delegator<Collection<Entry<K, V>>> {
 
 		private static final long serialVersionUID = 3746778947439539504L;
 
@@ -353,15 +355,16 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 
 		@SuppressWarnings("synthetic-access")
 		@Override
-		public boolean add(Entry<K, V> e) {
-			if (this.entries.add(e)) {
-				fireEntryAdded(e.getKey(), e.getValue());
+		public boolean add(Entry<K, V> entry) {
+			if (this.entries.add(entry)) {
+				fireEntryAdded(entry.getKey(), entry.getValue());
 				return true;
 			}
 			return false;
 		}
 
-		/**
+		/** Iterator on the multimap entries.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -370,9 +373,10 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 		private class EntryIterator implements Iterator<Entry<K, V>> {
 
 			private final Iterator<Entry<K, V>> iterator;
+
 			private Entry<K, V> entry;
 
-			public EntryIterator(Iterator<Entry<K, V>> iterator) {
+			EntryIterator(Iterator<Entry<K, V>> iterator) {
 				this.iterator = iterator;
 			}
 

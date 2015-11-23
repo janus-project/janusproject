@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel;
 
-import io.janusproject.services.IServiceManager;
-import io.janusproject.services.Services;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.spawn.KernelAgentSpawnListener;
-import io.janusproject.services.spawn.SpawnService;
-import io.janusproject.util.LoggerCreator;
-import io.janusproject.util.TwoStepConstruction;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.AgentContext;
+package io.janusproject.kernel;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.UUID;
@@ -38,24 +29,33 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.arakhne.afc.vmutil.locale.Locale;
-
 import com.google.common.util.concurrent.Service;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
+import io.janusproject.services.IServiceManager;
+import io.janusproject.services.Services;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.spawn.KernelAgentSpawnListener;
+import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.util.LoggerCreator;
+import io.janusproject.util.TwoStepConstruction;
+import org.arakhne.afc.vmutil.locale.Locale;
+
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.AgentContext;
 
 /**
  * This class represents the Kernel of the Janus platform.
- * <p>
- * <strong>The Kernel is a singleton.</strong>
- * <p>
- * The Kernel is assimilated to an agent that is omniscient and
+ *
+ * <p><strong>The Kernel is a singleton.</strong>
+ *
+ * <p>The Kernel is assimilated to an agent that is omniscient and
  * distributed other the network. It is containing all the other agents.
- * <p>
- * To create a Kernel, you should use the function {@link #create(Module...)}.
+ *
+ * <p>To create a Kernel, you should use the function {@link #create(Module...)}.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -125,7 +125,7 @@ public class Kernel {
 	/** Replies if the kernel is running or not.
 	 *
 	 * @return <code>true</code> if the kernel is running; <code>false</code>
-	 * otherwise.
+	 *     otherwise.
 	 */
 	public boolean isRunning() {
 		return this.isRunning.get();
@@ -196,7 +196,8 @@ public class Kernel {
 		this.janusContext = janusContext;
 	}
 
-	/**
+	/** Listener on platform events.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -204,21 +205,17 @@ public class Kernel {
 	 */
 	private class KernelStoppingListener implements KernelAgentSpawnListener {
 
-		/**
+		/** Construct.
 		 */
-		public KernelStoppingListener() {
+		KernelStoppingListener() {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void kernelAgentSpawn() {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void kernelAgentDestroy() {
 			// CAUTION: EXECUTE THE STOP FUNCTION IN A THREAD THAT
@@ -231,7 +228,8 @@ public class Kernel {
 		}
 	}
 
-	/**
+	/** Runner for stopping the kernel.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -239,9 +237,9 @@ public class Kernel {
 	 */
 	private class StopTheKernel implements ThreadFactory, Runnable, UncaughtExceptionHandler {
 
-		/**
+		/** Construct.
 		 */
-		public StopTheKernel() {
+		StopTheKernel() {
 			//
 		}
 
@@ -252,8 +250,6 @@ public class Kernel {
 			t.start();
 		}
 
-		/** {@inheritDoc}
-		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void run() {
@@ -264,26 +260,22 @@ public class Kernel {
 			Kernel.this.isRunning.set(false);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
-		public Thread newThread(Runnable r) {
-			Thread t = Executors.defaultThreadFactory().newThread(r);
+		public Thread newThread(Runnable runnable) {
+			Thread t = Executors.defaultThreadFactory().newThread(runnable);
 			t.setName("Janus kernel shutdown"); //$NON-NLS-1$
 			t.setDaemon(false);
 			t.setUncaughtExceptionHandler(this);
 			return t;
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
-		public void uncaughtException(Thread t, Throwable e) {
-			assert (t != null);
-			assert (e != null);
-			LogRecord record = new LogRecord(Level.SEVERE, e.getLocalizedMessage());
-			record.setThrown(e);
-			StackTraceElement elt = e.getStackTrace()[0];
+		public void uncaughtException(Thread thread, Throwable exception) {
+			assert (thread != null);
+			assert (exception != null);
+			LogRecord record = new LogRecord(Level.SEVERE, exception.getLocalizedMessage());
+			record.setThrown(exception);
+			StackTraceElement elt = exception.getStackTrace()[0];
 			assert (elt != null);
 			record.setSourceClassName(elt.getClassName());
 			record.setSourceMethodName(elt.getMethodName());

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.services.jdk.contextspace;
 
+import java.util.UUID;
+
+import com.google.inject.Injector;
 import io.janusproject.services.contextspace.SpaceRepositoryListener;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.janusproject.services.logging.LogService;
 import io.janusproject.util.TwoStepConstruction;
+
 import io.sarl.core.SpaceCreated;
 import io.sarl.core.SpaceDestroyed;
 import io.sarl.lang.core.Address;
@@ -34,10 +39,6 @@ import io.sarl.lang.core.SpaceSpecification;
 import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.util.OpenEventSpace;
 import io.sarl.util.OpenEventSpaceSpecification;
-
-import java.util.UUID;
-
-import com.google.inject.Injector;
 
 /** Implementation of an agent context in the Janus platform.
  *
@@ -56,12 +57,13 @@ class Context implements AgentContext {
 	private final SpaceRepository spaceRepository;
 
 	private final UUID defaultSpaceID;
+
 	private OpenEventSpace defaultSpace;
 
 
 	/** Constructs a <code>Context</code>.
-	 * <p>
-	 * CAUTION: Do not miss to call {@link #postConstruction()}.
+	 *
+	 * <p>CAUTION: Do not miss to call {@link #postConstruction()}.
 	 *
 	 * @param id - identifier of the context.
 	 * @param defaultSpaceID - identifier of the default space in the context.
@@ -119,6 +121,11 @@ class Context implements AgentContext {
 	}
 
 	@Override
+	public <S extends Space> SynchronizedCollection<S> getSpaces(Class<? extends SpaceSpecification<S>> spec) {
+		return this.spaceRepository.getSpaces(spec);
+	}
+
+	@Override
 	public SynchronizedCollection<? extends io.sarl.lang.core.Space> getSpaces() {
 		return this.spaceRepository.getSpaces();
 	}
@@ -140,29 +147,18 @@ class Context implements AgentContext {
 		return getOrCreateSpaceWithSpec(spec, spaceUUID, creationParams);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public <S extends Space> S getOrCreateSpaceWithSpec(
 			Class<? extends SpaceSpecification<S>> spec, UUID spaceUUID,
-					Object... creationParams) {
+			Object... creationParams) {
 		return this.spaceRepository.getOrCreateSpaceWithSpec(new SpaceID(this.id, spaceUUID, spec), spec, creationParams);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public <S extends Space> S getOrCreateSpaceWithID(UUID spaceUUID,
 			Class<? extends SpaceSpecification<S>> spec,
-					Object... creationParams) {
+			Object... creationParams) {
 		return this.spaceRepository.getOrCreateSpaceWithID(new SpaceID(this.id, spaceUUID, spec), spec, creationParams);
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public <S extends Space> SynchronizedCollection<S> getSpaces(Class<? extends SpaceSpecification<S>> spec) {
-		return this.spaceRepository.getSpaces(spec);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -186,7 +182,9 @@ class Context implements AgentContext {
 	private static class SpaceListener implements SpaceRepositoryListener {
 
 		private final Context context;
+
 		private final SpaceRepositoryListener relay;
+
 		private final LogService logger;
 
 		/**
@@ -194,7 +192,7 @@ class Context implements AgentContext {
 		 * @param logger - the logging service to use.
 		 * @param relay - the space repository listener to register at initialization time.
 		 */
-		public SpaceListener(Context context, LogService logger, SpaceRepositoryListener relay) {
+		SpaceListener(Context context, LogService logger, SpaceRepositoryListener relay) {
 			assert (context != null);
 			assert (logger != null);
 			assert (relay != null);
@@ -203,8 +201,6 @@ class Context implements AgentContext {
 			this.relay = relay;
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void spaceCreated(Space space, boolean isLocalCreation) {
 			this.logger.info(Context.class, "SPACE_CREATED", space.getID()); //$NON-NLS-1$
@@ -222,8 +218,6 @@ class Context implements AgentContext {
 			}
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void spaceDestroyed(Space space, boolean isLocalDestruction) {
 			this.logger.info(Context.class, "SPACE_DESTROYED", space.getID()); //$NON-NLS-1$
@@ -253,7 +247,9 @@ class Context implements AgentContext {
 	public static class DefaultSpaceRepositoryFactory implements SpaceRepositoryFactory {
 
 		private final DistributedDataStructureService dataStructureService;
+
 		private final Injector injector;
+
 		private final LogService logger;
 
 		/**
@@ -261,7 +257,7 @@ class Context implements AgentContext {
 		 * @param distributedDataStructure - service that permits to obtain distributed data structure.
 		 * @param logger - logging service.
 		 */
-		public DefaultSpaceRepositoryFactory(
+		DefaultSpaceRepositoryFactory(
 				Injector injector,
 				DistributedDataStructureService distributedDataStructure,
 				LogService logger) {
@@ -272,8 +268,8 @@ class Context implements AgentContext {
 
 		/**
 		 * {@inheritDoc}
-		 * <p>
-		 * In opposite to {@link #newInstanceWithPrivateSpaceListener(Context, String, SpaceRepositoryListener)},
+		 *
+		 * <p>In opposite to {@link #newInstanceWithPrivateSpaceListener(Context, String, SpaceRepositoryListener)},
 		 * this function wraps the listener into a private space listener proxy
 		 * before giving this wrapper to the space repository.
 		 */
@@ -288,8 +284,8 @@ class Context implements AgentContext {
 		}
 
 		/** Create an instance of the space repository.
-		 * <p>
-		 * In opposite to {@link #newInstance(Context, String, SpaceRepositoryListener)},
+		 *
+		 * <p>In opposite to {@link #newInstance(Context, String, SpaceRepositoryListener)},
 		 * this function gives the listener to the space repository,
 		 * without wrapping it into the private space listener proxy.
 		 *

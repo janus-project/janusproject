@@ -22,15 +22,24 @@ package io.janusproject.kernel.services.jdk.spawn;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import io.janusproject.services.contextspace.ContextSpaceService;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.network.NetworkService;
-import io.janusproject.services.spawn.AgentFactory;
 import io.janusproject.services.spawn.KernelAgentSpawnListener;
 import io.janusproject.services.spawn.SpawnService;
 import io.janusproject.services.spawn.SpawnService.AgentKillException;
@@ -38,6 +47,15 @@ import io.janusproject.services.spawn.SpawnServiceListener;
 import io.janusproject.testutils.AbstractDependentServiceTest;
 import io.janusproject.testutils.AvoidServiceStartForTest;
 import io.janusproject.testutils.StartServiceForTest;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.internal.verification.Times;
+
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ExternalContextAccess;
@@ -49,6 +67,9 @@ import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
+import io.sarl.lang.core.Skill;
+import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
@@ -117,9 +138,8 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 
 	@Mock
 	private Injector injector;
-
+	
 	/**
-	 * 
 	 */
 	public StandardSpawnServiceTest() {
 		super(SpawnService.class);
@@ -307,7 +327,7 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 			this.service.doStart();
 			fail("Expecting IllegalStateException"); //$NON-NLS-1$
 		}
-		catch(IllegalStateException _) {
+		catch(IllegalStateException exception) {
 			// Expected excpetion fired by notifyStarted()
 		}
 		Mockito.verify(this.kernelListener, new Times(1)).kernelAgentSpawn();

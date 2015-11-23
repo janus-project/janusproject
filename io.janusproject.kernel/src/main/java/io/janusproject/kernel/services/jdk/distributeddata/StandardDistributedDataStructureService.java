@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.distributeddata;
 
-import io.janusproject.kernel.services.guava.DMultiMapView;
-import io.janusproject.services.AbstractDependentService;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DMultiMap;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
+package io.janusproject.kernel.services.jdk.distributeddata;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -36,11 +31,16 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.util.concurrent.Service;
+import io.janusproject.kernel.services.guava.DMultiMapView;
+import io.janusproject.services.AbstractDependentService;
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DMultiMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
 
 /**
  * Service providing tools for creating distributed data structures.
  *
- * This implementation creates standard Java collections that cannot be
+ * <p>This implementation creates standard Java collections that cannot be
  * distributed other several JVM.
  *
  * @author $Author: sgalland$
@@ -49,7 +49,7 @@ import com.google.common.util.concurrent.Service;
  * @mavenartifactid $ArtifactId$
  */
 public class StandardDistributedDataStructureService extends AbstractDependentService
-implements DistributedDataStructureService {
+		implements DistributedDataStructureService {
 
 	@Override
 	public final Class<? extends Service> getServiceType() {
@@ -103,18 +103,19 @@ implements DistributedDataStructureService {
 		return new DMultiMapView<>(name, multimap);
 	}
 
-	/**
+	/** Suplier of list for Hazelcast.
+	 *
+	 * @param <K> type of the list elements.
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
-	 * @param <K>
 	 */
 	private static class ArrayListSupplier<K> implements Supplier<List<K>> {
 
-		/**
+		/** Construct.
 		 */
-		public ArrayListSupplier() {
+		ArrayListSupplier() {
 			//
 		}
 

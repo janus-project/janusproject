@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,45 +17,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.repository;
-
-
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.sarl.lang.core.EventListener;
-import io.sarl.lang.util.SynchronizedCollection;
-import io.sarl.lang.util.SynchronizedSet;
-import io.sarl.util.Collections3;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
 
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+
+import io.sarl.lang.core.EventListener;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
+
 /**
  * A repository of participants specific to a given space.
- * <p>
- * This repository links the id of an entity to its various addresses in the
+ *
+ * <p>This repository links the id of an entity to its various addresses in the
  * related space.
- * <p>
- * The repository must be distributed and synchronized all over the network by
+ *
+ * <p>The repository must be distributed and synchronized all over the network by
  * using data-structures that are provided by an injected
  * {@link DistributedDataStructureService}.
  *
- * @param <ADDRESS> - the generic type representing the address of a participant
- * in the related space. This type must remains small, less than M in memory and
- * must be {@link java.io.Serializable}.
+ * @param <ADDRESST> - the generic type representing the address of a participant
+ *     in the related space. This type must remains small, less than M in memory and
+ *     must be {@link java.io.Serializable}.
  * @author $Author: ngaud$
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public final class UniqueAddressParticipantRepository<ADDRESS extends Serializable> extends ParticipantRepository<ADDRESS> {
+public final class UniqueAddressParticipantRepository<ADDRESST extends Serializable> extends ParticipantRepository<ADDRESST> {
 
 	/**
 	 * Map linking the id of an entity to its unique address in the related space.
 	 * This map must be distributed and synchronized all over the network
 	 */
-	private final Map<UUID, ADDRESS> participants;
+	private final Map<UUID, ADDRESST> participants;
+
 	private final String distributedParticipantMapName;
 
 
@@ -75,16 +77,16 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 
 	/**
 	 * Registers a new participant in this repository.
-	 * @param a - the address of the participant
+	 * @param address - the address of the participant
 	 * @param entity - the entity associated to the specified address
 	 * @return the address of the participant
 	 */
-	public ADDRESS registerParticipant(ADDRESS a, EventListener entity) {
+	public ADDRESST registerParticipant(ADDRESST address, EventListener entity) {
 		synchronized (mutex()) {
-			addListener(a, entity);
-			this.participants.put(entity.getID(), a);
+			addListener(address, entity);
+			this.participants.put(entity.getID(), address);
 		}
-		return a;
+		return address;
 	}
 
 	/** Remove a participant from this repository.
@@ -92,7 +94,7 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @param entity - participant to remove from this repository.
 	 * @return the address that was mapped to the given participant.
 	 */
-	public ADDRESS unregisterParticipant(EventListener entity) {
+	public ADDRESST unregisterParticipant(EventListener entity) {
 		return unregisterParticipant(entity.getID());
 	}
 
@@ -101,7 +103,7 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @param entityID - identifier of the participant to remove from this repository.
 	 * @return the address that was mapped to the given participant.
 	 */
-	public ADDRESS unregisterParticipant(UUID entityID) {
+	public ADDRESST unregisterParticipant(UUID entityID) {
 		synchronized (mutex()) {
 			removeListener(this.participants.get(entityID));
 			return this.participants.remove(entityID);
@@ -113,7 +115,7 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @param entity - instance of a participant.
 	 * @return the address of the participant with the given id.
 	 */
-	public ADDRESS getAddress(EventListener entity) {
+	public ADDRESST getAddress(EventListener entity) {
 		return getAddress(entity.getID());
 	}
 
@@ -122,7 +124,7 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @param id - identifier of the participant to retreive.
 	 * @return the address of the participant with the given id.
 	 */
-	public ADDRESS getAddress(UUID id) {
+	public ADDRESST getAddress(UUID id) {
 		synchronized (mutex()) {
 			return this.participants.get(id);
 		}
@@ -132,10 +134,10 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 *
 	 * @return all the addresses.
 	 */
-	public SynchronizedCollection<ADDRESS> getParticipantAddresses() {
-		Object m = mutex();
-		synchronized (m) {
-			return Collections3.synchronizedCollection(this.participants.values(), m);
+	public SynchronizedCollection<ADDRESST> getParticipantAddresses() {
+		Object mutex = mutex();
+		synchronized (mutex) {
+			return Collections3.synchronizedCollection(this.participants.values(), mutex);
 		}
 	}
 
@@ -144,9 +146,9 @@ public final class UniqueAddressParticipantRepository<ADDRESS extends Serializab
 	 * @return all the identifiers.
 	 */
 	public SynchronizedSet<UUID> getParticipantIDs() {
-		Object m = mutex();
-		synchronized (m) {
-			return Collections3.synchronizedSet(this.participants.keySet(), m);
+		Object mutex = mutex();
+		synchronized (mutex) {
+			return Collections3.synchronizedSet(this.participants.keySet(), mutex);
 		}
 	}
 

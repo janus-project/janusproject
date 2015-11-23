@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.services.hazelcast;
 
-import io.janusproject.util.AbstractDMapView;
-
 import com.hazelcast.core.IMap;
+import io.janusproject.util.AbstractDMapView;
 
 /** View from a Hazelcast map to DMap.
  *

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.bic;
 
 import io.sarl.lang.core.Event;
 
 /** Janus event that permits to kill an agent
  * asynchronously.
- * <p>
- * This event is defined for ensure that the
+ *
+ * <p>This event is defined for ensure that the
  * killing function provided by the spawn service
  * is not invoked during the initilization state.
  *
@@ -37,9 +38,9 @@ class AsynchronousAgentKillingEvent extends Event {
 
 	private static final long serialVersionUID = 1195716429229202560L;
 
-	/**
+	/** Construct the event.
 	 */
-	public AsynchronousAgentKillingEvent() {
+	AsynchronousAgentKillingEvent() {
 		//
 	}
 

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.network;
 
-import io.janusproject.services.DependentService;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
+package io.janusproject.services.network;
 
 import java.net.URI;
 import java.util.EventListener;
+
+import io.janusproject.services.DependentService;
+
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.Scope;
+import io.sarl.lang.core.SpaceID;
 
 /** This class enables the Janus kernel to send messages other
  * the network.
@@ -48,8 +50,8 @@ public interface NetworkService extends DependentService {
 
 	/** Connect this instance of kernel to the given peer over the network
 	 * and for the given space.
-	 * <p>
-	 * If the network service is not yet ready for connecting the given
+	 *
+	 * <p>If the network service is not yet ready for connecting the given
 	 * URI, this URI <strong>MUST</strong> be bufferized until the
 	 * network service has been fully started.
 	 *
@@ -78,7 +80,7 @@ public interface NetworkService extends DependentService {
 	/** Replies the URI used by this network interface.
 	 *
 	 * @return the URI, or <code>null</code> if the
-	 * network is not started.
+	 *     network is not started.
 	 */
 	URI getURI();
 

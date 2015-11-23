@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.bic;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import com.google.inject.Inject;
 import io.janusproject.services.contextspace.ContextSpaceService;
+
 import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
@@ -32,12 +39,6 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-import com.google.inject.Inject;
 
 /** Janus implementation of SARL's {@link InnerContextSkill} built-in capacity.
  *
@@ -56,6 +57,7 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	 * Context inside the agent.
 	 */
 	private AgentContext innerContext;
+
 	@Inject
 	private ContextSpaceService contextService;
 
@@ -64,7 +66,7 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	 * @param agentAddressInInnerDefaultSpace - address of the owner of this skill in
 	 *                                          its default space.
 	 */
-	public InnerContextSkill(Agent agent, Address agentAddressInInnerDefaultSpace) {
+	InnerContextSkill(Agent agent, Address agentAddressInInnerDefaultSpace) {
 		super(agent);
 		this.agentAddressInInnerDefaultSpace = agentAddressInInnerDefaultSpace;
 	}
@@ -73,7 +75,7 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 	 * To create the inner context, call {@link #getInnerContext()}
 	 *
 	 * @return <code>true</code> if an instance of inner context exists,
-	 * otherwise <code>false</code>.
+	 *     otherwise <code>false</code>.
 	 */
 	synchronized boolean hasInnerContext() {
 		return this.innerContext != null;
@@ -81,8 +83,8 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 
 	/** Force to reset the inner context.
 	 * This function does not update the context repository.
-	 * <p>
-	 * Do not call this function, exception if you are sure
+	 *
+	 * <p>Do not call this function, exception if you are sure
 	 * that the setting of the inner context to <code>null</code>
 	 * only does not introduce problems.
 	 */
@@ -90,17 +92,12 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		this.innerContext = null;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()
 				+ ", addressInDefaultspace = " + this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void uninstall() {
 		AgentContext context = this.innerContext;
@@ -114,9 +111,6 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public synchronized AgentContext getInnerContext() {
 		if (this.innerContext == null) {
@@ -132,8 +126,6 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		return this.innerContext;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized boolean hasMemberAgent() {
 		if (this.innerContext != null) {
@@ -146,8 +138,6 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		return false;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized int getMemberAgentCount() {
 		if (this.innerContext != null) {
@@ -162,8 +152,6 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		return 0;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized SynchronizedSet<UUID> getMemberAgents() {
 		if (this.innerContext != null) {

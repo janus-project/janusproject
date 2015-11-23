@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.hazelcast;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.services.AbstractDependentService;
-import io.janusproject.services.AsyncStateService;
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryServiceListener;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.network.NetworkService;
-import io.janusproject.services.network.NetworkUtil;
-import io.janusproject.util.ListenerCollection;
-import io.janusproject.util.TwoStepConstruction;
+package io.janusproject.kernel.services.hazelcast;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -43,18 +32,30 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.hazelcast.core.EntryEvent;
-import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.hazelcast.core.MapEvent;
 import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
+import com.hazelcast.map.listener.EntryAddedListener;
+import com.hazelcast.map.listener.EntryEvictedListener;
+import com.hazelcast.map.listener.EntryRemovedListener;
+import io.janusproject.JanusConfig;
+import io.janusproject.services.AbstractDependentService;
+import io.janusproject.services.AsyncStateService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryServiceListener;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.util.ListenerCollection;
+import io.janusproject.util.TwoStepConstruction;
 
 /** Service that is providing the access to
  * the repository of the Janus kernels.
- * <p>
- * It uses the Hazelcast library for discovering the
+ *
+ * <p>It uses the Hazelcast library for discovering the
  * nodes over the network.
  *
  * @author $Author: srodriguez$
@@ -66,10 +67,12 @@ import com.hazelcast.core.MembershipListener;
 @Singleton
 @TwoStepConstruction
 public class HazelcastKernelDiscoveryService extends AbstractDependentService
-implements KernelDiscoveryService, AsyncStateService {
+		implements KernelDiscoveryService, AsyncStateService {
 
 	private final UUID janusID;
+
 	private URI currentPubURI;
+
 	private URI currentHzURI;
 
 	private IMap<URI, URI> kernels;
@@ -77,6 +80,7 @@ implements KernelDiscoveryService, AsyncStateService {
 	private boolean isReady;
 
 	private String hzRegId1;
+
 	private String hzRegId2;
 
 	private NetworkService network;
@@ -102,8 +106,6 @@ implements KernelDiscoveryService, AsyncStateService {
 		this.janusID = janusID;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public boolean isReadyForOtherServices() {
 		return isRunning() && this.isReady;
@@ -114,8 +116,6 @@ implements KernelDiscoveryService, AsyncStateService {
 		return KernelDiscoveryService.class;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(
@@ -145,29 +145,21 @@ implements KernelDiscoveryService, AsyncStateService {
 		this.network.addListener(this.networkStartListener, this.executorService.getExecutorService());
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public URI getCurrentKernel() {
 		return this.currentPubURI;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized Collection<URI> getKernels() {
 		return new ArrayList<>(this.kernels.values());
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void addKernelDiscoveryServiceListener(KernelDiscoveryServiceListener listener) {
 		this.listeners.add(KernelDiscoveryServiceListener.class, listener);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void removeKernelDiscoveryServiceListener(KernelDiscoveryServiceListener listener) {
 		this.listeners.remove(KernelDiscoveryServiceListener.class, listener);
@@ -201,8 +193,6 @@ implements KernelDiscoveryService, AsyncStateService {
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStart() {
 		this.hzRegId1 = this.kernels.addEntryListener(this.hzListener, true);
@@ -210,8 +200,6 @@ implements KernelDiscoveryService, AsyncStateService {
 		notifyStarted();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStop() {
 		this.isReady = false;
@@ -230,7 +218,8 @@ implements KernelDiscoveryService, AsyncStateService {
 		notifyStopped();
 	}
 
-	/**
+	/** Listener on Hazelcast events.
+	 *
 	 * @author $Author: srodriguez$
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -239,27 +228,23 @@ implements KernelDiscoveryService, AsyncStateService {
 	 */
 	private class HazelcastListener implements EntryListener<URI, URI>, MembershipListener {
 
-		/**
+		/** Construct.
 		 */
-		public HazelcastListener() {
+		HazelcastListener() {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void memberAdded(MembershipEvent membershipEvent) {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void memberRemoved(MembershipEvent membershipEvent) {
-			InetSocketAddress s = membershipEvent.getMember().getSocketAddress();
-			if (s != null) {
-				URI u = NetworkUtil.toURI(s);
+			InetSocketAddress socketAddress = membershipEvent.getMember().getSocketAddress();
+			if (socketAddress != null) {
+				URI u = NetworkUtil.toURI(socketAddress);
 				if (u != null) {
 					synchronized (HazelcastKernelDiscoveryService.this) {
 						HazelcastKernelDiscoveryService.this.kernels.remove(u);
@@ -268,15 +253,11 @@ implements KernelDiscoveryService, AsyncStateService {
 			}
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void entryAdded(EntryEvent<URI, URI> event) {
 			URI newPeer = event.getValue();
@@ -286,8 +267,6 @@ implements KernelDiscoveryService, AsyncStateService {
 			}
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void entryRemoved(EntryEvent<URI, URI> event) {
 			fireDisconnected(event);
@@ -300,8 +279,6 @@ implements KernelDiscoveryService, AsyncStateService {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void entryEvicted(EntryEvent<URI, URI> event) {
 			fireDisconnected(event);
@@ -331,7 +308,8 @@ implements KernelDiscoveryService, AsyncStateService {
 
 	}
 
-	/**
+	/** Listener on network events.
+	 *
 	 * @author $Author: srodriguez$
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -340,14 +318,12 @@ implements KernelDiscoveryService, AsyncStateService {
 	 */
 	private class NetworkStartListener extends Listener {
 
-		/**
+		/** Construct.
 		 */
-		public NetworkStartListener() {
+		NetworkStartListener() {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void running() {

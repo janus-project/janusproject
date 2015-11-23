@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.bic;
 
-import io.janusproject.kernel.Kernel;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.Skill;
+package io.janusproject.kernel.bic;
 
 import java.lang.ref.WeakReference;
 
 import com.google.common.util.concurrent.Service;
+import io.janusproject.kernel.Kernel;
+
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.Skill;
 
 /** Janus implementation of an internal skill that provides
  * access to the micro kernel.
@@ -43,13 +44,11 @@ class MicroKernelSkill extends Skill implements MicroKernelCapacity {
 	 * @param agent - the owner of this skill.
 	 * @param kernel - the reference to the local micro-kernel.
 	 */
-	public MicroKernelSkill(Agent agent, Kernel kernel) {
+	MicroKernelSkill(Agent agent, Kernel kernel) {
 		super(agent);
 		this.kernel = new WeakReference<>(kernel);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void uninstall() {
 		this.kernel = null;
@@ -63,8 +62,6 @@ class MicroKernelSkill extends Skill implements MicroKernelCapacity {
 		return this.kernel == null ? null : this.kernel.get();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public <S extends Service> S getService(Class<S> type) {
 		Kernel k = getKernel();

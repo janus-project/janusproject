@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,6 @@
  * limitations under the License.
  */
 package io.janusproject.kernel.services.hazelcast;
-
-import io.janusproject.services.AbstractDependentService;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.services.distributeddata.DMultiMap;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -44,6 +38,13 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MapEvent;
 import com.hazelcast.core.MultiMap;
+import com.hazelcast.map.listener.MapListener;
+
+import io.janusproject.services.AbstractDependentService;
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.services.distributeddata.DMultiMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
 
 /**
  * Service based on Hazelcast that permits to manage data structures
@@ -57,7 +58,7 @@ import com.hazelcast.core.MultiMap;
  * @mavenartifactid $ArtifactId$
  */
 public class HazelcastDistributedDataStructureService extends AbstractDependentService
-implements DistributedDataStructureService {
+		implements DistributedDataStructureService {
 
 	@Inject
 	private HazelcastInstance hazelcastInstance;
@@ -87,36 +88,36 @@ implements DistributedDataStructureService {
 
 	@Override
 	public <K, V> DMap<K, V> getMap(String name) {
-		IMap<K, V> m = this.hazelcastInstance.getMap(name);
-		if (m != null) {
-			return new MapView<>(name, m);
+		IMap<K, V> map = this.hazelcastInstance.getMap(name);
+		if (map != null) {
+			return new MapView<>(name, map);
 		}
 		return null;
 	}
 
 	@Override
 	public <K, V> DMap<K, V> getMap(String name, Comparator<? super K> comparator) {
-		IMap<K, V> m = this.hazelcastInstance.getMap(name);
-		if (m != null) {
-			return new MapView<>(name, m);
+		IMap<K, V> map = this.hazelcastInstance.getMap(name);
+		if (map != null) {
+			return new MapView<>(name, map);
 		}
 		return null;
 	}
 
 	@Override
 	public <K, V> DMultiMap<K, V> getMultiMap(String name) {
-		MultiMap<K, V> m = this.hazelcastInstance.getMultiMap(name);
-		if (m != null) {
-			return new MultiMapView<>(name, m);
+		MultiMap<K, V> map = this.hazelcastInstance.getMultiMap(name);
+		if (map != null) {
+			return new MultiMapView<>(name, map);
 		}
 		return null;
 	}
 
 	@Override
 	public <K, V> DMultiMap<K, V> getMultiMap(String name, Comparator<? super K> comparator) {
-		MultiMap<K, V> m = this.hazelcastInstance.getMultiMap(name);
-		if (m != null) {
-			return new MultiMapView<>(name, m);
+		MultiMap<K, V> map = this.hazelcastInstance.getMultiMap(name);
+		if (map != null) {
+			return new MultiMapView<>(name, map);
 		}
 		return null;
 	}
@@ -134,7 +135,7 @@ implements DistributedDataStructureService {
 		private final String name;
 		private final IMap<K, V> map;
 
-		public MapView(String name, IMap<K, V> map) {
+		MapView(String name, IMap<K, V> map) {
 			assert (map != null);
 			this.name = name;
 			this.map = map;
@@ -222,8 +223,6 @@ implements DistributedDataStructureService {
 			w.setHazelcastListener(k);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void removeDMapListener(DMapListener<? super K, ? super V> listener) {
 			if (listener instanceof EntryListenerWrapper) {
@@ -250,7 +249,7 @@ implements DistributedDataStructureService {
 		private final String name;
 		private final MultiMap<K, V> map;
 
-		public MultiMapView(String name, MultiMap<K, V> map) {
+		MultiMapView(String name, MultiMap<K, V> map) {
 			this.name = name;
 			assert (map != null);
 			this.map = map;
@@ -310,7 +309,7 @@ implements DistributedDataStructureService {
 		public boolean containsKey(Object key) {
 			try {
 				return this.map.containsKey((K) key);
-			} catch (ClassCastException _) {
+			} catch (ClassCastException exception) {
 				return false;
 			}
 		}
@@ -324,7 +323,7 @@ implements DistributedDataStructureService {
 		public boolean containsEntry(Object key, Object value) {
 			try {
 				return this.map.containsEntry((K) key, (V) value);
-			} catch (ClassCastException _) {
+			} catch (ClassCastException exception) {
 				return false;
 			}
 		}
@@ -398,7 +397,8 @@ implements DistributedDataStructureService {
 			return Multimaps.asMap(this);
 		}
 
-		/**
+		/** Internal implementation of a multiset.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -406,9 +406,9 @@ implements DistributedDataStructureService {
 		 */
 		private class SetMultiset implements Multiset<K> {
 
-			/**
+			/** Construct.
 			 */
-			public SetMultiset() {
+			SetMultiset() {
 				//
 			}
 
@@ -434,8 +434,8 @@ implements DistributedDataStructureService {
 			}
 
 			@Override
-			public <T> T[] toArray(T[] a) {
-				T[] tab = a;
+			public <T> T[] toArray(T[] array) {
+				T[] tab = array;
 				if (tab == null || tab.length < MultiMapView.this.size()) {
 					tab = (T[]) new Object[MultiMapView.this.size()];
 					int i = 0;
@@ -482,7 +482,7 @@ implements DistributedDataStructureService {
 						iterator.remove();
 					}
 					return old;
-				} catch (ClassCastException _) {
+				} catch (ClassCastException exception) {
 					return 0;
 				}
 			}
@@ -505,7 +505,7 @@ implements DistributedDataStructureService {
 						iterator.remove();
 					}
 					return old;
-				} catch (ClassCastException _) {
+				} catch (ClassCastException exception) {
 					return 0;
 				}
 			}
@@ -531,7 +531,7 @@ implements DistributedDataStructureService {
 							}
 							return true;
 						}
-					} catch (ClassCastException _) {
+					} catch (ClassCastException exception) {
 						//
 					}
 				}
@@ -539,7 +539,7 @@ implements DistributedDataStructureService {
 			}
 
 			@Override
-			public boolean addAll(Collection<? extends K> c) {
+			public boolean addAll(Collection<? extends K> collection) {
 				throw new UnsupportedOperationException();
 			}
 
@@ -550,8 +550,7 @@ implements DistributedDataStructureService {
 
 			@Override
 			public Set<com.google.common.collect.Multiset.Entry<K>> entrySet() {
-				// TODO Auto-generated method stub
-				return null;
+				throw new UnsupportedOperationException();
 			}
 
 			@Override
@@ -609,20 +608,22 @@ implements DistributedDataStructureService {
 
 	}
 
-	/**
+	/** Listener on the Hazelcast map events.
+	 *
+	 * @param <K> type of the keys.
+	 * @param <V> type of the values.
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
-	 * @param <K>
-	 * @param <V>
 	 */
 	private static class EntryListenerWrapper<K, V> implements EntryListener<K, V> {
 
 		private final DMapListener<? super K, ? super V> dmapListener;
+
 		private String key;
 
-		public EntryListenerWrapper(DMapListener<? super K, ? super V> listener) {
+		EntryListenerWrapper(DMapListener<? super K, ? super V> listener) {
 			this.dmapListener = listener;
 		}
 
@@ -670,15 +671,11 @@ implements DistributedDataStructureService {
 			this.dmapListener.entryUpdated(event.getKey(), event.getValue());
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void mapCleared(MapEvent event) {
 			this.dmapListener.mapCleared(true);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void mapEvicted(MapEvent event) {
 			this.dmapListener.mapCleared(false);

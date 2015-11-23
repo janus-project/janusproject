@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.modules.zeromq;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.kernel.services.zeromq.ZeroMQNetworkService;
-import io.janusproject.services.contextspace.ContextSpaceService;
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.network.EventSerializer;
-import io.janusproject.services.network.NetworkService;
+package io.janusproject.modules.zeromq;
 
 import java.net.URI;
 
@@ -36,6 +28,14 @@ import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import io.janusproject.JanusConfig;
+import io.janusproject.kernel.services.zeromq.ZeroMQNetworkService;
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.EventSerializer;
+import io.janusproject.services.network.NetworkService;
 
 /**
  * Module that provides the network layer based on the ZeroMQ library.

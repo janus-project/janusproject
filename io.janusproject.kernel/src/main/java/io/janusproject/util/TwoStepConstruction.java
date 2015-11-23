@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.util;
 
 import java.lang.annotation.ElementType;
@@ -28,8 +29,8 @@ import java.lang.annotation.Target;
 /**
  * Annotation that permits to mark the classes that
  * must be constructed in two explicit steps.
- * <p>
- * The steps are:<ol>
+ *
+ * <p>The steps are:<ol>
  * <li>invoke the constructor (explicit call);</li>
  * <li>injection mechanism (implicit, done during the constructor call);</li>
  * <li>finalization of the construction, eg. <code>postConstruction()</code>.</li>
@@ -45,6 +46,8 @@ import java.lang.annotation.Target;
 public @interface TwoStepConstruction {
 
 	/** Replies the names of the functions that are used for post construction.
+	 *
+	 * @return the names.
 	 */
 	String[] names() default { "postConstruction" };
 

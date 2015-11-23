@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject;
-import io.janusproject.modules.StandardJanusPlatformModule;
-import io.janusproject.modules.hazelcast.HazelcastKernelLoggerFactory;
 
 import java.util.Properties;
+
+import io.janusproject.modules.StandardJanusPlatformModule;
+import io.janusproject.modules.hazelcast.HazelcastKernelLoggerFactory;
 
 /** Constants for the Janus configuration.
  *
@@ -72,6 +74,7 @@ public final class JanusConfig {
 	 * @see #LOGGING_PROPERTY_FILE_NAME
 	 */
 	public static final String LOGGING_PROPERTY_FILE_VALUE = "resource:io/janusproject/logging.properties"; //$NON-NLS-1$
+
 	/** Name of the property that contains the identifier of the Janus context.
 	 * @see #DEFAULT_CONTEXT_ID_VALUE
 	 */
@@ -255,7 +258,7 @@ public final class JanusConfig {
 		if (value != null) {
 			try {
 				return Boolean.parseBoolean(value);
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -282,7 +285,7 @@ public final class JanusConfig {
 		if (value != null) {
 			try {
 				return Integer.parseInt(value);
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -311,7 +314,7 @@ public final class JanusConfig {
 		if (value != null) {
 			try {
 				return Float.parseFloat(value);
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -341,20 +344,20 @@ public final class JanusConfig {
 		String value = getSystemProperty(name, null);
 		if (value != null) {
 			try {
-				S e = Enum.valueOf(type, value);
-				if (e != null) {
-					return e;
+				S enumeration = Enum.valueOf(type, value);
+				if (enumeration != null) {
+					return enumeration;
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 			try {
 				int ordinal = Integer.parseInt(value);
-				S e = type.getEnumConstants()[ordinal];
-				if (e != null) {
-					return e;
+				S enumeration = type.getEnumConstants()[ordinal];
+				if (enumeration != null) {
+					return enumeration;
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -384,11 +387,11 @@ public final class JanusConfig {
 		String value = getSystemProperty(name, null);
 		if (value != null) {
 			try {
-				Class<?> e = Class.forName(value);
-				if (e != null) {
-					return e.asSubclass(type);
+				Class<?> typeInstance = Class.forName(value);
+				if (typeInstance != null) {
+					return typeInstance.asSubclass(type);
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -414,11 +417,11 @@ public final class JanusConfig {
 		String value = getSystemProperty(name, null);
 		if (value != null) {
 			try {
-				Class<?> e = Class.forName(value);
-				if (e != null) {
-					return e;
+				Class<?> typeInstance = Class.forName(value);
+				if (typeInstance != null) {
+					return typeInstance;
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -437,21 +440,21 @@ public final class JanusConfig {
 		String value = getSystemProperty(name, null);
 		if (value != null) {
 			try {
-				Class<?> e = Class.forName(value);
-				if (e != null) {
-					return e.asSubclass(type);
+				Class<?> typeInstance = Class.forName(value);
+				if (typeInstance != null) {
+					return typeInstance.asSubclass(type);
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
 		if (defaultValue != null) {
 			try {
-				Class<?> e = Class.forName(defaultValue);
-				if (e != null) {
-					return e.asSubclass(type);
+				Class<?> typeInstance = Class.forName(defaultValue);
+				if (typeInstance != null) {
+					return typeInstance.asSubclass(type);
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -468,21 +471,21 @@ public final class JanusConfig {
 		String value = getSystemProperty(name, null);
 		if (value != null) {
 			try {
-				Class<?> e = Class.forName(value);
-				if (e != null) {
-					return e;
+				Class<?> typeInstance = Class.forName(value);
+				if (typeInstance != null) {
+					return typeInstance;
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
 		if (defaultValue != null) {
 			try {
-				Class<?> e = Class.forName(defaultValue);
-				if (e != null) {
-					return e;
+				Class<?> typeInstance = Class.forName(defaultValue);
+				if (typeInstance != null) {
+					return typeInstance;
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}

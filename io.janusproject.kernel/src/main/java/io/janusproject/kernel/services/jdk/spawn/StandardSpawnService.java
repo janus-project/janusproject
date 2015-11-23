@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.services.jdk.spawn;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.Service;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import io.janusproject.kernel.bic.BuiltinCapacityUtil;
 import io.janusproject.services.AbstractDependentService;
 import io.janusproject.services.contextspace.ContextSpaceService;
-import io.janusproject.services.spawn.AgentFactory;
 import io.janusproject.services.spawn.KernelAgentSpawnListener;
 import io.janusproject.services.spawn.SpawnService;
 import io.janusproject.services.spawn.SpawnServiceListener;
 import io.janusproject.util.ListenerCollection;
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.lang.core.Address;
@@ -36,22 +55,6 @@ import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
-
-import org.arakhne.afc.vmutil.locale.Locale;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.util.concurrent.Service;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
 
 /**
  * Implementation of a spawning service
@@ -68,7 +71,9 @@ import com.google.inject.Singleton;
 public class StandardSpawnService extends AbstractDependentService implements SpawnService {
 
 	private final ListenerCollection<?> globalListeners = new ListenerCollection<>();
+
 	private final Multimap<UUID, SpawnServiceListener> agentLifecycleListeners = ArrayListMultimap.create();
+
 	private final Map<UUID, Agent> agents = new TreeMap<>();
 
 	private AgentFactory agentFactory;
@@ -86,8 +91,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return SpawnService.class;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
@@ -108,9 +111,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return this.agentFactory;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public synchronized UUID spawn(AgentContext parent, UUID agentID, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
@@ -127,9 +127,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		throw new SpawnDisabledException(parent.getID(), agentClazz);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public synchronized void killAgent(UUID agentID) throws AgentKillException {
 		boolean error = !isRunning();
@@ -169,17 +166,11 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return this.agents.get(id);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
 		this.globalListeners.add(KernelAgentSpawnListener.class, listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
 		this.globalListeners.remove(KernelAgentSpawnListener.class, listener);
@@ -203,9 +194,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener) {
 		synchronized (this.agentLifecycleListeners) {
@@ -213,9 +201,11 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
+	public void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
+		this.globalListeners.add(SpawnServiceListener.class, agentLifecycleListener);
+	}
+
 	@Override
 	public void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener) {
 		synchronized (this.agentLifecycleListeners) {
@@ -223,17 +213,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
-		this.globalListeners.add(SpawnServiceListener.class, agentLifecycleListener);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void removeSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
 		this.globalListeners.remove(SpawnServiceListener.class, agentLifecycleListener);
@@ -286,7 +265,7 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 	 *
 	 * @param agent - agent to test.
 	 * @return <code>true</code> if the given agent can be killed,
-	 * otherwise <code>false</code>.
+	 *     otherwise <code>false</code>.
 	 */
 	@SuppressWarnings("static-method")
 	public synchronized boolean canKillAgent(Agent agent) {
@@ -295,13 +274,13 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 			if (ac != null) {
 				Set<UUID> participants = ac.getDefaultSpace().getParticipants();
 				if (participants != null
-					&& (participants.size() > 1
-					 || (participants.size() == 1 && !participants.contains(agent.getID())))) {
+						&& (participants.size() > 1
+						|| (participants.size() == 1 && !participants.contains(agent.getID())))) {
 					return false;
 				}
 			}
 			return true;
-		} catch (Throwable _) {
+		} catch (Throwable exception) {
 			return false;
 		}
 	}
@@ -346,9 +325,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStart() {
 		// Assume that when the service is starting, the kernel agent is up.
@@ -356,9 +332,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		notifyStarted();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStop() {
 		synchronized (this.agentLifecycleListeners) {
@@ -434,7 +407,8 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 
 	}
 
-	/**
+	/** An injection module that is able to inject the parent ID and agent ID when creating an agent.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$

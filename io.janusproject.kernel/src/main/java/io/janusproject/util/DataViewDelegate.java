@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.util;
 
 
@@ -39,11 +40,11 @@ public final class DataViewDelegate {
 	 * @return the delegator object.
 	 */
 	public static Object undelegate(Object object) {
-		Object o = object;
-		while (o instanceof Delegator) {
-			o = ((Delegator<?>) o).getDelegatedObject();
+		Object obj = object;
+		while (obj instanceof Delegator) {
+			obj = ((Delegator<?>) obj).getDelegatedObject();
 		}
-		return o;
+		return obj;
 	}
 
 	/** An object that is delegate to a collection object.

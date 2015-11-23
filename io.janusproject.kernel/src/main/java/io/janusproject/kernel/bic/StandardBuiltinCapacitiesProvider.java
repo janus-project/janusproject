@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.bic;
 
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import io.janusproject.kernel.Kernel;
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.spawn.SpawnService;
 import io.janusproject.services.spawn.SpawnServiceListener;
+
 import io.sarl.core.Behaviors;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
@@ -40,15 +50,6 @@ import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Skill;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpaceSpecification;
-
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 /** Provider of the built-in capacities of the Janus platform.
  *
@@ -69,14 +70,8 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 	@Inject
 	private ContextSpaceService contextRepository;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Map<Class<? extends Capacity>, Skill> getBuiltinCapacities(Agent agent) {
-		// no need to be synchronized
-		Map<Class<? extends Capacity>, Skill> result = new HashMap<>();
-
 		UUID innerContextID = agent.getID();
 		SpaceID innerSpaceID = new SpaceID(
 				innerContextID,
@@ -85,7 +80,6 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		Address agentAddressInInnerSpace = new Address(innerSpaceID, agent.getID());
 		Kernel k = this.injector.getInstance(Kernel.class);
 
-		MicroKernelSkill microKernelSkill = new MicroKernelSkill(agent, k);
 		InternalEventBusSkill eventBusSkill = new InternalEventBusSkill(agent, agentAddressInInnerSpace);
 		InnerContextSkill innerContextSkill = new InnerContextSkill(agent, agentAddressInInnerSpace);
 		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent, agentAddressInInnerSpace);
@@ -106,6 +100,10 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		this.injector.injectMembers(scheduleSkill);
 		this.injector.injectMembers(loggingSkill);
 
+		MicroKernelSkill microKernelSkill = new MicroKernelSkill(agent, k);
+
+		// no need to be synchronized
+		Map<Class<? extends Capacity>, Skill> result = new HashMap<>();
 		result.put(MicroKernelCapacity.class, microKernelSkill);
 		result.put(InternalEventBusCapacity.class, eventBusSkill);
 		result.put(InnerContextAccess.class, innerContextSkill);
@@ -118,17 +116,17 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 
 		this.spawnService.addSpawnServiceListener(agent.getID(),
 				new AgentLifeCycleSupport(
-						agent.getID(),
-						this.spawnService,
-						eventBusSkill,
-						microKernelSkill,
-						innerContextSkill,
-						behaviorSkill,
-						lifecycleSkill,
-						externalContextSkill,
-						interactionSkill,
-						scheduleSkill,
-						loggingSkill));
+				agent.getID(),
+				this.spawnService,
+				eventBusSkill,
+				microKernelSkill,
+				innerContextSkill,
+				behaviorSkill,
+				lifecycleSkill,
+				externalContextSkill,
+				interactionSkill,
+				scheduleSkill,
+				loggingSkill));
 
 		// Test if all the BICs are installed.
 		assert (result.get(Behaviors.class) != null);
@@ -144,7 +142,8 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		return result;
 	}
 
-	/**
+	/** Implementation of the agent's cycle.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -153,8 +152,11 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 	private static class AgentLifeCycleSupport implements SpawnServiceListener {
 
 		private final UUID agentID;
+
 		private final WeakReference<SpawnService> spawnService;
+
 		private final InternalEventBusCapacity eventBusCapacity;
+
 		private final Skill[] skills;
 
 		/**
@@ -163,7 +165,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		 * @param eventBusCapacity - the capacity of the agent to manage an internal bus.
 		 * @param skills - the skills for the built-in capacities.
 		 */
-		public AgentLifeCycleSupport(
+		AgentLifeCycleSupport(
 				UUID agentId,
 				SpawnService spawnService,
 				InternalEventBusCapacity eventBusCapacity,
@@ -175,20 +177,20 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		}
 
 		@Override
-		public void agentSpawned(AgentContext parent, Agent iAgentID,
+		public void agentSpawned(AgentContext parent, Agent agent,
 				Object[] initializationParameters) {
 			try {
 				// Use reflection to ignore the "protected" access right.
-				Method m = Skill.class.getDeclaredMethod("install"); //$NON-NLS-1$
-				boolean isAccessible = m.isAccessible();
+				Method method = Skill.class.getDeclaredMethod("install"); //$NON-NLS-1$
+				boolean isAccessible = method.isAccessible();
 				try {
-					m.setAccessible(true);
-					m.invoke(this.eventBusCapacity);
+					method.setAccessible(true);
+					method.invoke(this.eventBusCapacity);
 					for (Skill s : this.skills) {
-						m.invoke(s);
+						method.invoke(s);
 					}
 				} finally {
-					m.setAccessible(isAccessible);
+					method.setAccessible(isAccessible);
 				}
 			} catch (RuntimeException e) {
 				throw e;
@@ -212,16 +214,16 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 
 			try {
 				// Use reflection to ignore the "protected" access right.
-				Method m = Skill.class.getDeclaredMethod("uninstall"); //$NON-NLS-1$
-				boolean isAccessible = m.isAccessible();
+				Method method = Skill.class.getDeclaredMethod("uninstall"); //$NON-NLS-1$
+				boolean isAccessible = method.isAccessible();
 				try {
-					m.setAccessible(true);
+					method.setAccessible(true);
 					for (int i = this.skills.length - 1; i >= 0; i--) {
-						m.invoke(this.skills[i]);
+						method.invoke(this.skills[i]);
 					}
-					m.invoke(this.eventBusCapacity);
+					method.invoke(this.eventBusCapacity);
 				} finally {
-					m.setAccessible(isAccessible);
+					method.setAccessible(isAccessible);
 				}
 			} catch (RuntimeException e) {
 				throw e;

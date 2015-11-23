@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.gson;
 
-import io.janusproject.services.network.AbstractEventSerializer;
-import io.janusproject.services.network.EventDispatch;
-import io.janusproject.services.network.EventEncrypter;
-import io.janusproject.services.network.EventEnvelope;
-import io.janusproject.services.network.NetworkConfig;
-import io.janusproject.services.network.NetworkUtil;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.lang.core.SpaceSpecification;
+package io.janusproject.kernel.services.gson;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.UUID;
-
-import org.arakhne.afc.vmutil.locale.Locale;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
@@ -46,12 +34,24 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
+import io.janusproject.services.network.AbstractEventSerializer;
+import io.janusproject.services.network.EventDispatch;
+import io.janusproject.services.network.EventEncrypter;
+import io.janusproject.services.network.EventEnvelope;
+import io.janusproject.services.network.NetworkConfig;
+import io.janusproject.services.network.NetworkUtil;
+import org.arakhne.afc.vmutil.locale.Locale;
+
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.Scope;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.core.SpaceSpecification;
 
 /**
  * Serialize the {@link EventDispatch} content using GSON to generate the
  * corresponding {@link EventEnvelope}.
- * <p>
- * This implementation assumes that an {@link EventEncrypter} and {@link Gson} are injected.
+ *
+ * <p>This implementation assumes that an {@link EventEncrypter} and {@link Gson} are injected.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -137,8 +137,8 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 
 		Map<String, String> headers = getHeadersFromString(
 				new String(
-						envelope.getCustomHeaders(),
-						NetworkConfig.getStringEncodingCharset()));
+				envelope.getCustomHeaders(),
+				NetworkConfig.getStringEncodingCharset()));
 
 		Class<? extends SpaceSpecification> spaceSpec = extractClass(
 				"x-java-spacespec-class", headers, SpaceSpecification.class); //$NON-NLS-1$
@@ -153,12 +153,12 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 
 		Event event = this.gson.fromJson(
 				new String(envelope.getBody(),
-						NetworkConfig.getStringEncodingCharset()),
+				NetworkConfig.getStringEncodingCharset()),
 				eventClazz);
 		assert (event != null);
 		Scope scope = this.gson.fromJson(
 				new String(envelope.getScope(),
-						NetworkConfig.getStringEncodingCharset()),
+				NetworkConfig.getStringEncodingCharset()),
 				scopeClazz);
 		assert (scope != null);
 
@@ -173,7 +173,7 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 		if (classname != null) {
 			try {
 				type = Class.forName(classname);
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}

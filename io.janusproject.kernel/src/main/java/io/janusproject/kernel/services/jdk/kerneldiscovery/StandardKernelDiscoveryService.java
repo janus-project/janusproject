@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.kerneldiscovery;
 
-import io.janusproject.services.AbstractDependentService;
-import io.janusproject.services.AsyncStateService;
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryServiceListener;
-import io.janusproject.services.network.NetworkService;
-import io.janusproject.util.TwoStepConstruction;
+package io.janusproject.kernel.services.jdk.kerneldiscovery;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -35,11 +28,18 @@ import java.util.Collection;
 import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.janusproject.services.AbstractDependentService;
+import io.janusproject.services.AsyncStateService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryServiceListener;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.util.TwoStepConstruction;
 
 /** Service that is providing the access to
  * the repository of the Janus kernels.
- * <p>
- * This implementation is not able to discovered other
+ *
+ * <p>This implementation is not able to discovered other
  * kernels.
  *
  * @author $Author: sgalland$
@@ -50,7 +50,7 @@ import com.google.inject.Singleton;
 @Singleton
 @TwoStepConstruction
 public class StandardKernelDiscoveryService extends AbstractDependentService
-implements KernelDiscoveryService, AsyncStateService {
+		implements KernelDiscoveryService, AsyncStateService {
 
 	private URI localURI;
 
@@ -77,8 +77,6 @@ implements KernelDiscoveryService, AsyncStateService {
 		this.network.addListener(new NetworkStartListener(), executorService.getExecutorService());
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(
@@ -122,15 +120,14 @@ implements KernelDiscoveryService, AsyncStateService {
 		notifyStarted();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStop() {
 		this.isReady = false;
 		notifyStopped();
 	}
 
-	/**
+	/** Listener on network events.
+	 *
 	 * @author $Author: srodriguez$
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -139,14 +136,12 @@ implements KernelDiscoveryService, AsyncStateService {
 	 */
 	private class NetworkStartListener extends Listener {
 
-		/**
+		/** Construct.
 		 */
-		public NetworkStartListener() {
+		NetworkStartListener() {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void running() {

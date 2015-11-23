@@ -122,7 +122,7 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		if (this.results != null) {
 			try {
 				return type.cast(this.results.get(index));
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -154,7 +154,7 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 						return i;
 					}
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}

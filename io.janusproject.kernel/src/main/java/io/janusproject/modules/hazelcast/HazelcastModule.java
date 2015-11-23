@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.modules.hazelcast;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.kernel.services.hazelcast.HazelcastDistributedDataStructureService;
-import io.janusproject.kernel.services.hazelcast.HazelcastInfrastructureService;
-import io.janusproject.kernel.services.hazelcast.HazelcastKernelDiscoveryService;
-import io.janusproject.modules.StandardJanusPlatformModule;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.network.NetworkUtil;
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.SpaceID;
+package io.janusproject.modules.hazelcast;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -46,6 +35,18 @@ import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.SerializerConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import io.janusproject.JanusConfig;
+import io.janusproject.kernel.services.hazelcast.HazelcastDistributedDataStructureService;
+import io.janusproject.kernel.services.hazelcast.HazelcastInfrastructureService;
+import io.janusproject.kernel.services.hazelcast.HazelcastKernelDiscoveryService;
+import io.janusproject.modules.StandardJanusPlatformModule;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.NetworkUtil;
+
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.SpaceID;
 
 /**
  * The Core Janus Module configures the minimum requirements for Janus to
@@ -58,13 +59,8 @@ import com.hazelcast.core.HazelcastInstance;
  */
 public class HazelcastModule extends AbstractModule {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void configure() {
-		Config hazelcastConfig = new Config();
-
 		SerializerConfig sc = new SerializerConfig();
 		sc.setTypeClass(SpaceID.class);
 		sc.setImplementation(new SpaceIDSerializer());
@@ -73,6 +69,7 @@ public class HazelcastModule extends AbstractModule {
 		sc2.setTypeClass(Address.class);
 		sc2.setImplementation(new AddressSerializer());
 
+		Config hazelcastConfig = new Config();
 		hazelcastConfig.getSerializationConfig().addSerializerConfig(sc);
 		hazelcastConfig.getSerializationConfig().addSerializerConfig(sc2);
 

@@ -15,17 +15,16 @@
 	<inceptionYear>2014</inceptionYear>
 
 	<description>
-	Janus is an open-source multi-agent platform fully implemented in Java 1.7. 
+	Janus is an open-source multi-agent platform fully implemented in Java 1.8. 
 	Janus enables developers to quickly create web, enterprise and desktop multiagent-based applications. 
 	It provides a comprehensive set of features to develop, run, display and monitor multiagent-based applications. 
 	Janus-based applications can be distributed across a network. 
 	Janus could be used as an agent-oriented platform, an organizational platform, and/or an holonic platform. 
 	It also natively manages the concept of recursive agents and holons.
 	
-	Janus is jointly developed by the multiagent teams of the Laboratoire Systèmes et Transports and the Grupo de Investigación en Tecnologías Informáticas Avanzadas de Tucumán.
+	Janus is jointly developed by the multiagent team of the University of Burgondy Franche Comt&amp;eacute;, and the Grupo de Investigación en Tecnologías Informáticas Avanzadas de Tucumán.
 	
 	This is the new version of Janus fully reimplemented to support the SARL Agent-Oriented Programming Language (http://www.sarl.io).
-	
 	</description>
 
 	<packaging>pom</packaging>
@@ -36,9 +35,10 @@
 
 	<properties>
 		<year>2015</year>
-		<copyrighters>Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND</copyrighters>
+		<compiler.level>1.8</compiler.level>
+		<copyrighters>the original authors or authors</copyrighters>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<sarl.version.range>0.3.0-SNAPSHOT</sarl.version.range>
+		<sarl.version>0.3.0-SNAPSHOT</sarl.version>
 		<sarl.spec.version>0.3</sarl.spec.version>
 		<guice.version>4.0</guice.version>
 		<guava.version>19.0.0</guava.version>
@@ -80,8 +80,7 @@
 			<dependency>
 				<groupId>io.sarl.maven</groupId>
 				<artifactId>io.sarl.maven.sdk</artifactId>
-				<version>${sarl.version.range}</version>
-				<type>pom</type>
+				<version>${sarl.version}</version>
 				<exclusions>
 					<exclusion>
 						<artifactId>guava</artifactId>
@@ -244,26 +243,40 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
 					<version>2.17</version>
+					<dependencies>
+						<dependency>
+							<groupId>io.sarl</groupId>
+							<artifactId>io.sarl.checkstyle</artifactId>
+							<version>${sarl.version}</version>
+						</dependency>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>6.12</version>
+						</dependency>
+					</dependencies>
 					<executions>
 						<execution>
-							<phase>prepare-package</phase>
+							<phase>process-classes</phase>
 							<goals>
-								<goal>checkstyle</goal>
+								<goal>check</goal>
 							</goals>
 						</execution>
 					</executions>
 					<configuration>
-						<configLocation>${main.basedir}/checkstyle/checkstyle.xml</configLocation>
-						<suppressionsLocation>${main.basedir}/checkstyle/suppressions.xml</suppressionsLocation>
-						<headerLocation>${main.basedir}/checkstyle/ClassHeader.txt</headerLocation>
-						<enableRSS>false</enableRSS>
-						<linkXRef>false</linkXRef>
+						<configLocation>io/sarl/checkstyle/checks.xml</configLocation>
+						<headerLocation>${mainbasedir}/checkstyle/class_header.txt</headerLocation>
+						<enableRSS>true</enableRSS>
+						<linkXRef>true</linkXRef>
 						<consoleOutput>true</consoleOutput>
 						<failsOnError>true</failsOnError>
 						<failOnViolation>true</failOnViolation>
+						<includeResources>false</includeResources>
 						<includeTestSourceDirectory>false</includeTestSourceDirectory>
+						<includeTestResources>false</includeTestResources>
 						<enableRulesSummary>true</enableRulesSummary>
-						<propertyExpansion>main.basedir=${main.basedir}</propertyExpansion>
+						<propertyExpansion>mainbasedir=${mainbasedir}</propertyExpansion>
+						<propertyExpansion>checkstyleheaderdir=${mainbasedir}/checkstyle</propertyExpansion>
 					</configuration>
 				</plugin>
 
@@ -449,6 +462,19 @@
 										<ignore />
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-checkstyle-plugin</artifactId>
+										<versionRange>[2.12.1,)</versionRange>
+										<goals>
+											<goal>check</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -508,8 +534,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>${compiler.level}</source>
+					<target>${compiler.level}</target>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.network;
 
-import io.janusproject.services.network.AbstractEventSerializer;
-import io.janusproject.services.network.EventDispatch;
-import io.janusproject.services.network.EventEncrypter;
-import io.janusproject.services.network.EventEnvelope;
-import io.janusproject.services.network.NetworkUtil;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.lang.core.SpaceSpecification;
+package io.janusproject.kernel.services.jdk.network;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -37,15 +28,24 @@ import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.inject.Inject;
+import io.janusproject.services.network.AbstractEventSerializer;
+import io.janusproject.services.network.EventDispatch;
+import io.janusproject.services.network.EventEncrypter;
+import io.janusproject.services.network.EventEnvelope;
+import io.janusproject.services.network.NetworkUtil;
 import org.arakhne.afc.vmutil.locale.Locale;
 
-import com.google.inject.Inject;
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.Scope;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.core.SpaceSpecification;
 
 /**
  * Serialize the {@link EventDispatch} content using the Java serialization
  * mechanism to generate the corresponding {@link EventEnvelope}.
- * <p>
- * This implementation assumes that an {@link EventEncrypter} is injected.
+ *
+ * <p>This implementation assumes that an {@link EventEncrypter} is injected.
  *
  * @author $Author: sgalland$
  * @author $Author: ngaud$
@@ -71,7 +71,6 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 		assert (dispatch != null) : "Parameter 'dispatch' must not be null"; //$NON-NLS-1$
 		Event event = dispatch.getEvent();
 		assert (event != null);
-		Scope<?> scope = dispatch.getScope();
 		SpaceID spaceID = dispatch.getSpaceID();
 		assert (spaceID != null);
 		assert (spaceID.getSpaceSpecification() != null);
@@ -80,6 +79,8 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 		assert (headers != null);
 		headers.put("x-java-spacespec-class", //$NON-NLS-1$
 				spaceID.getSpaceSpecification().getName());
+
+		Scope<?> scope = dispatch.getScope();
 
 		EventEnvelope envelope = new EventEnvelope(
 				NetworkUtil.toByteArray(spaceID.getContextID()),
@@ -109,9 +110,6 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 
 		this.encrypter.decrypt(envelope);
 
-		UUID contextId = NetworkUtil.fromByteArray(envelope.getContextId());
-		UUID spaceId = NetworkUtil.fromByteArray(envelope.getSpaceId());
-
 		Map<String, String> headers = fromBytes(envelope.getCustomHeaders(), Map.class);
 		assert (headers != null);
 
@@ -120,7 +118,7 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 		if (classname != null) {
 			try {
 				spaceSpec = Class.forName(classname);
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 		}
@@ -128,6 +126,9 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 		if (spaceSpec == null || !SpaceSpecification.class.isAssignableFrom(spaceSpec)) {
 			throw new ClassCastException(Locale.getString("INVALID_TYPE", spaceSpec)); //$NON-NLS-1$
 		}
+
+		UUID contextId = NetworkUtil.fromByteArray(envelope.getContextId());
+		UUID spaceId = NetworkUtil.fromByteArray(envelope.getSpaceId());
 
 		SpaceID spaceID = new SpaceID(contextId, spaceId,
 				(Class<? extends SpaceSpecification<?>>) spaceSpec);

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.services.network;
 
 import java.io.Serializable;
@@ -25,8 +26,8 @@ import java.util.Arrays;
 
 /**
  * Envelope of a message that is exchanged other the network.
- * <p>
- * A {@link EventEnvelope} can be transformed into/from a {@link EventDispatch}
+ *
+ * <p>A {@link EventEnvelope} can be transformed into/from a {@link EventDispatch}
  * with a {@link EventSerializer}.
  *
  * @author $Author: srodriguez$
@@ -43,9 +44,13 @@ public class EventEnvelope implements Serializable {
 	private static final long serialVersionUID = 3618628129423203542L;
 
 	private byte[] contextId;
+
 	private byte[] spaceId;
+
 	private byte[] scope;
+
 	private byte[] customHeaders;
+
 	private byte[] body;
 
 	/**
@@ -177,8 +182,6 @@ public class EventEnvelope implements Serializable {
 		this.scope = scope;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public String toString() {
 		return "EventEnvelope {\n  context=" //$NON-NLS-1$

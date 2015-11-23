@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.util;
 
-import io.janusproject.JanusConfig;
+package io.janusproject.util;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import io.janusproject.JanusConfig;
 
 /**
  * Helper for creating a logger.
@@ -63,8 +64,8 @@ public final class LoggerCreator {
 	}
 
 	/** Create a logger with the given name.
-	 * <p>
-	 * The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
+	 *
+	 * <p>The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
 	 *
 	 * @param name - the name of the new logger.
 	 * @return the logger.
@@ -76,8 +77,8 @@ public final class LoggerCreator {
 	}
 
 	/** Create a logger with the given name.
-	 * <p>
-	 * The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
+	 *
+	 * <p>The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
 	 *
 	 * @param name - the name of the new logger.
 	 * @param parent - the parent logger.
@@ -113,6 +114,7 @@ public final class LoggerCreator {
 	 * @param level - the string representation of the logging level.
 	 * @return the logging level.
 	 */
+	@SuppressWarnings({"checkstyle:returncount", "checkstyle:cyclomaticcomplexity"})
 	public static Level parseLoggingLevel(String level) {
 		if (level == null) {
 			return Level.INFO;
@@ -151,7 +153,7 @@ public final class LoggerCreator {
 		default:
 			try {
 				return fromInt(Integer.parseInt(level));
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 			return Level.INFO;
@@ -163,6 +165,7 @@ public final class LoggerCreator {
 	 * @param num - the numerical index that corresponds to the given level.
 	 * @return the logging level.
 	 */
+	@SuppressWarnings({"checkstyle:magicnumber", "checkstyle:returncount"})
 	public static Level fromInt(int num) {
 		switch (num) {
 		case 0:
@@ -194,6 +197,7 @@ public final class LoggerCreator {
 	 * @param level - the logging level.
 	 * @return the numerical index that corresponds to the given level.
 	 */
+	@SuppressWarnings({"checkstyle:magicnumber", "checkstyle:returncount", "checkstyle:npathcomplexity"})
 	public static int toInt(Level level) {
 		if (level == Level.OFF) {
 			return 0;
@@ -227,8 +231,8 @@ public final class LoggerCreator {
 
 	/** Convert a string representing a logging level into its
 	 * numerical representation.
-	 * <p>
-	 * This is a convinient function that calls
+	 *
+	 * <p>This is a convinient function that calls
 	 * {@link #parseLoggingLevel(String)} and
 	 * {@link #toInt(Level)}.
 	 *
@@ -245,14 +249,14 @@ public final class LoggerCreator {
 	 */
 	public static String[] getLevelStrings() {
 		return new String[] {
-				"none", //$NON-NLS-1$
-				"error", //$NON-NLS-1$
-				"warning", //$NON-NLS-1$
-				"info", //$NON-NLS-1$
-				"fine", //$NON-NLS-1$
-				"finer", //$NON-NLS-1$
-				"finest", //$NON-NLS-1$
-				"all", //$NON-NLS-1$
+			"none", //$NON-NLS-1$
+			"error", //$NON-NLS-1$
+			"warning", //$NON-NLS-1$
+			"info", //$NON-NLS-1$
+			"fine", //$NON-NLS-1$
+			"finer", //$NON-NLS-1$
+			"finest", //$NON-NLS-1$
+			"all", //$NON-NLS-1$
 		};
 	}
 

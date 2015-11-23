@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import io.janusproject.util.DataViewDelegate.Delegator;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
@@ -34,6 +34,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
+import io.janusproject.util.DataViewDelegate.Delegator;
 
 /** A view if the multiset of the keys in a {@link AbstractDMultiMapView}.
  *
@@ -49,7 +50,9 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 	private static final long serialVersionUID = -4540240956327121021L;
 
 	private final Multimap<K, V> multimap;
+
 	private transient ElementSet elementSet;
+
 	private transient EntrySet entrySet;
 
 	/**
@@ -120,9 +123,14 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		try {
 			Collection<V> values = getDelegatedObject().get((K) element);
 			return values.size();
-		} catch (ClassCastException _) {
+		} catch (ClassCastException exception) {
 			return 0;
 		}
+	}
+
+	@Override
+	public boolean remove(Object element) {
+		return remove(element, 1) > 0;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -155,7 +163,7 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 				}
 
 				return oldCount;
-			} catch (ClassCastException _) {
+			} catch (ClassCastException exception) {
 				//
 			}
 		}
@@ -195,17 +203,17 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends K> c) {
-		if (c.isEmpty()) {
+	public boolean addAll(Collection<? extends K> collection) {
+		if (collection.isEmpty()) {
 			return false;
 		}
-		if (c instanceof Multiset) {
-			Multiset<? extends K> that = (Multiset<? extends K>) c;
+		if (collection instanceof Multiset) {
+			Multiset<? extends K> that = (Multiset<? extends K>) collection;
 			for (Entry<? extends K> entry : that.entrySet()) {
 				add(entry.getElement(), entry.getCount());
 			}
 		} else {
-			Iterators.addAll(this, c.iterator());
+			Iterators.addAll(this, collection.iterator());
 		}
 		return true;
 	}
@@ -237,11 +245,6 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 	}
 
 	@Override
-	public boolean remove(Object element) {
-		return remove(element, 1) > 0;
-	}
-
-	@Override
 	public int add(K element, int occurrences) {
 		throw new UnsupportedOperationException();
 	}
@@ -251,7 +254,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		throw new UnsupportedOperationException();
 	}
 
-	/**
+	/** Set of entries in a Multiset.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -259,9 +263,7 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 	 */
 	private class EntrySet extends AbstractSet<Entry<K>> {
 
-		/**
-		 */
-		public EntrySet() {
+		EntrySet() {
 			//
 		}
 
@@ -274,9 +276,9 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		}
 
 		@Override
-		public boolean contains(Object o) {
-			if (o instanceof Entry) {
-				Entry<?> entry = (Entry<?>) o;
+		public boolean contains(Object obj) {
+			if (obj instanceof Entry) {
+				Entry<?> entry = (Entry<?>) obj;
 				if (entry.getCount() <= 0) {
 					return false;
 				}
@@ -313,10 +315,12 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 			final Iterator<K> backingEntries = getDelegatedObject().keySet().iterator();
 			return new Iterator<Entry<K>>() {
 				private boolean canRemove;
+
 				@Override
 				public boolean hasNext() {
 					return backingEntries.hasNext();
 				}
+
 				@Override
 				public Multiset.Entry<K> next() {
 					final K entryKey = backingEntries.next();
@@ -332,26 +336,30 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 							}
 							return false;
 						}
+
 						@Override
 						public int hashCode() {
-							K e = getElement();
-							return ((e == null) ? 0 : e.hashCode()) ^ getCount();
+							K element = getElement();
+							return ((element == null) ? 0 : element.hashCode()) ^ getCount();
 						}
+
 						@Override
 						public String toString() {
 							StringBuilder b = new StringBuilder();
 							b.append(String.valueOf(getElement()));
-							int n = getCount();
-							if (n != 1) {
+							int elementCount = getCount();
+							if (elementCount != 1) {
 								b.append(" x "); //$NON-NLS-1$
-								b.append(n);
+								b.append(elementCount);
 							}
 							return b.toString();
 						}
+
 						@Override
 						public K getElement() {
 							return entryKey;
 						}
+
 						@Override
 						public int getCount() {
 							Collection<V> values = entryValues;
@@ -362,6 +370,7 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 						}
 					};
 				}
+
 				@Override
 				public void remove() {
 					if (!this.canRemove) {
@@ -379,7 +388,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		}
 	}
 
-	/**
+	/** Set of elements in a MultisetView.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -387,9 +397,7 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 	 */
 	private class ElementSet extends AbstractSet<K> {
 
-		/**
-		 */
-		public ElementSet() {
+		ElementSet() {
 			//
 		}
 
@@ -407,13 +415,13 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		}
 
 		@Override
-		public boolean contains(Object o) {
-			return multiset().contains(o);
+		public boolean contains(Object obj) {
+			return multiset().contains(obj);
 		}
 
 		@Override
-		public boolean containsAll(Collection<?> c) {
-			return multiset().containsAll(c);
+		public boolean containsAll(Collection<?> col) {
+			return multiset().containsAll(col);
 		}
 
 		@Override
@@ -432,10 +440,10 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		}
 
 		@Override
-		public boolean remove(Object o) {
-			int count = multiset().count(o);
+		public boolean remove(Object obj) {
+			int count = multiset().count(obj);
 			if (count > 0) {
-				multiset().remove(o, count);
+				multiset().remove(obj, count);
 				return true;
 			}
 			return false;
@@ -448,7 +456,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 
 	}
 
-	/**
+	/** Iterator on Multiset keys.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -457,18 +466,22 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 	private class MultisetIterator implements Iterator<K> {
 
 		private final Iterator<Entry<K>> entryIterator;
+
 		private Entry<K> currentEntry;
+
 		/**
 		 * Count of subsequent elements equal to current element.
 		 */
 		private int laterCount;
+
 		/**
 		 * Count of all elements equal to current element.
 		 */
 		private int totalCount;
+
 		private boolean canRemove;
 
-		public MultisetIterator(Iterator<Entry<K>> entryIterator) {
+		MultisetIterator(Iterator<Entry<K>> entryIterator) {
 			this.entryIterator = entryIterator;
 		}
 
@@ -507,7 +520,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		}
 	}
 
-	/**
+	/** Iterator on transformed MultisetView.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -519,7 +533,7 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		/**
 		 * @param backingIterator - the iterator.
 		 */
-		public TransformedIterator(Iterator<? extends Entry<K>> backingIterator) {
+		TransformedIterator(Iterator<? extends Entry<K>> backingIterator) {
 			this.backingIterator = checkNotNull(backingIterator);
 		}
 

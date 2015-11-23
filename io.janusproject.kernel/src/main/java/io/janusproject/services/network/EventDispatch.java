@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.network;
 
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
+package io.janusproject.services.network;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.Scope;
+import io.sarl.lang.core.SpaceID;
+
 /** Description of the required information for dispatching
  * an event over the network.
- * <p>
- * A {@link EventDispatch} can be transformed into/from a {@link EventEnvelope}
+ *
+ * <p>A {@link EventDispatch} can be transformed into/from a {@link EventEnvelope}
  * with a {@link EventSerializer}.
  *
  * @author $Author: srodriguez$
@@ -46,8 +47,11 @@ public class EventDispatch implements Serializable {
 	private static final long serialVersionUID = 3394801973705690138L;
 
 	private final Scope<?> scope;
+
 	private final Event event;
+
 	private final SpaceID spaceID;
+
 	private Map<String, String> headers;
 
 	/** Construct a <code>EventDispatch</code>.
@@ -64,7 +68,7 @@ public class EventDispatch implements Serializable {
 		this.spaceID = sid;
 		this.event = event;
 		this.scope = scope;
-		this.headers = (headers == null) ? new HashMap<String, String>() : headers;
+		this.headers = (headers == null) ? new HashMap<>() : headers;
 	}
 
 	/** Construct a <code>EventDispatch</code>.
@@ -77,8 +81,6 @@ public class EventDispatch implements Serializable {
 		this(sid, event, scope, null);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public String toString() {
 		return "EventDispatch [scope=" + this.scope //$NON-NLS-1$

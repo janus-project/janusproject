@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.space;
 
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.EventListener;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.util.RestrictedAccessEventSpace;
+package io.janusproject.kernel.space;
 
 import java.security.Principal;
 import java.security.acl.Acl;
 import java.security.acl.Permission;
+
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.EventListener;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.util.RestrictedAccessEventSpace;
 
 /**
  * Default implementation of a restricted-access event space.
@@ -42,6 +44,7 @@ import java.security.acl.Permission;
 public class RestrictedAccessEventSpaceImpl extends AbstractEventSpace implements RestrictedAccessEventSpace {
 
 	private final Acl acl;
+
 	private final Permission accessPermission;
 
 	/**

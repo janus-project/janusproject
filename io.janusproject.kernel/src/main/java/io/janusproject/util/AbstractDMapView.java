@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.util;
 
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.util.DataViewDelegate.Delegator;
+package io.janusproject.util;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
@@ -30,6 +27,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.util.DataViewDelegate.Delegator;
 
 /** A view on a standard Map that provides the API for DMap.
  *
@@ -216,7 +217,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 			return this.entries.size();
 		}
 
-		/**
+		/** Iterator on DMap entries.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -225,10 +227,12 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 		private class EntryIterator implements Iterator<Entry<K, V>> {
 
 			private final Iterator<Entry<K, V>> iterator;
+
 			private K key;
+
 			private V value;
 
-			public EntryIterator(Iterator<Entry<K, V>> iterator) {
+			EntryIterator(Iterator<Entry<K, V>> iterator) {
 				this.iterator = iterator;
 			}
 
@@ -239,10 +243,10 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 
 			@Override
 			public Entry<K, V> next() {
-				Entry<K, V> e = this.iterator.next();
-				this.key = e.getKey();
-				this.value = e.getValue();
-				return e;
+				Entry<K, V> entry = this.iterator.next();
+				this.key = entry.getKey();
+				this.value = entry.getValue();
+				return entry;
 			}
 
 			@Override
@@ -305,7 +309,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 			return this.entries.size();
 		}
 
-		/**
+		/** Iterator on DMap keys.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -314,10 +319,12 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 		private class KeyIterator implements Iterator<K> {
 
 			private final Iterator<Entry<K, V>> iterator;
+
 			private K key;
+
 			private V value;
 
-			public KeyIterator(Iterator<Entry<K, V>> iterator) {
+			KeyIterator(Iterator<Entry<K, V>> iterator) {
 				this.iterator = iterator;
 			}
 
@@ -328,9 +335,9 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 
 			@Override
 			public K next() {
-				Entry<K, V> e = this.iterator.next();
-				this.key = e.getKey();
-				this.value = e.getValue();
+				Entry<K, V> entry = this.iterator.next();
+				this.key = entry.getKey();
+				this.value = entry.getValue();
 				return this.key;
 			}
 
@@ -394,7 +401,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 			return this.entries.size();
 		}
 
-		/**
+		/** Iterator on DMap values.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -403,10 +411,12 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 		private class ValueIterator implements Iterator<V> {
 
 			private final Iterator<Entry<K, V>> iterator;
+
 			private K key;
+
 			private V value;
 
-			public ValueIterator(Iterator<Entry<K, V>> iterator) {
+			ValueIterator(Iterator<Entry<K, V>> iterator) {
 				this.iterator = iterator;
 			}
 
@@ -417,9 +427,9 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 
 			@Override
 			public V next() {
-				Entry<K, V> e = this.iterator.next();
-				this.key = e.getKey();
-				this.value = e.getValue();
+				Entry<K, V> entry = this.iterator.next();
+				this.key = entry.getKey();
+				this.value = entry.getValue();
 				return this.value;
 			}
 

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.bic;
 
 import io.sarl.core.Destroy;
@@ -27,8 +28,8 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 
 /** Capacity that provides an event bus to notify the different components of an agent.
- * <p>
- * <strong>This capacity is provided by the Janus kernel, not SARL.</strong>
+ *
+ * <p><strong>This capacity is provided by the Janus kernel, not SARL.</strong>
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -86,7 +87,7 @@ public interface InternalEventBusCapacity extends Capacity {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	public enum OwnerState {
+	enum OwnerState {
 		/** The owner of the event bus is under creation.
 		 */
 		NEW,

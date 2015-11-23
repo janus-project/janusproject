@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.modules;
 
-import org.arakhne.afc.vmutil.OperatingSystem;
-
+import com.google.inject.AbstractModule;
 import io.janusproject.JanusConfig;
 import io.janusproject.modules.eventserial.NetworkEventModule;
 import io.janusproject.modules.hazelcast.HazelcastModule;
@@ -29,8 +29,7 @@ import io.janusproject.modules.kernel.LocalInfrastructureServiceModule;
 import io.janusproject.modules.kernel.LocalKernelDiscoveryServiceModule;
 import io.janusproject.modules.nonetwork.NoNetworkModule;
 import io.janusproject.modules.zeromq.ZeroMQNetworkModule;
-
-import com.google.inject.AbstractModule;
+import org.arakhne.afc.vmutil.OperatingSystem;
 
 /**
  * The module configures Janus to run using the standard core modules
@@ -43,9 +42,6 @@ import com.google.inject.AbstractModule;
  */
 public class StandardJanusPlatformModule extends AbstractModule {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void configure() {
 		boolean isNetworkEnabled =
