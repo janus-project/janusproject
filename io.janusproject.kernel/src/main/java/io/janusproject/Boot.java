@@ -81,6 +81,7 @@ public final class Boot {
 	private static final int ERROR_EXIT_CODE = 255;
 
 	private static PrintStream consoleLogger;
+
 	private static Exiter applicationExiter;
 
 	private Boot() {
@@ -110,17 +111,17 @@ public final class Boot {
 			Iterator<Option> optIterator = cmd.iterator();
 			while (optIterator.hasNext()) {
 				Option opt = optIterator.next();
-				switch (opt.getOpt()) {
-				case "h": //$NON-NLS-1$
+				switch (opt.getLongOpt()) {
+				case "help": //$NON-NLS-1$
 					showHelp();
 					return null;
-				case "s": //$NON-NLS-1$
+				case "showdefaults": //$NON-NLS-1$
 					showDefaults();
 					return null;
 				case "cli": //$NON-NLS-1$
 					showCommandLineArguments(args);
 					return null;
-				case "f": //$NON-NLS-1$
+				case "file": //$NON-NLS-1$
 					String rawFilename = opt.getValue();
 					if (rawFilename == null || "".equals(rawFilename)) { //$NON-NLS-1$
 						showHelp();
@@ -134,33 +135,33 @@ public final class Boot {
 					}
 					setPropertiesFrom(file);
 					break;
-				case "o": //$NON-NLS-1$
+				case "offline": //$NON-NLS-1$
 					setOffline(true);
 					break;
-				case "R": //$NON-NLS-1$
+				case "randomid": //$NON-NLS-1$
 					setRandomContextUUID();
 					break;
-				case "B": //$NON-NLS-1$
+				case "bootid": //$NON-NLS-1$
 					setBootAgentTypeContextUUID();
 					break;
-				case "W": //$NON-NLS-1$
+				case "worldid": //$NON-NLS-1$
 					setDefaultContextUUID();
 					break;
-				case "D": //$NON-NLS-1$
+				case "define": //$NON-NLS-1$
 					String name = opt.getValue(0);
 					if (!Strings.isNullOrEmpty(name)) {
 						setProperty(name, Strings.emptyToNull(opt.getValue(1)));
 					}
 					break;
-				case "l": //$NON-NLS-1$
+				case "log": //$NON-NLS-1$
 					verbose = Math.max(LoggerCreator.toInt(opt.getValue()), 0);
 					break;
-				case "q": //$NON-NLS-1$
+				case "quiet": //$NON-NLS-1$
 					if (verbose > 0) {
 						--verbose;
 					}
 					break;
-				case "v": //$NON-NLS-1$
+				case "verbose": //$NON-NLS-1$
 					++verbose;
 					break;
 				case "nologo": //$NON-NLS-1$
@@ -313,7 +314,7 @@ public final class Boot {
 		options.addOption("h", "help", false, //$NON-NLS-1$//$NON-NLS-2$
 				Locale.getString("CLI_HELP_H"));  //$NON-NLS-1$
 
-		options.addOption("nologo", false,  //$NON-NLS-1$
+		options.addOption(null, "nologo", false,  //$NON-NLS-1$
 				Locale.getString("CLI_HELP_NOLOGO"));  //$NON-NLS-1$
 
 		options.addOption("o", "offline", false,  //$NON-NLS-1$//$NON-NLS-2$
@@ -329,7 +330,7 @@ public final class Boot {
 
 		options.addOption("s", "showdefaults", false, //$NON-NLS-1$//$NON-NLS-2$
 				Locale.getString("CLI_HELP_S"));  //$NON-NLS-1$
-		options.addOption("cli", false, //$NON-NLS-1$
+		options.addOption(null, "cli", false, //$NON-NLS-1$
 				Locale.getString("CLI_HELP_CLI"));  //$NON-NLS-1$
 
 		options.addOption("v", "verbose", false, //$NON-NLS-1$//$NON-NLS-2$
@@ -355,7 +356,7 @@ public final class Boot {
 				JanusConfig.VERBOSE_LEVEL_VALUE, b));
 		opt.setArgs(1);
 		options.addOption(opt);
-		opt = new Option("D", true, Locale.getString("CLI_HELP_D"));  //$NON-NLS-1$//$NON-NLS-2$
+		opt = new Option("D", "define", true, Locale.getString("CLI_HELP_D"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		opt.setArgs(2);
 		opt.setValueSeparator('=');
 		opt.setArgName(Locale.getString("CLI_HELP_D_ARGNAME")); //$NON-NLS-1$
