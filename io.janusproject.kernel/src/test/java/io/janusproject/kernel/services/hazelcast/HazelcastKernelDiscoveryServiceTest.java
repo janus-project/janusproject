@@ -29,7 +29,7 @@ import io.janusproject.services.logging.LogService;
 import io.janusproject.services.network.NetworkService;
 import io.janusproject.services.network.NetworkUtil;
 import io.janusproject.testutils.AbstractDependentServiceTest;
-import io.janusproject.testutils.IMapMock;
+import io.janusproject.testutils.HzMapMock;
 import io.janusproject.testutils.StartServiceForTest;
 import io.janusproject.util.TwoStepConstruction;
 
@@ -110,7 +110,7 @@ extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 		this.hazelcastURI = NetworkUtil.toURI("tcp://123.124.125.126:5023"); //$NON-NLS-1$
 		this.kernelURI = NetworkUtil.toURI("tcp://123.124.125.126:34567"); //$NON-NLS-1$
 		this.contextId = UUID.randomUUID();
-		this.kernels = new IMapMock<>();
+		this.kernels = new HzMapMock<>();
 		this.hzInstance = Mockito.mock(HazelcastInstance.class);
 		{
 			Mockito.when(this.hzInstance.getMap(Matchers.anyString())).thenReturn(this.kernels);

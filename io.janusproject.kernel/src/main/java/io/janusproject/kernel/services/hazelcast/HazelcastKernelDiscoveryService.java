@@ -226,7 +226,8 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class HazelcastListener implements EntryListener<URI, URI>, MembershipListener {
+	private class HazelcastListener implements MembershipListener, EntryAddedListener<URI, URI>,
+			EntryRemovedListener<URI, URI>, EntryEvictedListener<URI, URI> {
 
 		/** Construct.
 		 */
@@ -272,30 +273,9 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 			fireDisconnected(event);
 		}
 
-		/** {@inheritDoc}
-		 */
-		@Override
-		public void entryUpdated(EntryEvent<URI, URI> event) {
-			//
-		}
-
 		@Override
 		public void entryEvicted(EntryEvent<URI, URI> event) {
 			fireDisconnected(event);
-		}
-
-		/** {@inheritDoc}
-		 */
-		@Override
-		public void mapCleared(MapEvent event) {
-			throw new UnsupportedOperationException("this exception should never occur"); //$NON-NLS-1$
-		}
-
-		/** {@inheritDoc}
-		 */
-		@Override
-		public void mapEvicted(MapEvent event) {
-			throw new UnsupportedOperationException("this exception should never occur"); //$NON-NLS-1$
 		}
 
 		private void fireDisconnected(EntryEvent<URI, URI> event) {

@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.services.hazelcast;
 
 import java.util.Collection;
@@ -133,6 +134,7 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 	private static final class MapView<K, V> implements DMap<K, V> {
 
 		private final String name;
+
 		private final IMap<K, V> map;
 
 		MapView(String name, IMap<K, V> map) {
@@ -219,7 +221,7 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 		@Override
 		public void addDMapListener(DMapListener<? super K, ? super V> listener) {
 			EntryListenerWrapper<K, V> w = new EntryListenerWrapper<>(listener);
-			String k = this.map.addEntryListener(w, true);
+			String k = this.map.addEntryListener((MapListener) w, true);
 			w.setHazelcastListener(k);
 		}
 
@@ -247,6 +249,7 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 	private static final class MultiMapView<K, V> implements DMultiMap<K, V> {
 
 		private final String name;
+
 		private final MultiMap<K, V> map;
 
 		MultiMapView(String name, MultiMap<K, V> map) {
@@ -469,6 +472,17 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 			}
 
 			@Override
+			public boolean add(K element) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean remove(Object element) {
+				Collection<?> values = MultiMapView.this.removeAll(element);
+				return values != null && !values.isEmpty();
+			}
+
+			@Override
 			public int remove(Object element, int occurrences) {
 				if (occurrences < 0) {
 					throw new IllegalArgumentException();
@@ -561,10 +575,12 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 					public boolean hasNext() {
 						return entries.hasNext();
 					}
+
 					@Override
 					public K next() {
 						return entries.next().getKey();
 					}
+
 					@Override
 					public void remove() {
 						entries.remove();
@@ -584,24 +600,13 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 			}
 
 			@Override
-			public boolean add(K element) {
-				throw new UnsupportedOperationException();
+			public boolean removeAll(Collection<?> collection) {
+				return MultiMapView.this.keySet().removeAll(collection);
 			}
 
 			@Override
-			public boolean remove(Object element) {
-				Collection<?> values = MultiMapView.this.removeAll(element);
-				return values != null && !values.isEmpty();
-			}
-
-			@Override
-			public boolean removeAll(Collection<?> c) {
-				return MultiMapView.this.keySet().removeAll(c);
-			}
-
-			@Override
-			public boolean retainAll(Collection<?> c) {
-				return MultiMapView.this.keySet().retainAll(c);
+			public boolean retainAll(Collection<?> collection) {
+				return MultiMapView.this.keySet().retainAll(collection);
 			}
 
 		}

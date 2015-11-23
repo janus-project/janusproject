@@ -28,21 +28,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.janusproject.testutils.IMapMock;
-import io.janusproject.util.DataViewDelegate.Delegator;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-
-import junit.framework.TestSuite;
 
 import org.junit.After;
 import org.junit.Assume;
@@ -53,7 +45,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.mockito.ArgumentCaptor;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.testing.MapTestSuiteBuilder;
 import com.google.common.collect.testing.TestStringMapGenerator;
 import com.google.common.collect.testing.features.CollectionFeature;
@@ -65,7 +56,10 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MultiMap;
 
-import static org.junit.Assume.*;
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.janusproject.testutils.HzMapMock;
+import junit.framework.TestSuite;
 
 /**
  * @author $Author: sgalland$
@@ -174,7 +168,7 @@ public class HazelcastDMapViewTest {
 					.using(new TestStringMapGenerator() {
 						@Override
 						protected Map<String, String> create(Entry<String, String>[] arg0) {
-							IMap<String, String> map = new IMapMock<>();
+							IMap<String, String> map = new HzMapMock<>();
 							for(Entry<String, String> entry : arg0) {
 								map.put(entry.getKey(), entry.getValue());
 							}
@@ -212,7 +206,7 @@ public class HazelcastDMapViewTest {
 
 		@Before
 		public void setUp() {
-			this.map = new IMapMock<>();
+			this.map = new HzMapMock<>();
 			this.view = new HazelcastDMapView<>(this.map);
 		}
 
@@ -244,7 +238,7 @@ public class HazelcastDMapViewTest {
 
 		@Before
 		public void setUp() {
-			this.map = new IMapMock<>();
+			this.map = new HzMapMock<>();
 			this.view = new HazelcastDMapView<>(this.map);
 		}
 
@@ -290,7 +284,7 @@ public class HazelcastDMapViewTest {
 		@Before
 		public void setUp() {
 			this.listener = mock(DMapListener.class);
-			this.map = new IMapMock<>();
+			this.map = new HzMapMock<>();
 			this.view = new HazelcastDMapView<>(this.map);
 		}
 

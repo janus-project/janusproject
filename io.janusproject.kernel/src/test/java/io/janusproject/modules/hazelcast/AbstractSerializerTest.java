@@ -218,6 +218,20 @@ abstract class AbstractSerializerTest extends AbstractJanusTest {
 		public void writeData(Data arg0) throws IOException {
 			throw new UnsupportedOperationException();
 		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void writeBooleanArray(boolean[] booleans) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public void writeUTFArray(String[] values) throws IOException {
+			throw new UnsupportedOperationException();
+		}
 		
 	}
 
@@ -417,6 +431,20 @@ abstract class AbstractSerializerTest extends AbstractJanusTest {
 		 */
 		@Override
 		public Data readData() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public boolean[] readBooleanArray() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		/** {@inheritDoc}
+		 */
+		@Override
+		public String[] readUTFArray() throws IOException {
 			throw new UnsupportedOperationException();
 		}
 		

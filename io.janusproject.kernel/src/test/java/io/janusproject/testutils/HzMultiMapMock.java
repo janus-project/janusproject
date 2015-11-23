@@ -51,7 +51,7 @@ import com.hazelcast.monitor.LocalMultiMapStats;
  * @param <V>
  */
 @SuppressWarnings("all")
-public class IMultiMapMock<K,V> implements MultiMap<K, V> {
+public class HzMultiMapMock<K,V> implements MultiMap<K, V> {
 
 	private final String name;
 	private final SetMultimap<K, V> map;
@@ -59,7 +59,7 @@ public class IMultiMapMock<K,V> implements MultiMap<K, V> {
 	/**
 	 * @param name
 	 */
-	public IMultiMapMock(String name) {
+	public HzMultiMapMock(String name) {
 		this.name = name;
 		Supplier<Set<V>> supplier = new Supplier<Set<V>>() {
 				@Override
@@ -85,11 +85,6 @@ public class IMultiMapMock<K,V> implements MultiMap<K, V> {
 	@Override
 	public String toString() {
 		return this.map.toString();
-	}
-
-	@Override
-	public Object getId() {
-		return getName();
 	}
 
 	@Override
@@ -224,6 +219,12 @@ public class IMultiMapMock<K,V> implements MultiMap<K, V> {
 
 	@Override
 	public boolean tryLock(K key, long time, TimeUnit timeunit)
+			throws InterruptedException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean tryLock(K key, long time, TimeUnit timeunit, long leaseTime, TimeUnit leaseTimeunit)
 			throws InterruptedException {
 		throw new UnsupportedOperationException();
 	}
