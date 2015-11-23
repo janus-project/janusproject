@@ -76,14 +76,15 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 
 	private final Map<UUID, Agent> agents = new TreeMap<>();
 
-	private AgentFactory agentFactory;
+	private final Injector injector;
 
-	/**
-	 * @param injector - the background injector that is currently used.
+	/** Constructs the service with the given (injected) injector.
+	 *
+	 * @param injector the injector that should be used by this service for creating the agents.
 	 */
 	@Inject
 	public StandardSpawnService(Injector injector) {
-		this.agentFactory = new DefaultAgentFactory(injector);
+		this.injector = injector;
 	}
 
 	@Override
@@ -96,26 +97,14 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
 	}
 
-	/** {@inheritDoc}
-	 */
-	@Override
-	public synchronized void setAgentFactory(AgentFactory factory) {
-		assert (factory != null);
-		this.agentFactory = factory;
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public synchronized AgentFactory getAgentFactory() {
-		return this.agentFactory;
-	}
-
 	@Override
 	public synchronized UUID spawn(AgentContext parent, UUID agentID, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
 			try {
-				Agent agent = this.agentFactory.newInstance(agentClazz, agentID, parent.getID());
+				JustInTimeAgentInjectionModule agentInjectionModule = new JustInTimeAgentInjectionModule(parent.getID(), agentID);
+
+				Injector agentInjector = this.injector.createChildInjector(agentInjectionModule);
+				Agent agent = agentInjector.getInstance(agentClazz);
 				assert (agent != null);
 				this.agents.put(agent.getID(), agent);
 				fireAgentSpawned(parent, agent, params);
@@ -401,7 +390,8 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		 */
 		public CannotSpawnException(Class<? extends Agent> agentClazz, Throwable cause) {
 			super(Locale.getString(StandardSpawnService.class,
-					"CANNOT_INSTANCIATE_AGENT", agentClazz), //$NON-NLS-1$
+					"CANNOT_INSTANCIATE_AGENT", agentClazz, //$NON-NLS-1$
+					(cause == null) ? null : cause.getLocalizedMessage()),
 				cause);
 		}
 
@@ -414,28 +404,22 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static class DefaultAgentFactory implements AgentFactory {
+	private static class JustInTimeAgentInjectionModule extends AbstractModule {
 
-		private final Injector injector;
+		private final UUID parentID;
 
-		/**
-		 * @param injector
-		 */
-		public DefaultAgentFactory(Injector injector) {
-			this.injector = injector;
+		private final UUID agentID;
+
+		JustInTimeAgentInjectionModule(UUID parentID, UUID agentID) {
+			assert (parentID != null);
+			this.parentID = parentID;
+			this.agentID = (agentID == null) ? UUID.randomUUID() : agentID;
 		}
 
 		@Override
-		public <T extends Agent> T newInstance(Class<T> type, UUID agentID, UUID contextID) throws Exception {
-			Agent agent;
-			if (agentID == null) {
-				agent = type.getConstructor(UUID.class).newInstance(contextID);
-			} else {
-				agent = type.getConstructor(UUID.class, UUID.class).newInstance(contextID, agentID);
-			}
-			assert (agent != null);
-			this.injector.injectMembers(agent);
-			return type.cast(agent);
+		public void configure() {
+			bind(Key.get(UUID.class, Names.named(Agent.PARENT_ID_KEY_NAME))).toInstance(this.parentID);
+			bind(Key.get(UUID.class, Names.named(Agent.AGENT_ID_KEY_NAME))).toInstance(this.agentID);
 		}
 
 	}

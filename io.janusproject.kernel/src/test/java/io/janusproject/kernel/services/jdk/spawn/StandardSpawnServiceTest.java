@@ -74,25 +74,6 @@ import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.internal.verification.Times;
-
-import com.google.inject.Injector;
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -104,19 +85,13 @@ import com.google.inject.Injector;
 public class StandardSpawnServiceTest extends AbstractDependentServiceTest<StandardSpawnService> {
 
 	@Nullable
+	private BuiltinCapacitiesProvider builtinCapacitiesProvider;
+	
+	@Nullable
 	private UUID agentId;
 
 	@Nullable
-	private Agent agent;
-
-	@Nullable
 	private OpenEventSpace innerSpace;
-
-	@Mock
-	private ExternalContextAccess contextAccess;
-
-	@Mock
-	private InnerContextAccess innerAccess;
 
 	@Mock
 	private AgentContext innerContext;
@@ -133,10 +108,6 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 	@Mock
 	private SpawnServiceListener serviceListener;
 
-	@Mock
-	private AgentFactory agentFactory;
-
-	@Mock
 	private Injector injector;
 	
 	/**
@@ -149,37 +120,40 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 	 */
 	@Override
 	public StandardSpawnService newService() {
-		return new StandardSpawnService(this.injector);
+		this.builtinCapacitiesProvider = Mockito.mock(BuiltinCapacitiesProvider.class);
+		if (this.injector == null) {
+			this.injector = Guice.createInjector(new TestModule(this.builtinCapacitiesProvider));
+		}
+		return this.injector.getInstance(StandardSpawnService.class);
 	}
 	
 	@Before
 	public void setUp() throws Exception {
+		UUID parentID = UUID.randomUUID();
 		this.agentId = UUID.randomUUID();
-		this.agent = Mockito.spy(new Agent(
-				Mockito.mock(BuiltinCapacitiesProvider.class),
-				UUID.randomUUID(),
-				null) {
-			@Override
-			protected <S extends Capacity> S getSkill(Class<S> capacity) {
-				if (ExternalContextAccess.class.equals(capacity))
-					return capacity.cast(StandardSpawnServiceTest.this.contextAccess);
-				return capacity.cast(StandardSpawnServiceTest.this.innerAccess);
-			}
-		});
 		MockitoAnnotations.initMocks(this);
-		Mockito.when(this.contextAccess.getAllContexts()).thenReturn(Collections3.synchronizedCollection(Collections.singleton(this.agentContext), this));
-		Mockito.when(this.innerAccess.getInnerContext()).thenReturn(this.innerContext);
 		this.innerSpace = Mockito.mock(OpenEventSpace.class);
 		Mockito.when(this.innerSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSingleton(this.agentId));
 		Mockito.when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
 		Mockito.when(this.agentContext.getDefaultSpace()).thenReturn(this.defaultSpace);
+		Mockito.when(this.agentContext.getID()).thenReturn(parentID);
 		Mockito.when(this.defaultSpace.getAddress(Matchers.any(UUID.class))).thenReturn(Mockito.mock(Address.class));
-		Mockito.when(this.agentFactory.newInstance(Matchers.any(Class.class), Matchers.any(UUID.class), Matchers.any(UUID.class))).thenReturn(this.agent);
-		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
+		
+		Map<Class<? extends Capacity>, Skill> bic = new HashMap<>();
+
+		InnerContextSkillMock innerContextSkill = Mockito.mock(InnerContextSkillMock.class);
+		bic.put(InnerContextAccess.class, innerContextSkill);
+		Mockito.when(innerContextSkill.getInnerContext()).thenReturn(this.innerContext);
+
+		ExternalContextSkillMock externalContextSkill = Mockito.mock(ExternalContextSkillMock.class);
+		bic.put(ExternalContextAccess.class, externalContextSkill);
+		Mockito.when(externalContextSkill.getAllContexts()).thenReturn(Collections3.synchronizedCollection(Collections.singleton(this.agentContext), this));
+
+		Mockito.when(this.builtinCapacitiesProvider.getBuiltinCapacities(Mockito.any())).thenReturn(bic);
+
 		this.service.addKernelAgentSpawnListener(this.kernelListener);
 		this.service.addSpawnServiceListener(this.serviceListener);
-		this.service.setAgentFactory(this.agentFactory);
 	}
 
 	@Override
@@ -205,13 +179,15 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 		UUID aId = UUID.fromString(this.agentId.toString());
 		UUID agentId = this.service.spawn(this.agentContext, aId, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		//
+		assertEquals(aId, agentId);
 		assertNotNull(agentId);
 		Set<UUID> agents = this.service.getAgents();
 		assertEquals(1, agents.size());
 		assertTrue(agents.contains(agentId));
-		assertSame(this.agentId, agentId);
-		assertNotSame(aId, agentId);
-		assertEquals(aId, agentId);
+		Agent spawnedAgent = this.service.getAgent(agentId);
+		assertNotNull(spawnedAgent);
+		assertEquals(agentId, spawnedAgent.getID());
+		assertEquals(this.agentContext.getID(), spawnedAgent.getParentID());
 		//
 		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
 		ArgumentCaptor<Agent> argument2 = ArgumentCaptor.forClass(Agent.class);
@@ -240,7 +216,10 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 		Set<UUID> agents = this.service.getAgents();
 		assertEquals(1, agents.size());
 		assertTrue(agents.contains(agentId));
-		assertSame(this.agentId, agentId);
+		Agent spawnedAgent = this.service.getAgent(agentId);
+		assertNotNull(spawnedAgent);
+		assertEquals(agentId, spawnedAgent.getID());
+		assertEquals(this.agentContext.getID(), spawnedAgent.getParentID());
 		//
 		ArgumentCaptor<AgentContext> argument1 = ArgumentCaptor.forClass(AgentContext.class);
 		ArgumentCaptor<Agent> argument2 = ArgumentCaptor.forClass(Agent.class);
@@ -268,12 +247,11 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(agIds, agIds));
 		this.service.startAsync().awaitRunning();
-		UUID agentId = this.service.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID agentId = this.service.spawn(this.agentContext, this.agentId, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		agIds.add(agentId);
 		Agent ag = this.service.getAgent(agentId);
 		assertNotNull(ag);
-		assertSame(this.agent, ag);
-		//
+		// Only the super agent is inside the inner context => super agent could be killed
 		assertTrue(this.service.canKillAgent(ag));
 	}
 
@@ -288,18 +266,17 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 		Mockito.when(this.defaultSpace.getParticipants()).thenReturn(
 				Collections3.synchronizedSet(agIds,agIds));
 		this.service.startAsync().awaitRunning();
-		UUID agentId = this.service.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID agentId = this.service.spawn(this.agentContext, this.agentId, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		agIds.add(agentId);
 		Agent ag = this.service.getAgent(agentId);
 		assertNotNull(ag);
-		assertSame(this.agent, ag);
-		//
+		// One agent other than the super agent is inside the inner context => super agent could not be killed
 		assertFalse(this.service.canKillAgent(ag));
 	}
 
 	@Test
 	public void killAgent() throws AgentKillException {
-		UUID agentId = this.service.spawn(this.agentContext, null, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
+		UUID agentId = this.service.spawn(this.agentContext, this.agentId, Agent.class, "a", "b");  //$NON-NLS-1$//$NON-NLS-2$
 		Agent ag = this.service.getAgent(agentId);
 		assertNotNull(ag);
 		//
@@ -331,6 +308,47 @@ public class StandardSpawnServiceTest extends AbstractDependentServiceTest<Stand
 			// Expected excpetion fired by notifyStarted()
 		}
 		Mockito.verify(this.kernelListener, new Times(1)).kernelAgentSpawn();
+	}
+
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static class TestModule extends AbstractModule {
+
+		private final BuiltinCapacitiesProvider builtinCapacitiesProvider;
+		
+		TestModule(BuiltinCapacitiesProvider builtinCapacitiesProvider) {
+			this.builtinCapacitiesProvider = builtinCapacitiesProvider;
+		}
+		
+		@Override
+		protected void configure() {
+			bind(BuiltinCapacitiesProvider.class).toInstance(this.builtinCapacitiesProvider);
+		}
+		
+	}
+	
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static abstract class InnerContextSkillMock extends Skill implements InnerContextAccess {
+		//
+	}
+	
+	/**
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	private static abstract class ExternalContextSkillMock extends Skill implements ExternalContextAccess {
+		//
 	}
 
 }

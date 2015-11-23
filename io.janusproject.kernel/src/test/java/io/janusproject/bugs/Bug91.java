@@ -20,18 +20,20 @@
 
 package io.janusproject.bugs;
 
-import io.janusproject.Boot;
-import io.janusproject.testutils.AbstractJanusRunTest;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.UUID;
 
+import com.google.common.eventbus.SubscriberExceptionHandler;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import io.janusproject.Boot;
+import io.janusproject.testutils.AbstractJanusRunTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.eventbus.SubscriberExceptionHandler;
-import com.google.inject.Inject;
-
-import static org.junit.Assert.*;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
 /** Unit test for the issue #91: Stop agent on initialization failure?
  * 
@@ -69,12 +71,12 @@ public class Bug91 extends AbstractJanusRunTest {
 	 */
 	public static class ExceptionInInitAgent extends TestingAgent {
 
-		public ExceptionInInitAgent(UUID parentID) {
-			super(parentID);
-		}
-
-		public ExceptionInInitAgent(UUID parentID, UUID agentID) {
-			super(parentID, agentID);
+		@Inject
+		public ExceptionInInitAgent(
+				BuiltinCapacitiesProvider provider,
+				@Named(Agent.PARENT_ID_KEY_NAME) UUID parentID,
+				@Named(Agent.AGENT_ID_KEY_NAME) UUID agentID) {
+			super(provider, parentID, agentID);
 		}
 
 		@Override

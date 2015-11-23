@@ -20,19 +20,24 @@
 
 package io.janusproject.bugs;
 
-import io.janusproject.Boot;
-import io.janusproject.services.network.NetworkUtil;
-import io.janusproject.testutils.AbstractJanusRunTest;
-import io.sarl.core.Lifecycle;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
 import java.net.InetAddress;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import com.google.inject.name.Named;
+import io.janusproject.Boot;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractJanusRunTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import io.sarl.core.Lifecycle;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
 /** Unit test for the issue #84: Problem with calling killMe in Initialize behavior of an agent.
  *
@@ -68,12 +73,12 @@ public class Bug84 extends AbstractJanusRunTest {
 	 */
 	public static class KilledInInitAgent extends TestingAgent {
 
-		public KilledInInitAgent(UUID parentID) {
-			super(parentID);
-		}
-
-		public KilledInInitAgent(UUID parentID, UUID agentID) {
-			super(parentID, agentID);
+		@Inject
+		public KilledInInitAgent(
+				BuiltinCapacitiesProvider provider,
+				@Named(Agent.PARENT_ID_KEY_NAME) UUID parentID,
+				@Named(Agent.AGENT_ID_KEY_NAME) UUID agentID) {
+			super(provider, parentID, agentID);
 		}
 
 		@Override

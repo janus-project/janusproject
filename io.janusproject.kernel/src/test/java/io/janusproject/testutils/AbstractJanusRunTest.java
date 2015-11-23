@@ -268,22 +268,13 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		private List<Object> results;
 
 		/**
-		 * @param parentID - the identifier of the parent's agent.
-		 */
-		public TestingAgent(UUID parentID) {
-			super(
-					Mockito.mock(BuiltinCapacitiesProvider.class),
-					parentID,
-					null);
-		}
-
-		/**
+		 * @param provider - the provider of builtin capacities.
 		 * @param parentID - the identifier of the parent's agent.
 		 * @param agentID - the identifier of the agent.
 		 */
-		public TestingAgent(UUID parentID, UUID agentID) {
+		public TestingAgent(BuiltinCapacitiesProvider provider, UUID parentID, UUID agentID) {
 			super(
-					Mockito.mock(BuiltinCapacitiesProvider.class),
+					provider,
 					parentID, agentID);
 		}
 
