@@ -447,7 +447,7 @@ public class ZeroMQNetworkService extends AbstractNetworkingExecutionThreadServi
 			super.startUp();
 			this.context = new ZContext();
 			this.sendingSocket = this.context.createSocket(ZMQ.PUB);
-			String strUri = NetworkUtil.toString(this.uriCandidate);
+			String strUri = this.uriCandidate.toString();
 			int port = this.sendingSocket.bindToRandomPort(strUri);
 			if (port != -1 && this.uriCandidate.getPort() == -1) {
 				this.validatedURI = new URI(
