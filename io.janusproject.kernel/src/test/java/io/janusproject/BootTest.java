@@ -80,6 +80,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import io.sarl.core.DefaultContextInteractions;
+import io.sarl.lang.SARLVersion;
+import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
@@ -113,6 +115,7 @@ public class BootTest {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
+	@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 	protected static class AgentMock extends Agent {
 		/**
 		 */
@@ -1099,6 +1102,7 @@ public class BootTest {
 		 * @mavengroupid $GroupId$
 		 * @mavenartifactid $ArtifactId$
 		 */
+		@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 		public static class RCAgent extends TestingAgent {
 
 			@Inject

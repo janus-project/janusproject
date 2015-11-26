@@ -36,6 +36,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import io.sarl.core.Lifecycle;
+import io.sarl.lang.SARLVersion;
+import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
@@ -71,6 +73,7 @@ public class Bug84 extends AbstractJanusRunTest {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
+	@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 	public static class KilledInInitAgent extends TestingAgent {
 
 		@Inject

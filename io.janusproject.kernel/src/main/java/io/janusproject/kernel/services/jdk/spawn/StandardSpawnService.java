@@ -29,6 +29,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.Service;
@@ -48,6 +49,8 @@ import org.arakhne.afc.vmutil.locale.Locale;
 
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
+import io.sarl.lang.SARLVersion;
+import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
@@ -97,10 +100,24 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
 	}
 
+	private static void ensureSarlSpecificationVersion(Class<? extends Agent> agentClazz) {
+		SarlSpecification annotation = agentClazz.getAnnotation(SarlSpecification.class);
+		if (annotation != null) {
+			String value = annotation.value();
+			if (!Strings.isNullOrEmpty(value) && SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING.equals(value)) {
+				return;
+			}
+		}
+		throw new InvalidSarlSpecificationException(agentClazz);
+	}
+
 	@Override
 	public synchronized UUID spawn(AgentContext parent, UUID agentID, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
 			try {
+				// Check if the version of the SARL agent class is compatible.
+				ensureSarlSpecificationVersion(agentClazz);
+
 				JustInTimeAgentInjectionModule agentInjectionModule = new JustInTimeAgentInjectionModule(parent.getID(), agentID);
 
 				Injector agentInjector = this.injector.createChildInjector(agentInjectionModule);
@@ -368,6 +385,27 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		 */
 		public SpawnServiceStopException(UUID agentID) {
 			super(Locale.getString(StandardSpawnService.class, "KILL_DISABLED", agentID)); //$NON-NLS-1$
+		}
+
+	}
+
+	/**
+	 * This exception is thrown when the agent to spawn is not generated according to a valid SARL specification version.
+	 *
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class InvalidSarlSpecificationException extends RuntimeException {
+
+		private static final long serialVersionUID = -3194494637438344108L;
+
+		/**
+		 * @param agentType the invalid type of agent.
+		 */
+		public InvalidSarlSpecificationException(Class<? extends Agent> agentType) {
+			super(Locale.getString(StandardSpawnService.class, "INVALID_SARL_SPECIFICATION", agentType.getName())); //$NON-NLS-1$
 		}
 
 	}
