@@ -20,6 +20,8 @@
 
 package io.janusproject.kernel.services.jdk.spawn;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -29,14 +31,14 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.Service;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Names;
 import io.janusproject.kernel.bic.BuiltinCapacityUtil;
 import io.janusproject.services.AbstractDependentService;
 import io.janusproject.services.contextspace.ContextSpaceService;
@@ -48,9 +50,12 @@ import org.arakhne.afc.vmutil.locale.Locale;
 
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
+import io.sarl.lang.SARLVersion;
+import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.lang.util.SynchronizedSet;
@@ -97,14 +102,29 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
 	}
 
+	private static void ensureSarlSpecificationVersion(Class<? extends Agent> agentClazz) {
+		SarlSpecification annotation = agentClazz.getAnnotation(SarlSpecification.class);
+		if (annotation != null) {
+			String value = annotation.value();
+			if (!Strings.isNullOrEmpty(value) && SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING.equals(value)) {
+				return;
+			}
+		}
+		throw new InvalidSarlSpecificationException(agentClazz);
+	}
+
 	@Override
 	public synchronized UUID spawn(AgentContext parent, UUID agentID, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
 			try {
-				JustInTimeAgentInjectionModule agentInjectionModule = new JustInTimeAgentInjectionModule(parent.getID(), agentID);
+				// Check if the version of the SARL agent class is compatible.
+				ensureSarlSpecificationVersion(agentClazz);
+
+				JustInTimeAgentInjectionModule agentInjectionModule = new JustInTimeAgentInjectionModule(
+						this.injector, agentClazz, parent.getID(), agentID);
 
 				Injector agentInjector = this.injector.createChildInjector(agentInjectionModule);
-				Agent agent = agentInjector.getInstance(agentClazz);
+				Agent agent = agentInjector.getInstance(Agent.class);
 				assert (agent != null);
 				this.agents.put(agent.getID(), agent);
 				fireAgentSpawned(parent, agent, params);
@@ -373,6 +393,27 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 	}
 
 	/**
+	 * This exception is thrown when the agent to spawn is not generated according to a valid SARL specification version.
+	 *
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class InvalidSarlSpecificationException extends RuntimeException {
+
+		private static final long serialVersionUID = -3194494637438344108L;
+
+		/**
+		 * @param agentType the invalid type of agent.
+		 */
+		public InvalidSarlSpecificationException(Class<? extends Agent> agentType) {
+			super(Locale.getString(StandardSpawnService.class, "INVALID_SARL_SPECIFICATION", agentType.getName())); //$NON-NLS-1$
+		}
+
+	}
+
+	/**
 	 * This exception is thrown when an agent cannot be spawned.
 	 *
 	 * @author $Author: sgalland$
@@ -404,22 +445,42 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static class JustInTimeAgentInjectionModule extends AbstractModule {
+	private static class JustInTimeAgentInjectionModule extends AbstractModule implements Provider<Agent> {
+
+		private final Injector injector;
+
+		private final Class<? extends Agent> agentType;
 
 		private final UUID parentID;
 
 		private final UUID agentID;
 
-		JustInTimeAgentInjectionModule(UUID parentID, UUID agentID) {
+		JustInTimeAgentInjectionModule(Injector injector, Class<? extends Agent> agentType, UUID parentID, UUID agentID) {
+			assert (injector != null);
+			assert (agentType != null);
 			assert (parentID != null);
+			this.injector = injector;
+			this.agentType = agentType;
 			this.parentID = parentID;
 			this.agentID = (agentID == null) ? UUID.randomUUID() : agentID;
 		}
 
 		@Override
 		public void configure() {
-			bind(Key.get(UUID.class, Names.named(Agent.PARENT_ID_KEY_NAME))).toInstance(this.parentID);
-			bind(Key.get(UUID.class, Names.named(Agent.AGENT_ID_KEY_NAME))).toInstance(this.agentID);
+			bind(Agent.class).toProvider(this);
+		}
+
+		@Override
+		public Agent get() {
+			try {
+				BuiltinCapacitiesProvider capacityProvider = this.injector.getInstance(BuiltinCapacitiesProvider.class);
+				Constructor<? extends Agent> constructor = this.agentType.getConstructor(
+						BuiltinCapacitiesProvider.class, UUID.class, UUID.class);
+				return constructor.newInstance(capacityProvider, this.parentID, this.agentID);
+			} catch (NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException exception) {
+				throw new CannotSpawnException(this.agentType, exception);
+			}
 		}
 
 	}

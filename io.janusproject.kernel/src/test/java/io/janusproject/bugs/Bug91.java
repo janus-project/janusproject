@@ -32,6 +32,8 @@ import io.janusproject.testutils.AbstractJanusRunTest;
 import org.junit.Before;
 import org.junit.Test;
 
+import io.sarl.lang.SARLVersion;
+import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
@@ -69,13 +71,13 @@ public class Bug91 extends AbstractJanusRunTest {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
+	@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 	public static class ExceptionInInitAgent extends TestingAgent {
 
-		@Inject
 		public ExceptionInInitAgent(
 				BuiltinCapacitiesProvider provider,
-				@Named(Agent.PARENT_ID_KEY_NAME) UUID parentID,
-				@Named(Agent.AGENT_ID_KEY_NAME) UUID agentID) {
+				UUID parentID,
+				UUID agentID) {
 			super(provider, parentID, agentID);
 		}
 
