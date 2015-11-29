@@ -119,10 +119,8 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 			try {
 				// Check if the version of the SARL agent class is compatible.
 				ensureSarlSpecificationVersion(agentClazz);
-
 				JustInTimeAgentInjectionModule agentInjectionModule = new JustInTimeAgentInjectionModule(
 						this.injector, agentClazz, parent.getID(), agentID);
-
 				Injector agentInjector = this.injector.createChildInjector(agentInjectionModule);
 				Agent agent = agentInjector.getInstance(Agent.class);
 				assert (agent != null);
