@@ -58,6 +58,7 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 	 * @param task - the JRE task that must be wrapped into the particular Janus implementation.
 	 */
 	JdkJanusScheduledFutureTask(RunnableScheduledFuture<V> task) {
+		assert (task != null);
 		this.task = task;
 	}
 
@@ -71,8 +72,12 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 	 *
 	 * @param thread - thread which is running this task.
 	 */
-	void setThread(Thread thread) {
-		this.thread = new WeakReference<>(thread);
+	synchronized void setThread(Thread thread) {
+		if (thread == null) {
+			this.thread = null;
+		} else {
+			this.thread = new WeakReference<>(thread);
+		}
 	}
 
 	/** Report the exception if one.
@@ -99,13 +104,13 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 	}
 
 	@Override
-	public Thread getThread() {
-		return this.thread.get();
+	public synchronized Thread getThread() {
+		return (this.thread == null) ? null : this.thread.get();
 	}
 
 	@Override
 	public boolean isCurrentThread() {
-		return Thread.currentThread() == this.thread.get();
+		return Thread.currentThread() == getThread();
 	}
 
 	@Override
