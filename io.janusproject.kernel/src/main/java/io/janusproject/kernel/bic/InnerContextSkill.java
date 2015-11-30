@@ -176,7 +176,7 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 
 	@Override
 	public boolean isInnerDefaultSpace(SpaceID spaceID) {
-		return isInnerDefaultSpace(spaceID.getID());
+		return spaceID.equals(innerContext.getDefaultSpace().getID());
 	}
 
 	@Override
