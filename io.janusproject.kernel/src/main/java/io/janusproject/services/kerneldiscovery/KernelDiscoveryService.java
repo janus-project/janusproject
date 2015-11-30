@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.kerneldiscovery;
 
-import io.janusproject.services.DependentService;
+package io.janusproject.services.kerneldiscovery;
 
 import java.net.URI;
 import java.util.Collection;
+
+import io.janusproject.services.DependentService;
 
 /** This class enables the Janus kernel to be distributed
  * other a network.
@@ -41,8 +42,8 @@ public interface KernelDiscoveryService extends DependentService {
 	URI getCurrentKernel();
 
 	/** Replies the URIs of the kernels, including the current kernels.
-	 * <p>
-	 * The replies collection must not be synchronized on the service.
+	 *
+	 * <p>The replies collection must not be synchronized on the service.
 	 *
 	 * @return the uri of the kernels.
 	 */

@@ -34,6 +34,7 @@ import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
@@ -51,6 +52,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.mockito.internal.verification.Times;
 
 /**
@@ -110,7 +112,10 @@ public class DefaultContextInteractionsSkillTest extends AbstractJanusTest {
 
 		this.lifeCapacity = mock(Lifecycle.class);
 
-		Agent agent = new Agent(UUID.randomUUID()) {
+		Agent agent = new Agent(
+				Mockito.mock(BuiltinCapacitiesProvider.class),
+				UUID.randomUUID(),
+				null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				return capacity.cast(DefaultContextInteractionsSkillTest.this.lifeCapacity);

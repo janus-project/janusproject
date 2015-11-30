@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.network;
 
-import io.janusproject.services.network.AbstractNetworkingService;
-import io.janusproject.services.network.NetworkServiceListener;
-import io.janusproject.services.network.NetworkUtil;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
+package io.janusproject.kernel.services.jdk.network;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -37,6 +31,13 @@ import java.util.List;
 import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.janusproject.services.network.AbstractNetworkingService;
+import io.janusproject.services.network.NetworkServiceListener;
+import io.janusproject.services.network.NetworkUtil;
+
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.Scope;
+import io.sarl.lang.core.SpaceID;
 
 /**
  * Service that is providing the network service but does not
@@ -54,23 +55,18 @@ public class NoNetworkService extends AbstractNetworkingService {
 
 	private URI localHost;
 
-	/**
+	/** Construct.
 	 */
 	@Inject
 	public NoNetworkService() {
 		//
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized URI getURI() {
 		return this.localHost;
 	}
 
-
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void addNetworkServiceListener(NetworkServiceListener listener) {
 		synchronized (this.listeners) {
@@ -78,8 +74,6 @@ public class NoNetworkService extends AbstractNetworkingService {
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void removeNetworkServiceListener(NetworkServiceListener listener) {
 		synchronized (this.listeners) {
@@ -87,38 +81,28 @@ public class NoNetworkService extends AbstractNetworkingService {
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void publish(Scope<?> scope, Event data)
 			throws Exception {
 		//
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void connectToRemoteSpaces(URI peerUri, SpaceID space,
 			NetworkEventReceivingListener listener) throws Exception {
 		//
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void disconnectFromRemoteSpace(URI peer, SpaceID space) throws Exception {
 		//
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void disconnectPeer(URI peer) throws Exception {
 		//
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStart() {
 		InetAddress adr = NetworkUtil.getLoopbackAddress();
@@ -134,22 +118,16 @@ public class NoNetworkService extends AbstractNetworkingService {
 		notifyStarted();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void doStop() {
 		notifyStopped();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Collections.emptyList();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceWeakDependencies() {
 		return Collections.emptyList();

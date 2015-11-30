@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.services.distributeddata;
 
 import com.google.common.collect.Multimap;
 
 /** Interface that represents a distributed multi-map.
- * <p>
- * A multi-map is a map that is associating a key to multiple values.
  *
+ * <p>A multi-map is a map that is associating a key to multiple values.
+ *
+ * @param <K> the type of the keys.
+ * @param <V> the type of the values.
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
- * @param <K>
- * @param <V>
  */
 public interface DMultiMap<K, V> extends Multimap<K, V> {
 
@@ -45,7 +46,7 @@ public interface DMultiMap<K, V> extends Multimap<K, V> {
 	 * possible.
 	 *
 	 * @return <code>true</code> if the changes are applied to the
-	 * underlying map, otherwise <code>false</code>.
+	 *     underlying map, otherwise <code>false</code>.
 	 */
 	boolean isBackedCollection();
 

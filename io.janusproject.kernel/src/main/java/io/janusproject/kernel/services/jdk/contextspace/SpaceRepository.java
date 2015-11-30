@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.contextspace;
 
-import io.janusproject.services.contextspace.SpaceRepositoryListener;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.util.TwoStepConstruction;
-import io.sarl.lang.core.Space;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.lang.core.SpaceSpecification;
-import io.sarl.lang.util.SynchronizedCollection;
-import io.sarl.util.Collections3;
+package io.janusproject.kernel.services.jdk.contextspace;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,14 +30,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.arakhne.afc.vmutil.ClassComparator;
-import org.arakhne.afc.vmutil.ObjectReferenceComparator;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import com.google.inject.Injector;
+import io.janusproject.services.contextspace.SpaceRepositoryListener;
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.util.TwoStepConstruction;
+import org.arakhne.afc.vmutil.ClassComparator;
+import org.arakhne.afc.vmutil.ObjectReferenceComparator;
+
+import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.lang.core.SpaceSpecification;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.util.Collections3;
 
 /**
  * A repository of spaces specific to a given context.
@@ -64,6 +64,7 @@ class SpaceRepository {
 	private static final Object[] NO_PARAMETERS = new Object[0];
 
 	private final String distributedSpaceSetName;
+
 	private final Injector injector;
 
 	/** Listener used as internal implementation for this repository.
@@ -98,7 +99,7 @@ class SpaceRepository {
 	 * @param injector - injector to used for creating new spaces.
 	 * @param listener - listener on the events in the space repository.
 	 */
-	public SpaceRepository(
+	SpaceRepository(
 			String distributedSpaceSetName,
 			DistributedDataStructureService distributedDataStructureService,
 			Injector injector,
@@ -141,9 +142,9 @@ class SpaceRepository {
 
 	private synchronized <S extends Space> S createSpaceInstance(
 			Class<? extends SpaceSpecification<S>> spec,
-					SpaceID spaceID,
-					boolean isLocalCreation,
-					Object[] creationParams) {
+			SpaceID spaceID,
+			boolean isLocalCreation,
+			Object[] creationParams) {
 		S space;
 		assert (spaceID.getSpaceSpecification() == null || spaceID.getSpaceSpecification().equals(spec))
 		: "The specification type is invalid"; //$NON-NLS-1$
@@ -193,7 +194,7 @@ class SpaceRepository {
 	 *
 	 * @param id - identifier of the space
 	 * @param isLocalDestruction - indicates if the destruction is initiated by
-	 * the local kernel.
+	 *     the local kernel.
 	 */
 	protected synchronized void removeLocalSpaceDefinition(SpaceID id, boolean isLocalDestruction) {
 		Space space = this.spaces.remove(id);
@@ -206,7 +207,7 @@ class SpaceRepository {
 	/** Remove all the remote spaces.
 	 *
 	 * @param isLocalDestruction - indicates if the destruction is initiated by
-	 * the local kernel.
+	 *     the local kernel.
 	 */
 	protected synchronized void removeLocalSpaceDefinitions(boolean isLocalDestruction) {
 		if (!this.spaces.isEmpty()) {
@@ -303,17 +304,6 @@ class SpaceRepository {
 	}
 
 	/**
-	 * Returns the first instance of a space with the specified SpaceID.
-	 *
-	 * @param spaceID - the identifier to retreive.
-	 * @return the space instance of <code>null</code> if none.
-	 */
-	public synchronized Space getSpace(SpaceID spaceID) {
-		return this.spaces.get(spaceID);
-	}
-
-
-	/**
 	 * Returns the collection of all spaces with the specified {@link SpaceSpecification} stored
 	 * in this repository.
 	 *
@@ -333,6 +323,16 @@ class SpaceRepository {
 					}
 				}),
 				this);
+	}
+
+	/**
+	 * Returns the first instance of a space with the specified SpaceID.
+	 *
+	 * @param spaceID - the identifier to retreive.
+	 * @return the space instance of <code>null</code> if none.
+	 */
+	public synchronized Space getSpace(SpaceID spaceID) {
+		return this.spaces.get(spaceID);
 	}
 
 	/** Notifies the listeners on the space creation.
@@ -368,14 +368,12 @@ class SpaceRepository {
 	 */
 	private class SpaceDMapListener implements DMapListener<SpaceID, Object[]> {
 
-		/**
+		/** Construct.
 		 */
-		public SpaceDMapListener() {
+		SpaceDMapListener() {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryAdded(SpaceID key, Object[] value) {
@@ -383,8 +381,6 @@ class SpaceRepository {
 			ensureLocalSpaceDefinition(key, value);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public void entryRemoved(SpaceID key, Object[] value) {
@@ -392,15 +388,11 @@ class SpaceRepository {
 			removeLocalSpaceDefinition(key, false);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void entryUpdated(SpaceID key, Object[] value) {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void mapCleared(boolean localClearing) {
 			removeLocalSpaceDefinitions(false);

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.modules.nonetwork;
 
-import io.janusproject.kernel.services.jdk.network.NoNetworkService;
-import io.janusproject.services.network.NetworkService;
+package io.janusproject.modules.nonetwork;
 
 import com.google.common.util.concurrent.Service;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
+import io.janusproject.kernel.services.jdk.network.NoNetworkService;
+import io.janusproject.services.network.NetworkService;
 
 /**
  * Module that provides the network layer based on the NoNetwork library.

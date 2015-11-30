@@ -29,6 +29,7 @@ import io.janusproject.services.logging.LogService;
 import io.janusproject.testutils.AbstractJanusTest;
 import io.janusproject.util.LoggerCreator;
 import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 
 import java.util.UUID;
@@ -66,19 +67,21 @@ public class LoggingSkillTest extends AbstractJanusTest {
 	@Mock
 	protected LogService logService;
 
-	@Mock
-	protected Logger parentLogger;
-
 	@InjectMocks
 	protected LoggingSkill skill;
 	
 	@Nullable
 	protected Logger logger;
 	
+	protected Logger parentLogger;
+
 	@Before
 	public void setUp() throws Exception {
 		UUID agentId = UUID.randomUUID();
-		this.owner = new Agent(agentId) {
+		this.owner = new Agent(
+				Mockito.mock(BuiltinCapacitiesProvider.class),
+				agentId,
+				null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				return capacity.cast(LoggingSkillTest.this.skill);
@@ -89,9 +92,10 @@ public class LoggingSkillTest extends AbstractJanusTest {
 		MockitoAnnotations.initMocks(this);
 		this.skill = Mockito.spy(this.skill);
 		//
-		Mockito.when(this.logService.getLogger()).thenReturn(this.parentLogger);
-		//
+		this.parentLogger = Mockito.spy(Logger.getLogger("ROOT"));
 		Mockito.when(this.parentLogger.getHandlers()).thenReturn(new Handler[] {this.handler});
+		//
+		Mockito.when(this.logService.getLogger()).thenReturn(this.parentLogger);
 		//
 		this.skill.install();
 		//
@@ -123,7 +127,7 @@ public class LoggingSkillTest extends AbstractJanusTest {
 		this.logger.setLevel(Level.ALL);
 		this.skill.error(message);
 		//
-		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
+		Mockito.verify(this.logger, new Times(3)).isLoggable(argument1.capture());
 		assertSame(Level.SEVERE, argument1.getValue());
 		//
 		Mockito.verify(this.logger, new Times(1)).log(argument2.capture(), argument3.capture());
@@ -164,7 +168,7 @@ public class LoggingSkillTest extends AbstractJanusTest {
 		this.logger.setLevel(Level.ALL);
 		this.skill.error(message, ex);
 		//
-		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
+		Mockito.verify(this.logger, new Times(3)).isLoggable(argument1.capture());
 		assertSame(Level.SEVERE, argument1.getValue());
 		//
 		Mockito.verify(this.logger, new Times(1)).log(argument2.capture(), argument3.capture(), argument5.capture());
@@ -203,7 +207,7 @@ public class LoggingSkillTest extends AbstractJanusTest {
 		this.logger.setLevel(Level.ALL);
 		this.skill.warning(message);
 		//
-		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
+		Mockito.verify(this.logger, new Times(3)).isLoggable(argument1.capture());
 		assertSame(Level.WARNING, argument1.getValue());
 		//
 		Mockito.verify(this.logger, new Times(1)).log(argument2.capture(), argument3.capture());
@@ -244,7 +248,7 @@ public class LoggingSkillTest extends AbstractJanusTest {
 		this.logger.setLevel(Level.ALL);
 		this.skill.warning(message, ex);
 		//
-		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
+		Mockito.verify(this.logger, new Times(3)).isLoggable(argument1.capture());
 		assertSame(Level.WARNING, argument1.getValue());
 		//
 		Mockito.verify(this.logger, new Times(1)).log(argument2.capture(), argument3.capture(), argument5.capture());
@@ -283,7 +287,7 @@ public class LoggingSkillTest extends AbstractJanusTest {
 		this.logger.setLevel(Level.ALL);
 		this.skill.info(message);
 		//
-		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
+		Mockito.verify(this.logger, new Times(3)).isLoggable(argument1.capture());
 		assertSame(Level.INFO, argument1.getValue());
 		//
 		Mockito.verify(this.logger, new Times(1)).log(argument2.capture(), argument3.capture());
@@ -331,7 +335,7 @@ public class LoggingSkillTest extends AbstractJanusTest {
 		this.logger.setLevel(Level.ALL);
 		this.skill.debug(message);
 		//
-		Mockito.verify(this.logger, new Times(1)).isLoggable(argument1.capture());
+		Mockito.verify(this.logger, new Times(3)).isLoggable(argument1.capture());
 		assertSame(Level.CONFIG, argument1.getValue());
 		//
 		Mockito.verify(this.logger, new Times(1)).log(argument2.capture(), argument3.capture());

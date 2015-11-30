@@ -19,9 +19,6 @@
  */
 package io.janusproject.testutils;
 
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DMapListener;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +33,8 @@ import com.hazelcast.core.ExecutionCallback;
 import com.hazelcast.core.IMap;
 import com.hazelcast.map.EntryProcessor;
 import com.hazelcast.map.MapInterceptor;
+import com.hazelcast.map.listener.MapListener;
+import com.hazelcast.map.listener.MapPartitionLostListener;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.aggregation.Aggregation;
 import com.hazelcast.mapreduce.aggregation.Supplier;
@@ -52,7 +51,7 @@ import com.hazelcast.query.Predicate;
  * @param <V>
  */
 @SuppressWarnings("all")
-public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
+public class HzMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 
 	private static final long serialVersionUID = -2482265223106773425L;
 
@@ -60,7 +59,7 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 	
 	/**
 	 */
-	public IMapMock() {
+	public HzMapMock() {
 		//
 	}
 
@@ -69,13 +68,6 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 	@Override
 	public void destroy() {
 		throw new UnsupportedOperationException();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public Object getId() {
-		return this.name;
 	}
 
 	/** {@inheritDoc}
@@ -99,33 +91,33 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 		throw new UnsupportedOperationException();
 	}
 
-	/** {@inheritDoc}
-	 */
-	@Override
-	public String addEntryListener(EntryListener<K, V> arg0, boolean arg1) {
-		return UUID.randomUUID().toString();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public String addEntryListener(EntryListener<K, V> arg0, K arg1, boolean arg2) {
-		return UUID.randomUUID().toString();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public String addEntryListener(EntryListener<K, V> arg0, Predicate<K, V> arg1, boolean arg2) {
-		return UUID.randomUUID().toString();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public String addEntryListener(EntryListener<K, V> arg0, Predicate<K, V> arg1, K arg2, boolean arg3) {
-		return UUID.randomUUID().toString();
-	}
+//	/** {@inheritDoc}
+//	 */
+//	@Override
+//	public String addEntryListener(EntryListener<K, V> arg0, boolean arg1) {
+//		return UUID.randomUUID().toString();
+//	}
+//
+//	/** {@inheritDoc}
+//	 */
+//	@Override
+//	public String addEntryListener(EntryListener<K, V> arg0, K arg1, boolean arg2) {
+//		return UUID.randomUUID().toString();
+//	}
+//
+//	/** {@inheritDoc}
+//	 */
+//	@Override
+//	public String addEntryListener(EntryListener<K, V> arg0, Predicate<K, V> arg1, boolean arg2) {
+//		return UUID.randomUUID().toString();
+//	}
+//
+//	/** {@inheritDoc}
+//	 */
+//	@Override
+//	public String addEntryListener(EntryListener<K, V> arg0, Predicate<K, V> arg1, K arg2, boolean arg3) {
+//		return UUID.randomUUID().toString();
+//	}
 
 	/** {@inheritDoc}
 	 */
@@ -138,29 +130,6 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 	 */
 	@Override
 	public String addInterceptor(MapInterceptor arg0) {
-		throw new UnsupportedOperationException();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public String addLocalEntryListener(EntryListener<K, V> arg0) {
-		throw new UnsupportedOperationException();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public String addLocalEntryListener(EntryListener<K, V> arg0,
-			Predicate<K, V> arg1, boolean arg2) {
-		throw new UnsupportedOperationException();
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public String addLocalEntryListener(EntryListener<K, V> arg0,
-			Predicate<K, V> arg1, K arg2, boolean arg3) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -439,6 +408,14 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 	/** {@inheritDoc}
 	 */
 	@Override
+	public boolean tryLock(K key, long time, TimeUnit timeunit, long leaseTime, TimeUnit leaseTimeunit)
+			throws InterruptedException {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
 	public boolean tryLock(K arg0, long arg1, TimeUnit arg2)
 			throws InterruptedException {
 		throw new UnsupportedOperationException();
@@ -491,6 +468,119 @@ public class IMapMock<K,V> extends HashMap<K, V> implements IMap<K, V> {
 	@Override
 	public void loadAll(Set<K> arg0, boolean arg1) {
 		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addLocalEntryListener(MapListener listener) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addLocalEntryListener(EntryListener listener) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addLocalEntryListener(MapListener listener, Predicate<K, V> predicate, boolean includeValue) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addLocalEntryListener(EntryListener listener, Predicate<K, V> predicate, boolean includeValue) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addLocalEntryListener(MapListener listener, Predicate<K, V> predicate, K key, boolean includeValue) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addLocalEntryListener(EntryListener listener, Predicate<K, V> predicate, K key,
+			boolean includeValue) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addEntryListener(MapListener listener, boolean includeValue) {
+		return UUID.randomUUID().toString();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addEntryListener(EntryListener listener, boolean includeValue) {
+		return UUID.randomUUID().toString();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addPartitionLostListener(MapPartitionLostListener listener) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public boolean removePartitionLostListener(String id) {
+		throw new UnsupportedOperationException();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addEntryListener(MapListener listener, K key, boolean includeValue) {
+		return UUID.randomUUID().toString();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addEntryListener(EntryListener listener, K key, boolean includeValue) {
+		return UUID.randomUUID().toString();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addEntryListener(MapListener listener, Predicate<K, V> predicate, boolean includeValue) {
+		return UUID.randomUUID().toString();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addEntryListener(EntryListener listener, Predicate<K, V> predicate, boolean includeValue) {
+		return UUID.randomUUID().toString();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addEntryListener(MapListener listener, Predicate<K, V> predicate, K key, boolean includeValue) {
+		return UUID.randomUUID().toString();
+	}
+
+	/** {@inheritDoc}
+	 */
+	@Override
+	public String addEntryListener(EntryListener listener, Predicate<K, V> predicate, K key, boolean includeValue) {
+		return UUID.randomUUID().toString();
 	}
 
 }

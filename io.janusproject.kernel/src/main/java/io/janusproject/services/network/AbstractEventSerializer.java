@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.services.network;
 
 import java.util.UUID;
@@ -44,11 +45,6 @@ public abstract class AbstractEventSerializer implements EventSerializer {
 		this.encrypter = encrypter;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @throws Exception
-	 */
 	@Override
 	public byte[] serializeContextID(UUID id) throws Exception {
 		assert (this.encrypter != null) : "Error in the injection of the encrypter"; //$NON-NLS-1$

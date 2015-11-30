@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.bic;
 
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.spawn.SpawnService;
-import io.janusproject.services.spawn.SpawnService.AgentKillException;
-import io.sarl.core.AgentSpawned;
-import io.sarl.core.Destroy;
-import io.sarl.core.Initialize;
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.EventListener;
-import io.sarl.lang.core.Skill;
+package io.janusproject.kernel.bic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +29,18 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.Queues;
 import com.google.common.eventbus.AsyncSyncEventBus;
 import com.google.inject.Inject;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.services.spawn.SpawnService.AgentKillException;
+
+import io.sarl.core.AgentSpawned;
+import io.sarl.core.Destroy;
+import io.sarl.core.Initialize;
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.EventListener;
+import io.sarl.lang.core.Skill;
 
 /** Janus implementation of an internal skill that provides
  * an event bus to notify the different components of an agent.
@@ -89,14 +90,12 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 	 * @param addressInInnerDefaultSpace - address of the owner of this skill
 	 *                                     in its inner default space.
 	 */
-	public InternalEventBusSkill(Agent agent, Address addressInInnerDefaultSpace) {
+	InternalEventBusSkill(Agent agent, Address addressInInnerDefaultSpace) {
 		super(agent);
 		this.agentAsEventListener = new AgentEventListener();
 		this.agentAddressInInnerDefaultSpace = addressInInnerDefaultSpace;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()
@@ -183,7 +182,8 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		return this.agentAsEventListener;
 	}
 
-	/**
+	/** Definition of the listener on events on the agent's bus.
+	 *
 	 * @author $Author: srodriguez$
 	 * @author $Author: ngaud$
 	 * @version $FullVersion$
@@ -199,7 +199,7 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		private boolean isKilled;
 
 		@SuppressWarnings("synthetic-access")
-		public AgentEventListener() {
+		AgentEventListener() {
 			this.aid = InternalEventBusSkill.this.getOwner().getID();
 		}
 
@@ -247,22 +247,22 @@ class InternalEventBusSkill extends Skill implements InternalEventBusCapacity {
 		}
 
 		@SuppressWarnings("synthetic-access")
-		private void fireEnqueuedEvents(InternalEventBusSkill s) {
-			Queue<Event> q = this.buffer;
-			if (q != null && !q.isEmpty()) {
+		private void fireEnqueuedEvents(InternalEventBusSkill skill) {
+			Queue<Event> queue = this.buffer;
+			if (queue != null && !queue.isEmpty()) {
 				this.buffer = null;
-				for (Event evt : q) {
-					s.eventBus.post(evt);
+				for (Event evt : queue) {
+					skill.eventBus.post(evt);
 				}
 			}
 		}
 
 		@SuppressWarnings("synthetic-access")
-		private void killOwner(InternalEventBusSkill s) {
+		private void killOwner(InternalEventBusSkill skill) {
 			try {
-				s.spawnService.killAgent(this.aid);
+				skill.spawnService.killAgent(this.aid);
 			} catch (AgentKillException e) {
-				s.logger.error(InternalEventBusSkill.class,
+				skill.logger.error(InternalEventBusSkill.class,
 						"CANNOT_KILL_AGENT", this.aid, e); //$NON-NLS-1$
 			}
 		}

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.util.ListenerCollection;
+package io.janusproject.kernel.services.jdk.executors;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.RunnableFuture;
@@ -30,6 +28,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.google.inject.Inject;
+import io.janusproject.JanusConfig;
+import io.janusproject.util.ListenerCollection;
 
 /**
  * Executor that support uncaucht exceptions and interruptable threads.
@@ -112,50 +112,42 @@ public class JdkThreadPoolExecutor extends ThreadPoolExecutor {
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
 		// This function is invoked when the task was submited
 		return new JdkJanusFutureTask<>(callable);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
 		// This function is invoked when the task was submited
 		return new JdkJanusFutureTask<>(runnable, value);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
-	protected void beforeExecute(Thread t, Runnable r) {
+	protected void beforeExecute(Thread thread, Runnable runnable) {
 		// Was the task submitted (if future task) or executed?
-		if (r instanceof JdkJanusFutureTask<?>) {
-			((JdkJanusFutureTask<?>) r).setThread(t);
+		if (runnable instanceof JdkJanusFutureTask<?>) {
+			((JdkJanusFutureTask<?>) runnable).setThread(thread);
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
-	protected void afterExecute(Runnable r, Throwable t) {
+	protected void afterExecute(Runnable runnable, Throwable throwable) {
 		Thread th;
 		JdkJanusFutureTask<?> task;
-		if (r instanceof JdkJanusFutureTask<?>) {
-			task = (JdkJanusFutureTask<?>) r;
+		if (runnable instanceof JdkJanusFutureTask<?>) {
+			task = (JdkJanusFutureTask<?>) runnable;
 			th = task.getThread();
 		} else {
 			task = null;
 			th = Thread.currentThread();
 		}
-		if (t != null && task != null) {
+		if (throwable != null && task != null) {
 			// Was the task submitted (if future task) or executed?
-			JdkExecutorUtil.log(th, t);
+			JdkExecutorUtil.log(th, throwable);
 		}
-		fireTaskFinished(th, r);
+		fireTaskFinished(th, runnable);
 	}
 
 }

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services;
 
-import io.janusproject.services.infrastructure.InfrastructureService;
+package io.janusproject.services;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -33,11 +32,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.arakhne.afc.vmutil.ClassComparator;
-
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.State;
 import com.google.common.util.concurrent.ServiceManager;
+import io.janusproject.services.infrastructure.InfrastructureService;
+import org.arakhne.afc.vmutil.ClassComparator;
 
 
 /** Tools for launching and stopping services.
@@ -54,8 +53,8 @@ public final class Services {
 	}
 
 	/** Start the services associated to the given service manager.
-	 * <p>
-	 * This starting function supports the {@link DependentService prioritized services}.
+	 *
+	 * <p>This starting function supports the {@link DependentService prioritized services}.
 	 *
 	 * @param manager - the manager of the services to start.
 	 */
@@ -64,8 +63,8 @@ public final class Services {
 	}
 
 	/** Start the services associated to the given service manager.
-	 * <p>
-	 * This starting function supports the {@link DependentService prioritized services}.
+	 *
+	 * <p>This starting function supports the {@link DependentService prioritized services}.
 	 *
 	 * @param manager - the manager of the services to start.
 	 */
@@ -85,8 +84,8 @@ public final class Services {
 	}
 
 	/** Stop the services associated to the given service manager.
-	 * <p>
-	 * This stopping function supports the {@link DependentService prioritized services}.
+	 *
+	 * <p>This stopping function supports the {@link DependentService prioritized services}.
 	 *
 	 * @param manager - the manager of the services to stop.
 	 */
@@ -95,8 +94,8 @@ public final class Services {
 	}
 
 	/** Stop the services associated to the given service manager.
-	 * <p>
-	 * This stopping function supports the {@link DependentService prioritized services}.
+	 *
+	 * <p>This stopping function supports the {@link DependentService prioritized services}.
 	 *
 	 * @param manager - the manager of the services to stop.
 	 */
@@ -312,23 +311,32 @@ public final class Services {
 		accessors.runInfrastructureServicesAfter(infraServices);
 	}
 
-	/**
+	/** Node that describes a service dependency.
+	 *
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
 	 */
 	private static class DependencyNode {
 
 		private Service service;
+
 		private final Class<? extends Service> type;
+
 		private final Collection<DependencyNode> nextServices = new ArrayList<>();
+
 		private final Collection<DependencyNode> nextWeakServices = new ArrayList<>();
+
 		private final Collection<WeakReference<DependencyNode>> asyncStateServices = new ArrayList<>();
 
-		public DependencyNode(DependentService service, Class<? extends Service> type) {
+		DependencyNode(DependentService service, Class<? extends Service> type) {
 			assert (service != null);
 			this.service = service;
 			this.type = type;
 		}
 
-		public DependencyNode(Class<? extends Service> type) {
+		DependencyNode(Class<? extends Service> type) {
 			this.service = null;
 			this.type = type;
 		}
@@ -357,8 +365,6 @@ public final class Services {
 			return this.nextWeakServices;
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public String toString() {
 			if (this.service == null) {
@@ -369,7 +375,8 @@ public final class Services {
 
 	}
 
-	/**
+	/** Accessors for running services.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -393,7 +400,8 @@ public final class Services {
 
 	}
 
-	/**
+	/** Accessors for running services at start-up.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -401,9 +409,9 @@ public final class Services {
 	 */
 	private static class StartingPhaseAccessors implements Accessors {
 
-		/**
+		/** Construct.
 		 */
-		public StartingPhaseAccessors() {
+		StartingPhaseAccessors() {
 			//
 		}
 
@@ -411,30 +419,36 @@ public final class Services {
 		public boolean matches(State element) {
 			return element == State.NEW;
 		}
+
 		@Override
 		public void runFreeServicesBefore(List<Service> freeServices) {
 			//
 		}
+
 		@Override
 		public void runInfrastructureServicesBefore(List<Service> infraServices) {
 			for (Service serv : infraServices) {
 				serv.startAsync().awaitRunning();
 			}
 		}
+
 		@Override
 		public boolean isAsyncStateWaitingEnabled() {
 			return true;
 		}
+
 		@Override
 		public void run(Service service) {
 			service.startAsync().awaitRunning();
 		}
+
 		@Override
 		public void runFreeServicesAfter(List<Service> freeServices) {
 			for (Service serv : freeServices) {
 				serv.startAsync();
 			}
 		}
+
 		@Override
 		public void runInfrastructureServicesAfter(List<Service> infraServices) {
 			//
@@ -442,7 +456,8 @@ public final class Services {
 
 	}
 
-	/**
+	/** Accessors for running agents at end.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -450,9 +465,9 @@ public final class Services {
 	 */
 	private static class StoppingPhaseAccessors implements Accessors {
 
-		/**
+		/** Construct.
 		 */
-		public StoppingPhaseAccessors() {
+		StoppingPhaseAccessors() {
 			//
 		}
 
@@ -460,28 +475,34 @@ public final class Services {
 		public boolean matches(State element) {
 			return element != State.TERMINATED && element != State.STOPPING;
 		}
+
 		@Override
 		public void runFreeServicesBefore(List<Service> freeServices) {
 			for (Service serv : freeServices) {
 				serv.stopAsync();
 			}
 		}
+
 		@Override
 		public void runInfrastructureServicesBefore(List<Service> infraServices) {
 			//
 		}
+
 		@Override
 		public boolean isAsyncStateWaitingEnabled() {
 			return false;
 		}
+
 		@Override
 		public void run(Service service) {
 			service.stopAsync().awaitTerminated();
 		}
+
 		@Override
 		public void runFreeServicesAfter(List<Service> freeServices) {
 			//
 		}
+
 		@Override
 		public void runInfrastructureServicesAfter(List<Service> infraServices) {
 			for (Service serv : infraServices) {

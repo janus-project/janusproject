@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.modules;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.services.network.NetworkUtil;
-import io.janusproject.util.LoggerCreator;
+package io.janusproject.modules;
 
 import java.io.IOError;
 import java.io.IOException;
@@ -37,8 +34,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.arakhne.afc.vmutil.FileSystem;
-
 import com.google.common.base.Strings;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
@@ -51,6 +46,10 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
+import io.janusproject.JanusConfig;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.util.LoggerCreator;
+import org.arakhne.afc.vmutil.FileSystem;
 
 /**
  * The module configures the minimum requirements for
@@ -63,9 +62,6 @@ import com.google.inject.spi.TypeListener;
  */
 public class BootModule extends AbstractModule {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void configure() {
 		// Custom logger
@@ -91,7 +87,8 @@ public class BootModule extends AbstractModule {
 		}
 	}
 
-	/**
+	/** Create a context identifier.
+	 *
 	 * @return the contextID
 	 */
 	@Provides
@@ -134,7 +131,8 @@ public class BootModule extends AbstractModule {
 		return UUID.fromString(str);
 	}
 
-	/**
+	/** Construct a space identifier.
+	 *
 	 * @return the spaceID
 	 */
 	@Provides
@@ -178,7 +176,8 @@ public class BootModule extends AbstractModule {
 		return pubUri;
 	}
 
-	/**
+	/** Provider of public URI for the network layer.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -186,9 +185,6 @@ public class BootModule extends AbstractModule {
 	 */
 	private static class PublicURIProvider implements Provider<String> {
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@SuppressWarnings("synthetic-access")
 		@Override
 		public String get() {
@@ -197,7 +193,8 @@ public class BootModule extends AbstractModule {
 
 	}
 
-	/**
+	/** Provider of logger.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -207,9 +204,9 @@ public class BootModule extends AbstractModule {
 
 		private final AtomicBoolean isInit = new AtomicBoolean(false);
 
-		/**
+		/** Construct.
 		 */
-		public LoggerMemberListener() {
+		LoggerMemberListener() {
 			//
 		}
 
@@ -229,8 +226,6 @@ public class BootModule extends AbstractModule {
 			}
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
 			for (Field field : type.getRawType().getDeclaredFields()) {
@@ -245,8 +240,9 @@ public class BootModule extends AbstractModule {
 
 	}
 
-	/**
-	 * @param <T>
+	/** Provider of logger.
+	 *
+	 * @param <T> the type of the type of the field.
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -256,15 +252,14 @@ public class BootModule extends AbstractModule {
 
 		private final Field field;
 
-		/**
-		 * @param field
+		/** Construct.
+		 *
+		 * @param field the field to inject.
 		 */
-		public LoggerMemberInjector(Field field) {
+		LoggerMemberInjector(Field field) {
 			this.field = field;
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void injectMembers(T instance) {
 			Logger logger = LoggerCreator.createLogger(this.field.getDeclaringClass().getName());

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.bic;
+
+import java.util.UUID;
 
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Lifecycle;
@@ -32,8 +35,6 @@ import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.Scopes;
 
-import java.util.UUID;
-
 /** Skill to access to the default interaction context.
  *
  * @author $Author: srodriguez$
@@ -41,11 +42,13 @@ import java.util.UUID;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class DefaultContextInteractionsSkill extends Skill implements
-DefaultContextInteractions {
+class DefaultContextInteractionsSkill extends Skill
+		implements DefaultContextInteractions {
 
 	private AgentContext parentContext;
+
 	private EventSpace defaultSpace;
+
 	private Address addressInParentDefaultSpace;
 
 
@@ -54,13 +57,11 @@ DefaultContextInteractions {
 	 * @param agent - owner of the skill.
 	 * @param parentContext - reference to the parent context.
 	 */
-	public DefaultContextInteractionsSkill(Agent agent, AgentContext parentContext) {
+	DefaultContextInteractionsSkill(Agent agent, AgentContext parentContext) {
 		super(agent);
 		this.parentContext = parentContext;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()
@@ -114,8 +115,8 @@ DefaultContextInteractions {
 	}
 
 	@Override
-	public UUID spawn(Class<? extends Agent> aAgent, Object... params) {
-		return getSkill(Lifecycle.class).spawnInContext(aAgent, this.parentContext, params);
+	public UUID spawn(Class<? extends Agent> agentType, Object... params) {
+		return getSkill(Lifecycle.class).spawnInContext(agentType, this.parentContext, params);
 	}
 
 	@Override

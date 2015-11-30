@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.bic;
 
-import io.janusproject.services.logging.LogService;
-import io.janusproject.util.LoggerCreator;
-import io.sarl.core.Logging;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.Skill;
+package io.janusproject.kernel.bic;
 
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.arakhne.afc.vmutil.locale.Locale;
-
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.util.LoggerCreator;
+import org.arakhne.afc.vmutil.locale.Locale;
+
+import io.sarl.core.Logging;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.Skill;
 
 /** Janus implementation of SARL's {@link Logging} built-in capacity.
  *
@@ -53,7 +53,7 @@ class LoggingSkill extends Skill implements Logging {
 	/**
 	 * @param agent - owner of this skill.
 	 */
-	public LoggingSkill(Agent agent) {
+	LoggingSkill(Agent agent) {
 		super(agent);
 	}
 
@@ -82,12 +82,12 @@ class LoggingSkill extends Skill implements Logging {
 
 	@Override
 	public void setLoggingName(String name) {
-		String n = name;
-		if (n == null || n.isEmpty()) {
-			n = Locale.getString(LoggingSkill.class, "AGENT_NAME", getOwner().getID()); //$NON-NLS-1$
+		String loggingName = name;
+		if (loggingName == null || loggingName.isEmpty()) {
+			loggingName = Locale.getString(LoggingSkill.class, "AGENT_NAME", getOwner().getID()); //$NON-NLS-1$
 		}
 		Level level = this.logger.getLevel();
-		this.logger = LoggerCreator.createLogger(n, this.logService.getLogger());
+		this.logger = LoggerCreator.createLogger(loggingName, this.logService.getLogger());
 		this.logger.setLevel(level);
 	}
 
@@ -99,11 +99,11 @@ class LoggingSkill extends Skill implements Logging {
 	@Override
 	public void error(Object message, Throwable exception) {
 		if (this.logger.isLoggable(Level.SEVERE)) {
-			String m = Strings.nullToEmpty(message == null ? null : message.toString());
+			String loggableMessage = Strings.nullToEmpty(message == null ? null : message.toString());
 			if (exception != null) {
-				this.logger.log(Level.SEVERE, m, exception);
+				this.logger.log(Level.SEVERE, loggableMessage, exception);
 			} else {
-				this.logger.log(Level.SEVERE, m);
+				this.logger.log(Level.SEVERE, loggableMessage);
 			}
 		}
 	}
@@ -111,19 +111,19 @@ class LoggingSkill extends Skill implements Logging {
 	@Override
 	public void error(Object message) {
 		if (this.logger.isLoggable(Level.SEVERE)) {
-			String m = Strings.nullToEmpty(message == null ? null : message.toString());
-			this.logger.log(Level.SEVERE, m);
+			String loggeableMessage = Strings.nullToEmpty(message == null ? null : message.toString());
+			this.logger.log(Level.SEVERE, loggeableMessage);
 		}
 	}
 
 	@Override
 	public void warning(Object message, Throwable exception) {
 		if (this.logger.isLoggable(Level.WARNING)) {
-			String m = Strings.nullToEmpty(message == null ? null : message.toString());
+			String loggeableMessage = Strings.nullToEmpty(message == null ? null : message.toString());
 			if (exception != null) {
-				this.logger.log(Level.WARNING, m, exception);
+				this.logger.log(Level.WARNING, loggeableMessage, exception);
 			} else {
-				this.logger.log(Level.WARNING, m);
+				this.logger.log(Level.WARNING, loggeableMessage);
 			}
 		}
 	}
@@ -131,24 +131,24 @@ class LoggingSkill extends Skill implements Logging {
 	@Override
 	public void warning(Object message) {
 		if (this.logger.isLoggable(Level.WARNING)) {
-			String m = Strings.nullToEmpty(message == null ? null : message.toString());
-			this.logger.log(Level.WARNING, m);
+			String loggeableMessage = Strings.nullToEmpty(message == null ? null : message.toString());
+			this.logger.log(Level.WARNING, loggeableMessage);
 		}
 	}
 
 	@Override
 	public void info(Object message) {
 		if (this.logger.isLoggable(Level.INFO)) {
-			String m = Strings.nullToEmpty(message == null ? null : message.toString());
-			this.logger.log(Level.INFO, m);
+			String loggeableMessage = Strings.nullToEmpty(message == null ? null : message.toString());
+			this.logger.log(Level.INFO, loggeableMessage);
 		}
 	}
 
 	@Override
 	public void debug(Object message) {
 		if (this.logger.isLoggable(Level.CONFIG)) {
-			String m = Strings.nullToEmpty(message == null ? null : message.toString());
-			this.logger.log(Level.CONFIG, m);
+			String loggeableMessage = Strings.nullToEmpty(message == null ? null : message.toString());
+			this.logger.log(Level.CONFIG, loggeableMessage);
 		}
 	}
 

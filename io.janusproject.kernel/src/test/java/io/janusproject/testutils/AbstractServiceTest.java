@@ -93,7 +93,7 @@ public abstract class AbstractServiceTest<S extends Service> extends AbstractJan
 				} finally {
 					f.setAccessible(isAcc);
 				}
-			} catch (Throwable _) {
+			} catch (Throwable exception) {
 				//
 			}
 			return null;

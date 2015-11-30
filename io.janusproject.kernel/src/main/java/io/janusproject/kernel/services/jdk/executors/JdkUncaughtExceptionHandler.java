@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.spawn.SpawnService;
-import io.sarl.core.Initialize;
-import io.sarl.lang.core.Agent;
+package io.janusproject.kernel.services.jdk.executors;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import org.arakhne.afc.vmutil.locale.Locale;
-
 import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.spawn.SpawnService;
+import org.arakhne.afc.vmutil.locale.Locale;
+
+import io.sarl.core.Initialize;
+import io.sarl.lang.core.Agent;
 
 /**
  * A factory of threads for the Janus platform.
@@ -62,25 +62,25 @@ public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler, Su
 		this.logger = logger;
 	}
 
-	private void log(Throwable e, String taskId, String taskName) {
-		assert (e != null);
-		Throwable cause = e;
+	private void log(Throwable exception, String taskId, String taskName) {
+		assert (exception != null);
+		Throwable cause = exception;
 		while (cause.getCause() != null && cause.getCause() != cause) {
 			cause = cause.getCause();
 		}
 		LogRecord record;
-		if (cause instanceof ChuckNorrisException || e instanceof ChuckNorrisException) {
+		if (cause instanceof ChuckNorrisException || exception instanceof ChuckNorrisException) {
 			// Chuck Norris cannot be catched!
 			return;
 		}
-		if (cause instanceof CancellationException || e instanceof CancellationException) {
+		if (cause instanceof CancellationException || exception instanceof CancellationException) {
 			// Avoid too much processing if the error is not loggeable
 			if (!this.logger.isLoggeable(Level.FINEST)) {
 				return;
 			}
 			record = new LogRecord(Level.FINEST,
 					Locale.getString("CANCEL_TASK", taskId, taskName)); //$NON-NLS-1$
-		} else if (cause instanceof InterruptedException || e instanceof InterruptedException) {
+		} else if (cause instanceof InterruptedException || exception instanceof InterruptedException) {
 			// Avoid too much processing if the error is not loggeable
 			if (!this.logger.isLoggeable(Level.FINEST)) {
 				return;
@@ -111,25 +111,21 @@ public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler, Su
 		this.logger.log(record);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
-	public void uncaughtException(Thread t, Throwable e) {
-		log(e, Long.toString(t.getId()), t.getName());
+	public void uncaughtException(Thread thread, Throwable exception) {
+		log(exception, Long.toString(thread.getId()), thread.getName());
 	}
 
 	/** Replies if the given object is an event that may cause agent stop when an error occured in the event's handler.
 	 *
-	 * @param o - the event to test.
+	 * @param object - the event to test.
 	 * @return <code>true</code> if the agent must stop if an error occured in the handler for the given event.
 	 */
 	@SuppressWarnings("static-method")
-	public boolean isAutoKillEvent(Object o) {
-		return o instanceof Initialize;
+	public boolean isAutoKillEvent(Object object) {
+		return object instanceof Initialize;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void handleException(Throwable exception,
 			SubscriberExceptionContext context) {

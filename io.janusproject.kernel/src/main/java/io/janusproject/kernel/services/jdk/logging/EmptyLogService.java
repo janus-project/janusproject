@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.logging;
 
-import io.janusproject.services.logging.LogService;
+package io.janusproject.kernel.services.jdk.logging;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
+import io.janusproject.services.logging.LogService;
 
 /** This class provides an implementation of the {@link LogService}
  * that outputs nothing.
@@ -43,7 +43,7 @@ public class EmptyLogService extends AbstractService implements LogService {
 
 	private final Logger logger;
 
-	/**
+	/** Construct.
 	 */
 	public EmptyLogService() {
 		this.logger = Logger.getLogger(EmptyLogService.class.getName());

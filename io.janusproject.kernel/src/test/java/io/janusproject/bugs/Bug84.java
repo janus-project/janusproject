@@ -20,19 +20,26 @@
 
 package io.janusproject.bugs;
 
-import io.janusproject.Boot;
-import io.janusproject.services.network.NetworkUtil;
-import io.janusproject.testutils.AbstractJanusRunTest;
-import io.sarl.core.Lifecycle;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
 import java.net.InetAddress;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import com.google.inject.name.Named;
+import io.janusproject.Boot;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractJanusRunTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import io.sarl.core.Lifecycle;
+import io.sarl.lang.SARLVersion;
+import io.sarl.lang.annotation.SarlSpecification;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
 /** Unit test for the issue #84: Problem with calling killMe in Initialize behavior of an agent.
  *
@@ -66,14 +73,14 @@ public class Bug84 extends AbstractJanusRunTest {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
+	@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 	public static class KilledInInitAgent extends TestingAgent {
 
-		public KilledInInitAgent(UUID parentID) {
-			super(parentID);
-		}
-
-		public KilledInInitAgent(UUID parentID, UUID agentID) {
-			super(parentID, agentID);
+		public KilledInInitAgent(
+				BuiltinCapacitiesProvider provider,
+				UUID parentID,
+				UUID agentID) {
+			super(provider, parentID, agentID);
 		}
 
 		@Override

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public interface DMapListener<K, V> extends EventListener {
 	/** Invoked when the map was cleared.
 	 *
 	 * @param localClearing - indicates if the clear in local (<code>true</code>)
-	 * or for all the nodes on the network (<code>false</code>).
+	 *     or for all the nodes on the network (<code>false</code>).
 	 */
 	void mapCleared(boolean localClearing);
 

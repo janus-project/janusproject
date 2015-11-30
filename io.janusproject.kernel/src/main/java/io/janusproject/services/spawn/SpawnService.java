@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.spawn;
 
-import io.janusproject.services.DependentService;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.AgentContext;
+package io.janusproject.services.spawn;
 
 import java.util.UUID;
 
+import io.janusproject.services.DependentService;
 import org.arakhne.afc.vmutil.locale.Locale;
+
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.AgentContext;
 
 /** This service provides the tools to manage
  * the life-cycle of the agents.
@@ -64,18 +65,18 @@ public interface SpawnService extends DependentService {
 	 */
 	void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
 
+	/** Add a listener on the changes in the current state of an agent.
+	 *
+	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
+	 */
+	void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
+
 	/** Remove a listener on the changes in the current state of an agent.
 	 *
 	 * @param id - identifier of the agent.
 	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
 	void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
-
-	/** Add a listener on the changes in the current state of an agent.
-	 *
-	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
-	 */
-	void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
 
 	/** Remove a listener on the changes in the current state of an agent.
 	 *
@@ -95,18 +96,6 @@ public interface SpawnService extends DependentService {
 	 */
 	void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener);
 
-	/** Change the agent factory.
-	 *
-	 * @param factory - factory of agents.
-	 */
-	void setAgentFactory(AgentFactory factory);
-
-	/** Replies the agent factory.
-	 *
-	 * @return the agent factory.
-	 */
-	AgentFactory getAgentFactory();
-
 	/** Exception occurs when an agent cannot be killed.
 	 *
 	 * @author $Author: sgalland$
@@ -114,7 +103,7 @@ public interface SpawnService extends DependentService {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	public static class AgentKillException extends Exception {
+	class AgentKillException extends Exception {
 
 		private static final long serialVersionUID = -7911946040378324212L;
 

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.modules.eventserial;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.kernel.services.gson.GsonEventSerializer;
-import io.janusproject.kernel.services.jdk.network.AESEventEncrypter;
-import io.janusproject.kernel.services.jdk.network.PlainTextEventEncrypter;
-import io.janusproject.services.network.EventEncrypter;
-import io.janusproject.services.network.EventSerializer;
-import io.janusproject.services.network.NetworkConfig;
+package io.janusproject.modules.eventserial;
 
 import java.util.Properties;
 
@@ -34,6 +27,13 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import io.janusproject.JanusConfig;
+import io.janusproject.kernel.services.gson.GsonEventSerializer;
+import io.janusproject.kernel.services.jdk.network.AESEventEncrypter;
+import io.janusproject.kernel.services.jdk.network.PlainTextEventEncrypter;
+import io.janusproject.services.network.EventEncrypter;
+import io.janusproject.services.network.EventSerializer;
+import io.janusproject.services.network.NetworkConfig;
 
 /**
  * Module that provides the network events.

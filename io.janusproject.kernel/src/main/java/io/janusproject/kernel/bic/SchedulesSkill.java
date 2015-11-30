@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.bic;
 
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.executor.JanusScheduledFutureTask;
-import io.janusproject.services.logging.LogService;
-import io.sarl.core.AgentTask;
-import io.sarl.core.Schedules;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.Skill;
+package io.janusproject.kernel.bic;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -37,12 +30,19 @@ import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.MoreObjects;
+import com.google.inject.Inject;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.executor.JanusScheduledFutureTask;
+import io.janusproject.services.logging.LogService;
 import org.arakhne.afc.vmutil.locale.Locale;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
-import com.google.common.base.MoreObjects;
-import com.google.inject.Inject;
+import io.sarl.core.AgentTask;
+import io.sarl.core.Schedules;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.Skill;
 
 /** Skill that permits to execute tasks with an executor service.
  *
@@ -60,17 +60,16 @@ class SchedulesSkill extends Skill implements Schedules {
 	private LogService logger;
 
 	private final Map<String, AgentTask> tasks = new HashMap<>();
+
 	private final Map<String, ScheduledFuture<?>> futures = new HashMap<>();
 
 	/**
 	 * @param agent - the owner of this skill.
 	 */
-	public SchedulesSkill(Agent agent) {
+	SchedulesSkill(Agent agent) {
 		super(agent);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()
@@ -137,14 +136,11 @@ class SchedulesSkill extends Skill implements Schedules {
 		task.setProcedure(procedure);
 		ScheduledFuture<?> sf =
 				this.executorService.schedule(
-						new AgentRunnableTask(task, false), delay, TimeUnit.MILLISECONDS);
+				new AgentRunnableTask(task, false), delay, TimeUnit.MILLISECONDS);
 		this.futures.put(task.getName(), sf);
 		return task;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public synchronized AgentTask task(String name) {
 		if (this.tasks.containsKey(name)) {
@@ -163,43 +159,31 @@ class SchedulesSkill extends Skill implements Schedules {
 		return t;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final boolean cancel(AgentTask task) {
 		return cancel(task, true);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public synchronized boolean cancel(AgentTask task, boolean mayInterruptIfRunning) {
 		if (task != null) {
 			String name = task.getName();
 			ScheduledFuture<?> future = this.futures.get(name);
 			if (future != null
-				&& !future.isDone()
-				&& !future.isCancelled()
-				&& future.cancel(mayInterruptIfRunning)) {
+					&& !future.isDone()
+					&& !future.isCancelled()
+					&& future.cancel(mayInterruptIfRunning)) {
 				finishTask(name);
 			}
 		}
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public AgentTask every(long period, Procedure1<? super Agent> procedure) {
 		return every(task("task-" + UUID.randomUUID()), period, procedure); //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public synchronized AgentTask every(AgentTask task, long period, Procedure1<? super Agent> procedure) {
 		task.setProcedure(procedure);
@@ -211,7 +195,8 @@ class SchedulesSkill extends Skill implements Schedules {
 
 
 
-	/**
+	/** Implementation of an agent task.
+	 *
 	 * @author $Author: srodriguez$
 	 * @version $Name$ $Revision$ $Date$
 	 * @mavengroupid $GroupId$
@@ -220,8 +205,10 @@ class SchedulesSkill extends Skill implements Schedules {
 	@SuppressWarnings("synthetic-access")
 	private class AgentRunnableTask implements Runnable {
 		private WeakReference<AgentTask> agentTaskRef;
+
 		private final boolean isPeriodic;
-		public AgentRunnableTask(AgentTask task, boolean isPeriodic) {
+
+		AgentRunnableTask(AgentTask task, boolean isPeriodic) {
 			this.agentTaskRef = new WeakReference<>(task);
 			this.isPeriodic = isPeriodic;
 		}
@@ -247,9 +234,6 @@ class SchedulesSkill extends Skill implements Schedules {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public String toString() {
 			return MoreObjects.toStringHelper(this).add(

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.bic;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 import io.janusproject.services.contextspace.ContextSpaceService;
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import io.sarl.core.Behaviors;
 import io.sarl.core.ContextJoined;
 import io.sarl.core.ContextLeft;
@@ -36,15 +45,6 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
-
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
-
-import org.arakhne.afc.vmutil.locale.Locale;
-
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 
 /**
  * Skill that permits to access to the context in which the agent is located.
@@ -65,12 +65,10 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	/**
 	 * @param agent - owner of the skill.
 	 */
-	public ExternalContextAccessSkill(Agent agent) {
+	ExternalContextAccessSkill(Agent agent) {
 		super(agent);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected String attributesToString() {
 		return super.attributesToString()

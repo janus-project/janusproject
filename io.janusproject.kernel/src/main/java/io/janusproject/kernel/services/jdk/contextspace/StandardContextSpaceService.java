@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.contextspace;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.services.AbstractDependentService;
-import io.janusproject.services.contextspace.ContextRepositoryListener;
-import io.janusproject.services.contextspace.ContextSpaceService;
-import io.janusproject.services.contextspace.SpaceRepositoryListener;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.network.NetworkService;
-import io.janusproject.util.ListenerCollection;
-import io.janusproject.util.TwoStepConstruction;
-import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.Space;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.util.Collections3;
+package io.janusproject.kernel.services.jdk.contextspace;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,6 +35,24 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import io.janusproject.JanusConfig;
+import io.janusproject.services.AbstractDependentService;
+import io.janusproject.services.contextspace.ContextRepositoryListener;
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.services.contextspace.SpaceRepositoryListener;
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.util.ListenerCollection;
+import io.janusproject.util.TwoStepConstruction;
+
+import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.util.Collections3;
 
 /**
  * A repository of Agent's context and spaces that
@@ -151,8 +152,6 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public final Object mutex() {
 		return this;
@@ -177,29 +176,21 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		this.defaultSpaces = dataStructureService.getMap(janusID.toString(), null);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized boolean isEmptyContextRepository() {
 		return this.contexts.isEmpty();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized int getNumberOfContexts() {
 		return this.contexts.size();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized boolean containsContext(UUID contextID) {
 		return this.contexts.containsKey(contextID);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized AgentContext createContext(UUID contextID, UUID defaultSpaceUUID) {
 		assert (contextID != null) : "The contextID cannot be null"; //$NON-NLS-1$
@@ -225,15 +216,11 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		return context;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public final void removeContext(AgentContext context) {
 		removeContext(context.getID());
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized void removeContext(UUID contextID) {
 		this.defaultSpaces.remove(contextID);
@@ -244,29 +231,11 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized Collection<AgentContext> getContexts() {
 		return Collections.unmodifiableCollection(Collections3.synchronizedCollection(this.contexts.values(), mutex()));
 	}
 
-	/** {@inheritDoc}
-	 */
-	@Override
-	public synchronized Set<UUID> getContextIDs() {
-		return Collections.unmodifiableSet(Collections3.synchronizedSet(this.contexts.keySet(), mutex()));
-	}
-
-	/** {@inheritDoc}
-	 */
-	@Override
-	public synchronized AgentContext getContext(UUID contextID) {
-		return this.contexts.get(contextID);
-	}
-
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized Collection<AgentContext> getContexts(final Collection<UUID> contextIDs) {
 		return Collections2.filter(this.contexts.values(), new Predicate<AgentContext>() {
@@ -277,15 +246,21 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		});
 	}
 
-	/** {@inheritDoc}
-	 */
+	@Override
+	public synchronized Set<UUID> getContextIDs() {
+		return Collections.unmodifiableSet(Collections3.synchronizedSet(this.contexts.keySet(), mutex()));
+	}
+
+	@Override
+	public synchronized AgentContext getContext(UUID contextID) {
+		return this.contexts.get(contextID);
+	}
+
 	@Override
 	public void addContextRepositoryListener(ContextRepositoryListener listener) {
 		this.listeners.add(ContextRepositoryListener.class, listener);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void removeContextRepositoryListener(ContextRepositoryListener listener) {
 		this.listeners.remove(ContextRepositoryListener.class, listener);
@@ -315,15 +290,11 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void addSpaceRepositoryListener(SpaceRepositoryListener listener) {
 		this.listeners.add(SpaceRepositoryListener.class, listener);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void removeSpaceRepositoryListener(SpaceRepositoryListener listener) {
 		this.listeners.remove(SpaceRepositoryListener.class, listener);
@@ -374,8 +345,6 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStart() {
 		for (SpaceID space : this.defaultSpaces.values()) {
@@ -386,8 +355,6 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		notifyStarted();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStop() {
 		if (this.dmapListener != null) {
@@ -405,7 +372,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		notifyStopped();
 	}
 
-	/**
+	/** Listener on map events from Hazelcast.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -413,37 +381,29 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 	 */
 	private class ContextDMapListener implements DMapListener<UUID, SpaceID> {
 
-		/**
+		/** Construct.
 		 */
-		public ContextDMapListener() {
+		ContextDMapListener() {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void entryAdded(UUID key, SpaceID value) {
 			assert (value != null);
 			ensureDefaultSpaceDefinition(value);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void entryRemoved(UUID key, SpaceID value) {
 			assert (value != null);
 			removeDefaultSpaceDefinition(value);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void entryUpdated(UUID key, SpaceID value) {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void mapCleared(boolean localClearing) {
 			throw new UnsupportedOperationException();
@@ -451,7 +411,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 
 	}
 
-	/**
+	/** Proxy for space events.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -459,21 +420,17 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 	 */
 	private class SpaceEventProxy implements SpaceRepositoryListener {
 
-		/**
+		/** Construct.
 		 */
-		public SpaceEventProxy() {
+		SpaceEventProxy() {
 			//
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void spaceCreated(Space space, boolean isLocalCreation) {
 			fireSpaceCreated(space, isLocalCreation);
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void spaceDestroyed(Space space, boolean isLocalDestruction) {
 			fireSpaceDestroyed(space, isLocalDestruction);
@@ -492,7 +449,7 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 
 		/** Create an instance of context.
 		 */
-		public DefaultContextFactory() {
+		DefaultContextFactory() {
 			//
 		}
 

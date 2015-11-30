@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,46 +17,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.arakhne;
 
-import io.janusproject.services.AbstractDependentService;
-import io.janusproject.services.logging.LogService;
+package io.janusproject.kernel.services.arakhne;
 
 import java.util.logging.Filter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.arakhne.afc.vmutil.locale.Locale;
-
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
+import io.janusproject.services.AbstractDependentService;
+import io.janusproject.services.logging.LogService;
+import org.arakhne.afc.vmutil.locale.Locale;
 
 /** This class enables to log information by ensuring
  * that the values of the parameters are not evaluated
  * until the information should be really log, according
  * to the log level.
  * This implementation is based on {@link Locale}, and the logger is injected.
- * <p>
- * The LogService considers the parameters of the functions as:<ul>
+ *
+ * <p>The LogService considers the parameters of the functions as:<ul>
  * <li>the messageKey is the name of the message in the property file;</li>
  * <li>the message parameters are the values that will replace the
  * strings {0}, {1}, {2}... in the text extracted from the ressource property;</li>
  * <li>the parameter propertyType is the class from which the filename of
  * the property file will be built.</li>
  * </ul>
- * <p>
- * If a <code>Throwable</code> is passed as parameter, the text of the
+ *
+ * <p>If a <code>Throwable</code> is passed as parameter, the text of the
  * exception is retreived.
- * <p>
- * If a <code>Callable</code> is passed as parameter, the object is automatically
+ *
+ *<p>If a <code>Callable</code> is passed as parameter, the object is automatically
  * called.
- * <p>
- * If a <code>LogParam</code> is passed as parameter, the <code>toString</code>
+ *
+ * <p>If a <code>LogParam</code> is passed as parameter, the <code>toString</code>
  * function will be invoked.
- * <p>
- * For all the other objects, the {@link #toString()} function is invoked.
+ *
+ * <p>For all the other objects, the {@link #toString()} function is invoked.
  *
  *
  * @author $Author: sgalland$
@@ -70,7 +69,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 
 	private LoggerCallerProvider loggerCallerProvider = new StackTraceLoggerCallerProvider();
 
-	/**
+	/** Construct the service.
 	 */
 	public ArakhneLocaleLogService() {
 		//
@@ -124,18 +123,18 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	}
 
 	private static LogRecord createLogRecord(Level level, String text, boolean exception, Object... message) {
-		Throwable e = null;
+		Throwable realException = null;
 		if (exception) {
 			for (Object m : message) {
 				if (m instanceof Throwable) {
-					e = (Throwable) m;
+					realException = (Throwable) m;
 					break;
 				}
 			}
 		}
 		LogRecord record = new LogRecord(level, text);
-		if (e != null) {
-			record.setThrown(e);
+		if (realException != null) {
+			record.setThrown(realException);
 		}
 		return record;
 	}
@@ -159,8 +158,6 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized void log(LogRecord record) {
 		if (isLogEnabled()) {
@@ -168,120 +165,88 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void log(Level level, Class<?> propertyType, String messageKey,
 			Object... message) {
 		writeInLog(level, true, propertyType, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void log(Level level, String messageKey, Object... message) {
 		writeInLog(level, true, null, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void info(String messageKey, Object... message) {
 		writeInLog(Level.INFO, false, null, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void info(Class<?> propertyType, String messageKey,
 			Object... message) {
 		writeInLog(Level.INFO, false, propertyType, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void fineInfo(String messageKey, Object... message) {
 		writeInLog(Level.FINE, false, null, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void fineInfo(Class<?> propertyType, String messageKey,
 			Object... message) {
 		writeInLog(Level.FINE, false, propertyType, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void finerInfo(String messageKey, Object... message) {
 		writeInLog(Level.FINER, false, null, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void finerInfo(Class<?> propertyType, String messageKey,
 			Object... message) {
 		writeInLog(Level.FINER, false, propertyType, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void debug(String messageKey, Object... message) {
 		writeInLog(Level.FINEST, true, null, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void debug(Class<?> propertyType, String messageKey,
 			Object... message) {
 		writeInLog(Level.FINEST, true, propertyType, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void warning(Class<?> propertyType, String messageKey,
 			Object... message) {
 		writeInLog(Level.WARNING, true, propertyType, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void warning(String messageKey, Object... message) {
 		writeInLog(Level.WARNING, true, null, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void error(String messageKey, Object... message) {
 		writeInLog(Level.SEVERE, true, null, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void error(Class<?> propertyType, String messageKey,
 			Object... message) {
 		writeInLog(Level.SEVERE, true, propertyType, messageKey, message);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized Logger getLogger() {
 		return this.logger;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Inject
 	@Override
 	public synchronized void setLogger(Logger logger) {
@@ -290,50 +255,36 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized void setFilter(Filter filter) {
 		this.logger.setFilter(filter);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public synchronized Filter getFilter() {
 		return this.logger.getFilter();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public boolean isLoggeable(Level level) {
 		return isLogEnabled() && this.logger.isLoggable(level);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Level getLevel() {
 		return this.logger.getLevel();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void setLevel(Level level) {
 		this.logger.setLevel(level);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void doStart() {
 		notifyStarted();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void doStop() {
 		notifyStopped();
@@ -366,7 +317,9 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	public static class LoggerCaller {
 
 		private final Class<?> type;
+
 		private final String methodName;
+
 		private final String className;
 
 		/**
@@ -406,7 +359,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 
 	}
 
-	/**
+	/** Provider of calling function on the stack trace.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -414,7 +368,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	 */
 	public static class StackTraceLoggerCallerProvider implements LoggerCallerProvider {
 
-		/**
+		/** Construct.
 		 */
 		public StackTraceLoggerCallerProvider() {
 			//

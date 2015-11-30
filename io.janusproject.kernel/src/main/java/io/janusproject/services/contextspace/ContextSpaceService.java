@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.contextspace;
 
-import io.janusproject.services.DependentService;
-import io.sarl.lang.core.AgentContext;
+package io.janusproject.services.contextspace;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+
+import io.janusproject.services.DependentService;
+
+import io.sarl.lang.core.AgentContext;
 
 /**
  * This service enables to store the contexts and to
@@ -98,9 +100,20 @@ public interface ContextSpaceService extends DependentService {
 	Collection<AgentContext> getContexts();
 
 	/**
+	 * Returns the collection of {@link AgentContext} with the given IDs.
+	 *
+	 * <p>The replies collection is synchronized and any iteration on it must
+	 * be synchronized on the mutex replies by {@link #mutex}.
+	 *
+	 * @param contextIDs - the identifiers of the contexts to retreive.
+	 * @return the collection of {@link AgentContext} with the given IDs
+	 */
+	Collection<AgentContext> getContexts(Collection<UUID> contextIDs);
+
+	/**
 	 * Returns the set of all agent context IDs stored in this repository.
-	 * <p>
-	 * The replies collection is synchronized and any iteration on it must be
+	 *
+	 * <p>The replies collection is synchronized and any iteration on it must be
 	 * synchronized on the mutex replies by {@link #mutex}.
 	 *
 	 * @return the set of all agent context IDs stored in this repository
@@ -114,17 +127,6 @@ public interface ContextSpaceService extends DependentService {
 	 * @return the {@link AgentContext} with the given ID
 	 */
 	AgentContext getContext(UUID contextID);
-
-	/**
-	 * Returns the collection of {@link AgentContext} with the given IDs.
-	 * <p>
-	 * The replies collection is synchronized and any iteration on it must
-	 * be synchronized on the mutex replies by {@link #mutex}.
-	 *
-	 * @param contextIDs - the identifiers of the contexts to retreive.
-	 * @return the collection of {@link AgentContext} with the given IDs
-	 */
-	Collection<AgentContext> getContexts(Collection<UUID> contextIDs);
 
 	/**
 	 * Add a listener on the context repository events.

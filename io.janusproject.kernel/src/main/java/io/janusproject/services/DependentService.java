@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.services;
 
 import java.util.Collection;
@@ -41,8 +42,8 @@ public interface DependentService extends Service {
 
 	/** Replies the services that must be launched BEFORE launching this service,
 	 * and that must be stop AFTER stopping this service.
-	 * <p>
-	 * If one of the dependencies is a {@link AsyncStateService}, this service
+	 *
+	 * <p>If one of the dependencies is a {@link AsyncStateService}, this service
 	 * will way until {@link AsyncStateService#isReadyForOtherServices()} is
 	 * true.
 	 *
@@ -53,8 +54,8 @@ public interface DependentService extends Service {
 
 	/** Replies the services that must be launched BEFORE launching this service,
 	 * and that must be stop AFTER stopping this service.
-	 * <p>
-	 * Even if one of the dependencies is a {@link AsyncStateService}, this service
+	 *
+	 * <p>Even if one of the dependencies is a {@link AsyncStateService}, this service
 	 * will never wait until {@link AsyncStateService#isReadyForOtherServices()} is
 	 * true.
 	 *

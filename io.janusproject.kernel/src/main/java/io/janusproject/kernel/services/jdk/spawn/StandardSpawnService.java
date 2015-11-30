@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.services.jdk.spawn;
 
-import io.janusproject.kernel.bic.BuiltinCapacityUtil;
-import io.janusproject.services.AbstractDependentService;
-import io.janusproject.services.contextspace.ContextSpaceService;
-import io.janusproject.services.spawn.AgentFactory;
-import io.janusproject.services.spawn.KernelAgentSpawnListener;
-import io.janusproject.services.spawn.SpawnService;
-import io.janusproject.services.spawn.SpawnServiceListener;
-import io.janusproject.util.ListenerCollection;
-import io.sarl.core.AgentKilled;
-import io.sarl.core.AgentSpawned;
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.EventSpace;
-import io.sarl.lang.util.SynchronizedCollection;
-import io.sarl.lang.util.SynchronizedSet;
-import io.sarl.util.Collections3;
-
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -44,14 +29,37 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.arakhne.afc.vmutil.locale.Locale;
+import javax.inject.Inject;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.Service;
-import com.google.inject.Inject;
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import io.janusproject.kernel.bic.BuiltinCapacityUtil;
+import io.janusproject.services.AbstractDependentService;
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.services.spawn.KernelAgentSpawnListener;
+import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.services.spawn.SpawnServiceListener;
+import io.janusproject.util.ListenerCollection;
+import org.arakhne.afc.vmutil.locale.Locale;
+
+import io.sarl.core.AgentKilled;
+import io.sarl.core.AgentSpawned;
+import io.sarl.lang.SARLVersion;
+import io.sarl.lang.annotation.SarlSpecification;
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
+import io.sarl.lang.core.EventSpace;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
 
 /**
  * Implementation of a spawning service
@@ -68,17 +76,20 @@ import com.google.inject.Singleton;
 public class StandardSpawnService extends AbstractDependentService implements SpawnService {
 
 	private final ListenerCollection<?> globalListeners = new ListenerCollection<>();
+
 	private final Multimap<UUID, SpawnServiceListener> agentLifecycleListeners = ArrayListMultimap.create();
+
 	private final Map<UUID, Agent> agents = new TreeMap<>();
 
-	private AgentFactory agentFactory;
+	private final Injector injector;
 
-	/**
-	 * @param injector - the background injector that is currently used.
+	/** Constructs the service with the given (injected) injector.
+	 *
+	 * @param injector the injector that should be used by this service for creating the agents.
 	 */
 	@Inject
 	public StandardSpawnService(Injector injector) {
-		this.agentFactory = new DefaultAgentFactory(injector);
+		this.injector = injector;
 	}
 
 	@Override
@@ -86,36 +97,32 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return SpawnService.class;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
 		return Arrays.<Class<? extends Service>>asList(ContextSpaceService.class);
 	}
 
-	/** {@inheritDoc}
-	 */
-	@Override
-	public synchronized void setAgentFactory(AgentFactory factory) {
-		assert (factory != null);
-		this.agentFactory = factory;
+	private static void ensureSarlSpecificationVersion(Class<? extends Agent> agentClazz) {
+		SarlSpecification annotation = agentClazz.getAnnotation(SarlSpecification.class);
+		if (annotation != null) {
+			String value = annotation.value();
+			if (!Strings.isNullOrEmpty(value) && SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING.equals(value)) {
+				return;
+			}
+		}
+		throw new InvalidSarlSpecificationException(agentClazz);
 	}
 
-	/** {@inheritDoc}
-	 */
-	@Override
-	public synchronized AgentFactory getAgentFactory() {
-		return this.agentFactory;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public synchronized UUID spawn(AgentContext parent, UUID agentID, Class<? extends Agent> agentClazz, Object... params) {
 		if (isRunning()) {
 			try {
-				Agent agent = this.agentFactory.newInstance(agentClazz, agentID, parent.getID());
+				// Check if the version of the SARL agent class is compatible.
+				ensureSarlSpecificationVersion(agentClazz);
+				JustInTimeAgentInjectionModule agentInjectionModule = new JustInTimeAgentInjectionModule(
+						this.injector, agentClazz, parent.getID(), agentID);
+				Injector agentInjector = this.injector.createChildInjector(agentInjectionModule);
+				Agent agent = agentInjector.getInstance(Agent.class);
 				assert (agent != null);
 				this.agents.put(agent.getID(), agent);
 				fireAgentSpawned(parent, agent, params);
@@ -127,9 +134,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		throw new SpawnDisabledException(parent.getID(), agentClazz);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public synchronized void killAgent(UUID agentID) throws AgentKillException {
 		boolean error = !isRunning();
@@ -169,17 +173,11 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return this.agents.get(id);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
 		this.globalListeners.add(KernelAgentSpawnListener.class, listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener) {
 		this.globalListeners.remove(KernelAgentSpawnListener.class, listener);
@@ -203,9 +201,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener) {
 		synchronized (this.agentLifecycleListeners) {
@@ -213,9 +208,11 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
+	public void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
+		this.globalListeners.add(SpawnServiceListener.class, agentLifecycleListener);
+	}
+
 	@Override
 	public void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener) {
 		synchronized (this.agentLifecycleListeners) {
@@ -223,17 +220,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
-		this.globalListeners.add(SpawnServiceListener.class, agentLifecycleListener);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void removeSpawnServiceListener(SpawnServiceListener agentLifecycleListener) {
 		this.globalListeners.remove(SpawnServiceListener.class, agentLifecycleListener);
@@ -286,7 +272,7 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 	 *
 	 * @param agent - agent to test.
 	 * @return <code>true</code> if the given agent can be killed,
-	 * otherwise <code>false</code>.
+	 *     otherwise <code>false</code>.
 	 */
 	@SuppressWarnings("static-method")
 	public synchronized boolean canKillAgent(Agent agent) {
@@ -295,13 +281,13 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 			if (ac != null) {
 				Set<UUID> participants = ac.getDefaultSpace().getParticipants();
 				if (participants != null
-					&& (participants.size() > 1
-					 || (participants.size() == 1 && !participants.contains(agent.getID())))) {
+						&& (participants.size() > 1
+						|| (participants.size() == 1 && !participants.contains(agent.getID())))) {
 					return false;
 				}
 			}
 			return true;
-		} catch (Throwable _) {
+		} catch (Throwable exception) {
 			return false;
 		}
 	}
@@ -346,9 +332,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStart() {
 		// Assume that when the service is starting, the kernel agent is up.
@@ -356,9 +339,6 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		notifyStarted();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected synchronized void doStop() {
 		synchronized (this.agentLifecycleListeners) {
@@ -411,6 +391,27 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 	}
 
 	/**
+	 * This exception is thrown when the agent to spawn is not generated according to a valid SARL specification version.
+	 *
+	 * @author $Author: sgalland$
+	 * @version $FullVersion$
+	 * @mavengroupid $GroupId$
+	 * @mavenartifactid $ArtifactId$
+	 */
+	public static class InvalidSarlSpecificationException extends RuntimeException {
+
+		private static final long serialVersionUID = -3194494637438344108L;
+
+		/**
+		 * @param agentType the invalid type of agent.
+		 */
+		public InvalidSarlSpecificationException(Class<? extends Agent> agentType) {
+			super(Locale.getString(StandardSpawnService.class, "INVALID_SARL_SPECIFICATION", agentType.getName())); //$NON-NLS-1$
+		}
+
+	}
+
+	/**
 	 * This exception is thrown when an agent cannot be spawned.
 	 *
 	 * @author $Author: sgalland$
@@ -428,40 +429,56 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		 */
 		public CannotSpawnException(Class<? extends Agent> agentClazz, Throwable cause) {
 			super(Locale.getString(StandardSpawnService.class,
-					"CANNOT_INSTANCIATE_AGENT", agentClazz), //$NON-NLS-1$
+					"CANNOT_INSTANCIATE_AGENT", agentClazz, //$NON-NLS-1$
+					(cause == null) ? null : cause.getLocalizedMessage()),
 				cause);
 		}
 
 	}
 
-	/**
+	/** An injection module that is able to inject the parent ID and agent ID when creating an agent.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private static class DefaultAgentFactory implements AgentFactory {
+	private static class JustInTimeAgentInjectionModule extends AbstractModule implements Provider<Agent> {
 
 		private final Injector injector;
 
-		/**
-		 * @param injector
-		 */
-		public DefaultAgentFactory(Injector injector) {
+		private final Class<? extends Agent> agentType;
+
+		private final UUID parentID;
+
+		private final UUID agentID;
+
+		JustInTimeAgentInjectionModule(Injector injector, Class<? extends Agent> agentType, UUID parentID, UUID agentID) {
+			assert (injector != null);
+			assert (agentType != null);
+			assert (parentID != null);
 			this.injector = injector;
+			this.agentType = agentType;
+			this.parentID = parentID;
+			this.agentID = (agentID == null) ? UUID.randomUUID() : agentID;
 		}
 
 		@Override
-		public <T extends Agent> T newInstance(Class<T> type, UUID agentID, UUID contextID) throws Exception {
-			Agent agent;
-			if (agentID == null) {
-				agent = type.getConstructor(UUID.class).newInstance(contextID);
-			} else {
-				agent = type.getConstructor(UUID.class, UUID.class).newInstance(contextID, agentID);
+		public void configure() {
+			bind(Agent.class).toProvider(this);
+		}
+
+		@Override
+		public Agent get() {
+			try {
+				BuiltinCapacitiesProvider capacityProvider = this.injector.getInstance(BuiltinCapacitiesProvider.class);
+				Constructor<? extends Agent> constructor = this.agentType.getConstructor(
+						BuiltinCapacitiesProvider.class, UUID.class, UUID.class);
+				return constructor.newInstance(capacityProvider, this.parentID, this.agentID);
+			} catch (NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException exception) {
+				throw new CannotSpawnException(this.agentType, exception);
 			}
-			assert (agent != null);
-			this.injector.injectMembers(agent);
-			return type.cast(agent);
 		}
 
 	}

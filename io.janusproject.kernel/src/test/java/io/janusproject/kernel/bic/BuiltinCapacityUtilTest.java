@@ -24,6 +24,7 @@ import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.util.Collections3;
@@ -64,7 +65,10 @@ public class BuiltinCapacityUtilTest extends AbstractJanusTest {
 	public void setUp() {
 		this.innerSkill = Mockito.mock(InnerContextAccess.class);
 		this.contextSkill = Mockito.mock(ExternalContextAccess.class);
-		this.agent = new Agent(UUID.randomUUID()) {
+		this.agent = new Agent(
+				Mockito.mock(BuiltinCapacitiesProvider.class),
+				UUID.randomUUID(),
+				null) {
 			/** {@inheritDoc}
 			 */
 			@Override

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.repository;
 
-import io.sarl.lang.core.EventListener;
-import io.sarl.lang.util.SynchronizedCollection;
-import io.sarl.lang.util.SynchronizedSet;
-import io.sarl.util.Collections3;
+package io.janusproject.kernel.repository;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -30,25 +26,30 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import io.sarl.lang.core.EventListener;
+import io.sarl.lang.util.SynchronizedCollection;
+import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.util.Collections3;
+
 /**
  * An abstract repository providing the basic support of storage a
  * collection a participant's address and its related listener.
  *
- * @param <ADDRESS> - the generic type representing the address of a
- * participant in the related space. This type must remains small, less than M
- * in memory and must be {@link java.io.Serializable}
+ * @param <ADDRESST> - the generic type representing the address of a
+ *     participant in the related space. This type must remains small, less than M
+ *     in memory and must be {@link java.io.Serializable}
  * @author $Author: ngaud$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public abstract class ParticipantRepository<ADDRESS extends Serializable> {
+public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 
 	/**
 	 * Map linking the unique address of an entity in the related space to the entity itself.
 	 * This is local non-distributed map.
 	 */
-	private final Map<ADDRESS, EventListener> listeners;
+	private final Map<ADDRESST, EventListener> listeners;
 
 	/** Construct a <code>ParticipantRepository</code>.
 	 */
@@ -69,7 +70,7 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	/** Replies if there is no participant registered in this repository.
 	 *
 	 * @return <code>true</code> if the repository is empty, <code>false</code>
-	 * if there is a least one participant.
+	 *     if there is a least one participant.
 	 */
 	protected boolean isListenerEmpty() {
 		synchronized (mutex()) {
@@ -83,7 +84,7 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * @return <code>true</code> if the given key is found in the repository,
 	 * <code>false</code> if the key is not present or <code>null</code>.
 	 */
-	protected boolean containsAddress(ADDRESS key) {
+	protected boolean containsAddress(ADDRESST key) {
 		synchronized (mutex()) {
 			return this.listeners.containsKey(key);
 		}
@@ -105,9 +106,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 *
 	 * @param key - the address of the participant to retreive.
 	 * @return the participant with the given address, or <code>null</code>
-	 * if there is no participant with the given address.
+	 *     if there is no participant with the given address.
 	 */
-	protected EventListener getListener(ADDRESS key) {
+	protected EventListener getListener(ADDRESST key) {
 		synchronized (mutex()) {
 			return this.listeners.get(key);
 		}
@@ -119,7 +120,7 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * @param value - is the participant to map to the address.
 	 * @return the participant that was previously associated to the given address.
 	 */
-	protected EventListener addListener(ADDRESS key, EventListener value) {
+	protected EventListener addListener(ADDRESST key, EventListener value) {
 		synchronized (mutex()) {
 			return this.listeners.put(key, value);
 		}
@@ -129,9 +130,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 *
 	 * @param key - address of the participant to remove.
 	 * @return the participant for which the address was removed, <code>null</code>
-	 * if the given address was not found.
+	 *     if the given address was not found.
 	 */
-	protected EventListener removeListener(ADDRESS key) {
+	protected EventListener removeListener(ADDRESST key) {
 		synchronized (mutex()) {
 			return this.listeners.remove(key);
 		}
@@ -149,10 +150,10 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 *
 	 * @return the addresses in this repository.
 	 */
-	protected SynchronizedSet<ADDRESS> getAdresses() {
-		Object m = mutex();
-		synchronized (m) {
-			return Collections3.synchronizedSet(this.listeners.keySet(), m);
+	protected SynchronizedSet<ADDRESST> getAdresses() {
+		Object mutex = mutex();
+		synchronized (mutex) {
+			return Collections3.synchronizedSet(this.listeners.keySet(), mutex);
 		}
 	}
 
@@ -161,9 +162,9 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 * @return the participants.
 	 */
 	public SynchronizedCollection<EventListener> getListeners() {
-		Object m = mutex();
-		synchronized (m) {
-			return Collections3.synchronizedCollection(this.listeners.values(), m);
+		Object mutex = mutex();
+		synchronized (mutex) {
+			return Collections3.synchronizedCollection(this.listeners.values(), mutex);
 		}
 	}
 
@@ -171,10 +172,10 @@ public abstract class ParticipantRepository<ADDRESS extends Serializable> {
 	 *
 	 * @return the pairs of addresses and participants
 	 */
-	protected Set<Entry<ADDRESS, EventListener>> listenersEntrySet() {
-		Object m = mutex();
-		synchronized (m) {
-			return Collections3.synchronizedSet(this.listeners.entrySet(), m);
+	protected Set<Entry<ADDRESST, EventListener>> listenersEntrySet() {
+		Object mutex = mutex();
+		synchronized (mutex) {
+			return Collections3.synchronizedSet(this.listeners.entrySet(), mutex);
 		}
 	}
 

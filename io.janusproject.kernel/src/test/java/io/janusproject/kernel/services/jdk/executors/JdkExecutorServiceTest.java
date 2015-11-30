@@ -174,7 +174,7 @@ extends AbstractDependentServiceTest<JdkExecutorService> {
 			this.service.doStop();
 			fail("IllegalStateException is expected"); //$NON-NLS-1$
 		}
-		catch(IllegalStateException _) {
+		catch(IllegalStateException exception) {
 			// This exception is fired by notifyStopped() 
 		}
 		Mockito.verify(this.scheduledExecutorService, new Times(1)).shutdown();

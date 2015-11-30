@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.executors;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.services.AbstractDependentService;
+package io.janusproject.kernel.services.jdk.executors;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -33,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.janusproject.JanusConfig;
+import io.janusproject.services.AbstractDependentService;
 
 /** Platform service that supports the execution resources.
  *
@@ -47,11 +47,12 @@ import com.google.inject.Singleton;
 public class JdkExecutorService extends AbstractDependentService implements io.janusproject.services.executor.ExecutorService {
 
 	private ScheduledExecutorService schedules;
+
 	private ExecutorService exec;
 
 	private ScheduledFuture<?> purgeTask;
 
-	/**
+	/** Construct.
 	 */
 	public JdkExecutorService() {
 		//
@@ -80,8 +81,6 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 		return io.janusproject.services.executor.ExecutorService.class;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void doStart() {
 		assert (this.schedules != null);
@@ -99,8 +98,6 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 		notifyStarted();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected void doStop() {
 		if (this.purgeTask != null) {
@@ -126,68 +123,50 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public Future<?> submit(Runnable task) {
 		return this.exec.submit(task);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public <T> Future<T> submit(Runnable task, T result) {
 		return this.exec.submit(task, result);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		return this.exec.submit(task);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public ScheduledFuture<?> schedule(Runnable command, long delay,
 			TimeUnit unit) {
 		return this.schedules.schedule(command, delay, unit);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public <T> ScheduledFuture<T> schedule(Callable<T> command, long delay,
 			TimeUnit unit) {
 		return this.schedules.schedule(command, delay, unit);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
 			long initialDelay, long period, TimeUnit unit) {
 		return this.schedules.scheduleAtFixedRate(command, initialDelay, period, unit);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
 			long initialDelay, long delay, TimeUnit unit) {
 		return this.schedules.scheduleWithFixedDelay(command, initialDelay, delay, unit);
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public ExecutorService getExecutorService() {
 		return this.exec;
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public void purge() {
 		if (this.exec instanceof ThreadPoolExecutor) {
@@ -209,9 +188,9 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 
 		private String oldThreadName;
 
-		/**
+		/** Construct.
 		 */
-		public Purger() {
+		Purger() {
 			//
 		}
 
@@ -235,8 +214,6 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 			return true;
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void run() {
 			assert (setName());
@@ -247,8 +224,6 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 			}
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public String toString() {
 			return "Janus Thread Purger"; //$NON-NLS-1$

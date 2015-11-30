@@ -29,10 +29,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.janusproject.testutils.IMultiMapMock;
-import io.janusproject.util.DataViewDelegate.Delegator;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,6 +62,11 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.MultiMap;
+
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.janusproject.testutils.HzMultiMapMock;
+import io.janusproject.util.DataViewDelegate.Delegator;
 
 /**
  * @author $Author: sgalland$
@@ -196,7 +197,7 @@ public class HazelcastDMultiMapViewTest {
 
 		@Before
 		public void setUp() {
-			this.map = new IMultiMapMock<>(UUID.randomUUID().toString());
+			this.map = new HzMultiMapMock<>(UUID.randomUUID().toString());
 			this.map.put("a", "va1");
 			this.map.put("a", "va2");
 			this.map.put("b", "vb");
@@ -391,7 +392,7 @@ public class HazelcastDMultiMapViewTest {
 
 		@Before
 		public void setUp() {
-			this.map = new IMultiMapMock<>(UUID.randomUUID().toString());
+			this.map = new HzMultiMapMock<>(UUID.randomUUID().toString());
 			this.view = new HazelcastDMultiMapView<>(this.map);
 		}
 
@@ -426,7 +427,7 @@ public class HazelcastDMultiMapViewTest {
 
 		@Before
 		public void setUp() {
-			this.map = new IMultiMapMock<>(UUID.randomUUID().toString());
+			this.map = new HzMultiMapMock<>(UUID.randomUUID().toString());
 			this.view = new HazelcastDMultiMapView<>(this.map);
 		}
 
@@ -505,7 +506,7 @@ public class HazelcastDMultiMapViewTest {
 		@Before
 		public void setUp() {
 			this.listener = mock(DMapListener.class);
-			this.map = new IMultiMapMock<>(UUID.randomUUID().toString());
+			this.map = new HzMultiMapMock<>(UUID.randomUUID().toString());
 			this.view = new HazelcastDMultiMapView<>(this.map);
 		}
 

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.kernel.space;
 
+import java.util.UUID;
+
+import com.google.common.eventbus.DeadEvent;
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
 import io.janusproject.kernel.repository.UniqueAddressParticipantRepository;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.logging.LogService;
 import io.janusproject.services.network.NetworkService;
+
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
@@ -32,12 +39,6 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 import io.sarl.util.Scopes;
-
-import java.util.UUID;
-
-import com.google.common.eventbus.DeadEvent;
-import com.google.common.eventbus.Subscribe;
-import com.google.inject.Inject;
 
 /**
  * Abstract implementation of an event space.
@@ -106,8 +107,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	}
 
 	/** Emit the given event in the given scope.
-	 * <p>
-	 * This function emits on the internal event bus of the agent
+	 *
+	 * <p>This function emits on the internal event bus of the agent
 	 * (call to {@link #doEmit(Event, Scope)}), and on the network.
 	 *
 	 * @param event - the event to emit.
@@ -131,8 +132,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	}
 
 	/** Emit the given event.
-	 * <p>
-	 * This function emits on the internal event bus of the agent
+	 *
+	 * <p>This function emits on the internal event bus of the agent
 	 * (call to {@link #doEmit(Event, Scope)}), and on the network.
 	 *
 	 * @param event - the event to emit.
@@ -143,8 +144,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	}
 
 	/** Do the emission of the event.
-	 * <p>
-	 * This function emits the event <strong>only on the internal
+	 *
+	 * <p>This function emits the event <strong>only on the internal
 	 * event bus</strong> of the agents.
 	 *
 	 * @param event - the event to emit.
@@ -161,9 +162,6 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public SynchronizedSet<UUID> getParticipants() {
 		synchronized (this.participants) {
@@ -174,23 +172,19 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	/**
 	 * Invoked when an event was not handled by a listener.
 	 *
-	 * @param e - dead event
+	 * @param event - dead event
 	 */
 	@Subscribe
-	public void unhandledEvent(DeadEvent e) {
+	public void unhandledEvent(DeadEvent event) {
 		this.logger.debug("UNHANDLED_EVENT", //$NON-NLS-1$
-				getID(), ((Event) e.getEvent()).getSource(), e.getEvent());
+				getID(), ((Event) event.getEvent()).getSource(), event.getEvent());
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public String toString() {
 		return getID().toString();
 	}
 
-	/** {@inheritDoc}
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void eventReceived(SpaceID space, Scope<?> scope, Event event) {
@@ -201,7 +195,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		}
 	}
 
-	/**
+	/** Asynchronous runner.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -210,13 +205,14 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	private static class AsyncRunner implements Runnable {
 
 		private final EventListener agent;
+
 		private final Event event;
 
-		/**
-		 * @param agent
-		 * @param event
+		/** Construct.
+		 * @param agent the agent listener.
+		 * @param event the event.
 		 */
-		public AsyncRunner(EventListener agent, Event event) {
+		AsyncRunner(EventListener agent, Event event) {
 			this.agent = agent;
 			this.event = event;
 		}

@@ -439,7 +439,7 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 			this.service.doStop();
 			fail("Expecting IllegalStateException"); //$NON-NLS-1$
 		}
-		catch(IllegalStateException _) {
+		catch(IllegalStateException exception) {
 			// Expected excpetion fired by notifyStopped()
 		}
 		Mockito.verifyNoMoreInteractions(this.contextListener);

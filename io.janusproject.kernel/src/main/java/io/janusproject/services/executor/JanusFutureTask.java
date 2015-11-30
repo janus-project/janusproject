@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.services.executor;
 
 import java.util.concurrent.FutureTask;
@@ -27,12 +28,12 @@ import java.util.concurrent.RunnableFuture;
  * execution of the <tt>run</tt> method causes completion of the
  * <tt>Future</tt> and allows access to its results.
  *
- * @param <V>
- * @see FutureTask
+ * @param <V> the type of the returned value.
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
+ * @see FutureTask
  */
 public interface JanusFutureTask<V> extends RunnableFuture<V> {
 
@@ -45,7 +46,7 @@ public interface JanusFutureTask<V> extends RunnableFuture<V> {
 	/** Replies the task associated to this future is running on the calling thread.
 	 *
 	 * @return <code>true</code> if the current thread is running the associated
-	 * task, <code>false</code> otherwie.
+	 *     task, <code>false</code> otherwie.
 	 */
 	boolean isCurrentThread();
 

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.util;
 
-import io.janusproject.services.distributeddata.DMultiMap;
-import io.janusproject.util.DataViewDelegate.Delegator;
+package io.janusproject.util;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
@@ -41,6 +39,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
+import io.janusproject.services.distributeddata.DMultiMap;
+import io.janusproject.util.DataViewDelegate.Delegator;
 
 /** A view on a Map that provides the API for the DMultiMap.
  *
@@ -52,11 +52,12 @@ import com.google.common.collect.Sets;
  * @mavenartifactid $ArtifactId$
  */
 public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
-implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
+		implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 
 	private static final long serialVersionUID = -6970650402150118406L;
 
 	private final String name;
+
 	private transient Map<K, Collection<V>> map;
 
 	/**
@@ -73,7 +74,7 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 
 	/** Wrap the given values into a dedicated view.
 	 *
-	 * The replies view may be a {@link SingleKeyValueListView} or
+	 * <p>The replies view may be a {@link SingleKeyValueListView} or
 	 * a {@link SingleKeyValueSetView} according to the type of the
 	 * given values' collection.
 	 *
@@ -94,14 +95,14 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 
 	/** Copy the given values.
 	 *
-	 * The replies collection may be a {@link List} or
+	 * <p>The replies collection may be a {@link List} or
 	 * a {@link Set} according to the type of the
 	 * given values' collection.
 	 *
 	 * @param values - the values.
 	 * @return the copy.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "checkstyle:illegaltype"})
 	Collection<V> copyValues(Collection<V> values) {
 		Object backEnd = DataViewDelegate.undelegate(values);
 		if (backEnd instanceof List<?>) {
@@ -290,6 +291,7 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		private static final long serialVersionUID = 4290615787745160981L;
 
 		private final K key;
+
 		private final List<V> values;
 
 		/**
@@ -337,9 +339,9 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		}
 
 		@Override
-		public boolean add(V e) {
-			if (this.values.add(e)) {
-				fireEntryAdded(this.key, e);
+		public boolean add(V element) {
+			if (this.values.add(element)) {
+				fireEntryAdded(this.key, element);
 				return true;
 			}
 			return false;
@@ -350,7 +352,8 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 			AbstractDMultiMapView.this.removeAll(this.key);
 		}
 
-		/**
+		/** Iterator on the DMulitmap values.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -359,9 +362,10 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		private class ValueIterator implements Iterator<V> {
 
 			private final Iterator<V> iterator;
+
 			private V value;
 
-			public ValueIterator(Iterator<V> iterator) {
+			ValueIterator(Iterator<V> iterator) {
 				this.iterator = iterator;
 			}
 
@@ -399,6 +403,7 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		private static final long serialVersionUID = 4290615787745160981L;
 
 		private final K key;
+
 		private final Set<V> values;
 
 		/**
@@ -441,9 +446,9 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		}
 
 		@Override
-		public boolean add(V e) {
-			if (this.values.add(e)) {
-				fireEntryAdded(this.key, e);
+		public boolean add(V element) {
+			if (this.values.add(element)) {
+				fireEntryAdded(this.key, element);
 				return true;
 			}
 			return false;
@@ -454,7 +459,8 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 			AbstractDMultiMapView.this.removeAll(this.key);
 		}
 
-		/**
+		/** Iterator on the DMultimap values.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -463,9 +469,10 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		private class ValueIterator implements Iterator<V> {
 
 			private final Iterator<V> iterator;
+
 			private V value;
 
-			public ValueIterator(Iterator<V> iterator) {
+			ValueIterator(Iterator<V> iterator) {
 				this.iterator = iterator;
 			}
 
@@ -541,7 +548,8 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 			return new KeyIterator(this.keys.iterator());
 		}
 
-		/**
+		/** Iterator on the DMultiMap keys.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -550,9 +558,10 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		private class KeyIterator implements Iterator<K> {
 
 			private final Iterator<K> iterator;
+
 			private K key;
 
-			public KeyIterator(Iterator<K> iterator) {
+			KeyIterator(Iterator<K> iterator) {
 				this.iterator = iterator;
 			}
 
@@ -561,8 +570,6 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 				return this.iterator.hasNext();
 			}
 
-			/** {@inheritDoc}
-			 */
 			@Override
 			public K next() {
 				this.key = this.iterator.next();
@@ -592,7 +599,7 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 	 * @mavenartifactid $ArtifactId$
 	 */
 	protected class EntryCollectionView extends AbstractCollection<Entry<K, V>>
-				implements Serializable, Delegator<Collection<Entry<K, V>>> {
+			implements Serializable, Delegator<Collection<Entry<K, V>>> {
 
 		private static final long serialVersionUID = 3746778947439539504L;
 
@@ -636,15 +643,16 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		}
 
 		@Override
-		public boolean add(Entry<K, V> e) {
-			if (this.entries.add(e)) {
-				fireEntryAdded(e.getKey(), e.getValue());
+		public boolean add(Entry<K, V> entry) {
+			if (this.entries.add(entry)) {
+				fireEntryAdded(entry.getKey(), entry.getValue());
 				return true;
 			}
 			return false;
 		}
 
-		/**
+		/** Iterator on DMultiMap entries.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -653,9 +661,10 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		private class EntryIterator implements Iterator<Entry<K, V>> {
 
 			private final Iterator<Entry<K, V>> iterator;
+
 			private Entry<K, V> entry;
 
-			public EntryIterator(Iterator<Entry<K, V>> iterator) {
+			EntryIterator(Iterator<Entry<K, V>> iterator) {
 				this.iterator = iterator;
 			}
 
@@ -734,7 +743,8 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 			return new ValueIterator(this.entries.iterator());
 		}
 
-		/**
+		/** Iterator on the DMultiMap values.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -743,9 +753,10 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 		private class ValueIterator implements Iterator<V> {
 
 			private final Iterator<Entry<K, V>> iterator;
+
 			private Entry<K, V> entry;
 
-			public ValueIterator(Iterator<Entry<K, V>> iterator) {
+			ValueIterator(Iterator<Entry<K, V>> iterator) {
 				this.iterator = iterator;
 			}
 
@@ -848,7 +859,8 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 			return AbstractDMultiMapView.this.keySet();
 		}
 
-		/**
+		/** Set of the DMultiMap entries.
+		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
 		 * @mavengroupid $GroupId$
@@ -861,7 +873,7 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 			/**
 			 * @param backedSet - the backed set.
 			 */
-			public EntrySet(Set<Entry<K, Collection<V>>> backedSet) {
+			EntrySet(Set<Entry<K, Collection<V>>> backedSet) {
 				this.backedSet = backedSet;
 			}
 
@@ -875,7 +887,8 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 				return this.backedSet.size();
 			}
 
-			/**
+			/** Iterator on the DMultiMap entries.
+			 *
 			 * @author $Author: sgalland$
 			 * @version $FullVersion$
 			 * @mavengroupid $GroupId$
@@ -884,12 +897,13 @@ implements DMultiMap<K, V>, Serializable, Delegator<Multimap<K, V>> {
 			private class EntryIterator implements Iterator<Entry<K, Collection<V>>> {
 
 				private final Iterator<Entry<K, Collection<V>>> iterator;
+
 				private Entry<K, Collection<V>> entry;
 
 				/**
 				 * @param iterator - the iterator.
 				 */
-				public EntryIterator(Iterator<Entry<K, Collection<V>>> iterator) {
+				EntryIterator(Iterator<Entry<K, Collection<V>>> iterator) {
 					this.iterator = iterator;
 				}
 

@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.janusproject.services.distributeddata;
 
 import java.util.Comparator;
@@ -39,12 +40,12 @@ public interface DistributedDataStructureService extends DependentService {
 	/**
 	 * Replies the {@link DMap} with the given name.
 	 *
-	 * This function permits to create a map for keys
+	 * <p>This function permits to create a map for keys
 	 * without a natural order, and without a specific comparator.
 	 * An object has a natural order if it implements
 	 * {@link Comparable}.
 	 *
-	 * This function is equivalent to create a <code>HashMap</code>
+	 * <p>This function is equivalent to create a <code>HashMap</code>
 	 * in the standard Java API.
 	 * If the keys have a natural order, i.e. they implement the
 	 * {@link Comparable} interface, or if you are able to provide
@@ -63,14 +64,14 @@ public interface DistributedDataStructureService extends DependentService {
 	/**
 	 * Replies the {@link DMap} with the given name.
 	 *
-	 * This function permits to create a map for keys
+	 * <p>This function permits to create a map for keys
 	 * with a natural order, OR with a specific comparator.
 	 * An object has a natural order if it implements
 	 * {@link Comparable}.
 	 * If the comparator is <code>null</code>, then the natural
 	 * order of the keys is used.
 	 *
-	 * This function is equivalent to create a <code>TreeMap</code>
+	 * <p>This function is equivalent to create a <code>TreeMap</code>
 	 * in the standard Java API.
 	 * If the keys have not a natural order, i.e. they not implement the
 	 * {@link Comparable} interface, or if you are not able to provide
@@ -90,12 +91,12 @@ public interface DistributedDataStructureService extends DependentService {
 	/**
 	 * Replies the {@link DMultiMap} with the given name.
 	 *
-	 * This function permits to create a map for keys
+	 * <p>This function permits to create a map for keys
 	 * without a natural order, and without a specific comparator.
 	 * An object has a natural order if it implements
 	 * {@link Comparable}.
 	 *
-	 * This function is equivalent to create a <code>HashMap</code>
+	 * <p>This function is equivalent to create a <code>HashMap</code>
 	 * in the standard Java API.
 	 * If the keys have a natural order, i.e. they implement the
 	 * {@link Comparable} interface, or if you are able to provide
@@ -114,14 +115,14 @@ public interface DistributedDataStructureService extends DependentService {
 	/**
 	 * Replies the {@link DMultiMap} with the given name.
 	 *
-	 * This function permits to create a map for keys
+	 * <p>This function permits to create a map for keys
 	 * with a natural order, OR with a specific comparator.
 	 * An object has a natural order if it implements
 	 * {@link Comparable}.
 	 * If the comparator is <code>null</code>, then the natural
 	 * order of the keys is used.
 	 *
-	 * This function is equivalent to create a <code>TreeMap</code>
+	 * <p>This function is equivalent to create a <code>TreeMap</code>
 	 * in the standard Java API.
 	 * If the keys have not a natural order, i.e. they not implement the
 	 * {@link Comparable} interface, or if you are not able to provide

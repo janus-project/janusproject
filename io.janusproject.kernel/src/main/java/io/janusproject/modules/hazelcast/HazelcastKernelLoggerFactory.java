@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.modules.hazelcast;
 
-import io.janusproject.services.logging.LogService;
+package io.janusproject.modules.hazelcast;
 
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -28,6 +27,7 @@ import com.hazelcast.logging.AbstractLogger;
 import com.hazelcast.logging.ILogger;
 import com.hazelcast.logging.LogEvent;
 import com.hazelcast.logging.LoggerFactorySupport;
+import io.janusproject.services.logging.LogService;
 
 /** Factory of logger for the Hazelcast API.
  *
@@ -40,7 +40,7 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 
 	private static LogService logger;
 
-	/**
+	/** Construct.
 	 */
 	public HazelcastKernelLoggerFactory() {
 		//
@@ -66,14 +66,13 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 		}
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	protected ILogger createLogger(String name) {
 		return new HzKernelLogger();
 	}
 
-	/**
+	/** Logger for Hazelcast.
+	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
@@ -81,14 +80,12 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 	 */
 	private static final class HzKernelLogger extends AbstractLogger {
 
-        /**
+        /** Construct.
          */
-        public HzKernelLogger() {
+        HzKernelLogger() {
         	//
         }
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void log(Level level, String message) {
 			LogService serv = getLogService();
@@ -97,8 +94,6 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 			}
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void log(Level level, String message, Throwable thrown) {
 			LogService serv = getLogService();
@@ -115,8 +110,6 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 			}
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public void log(LogEvent logEvent) {
 			LogService serv = getLogService();
@@ -125,8 +118,6 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 			}
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public Level getLevel() {
 			LogService serv = getLogService();
@@ -136,8 +127,6 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 			return Level.OFF;
 		}
 
-		/** {@inheritDoc}
-		 */
 		@Override
 		public boolean isLoggable(Level level) {
 			LogService serv = getLogService();

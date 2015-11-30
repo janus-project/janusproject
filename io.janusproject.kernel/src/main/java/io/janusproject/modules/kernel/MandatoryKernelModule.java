@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.modules.kernel;
 
-import io.janusproject.JanusConfig;
-import io.janusproject.kernel.bic.StandardBuiltinCapacitiesProvider;
-import io.janusproject.kernel.space.EventSpaceSpecificationImpl;
-import io.janusproject.kernel.space.OpenEventSpaceSpecificationImpl;
-import io.janusproject.kernel.space.RestrictedAccessEventSpaceSpecificationImpl;
-import io.janusproject.services.GoogleServiceManager;
-import io.janusproject.services.IServiceManager;
-import io.janusproject.services.contextspace.ContextSpaceService;
-import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.BuiltinCapacitiesProvider;
-import io.sarl.lang.core.EventSpaceSpecification;
-import io.sarl.lang.core.Percept;
-import io.sarl.util.OpenEventSpaceSpecification;
-import io.sarl.util.RestrictedAccessEventSpaceSpecification;
+package io.janusproject.modules.kernel;
 
 import java.util.Set;
 import java.util.UUID;
@@ -48,6 +34,21 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import io.janusproject.JanusConfig;
+import io.janusproject.kernel.bic.StandardBuiltinCapacitiesProvider;
+import io.janusproject.kernel.space.EventSpaceSpecificationImpl;
+import io.janusproject.kernel.space.OpenEventSpaceSpecificationImpl;
+import io.janusproject.kernel.space.RestrictedAccessEventSpaceSpecificationImpl;
+import io.janusproject.services.GoogleServiceManager;
+import io.janusproject.services.IServiceManager;
+import io.janusproject.services.contextspace.ContextSpaceService;
+
+import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
+import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.Percept;
+import io.sarl.util.OpenEventSpaceSpecification;
+import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
 /** Configure the mandatory elements of the Janus kernel.
  *
@@ -58,8 +59,7 @@ import com.google.inject.name.Names;
  * @mavenartifactid $ArtifactId$
  */
 public class MandatoryKernelModule extends AbstractModule {
-	/** {@inheritDoc}
-	 */
+
 	@Override
 	protected void configure() {
 		requireBinding(Key.get(UUID.class, Names.named(JanusConfig.DEFAULT_CONTEXT_ID_NAME)));

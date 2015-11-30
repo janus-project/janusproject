@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.services.jdk.network;
 
-import io.janusproject.services.network.AbstractEventEncrypter;
-import io.janusproject.services.network.EventEnvelope;
-import io.janusproject.services.network.NetworkConfig;
+package io.janusproject.kernel.services.jdk.network;
 
 import java.security.GeneralSecurityException;
 import java.util.UUID;
@@ -31,14 +28,16 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
 
-import org.arakhne.afc.vmutil.locale.Locale;
-
 import com.google.inject.Inject;
+import io.janusproject.services.network.AbstractEventEncrypter;
+import io.janusproject.services.network.EventEnvelope;
+import io.janusproject.services.network.NetworkConfig;
+import org.arakhne.afc.vmutil.locale.Locale;
 
 /**
  * Encrypts the {@link EventEnvelope} content using the AES algorithm.
- * <p>
- * To define the key you need to specify the binding {@link NetworkConfig}.
+ *
+ * <p>To define the key you need to specify the binding {@link NetworkConfig}.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -46,6 +45,7 @@ import com.google.inject.Inject;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
+@SuppressWarnings("checkstyle:magicnumber")
 public class AESEventEncrypter extends AbstractEventEncrypter {
 
 	private static final String ALGORITHM = "AES/CBC/PKCS5Padding"; //$NON-NLS-1$
@@ -99,8 +99,6 @@ public class AESEventEncrypter extends AbstractEventEncrypter {
 		envelope.setBody(cipher.doFinal(envelope.getBody()));
 	}
 
-	/** {@inheritDoc}
-	 */
 	@Override
 	public byte[] encryptUUID(UUID uuid) {
 		try {

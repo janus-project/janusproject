@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.kernel.bic;
 
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.services.spawn.SpawnService;
-import io.sarl.core.Lifecycle;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.Skill;
+package io.janusproject.kernel.bic;
 
 import java.util.UUID;
 
 import com.google.inject.Inject;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.spawn.SpawnService;
+
+import io.sarl.core.Lifecycle;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.Skill;
 
 /**
  * Skill that permits to manage the life cycle of the agents.
@@ -50,13 +51,13 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	 *
 	 * @param agent - owner of the skill.
 	 */
-	public LifecycleSkill(Agent agent) {
+	LifecycleSkill(Agent agent) {
 		super(agent);
 	}
 
 	@Override
-	public UUID spawnInContext(Class<? extends Agent> aAgent, AgentContext context, Object... params) {
-		return this.spawnService.spawn(context, null, aAgent, params);
+	public UUID spawnInContext(Class<? extends Agent> agentType, AgentContext context, Object... params) {
+		return this.spawnService.spawn(context, null, agentType, params);
 	}
 
 	@Override
@@ -85,11 +86,12 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 		private static final long serialVersionUID = 3186824315988212481L;
 
-		/**
-		 * @param e - cause
+		/** Construct.
+		 *
+		 * @param exception - cause
 		 */
-		AgentKillException(io.janusproject.services.spawn.SpawnService.AgentKillException e) {
-			super(e.getMessage(), e);
+		AgentKillException(io.janusproject.services.spawn.SpawnService.AgentKillException exception) {
+			super(exception.getMessage(), exception);
 		}
 
 		/** Replies the agent that cannot be killed.

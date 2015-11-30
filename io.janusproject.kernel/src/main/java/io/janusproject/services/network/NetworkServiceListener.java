@@ -4,7 +4,7 @@
  * Janus platform is an open-source multiagent platform.
  * More details on http://www.janusproject.io
  *
- * Copyright (C) 2014-2015 Sebastian RODRIGUEZ, Nicolas GAUD, Stéphane GALLAND.
+ * Copyright (C) 2014-2015 the original authors or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.janusproject.services.network;
 
-import io.sarl.lang.core.SpaceID;
+package io.janusproject.services.network;
 
 import java.net.URI;
 import java.util.EventListener;
+
+import io.sarl.lang.core.SpaceID;
 
 /** Listener on events related to the network service.
  *
@@ -45,18 +46,18 @@ public interface NetworkServiceListener extends EventListener {
 	 */
 	void peerDisconnected(URI peerURI);
 
-	/** Invoked when a connection to a peer was opened for a particular space.
-	 *
-	 * @param peerURI - URI of the remote kernel is connected to the local kernel.
-	 * @param space - the identifier of the space for which a connection was opened.
-	 */
-	void peerConnected(URI peerURI, SpaceID space);
-
 	/** Invoked when a remote peer has been disconnected for a particular space.
 	 *
 	 * @param peerURI - URI of the remote kernel is connected to the local kernel.
 	 * @param space - the identifier of the space for which a connection was opened.
 	 */
 	void peerDisconnected(URI peerURI, SpaceID space);
+
+	/** Invoked when a connection to a peer was opened for a particular space.
+	 *
+	 * @param peerURI - URI of the remote kernel is connected to the local kernel.
+	 * @param space - the identifier of the space for which a connection was opened.
+	 */
+	void peerConnected(URI peerURI, SpaceID space);
 
 }

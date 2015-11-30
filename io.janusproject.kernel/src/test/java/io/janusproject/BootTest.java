@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
@@ -37,28 +38,31 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import io.janusproject.Boot.Exiter;
-import io.janusproject.kernel.Kernel;
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.testutils.AbstractJanusRunTest;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.core.DefaultContextInteractions;
-import io.sarl.lang.core.Agent;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
-import org.apache.commons.cli.BasicParser;
+import com.google.inject.Binder;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.name.Named;
+import io.janusproject.Boot.Exiter;
+import io.janusproject.kernel.Kernel;
+import io.janusproject.testutils.AbstractJanusRunTest;
+import io.janusproject.testutils.AbstractJanusTest;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.arakhne.afc.vmutil.FileSystem;
 import org.arakhne.afc.vmutil.Resources;
@@ -72,11 +76,14 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import com.google.inject.Provides;
+import io.sarl.core.DefaultContextInteractions;
+import io.sarl.lang.SARLVersion;
+import io.sarl.lang.annotation.SarlSpecification;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
 /**
  * @author $Author: sgalland$
@@ -108,11 +115,15 @@ public class BootTest {
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
+	@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 	protected static class AgentMock extends Agent {
 		/**
 		 */
 		public AgentMock() {
-			super(null);
+			super(
+					Mockito.mock(BuiltinCapacitiesProvider.class),
+					UUID.randomUUID(),
+					null);
 		}
 	}
 
@@ -268,7 +279,7 @@ public class BootTest {
 		@Before
 		public void setUp() throws Exception {
 			this.janusOptions = Boot.getOptions();
-			this.parser = new BasicParser();
+			this.parser = new DefaultParser();
 		}
 
 		@Test
@@ -284,36 +295,65 @@ public class BootTest {
 
 			cmd = this.parser.parse(this.janusOptions, args("-f", "thefile"));
 			assertTrue(cmd.hasOption('f'));
+			assertEquals("thefile", cmd.getOptionValue('f'));
 			cmd = this.parser.parse(this.janusOptions, args("-file", "thefile"));
 			assertTrue(cmd.hasOption('f'));
+			assertEquals("thefile", cmd.getOptionValue('f'));
 			cmd = this.parser.parse(this.janusOptions, args("--file", "thefile"));
 			assertTrue(cmd.hasOption('f'));
+			assertEquals("thefile", cmd.getOptionValue('f'));
 
 			cmd = this.parser.parse(this.janusOptions, args("-B", "uid"));
 			assertTrue(cmd.hasOption('B'));
+			assertEquals("uid", cmd.getArgs()[0]);
 			cmd = this.parser.parse(this.janusOptions, args("-bootid", "uid"));
 			assertTrue(cmd.hasOption('B'));
+			assertEquals("uid", cmd.getArgs()[0]);
 			cmd = this.parser.parse(this.janusOptions, args("--bootid", "uid"));
 			assertTrue(cmd.hasOption('B'));
+			assertEquals("uid", cmd.getArgs()[0]);
 
 			cmd = this.parser.parse(this.janusOptions, args("-R", "uid"));
 			assertTrue(cmd.hasOption('R'));
+			assertEquals("uid", cmd.getArgs()[0]);
 			cmd = this.parser.parse(this.janusOptions, args("-randomid", "uid"));
 			assertTrue(cmd.hasOption('R'));
+			assertEquals("uid", cmd.getArgs()[0]);
 			cmd = this.parser.parse(this.janusOptions, args("--randomid", "uid"));
 			assertTrue(cmd.hasOption('R'));
+			assertEquals("uid", cmd.getArgs()[0]);
 
 			cmd = this.parser.parse(this.janusOptions, args("-W", "uid"));
 			assertTrue(cmd.hasOption('W'));
+			assertEquals("uid", cmd.getArgs()[0]);
 			cmd = this.parser.parse(this.janusOptions, args("-worldid", "uid"));
 			assertTrue(cmd.hasOption('W'));
+			assertEquals("uid", cmd.getArgs()[0]);
 			cmd = this.parser.parse(this.janusOptions, args("--worldid", "uid"));
 			assertTrue(cmd.hasOption('W'));
+			assertEquals("uid", cmd.getArgs()[0]);
 
 			cmd = this.parser.parse(this.janusOptions, args("-D", "name=value"));
 			assertTrue(cmd.hasOption('D'));
-			cmd = this.parser.parse(this.janusOptions, args("-D", "name"));
+			assertArrayEquals(new String[] {"name", "value"}, cmd.getOptionValues('D'));
+			cmd = this.parser.parse(this.janusOptions, args("-Dname=value"));
 			assertTrue(cmd.hasOption('D'));
+			assertArrayEquals(new String[] {"name", "value"}, cmd.getOptionValues('D'));
+			cmd = this.parser.parse(this.janusOptions, args("-D", "name", "value"));
+			assertTrue(cmd.hasOption('D'));
+			assertArrayEquals(new String[] {"name", "value"}, cmd.getOptionValues('D'));
+			try {
+				this.parser.parse(this.janusOptions, args("-D", "name"));
+				fail("Expecting failure");
+			} catch (Throwable exception) {
+				//
+			}
+			try {
+				this.parser.parse(this.janusOptions, args("-D"));
+				fail("Expecting failure");
+			} catch (Throwable exception) {
+				//
+			}
 		}
 
 		@Test
@@ -619,7 +659,7 @@ public class BootTest {
 		}
 
 		@Test
-		public void option_cli_valid() {
+		public void option_cli_valid() throws IOException {
 			Object[] freeArgs = Boot.parseCommandLine(args("arg1", "--cli", "--", "-x", "arg2", "-y"));
 			// The properties are null since resetProperties() is invoked for resetting the properties in
 			// the start-up function inherited from AbstractJanusTest
@@ -639,9 +679,9 @@ public class BootTest {
 			verify(this.exiter, only()).exit();
 		}
 		
-		private void verifyCli(String... text) {
+		private void verifyCli(String... text) throws IOException {
 			ArgumentCaptor<String> arg = ArgumentCaptor.forClass(String.class);
-			verify(this.logger, times(text.length)).println(arg.capture());
+			verify(this.logger, Mockito.times(text.length)).println(arg.capture());
 			List<String> list = arg.getAllValues();
 			assertEquals("invalid list size", text.length, list.size());
 			for (int i = 0; i < text.length; ++i) {
@@ -1062,14 +1102,14 @@ public class BootTest {
 		 * @mavengroupid $GroupId$
 		 * @mavenartifactid $ArtifactId$
 		 */
+		@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 		public static class RCAgent extends TestingAgent {
 
-			public RCAgent(UUID parentID) {
-				super(parentID);
-			}
-
-			public RCAgent(UUID parentID, UUID agentID) {
-				super(parentID, agentID);
+			public RCAgent(
+					BuiltinCapacitiesProvider provider,
+					UUID parentID,
+					UUID agentID) {
+				super(provider, parentID, agentID);
 			}
 
 			@Override
