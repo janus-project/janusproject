@@ -216,7 +216,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 	@Override
 	public boolean isInSpace(Event event, SpaceID spaceID) {
-		return isInSpace(event, spaceID.getID());
+		return spaceID.equals(event.getSource().getSpaceId());
 	}
 
 	@Override
