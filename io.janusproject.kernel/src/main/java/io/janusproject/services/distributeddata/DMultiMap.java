@@ -52,13 +52,12 @@ public interface DMultiMap<K, V> extends Multimap<K, V> {
 
 	/**
 	 * Returns number of values matching to given key in the multimap.
-	 * <p/>
-	 * <p><b>Warning:</b></p>
-	 * <p>
-	 * This method uses <tt>hashCode</tt> and <tt>equals</tt> of binary form of
+	 *
+	 * <p><b>Warning:</b>
+	 *
+	 * <p>This method uses <tt>hashCode</tt> and <tt>equals</tt> of binary form of
 	 * the <tt>key</tt>, not the actual implementations of <tt>hashCode</tt> and <tt>equals</tt>
 	 * defined in <tt>key</tt>'s class.
-	 * </p>
 	 *
 	 * @param key the key whose values count are to be returned
 	 * @return number of values matching to given key in the multimap.

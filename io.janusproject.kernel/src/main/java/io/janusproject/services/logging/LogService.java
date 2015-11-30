@@ -46,7 +46,7 @@ import io.janusproject.services.DependentService;
  * <p>If a <code>LogParam</code> is passed as parameter, the <code>toString</code>
  * function will be invoked.
  *
- * <p>For all the other objects, the {@link #toString()} function is invoked.
+ * <p>For all the other objects, the {@link Object#toString()} function is invoked.
  *
  *
  * @author $Author: sgalland$
