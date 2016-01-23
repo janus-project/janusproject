@@ -7,7 +7,7 @@
 
 	<groupId>io.janusproject</groupId>
 	<artifactId>io.janusproject</artifactId>
-	<version>2.0.4.0-SNAPSHOT</version>
+	<version>2.0.3.1</version>
 
 
 	<name>Janus Project</name>
@@ -38,8 +38,8 @@
 		<compiler.level>1.8</compiler.level>
 		<copyrighters>the original authors or authors</copyrighters>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<sarl.version>0.4.0-SNAPSHOT</sarl.version>
-		<sarl.spec.version>0.4</sarl.spec.version>
+		<sarl.version>0.3.1</sarl.version>
+		<sarl.spec.version>0.3</sarl.spec.version>
 		<guice.version>4.0</guice.version>
 		<guava.version>19.0.0</guava.version>
 		<guava.tests.version>18.0</guava.tests.version>
@@ -245,11 +245,6 @@
 					<version>2.17</version>
 					<dependencies>
 						<dependency>
-							<groupId>io.sarl</groupId>
-							<artifactId>io.sarl.checkstyle</artifactId>
-							<version>${sarl.version}</version>
-						</dependency>
-						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
 							<version>6.12</version>
@@ -264,7 +259,7 @@
 						</execution>
 					</executions>
 					<configuration>
-						<configLocation>io/sarl/checkstyle/checks.xml</configLocation>
+						<configLocation>${mainbasedir}/checkstyle/checks.xml</configLocation>
 						<headerLocation>${mainbasedir}/checkstyle/class_header.txt</headerLocation>
 						<enableRSS>true</enableRSS>
 						<linkXRef>true</linkXRef>
