@@ -34,18 +34,18 @@
 	<!-- ======================================= -->
 
 	<properties>
-		<year>2015</year>
+		<year>2016</year>
 		<compiler.level>1.8</compiler.level>
 		<copyrighters>the original authors or authors</copyrighters>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sarl.version>0.4.0-SNAPSHOT</sarl.version>
 		<sarl.spec.version>0.3</sarl.spec.version>
 		<guice.version>4.0</guice.version>
-		<guava.version>19.0.0</guava.version>
+		<guava.version>18.0</guava.version>
 		<guava.tests.version>18.0</guava.tests.version>
 		<jeromq.version>0.3.5</jeromq.version>
 		<gson.version>2.4</gson.version>
-		<hazelcast.version>3.6-EA</hazelcast.version>
+		<hazelcast.version>3.7-EA</hazelcast.version>
 		<afc.version>12.0</afc.version>
 	</properties>
 
@@ -132,7 +132,7 @@
 			</dependency>
 
 			<dependency>
-				<groupId>io.janusproject.guava</groupId>
+				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>${guava.version}</version>
 			</dependency>
@@ -247,7 +247,7 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>6.12</version>
+							<version>6.16</version>
 						</dependency>
 					</dependencies>
 					<executions>
