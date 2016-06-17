@@ -32,7 +32,8 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.UUID;
 
-/** Provide utilities related to the network.
+/**
+ * Provide utilities related to the network.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -45,20 +46,19 @@ public final class NetworkUtil {
 		//
 	}
 
-	/** Replies if the host is connected.
+	/**
+	 * Replies if the host is connected.
 	 *
-	 * @return <code>true</code> if this host has one non-loopback address;
-	 * <code>false</code> otherwise.
+	 * @return <code>true</code> if this host has one non-loopback address; <code>false</code> otherwise.
 	 */
 	public static boolean isConnectedHost() {
 		return getPrimaryAddress() != null;
 	}
 
-	/** Replies the first IPv4 public address.
-	 * A public address is an address that is not loopback.
+	/**
+	 * Replies the first IPv4 public address. A public address is an address that is not loopback.
 	 *
-	 * @return the first public IPv4 address or <code>null</code> if
-	 *     none.
+	 * @return the first public IPv4 address or <code>null</code> if none.
 	 */
 	public static InetAddress getPrimaryAddress() {
 		try {
@@ -73,8 +73,7 @@ public final class NetworkUtil {
 					if (addrs != null) {
 						while (addrs.hasMoreElements()) {
 							adr = addrs.nextElement();
-							if (adr != null && !adr.isLoopbackAddress()
-									&& (adr instanceof Inet4Address)) {
+							if (adr != null && !adr.isLoopbackAddress() && (adr instanceof Inet4Address)) {
 								return adr;
 							}
 						}
@@ -87,10 +86,10 @@ public final class NetworkUtil {
 		return null;
 	}
 
-	/** Replies the IPv4 loopback address.
+	/**
+	 * Replies the IPv4 loopback address.
 	 *
-	 * @return the IPv4 loopback address or <code>null</code> if
-	 *     none.
+	 * @return the IPv4 loopback address or <code>null</code> if none.
 	 */
 	public static InetAddress getLoopbackAddress() {
 		try {
@@ -105,8 +104,7 @@ public final class NetworkUtil {
 					if (addrs != null) {
 						while (addrs.hasMoreElements()) {
 							adr = addrs.nextElement();
-							if (adr != null && adr.isLoopbackAddress()
-									&& (adr instanceof Inet4Address)) {
+							if (adr != null && adr.isLoopbackAddress() && (adr instanceof Inet4Address)) {
 								return adr;
 							}
 						}
@@ -119,7 +117,8 @@ public final class NetworkUtil {
 		return null;
 	}
 
-	/** Replies the byte-array representation of the given id.
+	/**
+	 * Replies the byte-array representation of the given id.
 	 *
 	 * @param id - the UUID to convert to byte array.
 	 * @return the byte-array representation.
@@ -128,7 +127,8 @@ public final class NetworkUtil {
 		return id.toString().getBytes(NetworkConfig.getStringEncodingCharset());
 	}
 
-	/** Replies the id from the given byte-array representation.
+	/**
+	 * Replies the id from the given byte-array representation.
 	 *
 	 * @param id - the byte array to convert to UUID.
 	 * @return the UUID.
@@ -137,9 +137,11 @@ public final class NetworkUtil {
 		return UUID.fromString(new String(id, NetworkConfig.getStringEncodingCharset()));
 	}
 
-	/** Convert a string URI to an object URI.
+	/**
+	 * Convert a string URI to an object URI.
 	 *
-	 * <p>This function support the syntax ":*" for the port.
+	 * <p>
+	 * This function support the syntax ":*" for the port.
 	 *
 	 * @param uri - the string representation of the URI to parse.
 	 * @return the URI.
@@ -153,19 +155,14 @@ public final class NetworkUtil {
 			adr = u.getPath();
 		}
 		if (adr != null && adr.endsWith(":*")) { //$NON-NLS-1$
-			return new URI(
-					u.getScheme(),
-					u.getUserInfo(),
-					adr.substring(0, adr.length() - 2),
-					-1,
-					null,
-					u.getQuery(),
+			return new URI(u.getScheme(), u.getUserInfo(), adr.substring(0, adr.length() - 2), -1, null, u.getQuery(),
 					u.getFragment());
 		}
 		return u;
 	}
 
-	/** Convert an inet address to an URI.
+	/**
+	 * Convert an inet address to an URI.
 	 *
 	 * @param adr - address to convert to URI.
 	 * @return the URI.
@@ -178,7 +175,8 @@ public final class NetworkUtil {
 		}
 	}
 
-	/** Convert a socket address to an URI.
+	/**
+	 * Convert a socket address to an URI.
 	 *
 	 * @param adr - address to convert to URI.
 	 * @return the URI.
@@ -187,7 +185,8 @@ public final class NetworkUtil {
 		return toURI(adr.getAddress(), adr.getPort());
 	}
 
-	/** Convert an inet address to an URI.
+	/**
+	 * Convert an inet address to an URI.
 	 *
 	 * @param adr - the address.
 	 * @param port - port number, if negative or nul, use the "*" notation.
@@ -201,7 +200,8 @@ public final class NetworkUtil {
 		}
 	}
 
-	/** Extract an Inet address from an URI.
+	/**
+	 * Extract an Inet address from an URI.
 	 *
 	 * @param uri - the address.
 	 * @return the address.
@@ -220,7 +220,8 @@ public final class NetworkUtil {
 		}
 	}
 
-	/** Extract an Inet address from an URI.
+	/**
+	 * Extract an Inet address from an URI.
 	 *
 	 * @param uri - the address.
 	 * @return the address.
@@ -234,4 +235,66 @@ public final class NetworkUtil {
 		return new InetSocketAddress(adr, port);
 	}
 
+	private static void extractHost(URI uri, StringBuilder sb) {
+		if (uri.getHost() != null) {
+			sb.append("//"); //$NON-NLS-1$
+			if (uri.getUserInfo() != null) {
+				sb.append(uri.getUserInfo());
+				sb.append('@');
+			}
+			boolean needBrackets = ((uri.getHost().indexOf(':') >= 0) && !uri.getHost().startsWith("[") //$NON-NLS-1$
+			  && !uri.getHost().endsWith("]")); //$NON-NLS-1$
+			if (needBrackets) {
+				sb.append('[');
+			}
+			sb.append(uri.getHost());
+			if (needBrackets) {
+				sb.append(']');
+			}
+			sb.append(':');
+			if (uri.getPort() != 1) {
+				sb.append(uri.getPort());
+			} else {
+				sb.append('*');
+			}
+		} else if (uri.getAuthority() != null) {
+			sb.append("//"); //$NON-NLS-1$
+			sb.append(uri.getAuthority());
+		}
+	}
+
+	/**
+	 * Convert an object URI to a string URI.
+	 * <p>
+	 * This function differs from {@link URI#toString()} because it outputs "*" as the port when the port in the uri is lower or
+	 * equals to zero.
+	 *
+	 * @param uri the URI to convert to its string representation.
+	 * @return the URI.
+	 * @throws URISyntaxException when the given URI has an invalid syntax.
+	 */
+	public static String toString(URI uri) throws URISyntaxException {
+		StringBuilder sb = new StringBuilder();
+		if (uri.getScheme() != null) {
+			sb.append(uri.getScheme());
+			sb.append(':');
+		}
+		if (uri.isOpaque()) {
+			sb.append(uri.getSchemeSpecificPart());
+		} else {
+			extractHost(uri, sb);
+			if (uri.getPath() != null) {
+				sb.append(uri.getPath());
+			}
+			if (uri.getQuery() != null) {
+				sb.append('?');
+				sb.append(uri.getQuery());
+			}
+		}
+		if (uri.getFragment() != null) {
+			sb.append('#');
+			sb.append(uri.getFragment());
+		}
+		return sb.toString();
+	}
 }
