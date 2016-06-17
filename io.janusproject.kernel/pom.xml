@@ -22,7 +22,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>io.janusproject.guava</groupId>
+			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
 
