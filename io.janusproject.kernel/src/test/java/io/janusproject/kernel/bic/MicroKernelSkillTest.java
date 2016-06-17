@@ -44,13 +44,13 @@ public class MicroKernelSkillTest extends AbstractJanusTest {
 
 	@Mock
 	private NetworkService service;
-	
+
 	@Mock
 	private Kernel kernel;
-	
+
 	@InjectMocks
 	private MicroKernelSkill skill;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);

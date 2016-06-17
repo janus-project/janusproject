@@ -22,4 +22,3 @@
  * Implementation of the kernel discovery services based on the Java Development Kit.
  */
 package io.janusproject.kernel.services.jdk.kerneldiscovery;
-

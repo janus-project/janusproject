@@ -23,13 +23,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import io.janusproject.testutils.AbstractJanusTest;
 
 import java.io.File;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.junit.Test;
+
+import io.janusproject.testutils.AbstractJanusTest;
 
 /**
  * @author $Author: sgalland$
@@ -46,8 +47,8 @@ public class ClasspathTest extends AbstractJanusTest {
 		assertNotNull(rawClasspath);
 		assertNotEquals("", rawClasspath);
 		String[] paths = rawClasspath.split(File.pathSeparator);
-		
-		for(String path : paths) {
+
+		for (String path : paths) {
 			File file = new File(path);
 			if (file.isDirectory()) {
 				file = new File(file, "META-INF");
@@ -55,7 +56,8 @@ public class ClasspathTest extends AbstractJanusTest {
 				file = new File(file, "com.google.guava");
 				file = new File(file, "guava");
 				file = new File(file, "pom.xml");
-				assertFalse("The original Guava library was found in the classpath. Only the Janus fork must be used.", file.exists());
+				assertFalse("The original Guava library was found in the classpath. Only the Janus fork must be used.",
+						file.exists());
 			} else {
 				try (JarFile jf = new JarFile(file)) {
 					JarEntry entry = jf.getJarEntry("META-INF/maven/com.google.guava/guava/pom.xml");
@@ -63,7 +65,7 @@ public class ClasspathTest extends AbstractJanusTest {
 				}
 			}
 		}
-		
+
 	}
 
 }

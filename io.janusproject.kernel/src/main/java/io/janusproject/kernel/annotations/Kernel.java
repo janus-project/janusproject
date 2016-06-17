@@ -30,14 +30,16 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
-/** Annotation for injection of the kernel.
+/**
+ * Annotation for injection of the kernel.
  *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@BindingAnnotation @Target({ FIELD, PARAMETER, METHOD })
+@BindingAnnotation
+@Target({ FIELD, PARAMETER, METHOD })
 @Retention(RUNTIME)
 public @interface Kernel {
 	//

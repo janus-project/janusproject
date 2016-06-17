@@ -19,57 +19,37 @@
  */
 package io.janusproject.testutils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import io.janusproject.JanusConfig;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nullable;
 
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.internal.runners.statements.RunBefores;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.Statement;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.Service.Listener;
-import com.google.common.util.concurrent.Service.State;
 
-/** Abstract class that is providing useful tools for unit tests.
+import io.janusproject.JanusConfig;
+
+/**
+ * Abstract class that is providing useful tools for unit tests.
  *
- * This class provides assertion functions, clear the system properties
- * related to Janus, and reset the attributes of the unit test that
- * are marked <code>@Mock</code>, <code>@InjectMocks</code> or
- * <code>@Nullable</code>.
+ * This class provides assertion functions, clear the system properties related to Janus, and reset the attributes of the unit
+ * test that are marked <code>@Mock</code>, <code>@InjectMocks</code> or <code>@Nullable</code>.
  *
  * @param <S> - the type of the service.
  * @author $Author: sgalland$
@@ -80,8 +60,8 @@ import com.google.common.util.concurrent.Service.State;
 @SuppressWarnings("all")
 public abstract class AbstractJanusTest {
 
-	/** This rule permits to clean automatically the fields
-	 * at the end of the test.
+	/**
+	 * This rule permits to clean automatically the fields at the end of the test.
 	 */
 	@Rule
 	public TestWatcher rootJanusWatchter = new TestWatcher() {
@@ -90,14 +70,14 @@ public abstract class AbstractJanusTest {
 			// Clear the system properties
 			resetProperties();
 		}
+
 		@Override
 		protected void finished(Description description) {
 			// Clear the references to the mock objects or the injected objects
 			Class<?> type = AbstractJanusTest.this.getClass();
 			while (type != null && !Object.class.equals(type)) {
 				for (Field field : type.getDeclaredFields()) {
-					if ((field.getAnnotation(Mock.class) != null
-							|| field.getAnnotation(InjectMocks.class) != null
+					if ((field.getAnnotation(Mock.class) != null || field.getAnnotation(InjectMocks.class) != null
 							|| field.getAnnotation(Nullable.class) != null)
 							&& (field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) == 0) {
 						boolean isAcc = field.isAccessible();
@@ -117,8 +97,9 @@ public abstract class AbstractJanusTest {
 			resetProperties();
 		}
 	};
-	
-	/** Test if the given exception has a cause of the given type.
+
+	/**
+	 * Test if the given exception has a cause of the given type.
 	 *
 	 * If the given exception has no cause, it is the cause.
 	 *
@@ -135,14 +116,13 @@ public abstract class AbstractJanusTest {
 		if (cause == null) {
 			cause = actual;
 		}
-		assertTrue("Unexpected type of exception's cause. Expected: "
-				+ expected.getName() + ". Actual: "
-				+ cause.getClass().getName(),
-				expected.isInstance(cause));
+		assertTrue("Unexpected type of exception's cause. Expected: " + expected.getName() + ". Actual: "
+				+ cause.getClass().getName(), expected.isInstance(cause));
 		return expected.cast(cause);
 	}
 
-	/** Test if the actual collection/iterable contains all the expected objects.
+	/**
+	 * Test if the actual collection/iterable contains all the expected objects.
 	 * 
 	 * @param actual - the collection to test.
 	 * @param expected - the expected objects.
@@ -151,7 +131,8 @@ public abstract class AbstractJanusTest {
 		assertContainsCollection(actual, Arrays.asList(expected));
 	}
 
-	/** Test if the actual collection/iterable contains all the expected objects.
+	/**
+	 * Test if the actual collection/iterable contains all the expected objects.
 	 * 
 	 * @param actual - the collection to test.
 	 * @param expected - the expected objects.
@@ -174,13 +155,12 @@ public abstract class AbstractJanusTest {
 		}
 
 		if (!le.isEmpty()) {
-			fail("Expecting the following elements:\n" + le.toString() + "\nbut was:\n" +
-					Iterables.toString(actual));
+			fail("Expecting the following elements:\n" + le.toString() + "\nbut was:\n" + Iterables.toString(actual));
 		}
 	}
 
-	/** Assert if the value is the string representation of
-	 * the boolean vlaue <code>true</code>.
+	/**
+	 * Assert if the value is the string representation of the boolean vlaue <code>true</code>.
 	 *
 	 * @param actual - the value.
 	 */
@@ -188,8 +168,8 @@ public abstract class AbstractJanusTest {
 		assertTrueStr(null, actual);
 	}
 
-	/** Assert if the value is the string representation of
-	 * the boolean vlaue <code>true</code>.
+	/**
+	 * Assert if the value is the string representation of the boolean vlaue <code>true</code>.
 	 *
 	 * @param message - the error message.
 	 * @param actual - the value.
@@ -198,8 +178,8 @@ public abstract class AbstractJanusTest {
 		assertEquals(message, Boolean.TRUE.toString(), actual);
 	}
 
-	/** Assert if the value is the string representation of
-	 * the boolean vlaue <code>false</code>.
+	/**
+	 * Assert if the value is the string representation of the boolean vlaue <code>false</code>.
 	 *
 	 * @param actual - the value.
 	 */
@@ -207,8 +187,8 @@ public abstract class AbstractJanusTest {
 		assertFalseStr(null, actual);
 	}
 
-	/** Assert if the value is the string representation of
-	 * the boolean vlaue <code>false</code>.
+	/**
+	 * Assert if the value is the string representation of the boolean vlaue <code>false</code>.
 	 *
 	 * @param message - the error message.
 	 * @param actual - the value.
@@ -217,8 +197,8 @@ public abstract class AbstractJanusTest {
 		assertEquals(message, Boolean.FALSE.toString(), actual);
 	}
 
-	/** Assert if the system property with the given name has
-	 * the boolean value <code>true</code>.
+	/**
+	 * Assert if the system property with the given name has the boolean value <code>true</code>.
 	 *
 	 * The property must be defined
 	 *
@@ -232,8 +212,8 @@ public abstract class AbstractJanusTest {
 		assertTrueStr("The property '" + name + "' is expected to be true.", v);
 	}
 
-	/** Assert if the system property with the given name has
-	 * the boolean value <code>false</code>.
+	/**
+	 * Assert if the system property with the given name has the boolean value <code>false</code>.
 	 *
 	 * @param name - the name of the property.
 	 */
@@ -245,8 +225,8 @@ public abstract class AbstractJanusTest {
 		assertFalseStr("The property '" + name + "' is expected to be true.", v);
 	}
 
-	/** Assert if the system property with the given name has
-	 * the boolean value <code>false</code>.
+	/**
+	 * Assert if the system property with the given name has the boolean value <code>false</code>.
 	 *
 	 * @param name - the name of the property.
 	 */
@@ -257,8 +237,8 @@ public abstract class AbstractJanusTest {
 		}
 	}
 
-	/** Assert if the system property with the given name has
-	 * the given value.
+	/**
+	 * Assert if the system property with the given name has the given value.
 	 *
 	 * @param name - the name of the property.
 	 * @param value - the value of the property.
@@ -275,13 +255,14 @@ public abstract class AbstractJanusTest {
 		}
 	}
 
-	/** Remove all the system properties related to Janus.
+	/**
+	 * Remove all the system properties related to Janus.
 	 */
 	public static void resetProperties() {
 		Properties tmp = new Properties();
 		JanusConfig.getDefaultValues(tmp);
 		Properties props = System.getProperties();
-		for(Object name : tmp.keySet()) {
+		for (Object name : tmp.keySet()) {
 			props.remove(name);
 		}
 	}

@@ -22,4 +22,3 @@
  * Implementation of the Built-in Capacities provided by the Janus platform.
  */
 package io.janusproject.kernel.bic;
-

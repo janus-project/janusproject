@@ -43,23 +43,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.name.Named;
-import io.janusproject.Boot.Exiter;
-import io.janusproject.kernel.Kernel;
-import io.janusproject.testutils.AbstractJanusRunTest;
-import io.janusproject.testutils.AbstractJanusTest;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -79,6 +69,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import com.google.inject.Binder;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+
+import io.janusproject.Boot.Exiter;
+import io.janusproject.kernel.Kernel;
+import io.janusproject.testutils.AbstractJanusRunTest;
+import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.lang.SARLVersion;
 import io.sarl.lang.annotation.SarlSpecification;
@@ -92,14 +90,8 @@ import io.sarl.lang.core.BuiltinCapacitiesProvider;
  * @mavenartifactid $ArtifactId$
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-	BootTest.SetterTests.class,
-	BootTest.CommandLineParserTests.class,
-	BootTest.CommandLineExecutionTests.class,
-	BootTest.StartTests.class,
-	BootTest.BootAgentIdentifierTests.class,
-	BootTest.RunConfigurationTests.class,
-})
+@SuiteClasses({ BootTest.SetterTests.class, BootTest.CommandLineParserTests.class, BootTest.CommandLineExecutionTests.class,
+		BootTest.StartTests.class, BootTest.BootAgentIdentifierTests.class, BootTest.RunConfigurationTests.class, })
 @SuppressWarnings("all")
 public class BootTest {
 
@@ -120,10 +112,7 @@ public class BootTest {
 		/**
 		 */
 		public AgentMock() {
-			super(
-					Mockito.mock(BuiltinCapacitiesProvider.class),
-					UUID.randomUUID(),
-					null);
+			super(Mockito.mock(BuiltinCapacitiesProvider.class), UUID.randomUUID(), null);
 		}
 	}
 
@@ -196,7 +185,7 @@ public class BootTest {
 
 		@Test
 		public void setVerboseLevel() {
-			for(int i = -10; i < 10; ++i) {
+			for (int i = -10; i < 10; ++i) {
 				Boot.setVerboseLevel(i);
 				assertEquals(Integer.toString(i), System.getProperty(JanusConfig.VERBOSE_LEVEL_NAME));
 			}
@@ -335,13 +324,13 @@ public class BootTest {
 
 			cmd = this.parser.parse(this.janusOptions, args("-D", "name=value"));
 			assertTrue(cmd.hasOption('D'));
-			assertArrayEquals(new String[] {"name", "value"}, cmd.getOptionValues('D'));
+			assertArrayEquals(new String[] { "name", "value" }, cmd.getOptionValues('D'));
 			cmd = this.parser.parse(this.janusOptions, args("-Dname=value"));
 			assertTrue(cmd.hasOption('D'));
-			assertArrayEquals(new String[] {"name", "value"}, cmd.getOptionValues('D'));
+			assertArrayEquals(new String[] { "name", "value" }, cmd.getOptionValues('D'));
 			cmd = this.parser.parse(this.janusOptions, args("-D", "name", "value"));
 			assertTrue(cmd.hasOption('D'));
-			assertArrayEquals(new String[] {"name", "value"}, cmd.getOptionValues('D'));
+			assertArrayEquals(new String[] { "name", "value" }, cmd.getOptionValues('D'));
 			try {
 				this.parser.parse(this.janusOptions, args("-D", "name"));
 				fail("Expecting failure");
@@ -678,7 +667,7 @@ public class BootTest {
 			verifyNoMoreInteractions(this.logger);
 			verify(this.exiter, only()).exit();
 		}
-		
+
 		private void verifyCli(String... text) throws IOException {
 			ArgumentCaptor<String> arg = ArgumentCaptor.forClass(String.class);
 			verify(this.logger, Mockito.times(text.length)).println(arg.capture());
@@ -755,7 +744,8 @@ public class BootTest {
 
 		@Test
 		public void option_D_valid_withSeparation() {
-			Object[] freeArgs = Boot.parseCommandLine(args("-D", "io.janusproject.tests.MY_PROPERTY_1=the value", "--", "-x", "-y"));
+			Object[] freeArgs = Boot
+					.parseCommandLine(args("-D", "io.janusproject.tests.MY_PROPERTY_1=the value", "--", "-x", "-y"));
 			// The properties are null since resetProperties() is invoked for resetting the properties in
 			// the start-up function inherited from AbstractJanusTest
 			assertNullProperty(JanusConfig.JANUS_LOGO_SHOW_NAME);
@@ -1007,9 +997,7 @@ public class BootTest {
 			ArgumentCaptor<String> parameters = ArgumentCaptor.forClass(String.class);
 			verify(kernel).spawn(agentType.capture(), parameters.capture());
 			assertEquals(AgentMock.class, agentType.getValue());
-			assertArrayEquals(new String[] {
-					"param1", "param2", "param3"
-			}, parameters.getAllValues().toArray());
+			assertArrayEquals(new String[] { "param1", "param2", "param3" }, parameters.getAllValues().toArray());
 
 			assertEquals(AgentMock.class.getName(), System.getProperty(JanusConfig.BOOT_AGENT));
 			String sid = System.getProperty(JanusConfig.BOOT_AGENT_ID);
@@ -1057,7 +1045,7 @@ public class BootTest {
 
 		@Nullable
 		private UUID defaultID;
-		
+
 		@Nullable
 		private UUID bootID;
 
@@ -1067,7 +1055,7 @@ public class BootTest {
 			this.bootID = UUID.nameUUIDFromBytes(RCAgent.class.getName().getBytes());
 			Boot.setOffline(true);
 		}
-		
+
 		@Test
 		public void defaultContextUUID() throws Exception {
 			Boot.setDefaultContextUUID();
@@ -1105,10 +1093,7 @@ public class BootTest {
 		@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 		public static class RCAgent extends TestingAgent {
 
-			public RCAgent(
-					BuiltinCapacitiesProvider provider,
-					UUID parentID,
-					UUID agentID) {
+			public RCAgent(BuiltinCapacitiesProvider provider, UUID parentID, UUID agentID) {
 				super(provider, parentID, agentID);
 			}
 

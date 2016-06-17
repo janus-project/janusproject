@@ -22,8 +22,8 @@ package io.janusproject.kernel.space;
 
 import io.sarl.lang.core.SpaceID;
 
-
-/** Abstract implementation of a space.
+/**
+ * Abstract implementation of a space.
  *
  * @author $Author: srodriguez$
  * @version $FullVersion$
@@ -34,7 +34,8 @@ public abstract class SpaceBase implements DistributedSpace {
 
 	private final SpaceID id;
 
-	/** Constructs a space.
+	/**
+	 * Constructs a space.
 	 *
 	 * @param id - identifier of the space.
 	 */

@@ -26,7 +26,8 @@ import java.util.concurrent.TimeUnit;
 import org.hamcrest.Description;
 import org.hamcrest.DiagnosingMatcher;
 
-/** A matcher that is testing if a future is throwing an exception.
+/**
+ * A matcher that is testing if a future is throwing an exception.
  * 
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -44,14 +45,16 @@ public class FutureExceptionMatcher extends DiagnosingMatcher<Future<?>> {
 		this.expected = expected;
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void describeTo(Description description) {
 		description.appendText("an instance of ").appendText(this.expected.getName()); //$NON-NLS-1$
 	}
 
-	/** {@inheritDoc}
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected boolean matches(Object item, Description mismatch) {
@@ -64,13 +67,12 @@ public class FutureExceptionMatcher extends DiagnosingMatcher<Future<?>> {
 			mismatch.appendValue(item).appendText(" is not a Future"); //$NON-NLS-1$
 			return false;
 		}
-		
-		Future<?> f = (Future<?>)item;
-		
+
+		Future<?> f = (Future<?>) item;
+
 		try {
 			f.get(30, TimeUnit.SECONDS);
-		}
-		catch(Throwable e) {
+		} catch (Throwable e) {
 			while (e instanceof ExecutionException) {
 				e = e.getCause();
 			}
@@ -80,8 +82,8 @@ public class FutureExceptionMatcher extends DiagnosingMatcher<Future<?>> {
 			}
 			return true;
 		}
-		
-		mismatch.appendText("an exception of type "+this.expected+" is expected"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		mismatch.appendText("an exception of type " + this.expected + " is expected"); //$NON-NLS-1$ //$NON-NLS-2$
 		return false;
 	}
 

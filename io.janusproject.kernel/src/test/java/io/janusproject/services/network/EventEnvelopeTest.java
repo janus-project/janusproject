@@ -23,11 +23,10 @@ import static org.junit.Assert.assertSame;
 
 import javax.annotation.Nullable;
 
-import io.janusproject.testutils.AbstractJanusTest;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import io.janusproject.testutils.AbstractJanusTest;
 
 /**
  * @author $Author: sgalland$
@@ -55,17 +54,17 @@ public class EventEnvelopeTest extends AbstractJanusTest {
 
 	@Nullable
 	private EventEnvelope envelope;
-	
+
 	@Before
 	public void setUp() {
 		this.contextId = new byte[] { 32 };
 		this.spaceId = new byte[] { 32 };
 		this.event = new byte[] { 32 };
 		this.scope = new byte[] { 32 };
-		this.headers= new byte[] { 32 };
+		this.headers = new byte[] { 32 };
 		this.envelope = new EventEnvelope(this.contextId, this.spaceId, this.scope, this.headers, this.event);
 	}
-	
+
 	@Test
 	public void getCustomHeaders() {
 		assertSame(this.headers, this.envelope.getCustomHeaders());

@@ -22,4 +22,3 @@
  * Java annotations for defining the Janus micro-kernel classes.
  */
 package io.janusproject.kernel.annotations;
-

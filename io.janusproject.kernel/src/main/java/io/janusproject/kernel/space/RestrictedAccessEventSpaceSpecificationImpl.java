@@ -31,12 +31,13 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.util.RestrictedAccessEventSpace;
 import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
-/** Default implementation of the specification of a restricted-access event space.
+/**
+ * Default implementation of the specification of a restricted-access event space.
  *
- * <p>The initialization parameters of {@link #create(SpaceID, Object...)} must contain
- * an instance of {@link Acl}. This instance is the Access Control List.
- * The first parameter that is a {@link Permission} will be assumed as the
- * permission to have to be allowed to access to the space.
+ * <p>
+ * The initialization parameters of {@link #create(SpaceID, Object...)} must contain an instance of {@link Acl}. This instance is
+ * the Access Control List. The first parameter that is a {@link Permission} will be assumed as the permission to have to be
+ * allowed to access to the space.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$

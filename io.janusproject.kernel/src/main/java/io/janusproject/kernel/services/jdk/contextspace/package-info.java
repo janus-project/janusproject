@@ -19,8 +19,6 @@
  */
 
 /**
- * Implementation of the service for managing contexts and spaces
- * based on the Java Development Kit.
+ * Implementation of the service for managing contexts and spaces based on the Java Development Kit.
  */
 package io.janusproject.kernel.services.jdk.contextspace;
-

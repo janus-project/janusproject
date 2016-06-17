@@ -22,4 +22,3 @@
  * Definition of the service for managing the low-level/hardware infrastructure.
  */
 package io.janusproject.services.infrastructure;
-

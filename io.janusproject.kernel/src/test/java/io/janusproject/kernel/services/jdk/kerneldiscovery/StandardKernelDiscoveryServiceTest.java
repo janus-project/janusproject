@@ -21,13 +21,8 @@ package io.janusproject.kernel.services.jdk.kerneldiscovery;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.network.NetworkService;
-import io.janusproject.services.network.NetworkServiceListener;
-import io.janusproject.services.network.NetworkUtil;
-import io.janusproject.testutils.AbstractDependentServiceTest;
-import io.janusproject.testutils.StartServiceForTest;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -40,13 +35,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-
-import static org.mockito.Mockito.*;
-
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.common.util.concurrent.Service.Listener;
+
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.StartServiceForTest;
 
 /**
  * @author $Author: sgalland$
@@ -56,8 +55,7 @@ import com.google.common.util.concurrent.Service.Listener;
  */
 @StartServiceForTest(startAfterSetUp = true)
 @SuppressWarnings("all")
-public final class StandardKernelDiscoveryServiceTest
-extends AbstractDependentServiceTest<StandardKernelDiscoveryService> {
+public final class StandardKernelDiscoveryServiceTest extends AbstractDependentServiceTest<StandardKernelDiscoveryService> {
 
 	@Nullable
 	private URI uri;
@@ -84,15 +82,15 @@ extends AbstractDependentServiceTest<StandardKernelDiscoveryService> {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock invocation) throws Throwable {
-				StandardKernelDiscoveryServiceTest.this.networkServiceListener =
-						invocation.getArgumentAt(0, Listener.class);
+				StandardKernelDiscoveryServiceTest.this.networkServiceListener = invocation.getArgumentAt(0, Listener.class);
 				return null;
 			}
 		}).when(this.network).addListener(Matchers.any(Listener.class), Matchers.any(Executor.class));
 		this.service.postConstruction(this.network, this.executor);
 	}
 
-	/** Simulate the network connection.
+	/**
+	 * Simulate the network connection.
 	 */
 	protected void connectNetwork() {
 		assertNotNull("The kernel discovery service is expected to register a listener on the NetworkService.",
@@ -108,8 +106,7 @@ extends AbstractDependentServiceTest<StandardKernelDiscoveryService> {
 
 	@Override
 	public void getServiceDependencies() {
-		assertContains(this.service.getServiceDependencies(),
-				ExecutorService.class);
+		assertContains(this.service.getServiceDependencies(), ExecutorService.class);
 	}
 
 	@Override

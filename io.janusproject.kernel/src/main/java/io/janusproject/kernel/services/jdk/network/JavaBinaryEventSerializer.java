@@ -42,10 +42,11 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
 
 /**
- * Serialize the {@link EventDispatch} content using the Java serialization
- * mechanism to generate the corresponding {@link EventEnvelope}.
+ * Serialize the {@link EventDispatch} content using the Java serialization mechanism to generate the corresponding
+ * {@link EventEnvelope}.
  *
- * <p>This implementation assumes that an {@link EventEncrypter} is injected.
+ * <p>
+ * This implementation assumes that an {@link EventEncrypter} is injected.
  *
  * @author $Author: sgalland$
  * @author $Author: ngaud$
@@ -55,8 +56,8 @@ import io.sarl.lang.core.SpaceSpecification;
  */
 public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 
-	/** Constructs an GsonEventSerializer.
-	 * The {@link EventEncrypter} is injected.
+	/**
+	 * Constructs an GsonEventSerializer. The {@link EventEncrypter} is injected.
 	 *
 	 * @param encrypter - the object that will permits to encrypt the events.
 	 */
@@ -82,12 +83,8 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 
 		Scope<?> scope = dispatch.getScope();
 
-		EventEnvelope envelope = new EventEnvelope(
-				NetworkUtil.toByteArray(spaceID.getContextID()),
-				NetworkUtil.toByteArray(spaceID.getID()),
-				toBytes(scope),
-				toBytes(dispatch.getCustomHeaders()),
-				toBytes(event));
+		EventEnvelope envelope = new EventEnvelope(NetworkUtil.toByteArray(spaceID.getContextID()),
+				NetworkUtil.toByteArray(spaceID.getID()), toBytes(scope), toBytes(dispatch.getCustomHeaders()), toBytes(event));
 
 		this.encrypter.encrypt(envelope);
 
@@ -130,8 +127,7 @@ public class JavaBinaryEventSerializer extends AbstractEventSerializer {
 		UUID contextId = NetworkUtil.fromByteArray(envelope.getContextId());
 		UUID spaceId = NetworkUtil.fromByteArray(envelope.getSpaceId());
 
-		SpaceID spaceID = new SpaceID(contextId, spaceId,
-				(Class<? extends SpaceSpecification<?>>) spaceSpec);
+		SpaceID spaceID = new SpaceID(contextId, spaceId, (Class<? extends SpaceSpecification<?>>) spaceSpec);
 
 		Event event = fromBytes(envelope.getBody(), Event.class);
 		assert (event != null);

@@ -22,18 +22,18 @@ package io.janusproject.services.infrastructure;
 
 import com.google.common.util.concurrent.Service;
 
-/** This class supports the management of the infrastructure as
- * a service for the Janus platform.
+/**
+ * This class supports the management of the infrastructure as a service for the Janus platform.
  *
- * <p><strong>All the other services must depends on
- * this service</strong>.
+ * <p>
+ * <strong>All the other services must depends on this service</strong>.
  *
- * <p>The tasks that are done by this service are low-level and must
- * not depend on other services.
+ * <p>
+ * The tasks that are done by this service are low-level and must not depend on other services.
  *
- * <p>This service is used for released any resource that is shared
- * by several other services. For example, Hazelcast instance
- * may be release by a specific implementation of this service.
+ * <p>
+ * This service is used for released any resource that is shared by several other services. For example, Hazelcast instance may be
+ * release by a specific implementation of this service.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$

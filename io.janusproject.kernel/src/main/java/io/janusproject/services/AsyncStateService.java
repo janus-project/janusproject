@@ -32,12 +32,12 @@ import com.google.common.util.concurrent.Service;
  */
 public interface AsyncStateService extends Service {
 
-	/** Replies if the service is launched and ready for running.
+	/**
+	 * Replies if the service is launched and ready for running.
 	 *
-	 * <p>This functions differs from {@link Service#isRunning()}:
-	 * this functions replies <code>true</code> if the service
-	 * is running (similar to {@link Service#isRunning()}) AND
-	 * the service considers it is redy to respond to other services.
+	 * <p>
+	 * This functions differs from {@link Service#isRunning()}: this functions replies <code>true</code> if the service is running
+	 * (similar to {@link Service#isRunning()}) AND the service considers it is redy to respond to other services.
 	 *
 	 * @return <code>true</code> if ready.
 	 */

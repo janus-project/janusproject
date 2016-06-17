@@ -19,8 +19,6 @@
  */
 
 /**
- * Implementation of services based on
- * <a href="http://www.zeromq.org/">ZeroMQ</a>.
+ * Implementation of services based on <a href="http://www.zeromq.org/">ZeroMQ</a>.
  */
 package io.janusproject.kernel.services.zeromq;
-

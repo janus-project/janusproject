@@ -19,8 +19,6 @@
  */
 
 /**
- * Implementation of services based on
- * <a href="http://www.hazelcast.org">Hazelcast</a>.
+ * Implementation of services based on <a href="http://www.hazelcast.org">Hazelcast</a>.
  */
 package io.janusproject.kernel.services.hazelcast;
-

@@ -25,17 +25,17 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.testutils.AbstractJanusTest;
 
 /**
  * @author $Author: sgalland$
@@ -48,12 +48,12 @@ public class AbstractMapViewTest extends AbstractJanusTest {
 
 	@Nullable
 	private ViewMock view;
-	
+
 	@Before
 	public void setUp() {
 		this.view = new ViewMock<String, String>();
 	}
-	
+
 	@Test
 	public void addDMapListener_0() {
 		DMapListener<String, String> listener = mock(DMapListener.class);
@@ -141,7 +141,7 @@ public class AbstractMapViewTest extends AbstractJanusTest {
 		assertSame(key, arg0.getValue());
 		assertSame(value, arg1.getValue());
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -159,12 +159,12 @@ public class AbstractMapViewTest extends AbstractJanusTest {
 		public ListenerCollection<DMapListener<? super K, ? super V>> testGetListeners() {
 			return this.listeners;
 		}
-		
+
 		@Override
 		public void fireEntryAdded(K key, V value) {
 			super.fireEntryAdded(key, value);
 		}
-		
+
 		@Override
 		public void fireEntryRemoved(K key, V value) {
 			super.fireEntryRemoved(key, value);
@@ -176,5 +176,5 @@ public class AbstractMapViewTest extends AbstractJanusTest {
 		}
 
 	}
-	
+
 }

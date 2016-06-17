@@ -22,9 +22,6 @@ package io.janusproject.kernel.services.jdk.executors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
-import io.janusproject.testutils.AbstractDependentServiceTest;
-import io.janusproject.testutils.AvoidServiceStartForTest;
-import io.janusproject.testutils.StartServiceForTest;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +34,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.Times;
 
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.AvoidServiceStartForTest;
+import io.janusproject.testutils.StartServiceForTest;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -45,33 +46,32 @@ import org.mockito.internal.verification.Times;
  */
 @SuppressWarnings("all")
 @StartServiceForTest
-public final class JdkExecutorServiceTest
-extends AbstractDependentServiceTest<JdkExecutorService> {
+public final class JdkExecutorServiceTest extends AbstractDependentServiceTest<JdkExecutorService> {
 
 	@Mock
 	private Runnable runnable;
-	
+
 	@Mock
 	private Callable<?> callable;
 
 	@Mock
 	private ScheduledExecutorService scheduledExecutorService;
-	
+
 	@Mock
 	private ExecutorService executorService;
-	
+
 	/**
 	 * 
 	 */
 	public JdkExecutorServiceTest() {
 		super(io.janusproject.services.executor.ExecutorService.class);
 	}
-	
+
 	@Override
 	public JdkExecutorService newService() {
 		return new JdkExecutorService();
 	}
-	
+
 	@Override
 	public void getServiceDependencies() {
 		assertContains(this.service.getServiceDependencies());
@@ -140,7 +140,8 @@ extends AbstractDependentServiceTest<JdkExecutorService> {
 		ArgumentCaptor<Long> argument2 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<Long> argument3 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<TimeUnit> argument4 = ArgumentCaptor.forClass(TimeUnit.class);
-		Mockito.verify(this.scheduledExecutorService).scheduleAtFixedRate(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture());
+		Mockito.verify(this.scheduledExecutorService).scheduleAtFixedRate(argument1.capture(), argument2.capture(),
+				argument3.capture(), argument4.capture());
 		assertSame(this.runnable, argument1.getValue());
 		assertEquals(new Long(10), argument2.getValue());
 		assertEquals(new Long(5), argument3.getValue());
@@ -154,7 +155,8 @@ extends AbstractDependentServiceTest<JdkExecutorService> {
 		ArgumentCaptor<Long> argument2 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<Long> argument3 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<TimeUnit> argument4 = ArgumentCaptor.forClass(TimeUnit.class);
-		Mockito.verify(this.scheduledExecutorService).scheduleWithFixedDelay(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture());
+		Mockito.verify(this.scheduledExecutorService).scheduleWithFixedDelay(argument1.capture(), argument2.capture(),
+				argument3.capture(), argument4.capture());
 		assertSame(this.runnable, argument1.getValue());
 		assertEquals(new Long(10), argument2.getValue());
 		assertEquals(new Long(5), argument3.getValue());
@@ -173,16 +175,15 @@ extends AbstractDependentServiceTest<JdkExecutorService> {
 		try {
 			this.service.doStop();
 			fail("IllegalStateException is expected"); //$NON-NLS-1$
-		}
-		catch(IllegalStateException exception) {
-			// This exception is fired by notifyStopped() 
+		} catch (IllegalStateException exception) {
+			// This exception is fired by notifyStopped()
 		}
 		Mockito.verify(this.scheduledExecutorService, new Times(1)).shutdown();
 		Mockito.verify(this.executorService, new Times(1)).shutdown();
 		Mockito.verify(this.scheduledExecutorService, new Times(1)).shutdownNow();
 		Mockito.verify(this.executorService, new Times(1)).shutdownNow();
 	}
-	
+
 	@Test
 	public void doStop_init() {
 		this.service.doStop();

@@ -25,8 +25,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.EventListener;
 
 import java.util.Collection;
 import java.util.Map;
@@ -39,6 +37,9 @@ import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.lang.core.EventListener;
 
 /**
  * @author $Author: sgalland$
@@ -53,8 +54,8 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 	private ParticipantRepository<String> repository;
 
 	@Nullable
-	private Map<String,EventListener> listeners;
-	
+	private Map<String, EventListener> listeners;
+
 	@Before
 	public void setUp() {
 		this.repository = new ParticipantRepository<String>() {
@@ -67,9 +68,9 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 		this.listeners.put("d", Mockito.mock(EventListener.class)); //$NON-NLS-1$
 		this.listeners.put("e", Mockito.mock(EventListener.class)); //$NON-NLS-1$
 	}
-	
+
 	private void addListenerMocks() {
-		for(Entry<String,EventListener> l : this.listeners.entrySet()) {
+		for (Entry<String, EventListener> l : this.listeners.entrySet()) {
 			this.repository.addListener(l.getKey(), l.getValue());
 		}
 	}
@@ -94,14 +95,14 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 
 	@Test
 	public void containsAddress() {
-		for(String c : this.listeners.keySet()) {
+		for (String c : this.listeners.keySet()) {
 			assertFalse(this.repository.containsAddress(c));
 		}
 		assertFalse(this.repository.containsAddress("f")); //$NON-NLS-1$
 		//
 		addListenerMocks();
 		//
-		for(String c : this.listeners.keySet()) {
+		for (String c : this.listeners.keySet()) {
 			assertTrue(this.repository.containsAddress(c));
 		}
 		assertFalse(this.repository.containsAddress("f")); //$NON-NLS-1$
@@ -109,14 +110,14 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 
 	@Test
 	public void containsListener() {
-		for(EventListener l : this.listeners.values()) {
+		for (EventListener l : this.listeners.values()) {
 			assertFalse(this.repository.containsListener(l));
 		}
 		assertFalse(this.repository.containsListener(Mockito.mock(EventListener.class)));
 		//
 		addListenerMocks();
 		//
-		for(EventListener l : this.listeners.values()) {
+		for (EventListener l : this.listeners.values()) {
 			assertTrue(this.repository.containsListener(l));
 		}
 		assertFalse(this.repository.containsListener(Mockito.mock(EventListener.class)));
@@ -124,14 +125,14 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 
 	@Test
 	public void getListener() {
-		for(String k : this.listeners.keySet()) {
+		for (String k : this.listeners.keySet()) {
 			assertNull(this.repository.getListener(k));
 		}
 		assertNull(this.repository.getListener("f")); //$NON-NLS-1$
 		//
 		addListenerMocks();
 		//
-		for(String k : this.listeners.keySet()) {
+		for (String k : this.listeners.keySet()) {
 			assertSame(this.listeners.get(k), this.repository.getListener(k));
 		}
 		assertNull(this.repository.getListener("f")); //$NON-NLS-1$
@@ -139,14 +140,14 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 
 	@Test
 	public void removeListener() {
-		for(String k : this.listeners.keySet()) {
+		for (String k : this.listeners.keySet()) {
 			assertNull(this.repository.removeListener(k));
 		}
 		assertNull(this.repository.removeListener("f")); //$NON-NLS-1$
 		//
 		addListenerMocks();
 		//
-		for(String k : this.listeners.keySet()) {
+		for (String k : this.listeners.keySet()) {
 			assertSame(this.listeners.get(k), this.repository.removeListener(k));
 		}
 		assertNull(this.repository.removeListener("f")); //$NON-NLS-1$
@@ -179,7 +180,7 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 		assertNotNull(adrs);
 		assertFalse(adrs.isEmpty());
 		assertEquals(5, adrs.size());
-		for(String k : this.listeners.keySet()) {
+		for (String k : this.listeners.keySet()) {
 			assertTrue(adrs.contains(k));
 		}
 	}
@@ -196,14 +197,14 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 		assertNotNull(list);
 		assertFalse(list.isEmpty());
 		assertEquals(5, list.size());
-		for(EventListener l : this.listeners.values()) {
+		for (EventListener l : this.listeners.values()) {
 			assertTrue(list.contains(l));
 		}
 	}
 
 	@Test
 	public void listenersEntrySet() {
-		Set<Entry<String,EventListener>> list = this.repository.listenersEntrySet();
+		Set<Entry<String, EventListener>> list = this.repository.listenersEntrySet();
 		assertNotNull(list);
 		assertTrue(list.isEmpty());
 		//
@@ -214,5 +215,5 @@ public class ParticipantRepositoryTest extends AbstractJanusTest {
 		assertFalse(list.isEmpty());
 		assertEquals(5, list.size());
 	}
-	
+
 }

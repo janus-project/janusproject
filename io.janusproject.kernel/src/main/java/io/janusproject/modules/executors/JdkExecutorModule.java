@@ -24,7 +24,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
-import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import io.janusproject.kernel.services.jdk.executors.JdkExecutorService;
@@ -34,7 +33,8 @@ import io.janusproject.kernel.services.jdk.executors.JdkThreadPoolExecutor;
 import io.janusproject.kernel.services.jdk.executors.JdkUncaughtExceptionHandler;
 import io.janusproject.services.executor.ExecutorService;
 
-/** Configure the module for the {@code ExecutorService} based on the JDF.
+/**
+ * Configure the module for the {@code ExecutorService} based on the JDF.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -47,7 +47,6 @@ public class JdkExecutorModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		// Thread catchers
-		bind(SubscriberExceptionHandler.class).to(JdkUncaughtExceptionHandler.class).in(Singleton.class);
 		bind(UncaughtExceptionHandler.class).to(JdkUncaughtExceptionHandler.class).in(Singleton.class);
 
 		// Bind the background objects

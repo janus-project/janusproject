@@ -21,10 +21,6 @@ package io.janusproject.kernel.services.jdk.executors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.Event;
 
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
@@ -38,8 +34,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.SubscriberExceptionContext;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
 
 /**
  * @author $Author: sgalland$
@@ -47,7 +44,7 @@ import com.google.common.eventbus.SubscriberExceptionContext;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({ "javadoc" })
 public class JdkUncaughtExceptionHandlerTest extends AbstractJanusTest {
 
 	@Nullable
@@ -56,30 +53,19 @@ public class JdkUncaughtExceptionHandlerTest extends AbstractJanusTest {
 	@Nullable
 	private JdkUncaughtExceptionHandler handler;
 
-	@Nullable
-	private SubscriberExceptionContext exceptionContext;
-	
 	@Before
 	public void setUp() {
 		this.logger = Mockito.mock(LogService.class);
 		Mockito.when(this.logger.isLoggeable(Matchers.any(Level.class))).thenReturn(true);
-		
-		EventBus eventBus = Mockito.mock(EventBus.class);
-		Mockito.when(eventBus.toString()).thenReturn("TESTING_EVENT_BUS"); //$NON-NLS-1$
-		Event event = Mockito.mock(Event.class);
-		Mockito.when(event.toString()).thenReturn("TESTING_EVENT"); //$NON-NLS-1$
-		this.exceptionContext = Mockito.mock(SubscriberExceptionContext.class);
-		Mockito.when(this.exceptionContext.getEventBus()).thenReturn(eventBus);
-		Mockito.when(this.exceptionContext.getEvent()).thenReturn(event);
-				
+
 		this.handler = new JdkUncaughtExceptionHandler(this.logger);
 	}
-	
+
 	@Test
 	public void uncaughtException_Exception() {
 		Exception e = new Exception();
 		this.handler.uncaughtException(Thread.currentThread(), e);
-		
+
 		ArgumentCaptor<LogRecord> argument = ArgumentCaptor.forClass(LogRecord.class);
 		Mockito.verify(this.logger).log(argument.capture());
 		assertSame(Level.SEVERE, argument.getValue().getLevel());
@@ -91,7 +77,7 @@ public class JdkUncaughtExceptionHandlerTest extends AbstractJanusTest {
 	@Test
 	public void uncaughtException_ChuckNorris() {
 		Exception e = new ChuckNorrisException();
-		this.handler.uncaughtException(Thread.currentThread(), e);		
+		this.handler.uncaughtException(Thread.currentThread(), e);
 		Mockito.verifyZeroInteractions(this.logger);
 	}
 
@@ -99,7 +85,7 @@ public class JdkUncaughtExceptionHandlerTest extends AbstractJanusTest {
 	public void uncaughtException_Cancellation() {
 		Exception e = new CancellationException();
 		this.handler.uncaughtException(Thread.currentThread(), e);
-		
+
 		ArgumentCaptor<LogRecord> argument = ArgumentCaptor.forClass(LogRecord.class);
 		Mockito.verify(this.logger).log(argument.capture());
 		assertSame(Level.FINEST, argument.getValue().getLevel());
@@ -112,59 +98,13 @@ public class JdkUncaughtExceptionHandlerTest extends AbstractJanusTest {
 	public void uncaughtException_Interrupt() {
 		Exception e = new InterruptedException();
 		this.handler.uncaughtException(Thread.currentThread(), e);
-		
+
 		ArgumentCaptor<LogRecord> argument = ArgumentCaptor.forClass(LogRecord.class);
 		Mockito.verify(this.logger).log(argument.capture());
 		assertSame(Level.FINEST, argument.getValue().getLevel());
 		assertSame(e, argument.getValue().getThrown());
 		assertEquals(JdkUncaughtExceptionHandlerTest.class.getName(), argument.getValue().getSourceClassName());
 		assertEquals("uncaughtException_Interrupt", argument.getValue().getSourceMethodName()); //$NON-NLS-1$
-	}
-
-	@Test
-	public void handleException_Exception() {
-		Exception e = new Exception();
-		this.handler.handleException(e, this.exceptionContext);
-		
-		ArgumentCaptor<LogRecord> argument = ArgumentCaptor.forClass(LogRecord.class);
-		Mockito.verify(this.logger).log(argument.capture());
-		assertSame(Level.SEVERE, argument.getValue().getLevel());
-		assertSame(e, argument.getValue().getThrown());
-		assertEquals(JdkUncaughtExceptionHandlerTest.class.getName(), argument.getValue().getSourceClassName());
-		assertEquals("handleException_Exception", argument.getValue().getSourceMethodName()); //$NON-NLS-1$
-	}
-
-	@Test
-	public void handleException_ChuckNorris() {
-		Exception e = new ChuckNorrisException();
-		this.handler.handleException(e, this.exceptionContext);		
-		Mockito.verifyZeroInteractions(this.logger);
-	}
-
-	@Test
-	public void handleException_Cancellation() {
-		Exception e = new CancellationException();
-		this.handler.handleException(e, this.exceptionContext);
-
-		ArgumentCaptor<LogRecord> argument = ArgumentCaptor.forClass(LogRecord.class);
-		Mockito.verify(this.logger).log(argument.capture());
-		assertSame(Level.FINEST, argument.getValue().getLevel());
-		assertSame(e, argument.getValue().getThrown());
-		assertEquals(JdkUncaughtExceptionHandlerTest.class.getName(), argument.getValue().getSourceClassName());
-		assertEquals("handleException_Cancellation", argument.getValue().getSourceMethodName()); //$NON-NLS-1$
-	}
-
-	@Test
-	public void handleException_Interrupt() {
-		Exception e = new InterruptedException();
-		this.handler.handleException(e, this.exceptionContext);
-		
-		ArgumentCaptor<LogRecord> argument = ArgumentCaptor.forClass(LogRecord.class);
-		Mockito.verify(this.logger).log(argument.capture());
-		assertSame(Level.FINEST, argument.getValue().getLevel());
-		assertSame(e, argument.getValue().getThrown());
-		assertEquals(JdkUncaughtExceptionHandlerTest.class.getName(), argument.getValue().getSourceClassName());
-		assertEquals("handleException_Interrupt", argument.getValue().getSourceMethodName()); //$NON-NLS-1$
 	}
 
 }

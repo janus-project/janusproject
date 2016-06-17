@@ -40,8 +40,7 @@ import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 
 /**
- * Service that is providing the network service but does not
- * send othet the network.
+ * Service that is providing the network service but does not send othet the network.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -51,11 +50,12 @@ import io.sarl.lang.core.SpaceID;
 @Singleton
 public class NoNetworkService extends AbstractNetworkingService {
 
-    private final List<NetworkServiceListener> listeners = new ArrayList<>();
+	private final List<NetworkServiceListener> listeners = new ArrayList<>();
 
 	private URI localHost;
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	@Inject
 	public NoNetworkService() {
@@ -82,14 +82,12 @@ public class NoNetworkService extends AbstractNetworkingService {
 	}
 
 	@Override
-	public void publish(Scope<?> scope, Event data)
-			throws Exception {
+	public void publish(Scope<?> scope, Event data) throws Exception {
 		//
 	}
 
 	@Override
-	public void connectToRemoteSpaces(URI peerUri, SpaceID space,
-			NetworkEventReceivingListener listener) throws Exception {
+	public void connectToRemoteSpaces(URI peerUri, SpaceID space, NetworkEventReceivingListener listener) throws Exception {
 		//
 	}
 

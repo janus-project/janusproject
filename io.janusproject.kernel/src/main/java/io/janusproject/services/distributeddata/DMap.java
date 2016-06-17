@@ -22,7 +22,8 @@ package io.janusproject.services.distributeddata;
 
 import java.util.Map;
 
-/** Interface that represents a distributed map.
+/**
+ * Interface that represents a distributed map.
  *
  * @param <K> the type of the keys.
  * @param <V> the type of the values.
@@ -33,28 +34,30 @@ import java.util.Map;
  */
 public interface DMap<K, V> extends Map<K, V> {
 
-	/** Replies the name of the map.
+	/**
+	 * Replies the name of the map.
 	 *
 	 * @return the name of the map.
 	 */
 	String getName();
 
-	/** Replies if changes to the returned collections will update the underlying map,
-	 * and vice versa. However, changes to the returned collection are not
-	 * possible.
+	/**
+	 * Replies if changes to the returned collections will update the underlying map, and vice versa. However, changes to the
+	 * returned collection are not possible.
 	 *
-	 * @return <code>true</code> if the changes are applied to the
-	 *     underlying map, otherwise <code>false</code>.
+	 * @return <code>true</code> if the changes are applied to the underlying map, otherwise <code>false</code>.
 	 */
 	boolean isBackedCollection();
 
-	/** Add listener on events on the DMap.
+	/**
+	 * Add listener on events on the DMap.
 	 *
 	 * @param listener - the listener
 	 */
 	void addDMapListener(DMapListener<? super K, ? super V> listener);
 
-	/** Remove listener on events on the DMap.
+	/**
+	 * Remove listener on events on the DMap.
 	 *
 	 * @param listener - the listener
 	 */

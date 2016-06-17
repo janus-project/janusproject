@@ -31,8 +31,8 @@ import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
 import io.janusproject.services.logging.LogService;
 
-/** This class provides an implementation of the {@link LogService}
- * that outputs nothing.
+/**
+ * This class provides an implementation of the {@link LogService} that outputs nothing.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -43,7 +43,8 @@ public class EmptyLogService extends AbstractService implements LogService {
 
 	private final Logger logger;
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public EmptyLogService() {
 		this.logger = Logger.getLogger(EmptyLogService.class.getName());

@@ -25,9 +25,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.janusproject.testutils.FutureExceptionMatcher;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Callable;
@@ -44,13 +41,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.exceptions.base.MockitoException;
 
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.janusproject.testutils.FutureExceptionMatcher;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({ "javadoc" })
 public class JdkThreadPoolExecutorTest extends AbstractJanusTest {
 
 	static final Object VALUE = new Object();
@@ -211,15 +212,16 @@ public class JdkThreadPoolExecutorTest extends AbstractJanusTest {
 		/**
 		 * @param state
 		 */
-		public RunnableMock(int state) {
+		RunnableMock(int state) {
 			this.state = state;
 		}
 
-		/** {@inheritDoc}
+		/**
+		 * {@inheritDoc}
 		 */
 		@Override
 		public void run() {
-			switch(this.state) {
+			switch (this.state) {
 			case 1:
 				throw new MockitoException(""); //$NON-NLS-1$
 			case 2:
@@ -228,11 +230,12 @@ public class JdkThreadPoolExecutorTest extends AbstractJanusTest {
 			}
 		}
 
-		/** {@inheritDoc}
+		/**
+		 * {@inheritDoc}
 		 */
 		@Override
 		public Object call() {
-			switch(this.state) {
+			switch (this.state) {
 			case 1:
 				throw new MockitoException(""); //$NON-NLS-1$
 			case 2:
@@ -256,11 +259,12 @@ public class JdkThreadPoolExecutorTest extends AbstractJanusTest {
 
 		/**
 		 */
-		public TerminationListener() {
+		TerminationListener() {
 			//
 		}
 
-		/** {@inheritDoc}
+		/**
+		 * {@inheritDoc}
 		 */
 		@Override
 		public void taskFinished(Thread thread, Runnable task) {

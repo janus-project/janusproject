@@ -22,7 +22,8 @@ package io.janusproject.kernel.services.jdk.contextspace;
 
 import io.janusproject.services.contextspace.SpaceRepositoryListener;
 
-/** Factory for the space repository in a context.
+/**
+ * Factory for the space repository in a context.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -31,13 +32,12 @@ import io.janusproject.services.contextspace.SpaceRepositoryListener;
  */
 interface SpaceRepositoryFactory {
 
-	/** Create an instance of the space repository.
+	/**
+	 * Create an instance of the space repository.
 	 *
 	 * @param context - the owner of the space repository.
-	 * @param distributedSpaceSetName - name of the space repository data-structure that is
-	 *                                  shared among the computer network.
-	 * @param listener - listener on space repository events that must be registered
-	 *                   at the creation time.
+	 * @param distributedSpaceSetName - name of the space repository data-structure that is shared among the computer network.
+	 * @param listener - listener on space repository events that must be registered at the creation time.
 	 * @return the new repository
 	 */
 	SpaceRepository newInstance(Context context, String distributedSpaceSetName, SpaceRepositoryListener listener);

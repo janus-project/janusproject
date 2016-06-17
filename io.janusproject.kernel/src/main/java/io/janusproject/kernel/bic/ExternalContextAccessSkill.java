@@ -71,8 +71,7 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 
 	@Override
 	protected String attributesToString() {
-		return super.attributesToString()
-				+ ", contexts = " + this.contextRepository.toString(); //$NON-NLS-1$
+		return super.attributesToString() + ", contexts = " + this.contextRepository.toString(); //$NON-NLS-1$
 	}
 
 	@Override
@@ -92,9 +91,8 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	@Override
 	public SynchronizedCollection<AgentContext> getAllContexts() {
 		return Collections3.synchronizedCollection(
-				Collections.unmodifiableCollection(
-						this.contextRepository.getContexts(this.contexts)),
-						this.contextRepository.mutex());
+				Collections.unmodifiableCollection(this.contextRepository.getContexts(this.contexts)),
+				this.contextRepository.mutex());
 	}
 
 	@Override
@@ -119,45 +117,38 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 		assert (ac != null) : "Unknown Context"; //$NON-NLS-1$
 
 		if (!futureContextDefaultSpaceID.equals(ac.getDefaultSpace().getID().getID())) {
-			throw new IllegalArgumentException(Locale.getString(
-					"INVALID_DEFAULT_SPACE_MATCHING", //$NON-NLS-1$
+			throw new IllegalArgumentException(Locale.getString("INVALID_DEFAULT_SPACE_MATCHING", //$NON-NLS-1$
 					futureContextDefaultSpaceID));
 		}
 
 		this.contexts.add(futureContext);
 
-		((OpenEventSpace) ac.getDefaultSpace()).register(
-				getSkill(InternalEventBusCapacity.class).asEventListener());
+		((OpenEventSpace) ac.getDefaultSpace()).register(getSkill(InternalEventBusCapacity.class).asEventListener());
 
 		fireContextJoined(futureContext, futureContextDefaultSpaceID);
 		fireMemberJoined(ac);
 	}
 
 	/**
-	 * Fires an {@link ContextJoined} event into the Inner Context default space
-	 * of the owner agent to notify behaviors/members that a new context has been joined.
+	 * Fires an {@link ContextJoined} event into the Inner Context default space of the owner agent to notify behaviors/members
+	 * that a new context has been joined.
 	 *
 	 * @param futureContext - ID of the newly joined context
 	 * @param futureContextDefaultSpaceID - ID of the default space of the newly joined context
 	 */
 	protected void fireContextJoined(UUID futureContext, UUID futureContextDefaultSpaceID) {
-		getSkill(Behaviors.class).wake(new ContextJoined(
-				futureContext, futureContextDefaultSpaceID));
+		getSkill(Behaviors.class).wake(new ContextJoined(futureContext, futureContextDefaultSpaceID));
 	}
 
 	/**
-	 * Fires an {@link MemberJoined} event into the newly joined parent Context
-	 * default space to notify other context's members that a new
-	 * agent joined this context.
+	 * Fires an {@link MemberJoined} event into the newly joined parent Context default space to notify other context's members
+	 * that a new agent joined this context.
 	 *
 	 * @param newJoinedContext - the newly joined context to notify its members
 	 */
 	protected void fireMemberJoined(AgentContext newJoinedContext) {
 		EventSpace defSpace = newJoinedContext.getDefaultSpace();
-		defSpace.emit(new MemberJoined(
-				defSpace.getAddress(getOwner().getID()),
-				newJoinedContext.getID(),
-				getOwner().getID(),
+		defSpace.emit(new MemberJoined(defSpace.getAddress(getOwner().getID()), newJoinedContext.getID(), getOwner().getID(),
 				getOwner().getClass().getName()));
 	}
 
@@ -177,16 +168,14 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 		fireContextLeft(contextID);
 		fireMemberLeft(ac);
 
-		((OpenEventSpace) ac.getDefaultSpace()).unregister(
-				getSkill(InternalEventBusCapacity.class).asEventListener());
+		((OpenEventSpace) ac.getDefaultSpace()).unregister(getSkill(InternalEventBusCapacity.class).asEventListener());
 
 		this.contexts.remove(contextID);
 	}
 
 	/**
-	 * Fires an {@link ContextLeft} event into the Inner Context Default
-	 * space of the owner agent to notify behaviors/members that the
-	 * specified context has been left.
+	 * Fires an {@link ContextLeft} event into the Inner Context Default space of the owner agent to notify behaviors/members that
+	 * the specified context has been left.
 	 *
 	 * @param contextID - the ID of context that will be left
 	 */
@@ -195,18 +184,15 @@ class ExternalContextAccessSkill extends Skill implements ExternalContextAccess 
 	}
 
 	/**
-	 * Fires an {@link MemberLeft} event into the default space of the Context
-	 * that will be left to notify other context's members that an agent has
-	 * left this context.
+	 * Fires an {@link MemberLeft} event into the default space of the Context that will be left to notify other context's members
+	 * that an agent has left this context.
 	 *
 	 * @param leftContext - the context that will be left
 	 */
 	protected void fireMemberLeft(AgentContext leftContext) {
 		EventSpace defSpace = leftContext.getDefaultSpace();
-		defSpace.emit(new MemberLeft(
-				defSpace.getAddress(getOwner().getID()),
-				getOwner().getID(),
-				getOwner().getClass().getName()));
+		defSpace.emit(
+				new MemberLeft(defSpace.getAddress(getOwner().getID()), getOwner().getID(), getOwner().getClass().getName()));
 	}
 
 	@Override

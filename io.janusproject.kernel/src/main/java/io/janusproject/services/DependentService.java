@@ -34,30 +34,33 @@ import com.google.common.util.concurrent.Service;
  */
 public interface DependentService extends Service {
 
-	/** Replies the service interface implemented by this service.
+	/**
+	 * Replies the service interface implemented by this service.
 	 *
 	 * @return the service interface.
 	 */
 	Class<? extends Service> getServiceType();
 
-	/** Replies the services that must be launched BEFORE launching this service,
-	 * and that must be stop AFTER stopping this service.
+	/**
+	 * Replies the services that must be launched BEFORE launching this service, and that must be stop AFTER stopping this
+	 * service.
 	 *
-	 * <p>If one of the dependencies is a {@link AsyncStateService}, this service
-	 * will way until {@link AsyncStateService#isReadyForOtherServices()} is
-	 * true.
+	 * <p>
+	 * If one of the dependencies is a {@link AsyncStateService}, this service will way until
+	 * {@link AsyncStateService#isReadyForOtherServices()} is true.
 	 *
 	 * @return the dependencies.
 	 * @see #getServiceWeakDependencies()
 	 */
 	Collection<Class<? extends Service>> getServiceDependencies();
 
-	/** Replies the services that must be launched BEFORE launching this service,
-	 * and that must be stop AFTER stopping this service.
+	/**
+	 * Replies the services that must be launched BEFORE launching this service, and that must be stop AFTER stopping this
+	 * service.
 	 *
-	 * <p>Even if one of the dependencies is a {@link AsyncStateService}, this service
-	 * will never wait until {@link AsyncStateService#isReadyForOtherServices()} is
-	 * true.
+	 * <p>
+	 * Even if one of the dependencies is a {@link AsyncStateService}, this service will never wait until
+	 * {@link AsyncStateService#isReadyForOtherServices()} is true.
 	 *
 	 * @return the dependencies.
 	 * @see #getServiceDependencies()

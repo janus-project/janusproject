@@ -22,4 +22,3 @@
  * Classes and tools for implementing spaces in the Janus platform.
  */
 package io.janusproject.kernel.space;
-

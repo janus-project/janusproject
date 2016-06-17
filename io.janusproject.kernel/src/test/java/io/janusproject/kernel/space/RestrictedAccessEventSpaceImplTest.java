@@ -25,19 +25,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import io.janusproject.kernel.services.jdk.distributeddata.DMapView;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.network.NetworkService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.EventListener;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.util.OpenEventSpaceSpecification;
-import io.sarl.util.Scopes;
 
 import java.security.Principal;
 import java.security.acl.Acl;
@@ -61,6 +48,20 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import io.janusproject.kernel.services.jdk.distributeddata.DMapView;
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.EventListener;
+import io.sarl.lang.core.Scope;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.util.OpenEventSpaceSpecification;
+import io.sarl.util.Scopes;
 
 /**
  * @author $Author: sgalland$
@@ -100,29 +101,24 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 
 	@InjectMocks
 	private RestrictedAccessEventSpaceImpl space;
-	
+
 	@Before
 	public void setUp() {
 		this.agentId = UUID.randomUUID();
-		
+
 		this.service = Mockito.mock(DistributedDataStructureService.class);
-		DMap<Object, Object> mapMock = new DMapView<>(
-				UUID.randomUUID().toString(),
-				new HashMap<>());
+		DMap<Object, Object> mapMock = new DMapView<>(UUID.randomUUID().toString(), new HashMap<>());
 		Mockito.when(this.service.getMap(Matchers.anyString(), Matchers.any(Comparator.class))).thenReturn(mapMock);
 		Mockito.when(this.service.getMap(Matchers.anyString())).thenReturn(mapMock);
-		
-		this.spaceId = new SpaceID(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				OpenEventSpaceSpecification.class);
-		
+
+		this.spaceId = new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class);
+
 		this.address = new Address(this.spaceId, this.agentId);
-		
+
 		this.acl = Mockito.mock(Acl.class);
 		Mockito.when(this.acl.checkPermission(Mockito.any(Principal.class), Mockito.any(Permission.class))).thenReturn(true);
 		this.permission = Mockito.mock(Permission.class);
-		
+
 		this.space = new RestrictedAccessEventSpaceImpl(this.spaceId, this.acl, this.permission, this.service);
 
 		this.listener = Mockito.mock(EventListener.class);
@@ -130,16 +126,14 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 
 		MockitoAnnotations.initMocks(this);
 
-		Mockito.when(this.executor.submit(Mockito.any(Runnable.class))).thenAnswer(
-				new Answer<Future<?>>() {
-					@Override
-					public Future<?> answer(InvocationOnMock invocation) throws Throwable {
-						Runnable r = (Runnable)invocation.getArguments()[0];
-						r.run();
-						return null;
-					}
-				}
-		);
+		Mockito.when(this.executor.submit(Mockito.any(Runnable.class))).thenAnswer(new Answer<Future<?>>() {
+			@Override
+			public Future<?> answer(InvocationOnMock invocation) throws Throwable {
+				Runnable r = (Runnable) invocation.getArguments()[0];
+				r.run();
+				return null;
+			}
+		});
 	}
 
 	private void register() {
@@ -188,18 +182,18 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 	@Test
 	public void doEmit_fullscope() {
 		Event event;
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, Scopes.<Address>allParticipants());
+		Mockito.when(event.getSource()).thenReturn(this.address);
+		this.space.doEmit(event, Scopes.<Address> allParticipants());
 		Mockito.verifyZeroInteractions(this.listener);
-		
+
 		register();
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, Scopes.<Address>allParticipants());
-		
+		Mockito.when(event.getSource()).thenReturn(this.address);
+		this.space.doEmit(event, Scopes.<Address> allParticipants());
+
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertSame(event, argument.getValue());
@@ -207,8 +201,8 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 		unregister();
 
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
-		this.space.doEmit(event, Scopes.<Address>allParticipants());
+		Mockito.when(event.getSource()).thenReturn(this.address);
+		this.space.doEmit(event, Scopes.<Address> allParticipants());
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertNotSame(event, argument.getValue());
 	}
@@ -216,18 +210,18 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 	@Test
 	public void doEmit_scopeaddress() {
 		Event event;
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(this.address));
 		Mockito.verifyZeroInteractions(this.listener);
-		
+
 		register();
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(this.address));
-		
+
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertSame(event, argument.getValue());
@@ -235,7 +229,7 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 		unregister();
 
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(this.address));
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertNotSame(event, argument.getValue());
@@ -243,53 +237,49 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 
 	@Test
 	public void doEmit_scopeotheraddress() {
-		Address otherAddress = new Address(new SpaceID(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				OpenEventSpaceSpecification.class), UUID.randomUUID());
+		Address otherAddress = new Address(new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class),
+				UUID.randomUUID());
 
 		Event event;
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(otherAddress));
 		Mockito.verifyZeroInteractions(this.listener);
-		
+
 		register();
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(otherAddress));
 		Mockito.verify(this.listener, new Times(0)).receiveEvent(Mockito.any(Event.class));
 
 		unregister();
 
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(otherAddress));
 		Mockito.verify(this.listener, new Times(0)).receiveEvent(Mockito.any(Event.class));
 	}
 
 	@Test
 	public void doEmit_scopebothaddresses() {
-		Address otherAddress = new Address(new SpaceID(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				OpenEventSpaceSpecification.class), UUID.randomUUID());
+		Address otherAddress = new Address(new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class),
+				UUID.randomUUID());
 
 		Event event;
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(this.address, otherAddress));
 		Mockito.verifyZeroInteractions(this.listener);
-		
+
 		register();
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(this.address, otherAddress));
-		
+
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertSame(event, argument.getValue());
@@ -297,7 +287,7 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 		unregister();
 
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.doEmit(event, Scopes.addresses(this.address, otherAddress));
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertNotSame(event, argument.getValue());
@@ -306,14 +296,14 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 	@Test
 	public void emitEventScope_fullscope() throws Exception {
 		Event event;
-		Scope<Address> scope = Scopes.<Address>allParticipants();
-		
+		Scope<Address> scope = Scopes.<Address> allParticipants();
+
 		register();
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.emit(event, scope);
-		
+
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertSame(event, argument.getValue());
@@ -330,13 +320,13 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 	public void emitEventScope_scopeaddress() throws Exception {
 		Event event;
 		Scope<Address> scope = Scopes.addresses(this.address);
-		
+
 		register();
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.emit(event, scope);
-		
+
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertSame(event, argument.getValue());
@@ -351,18 +341,16 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 
 	@Test
 	public void emitEventScope_scopeotheraddress() throws Exception {
-		Address otherAddress = new Address(new SpaceID(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				OpenEventSpaceSpecification.class), UUID.randomUUID());
+		Address otherAddress = new Address(new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class),
+				UUID.randomUUID());
 
 		Event event;
 		Scope<Address> scope = Scopes.addresses(otherAddress);
-		
+
 		register();
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.emit(event, scope);
 		Mockito.verify(this.listener, new Times(0)).receiveEvent(Mockito.any(Event.class));
 		{
@@ -376,20 +364,18 @@ public class RestrictedAccessEventSpaceImplTest extends AbstractJanusTest {
 
 	@Test
 	public void emitEventScope_scopebothaddresses() throws Exception {
-		Address otherAddress = new Address(new SpaceID(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				OpenEventSpaceSpecification.class), UUID.randomUUID());
+		Address otherAddress = new Address(new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class),
+				UUID.randomUUID());
 
 		Event event;
 		Scope<Address> scope = Scopes.addresses(this.address, otherAddress);
-		
+
 		register();
-		
+
 		event = Mockito.mock(Event.class);
-		Mockito.when(event.getSource()).thenReturn(this.address);		
+		Mockito.when(event.getSource()).thenReturn(this.address);
 		this.space.emit(event, scope);
-		
+
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
 		Mockito.verify(this.listener).receiveEvent(argument.capture());
 		assertSame(event, argument.getValue());

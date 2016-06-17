@@ -23,12 +23,11 @@ package io.janusproject.services.network;
 import java.io.Serializable;
 import java.util.Arrays;
 
-
 /**
  * Envelope of a message that is exchanged other the network.
  *
- * <p>A {@link EventEnvelope} can be transformed into/from a {@link EventDispatch}
- * with a {@link EventSerializer}.
+ * <p>
+ * A {@link EventEnvelope} can be transformed into/from a {@link EventDispatch} with a {@link EventSerializer}.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -64,16 +63,11 @@ public class EventEnvelope implements Serializable {
 	 */
 	public EventEnvelope(byte[] contextId, byte[] spaceID, byte[] scope, byte[] headers, byte[] body) {
 
-		assert (contextId != null && contextId.length > 0)
-			: "Parameter 'contextId' must not be null or zero-length"; //$NON-NLS-1$
-		assert (spaceID != null && spaceID.length > 0)
-			: "Parameter 'spaceID' must not be null or zero-length"; //$NON-NLS-1$
-		assert (scope != null && scope.length > 0)
-			: "Parameter 'scope' must not be null or zero-length"; //$NON-NLS-1$
-		assert (headers != null && headers.length > 0)
-			: "Parameter 'headers' must not be null or zero-length"; //$NON-NLS-1$
-		assert (body != null && body.length > 0)
-			: "Parameter 'body' must not be null or zero-length"; //$NON-NLS-1$
+		assert (contextId != null && contextId.length > 0) : "Parameter 'contextId' must not be null or zero-length"; //$NON-NLS-1$
+		assert (spaceID != null && spaceID.length > 0) : "Parameter 'spaceID' must not be null or zero-length"; //$NON-NLS-1$
+		assert (scope != null && scope.length > 0) : "Parameter 'scope' must not be null or zero-length"; //$NON-NLS-1$
+		assert (headers != null && headers.length > 0) : "Parameter 'headers' must not be null or zero-length"; //$NON-NLS-1$
+		assert (body != null && body.length > 0) : "Parameter 'body' must not be null or zero-length"; //$NON-NLS-1$
 
 		this.contextId = contextId;
 		this.spaceId = spaceID;
@@ -133,8 +127,7 @@ public class EventEnvelope implements Serializable {
 	 * @param headers - the serialized header for the message
 	 */
 	public void setCustomHeaders(byte[] headers) {
-		assert (headers != null && headers.length > 0)
-			: "Parameter 'headers' must not be null or zero-length"; //$NON-NLS-1$
+		assert (headers != null && headers.length > 0) : "Parameter 'headers' must not be null or zero-length"; //$NON-NLS-1$
 		this.customHeaders = headers;
 	}
 
@@ -144,8 +137,7 @@ public class EventEnvelope implements Serializable {
 	 * @param body - the serialized message content
 	 */
 	public void setBody(byte[] body) {
-		assert (body != null && body.length > 0)
-			: "Parameter 'body' must not be null or zero-length"; //$NON-NLS-1$
+		assert (body != null && body.length > 0) : "Parameter 'body' must not be null or zero-length"; //$NON-NLS-1$
 		this.body = body;
 	}
 
@@ -155,8 +147,7 @@ public class EventEnvelope implements Serializable {
 	 * @param contextID - the serialized context identifier
 	 */
 	public void setContextId(byte[] contextID) {
-		assert (contextID != null && contextID.length > 0)
-			: "Parameter 'contextID' must not be null or zero-length"; //$NON-NLS-1$
+		assert (contextID != null && contextID.length > 0) : "Parameter 'contextID' must not be null or zero-length"; //$NON-NLS-1$
 		this.contextId = contextID;
 	}
 
@@ -166,8 +157,7 @@ public class EventEnvelope implements Serializable {
 	 * @param spaceID - the serialized space identifier
 	 */
 	public void setSpaceId(byte[] spaceID) {
-		assert (spaceID != null && spaceID.length > 0)
-			: "Parameter 'spaceID' must not be null or zero-length"; //$NON-NLS-1$
+		assert (spaceID != null && spaceID.length > 0) : "Parameter 'spaceID' must not be null or zero-length"; //$NON-NLS-1$
 		this.spaceId = spaceID;
 	}
 
@@ -177,19 +167,18 @@ public class EventEnvelope implements Serializable {
 	 * @param scope - the serialized scope
 	 */
 	public void setScope(byte[] scope) {
-		assert (scope != null && scope.length > 0)
-			: "Parameter 'scope' must not be null or zero-length"; //$NON-NLS-1$
+		assert (scope != null && scope.length > 0) : "Parameter 'scope' must not be null or zero-length"; //$NON-NLS-1$
 		this.scope = scope;
 	}
 
 	@Override
 	public String toString() {
 		return "EventEnvelope {\n  context=" //$NON-NLS-1$
-					+ Arrays.toString(this.contextId) + "\n  scope=" //$NON-NLS-1$
-					+ Arrays.toString(this.scope) + ",\n  spaceID=" //$NON-NLS-1$
-					+ Arrays.toString(this.spaceId) + ",\n  headers=" //$NON-NLS-1$
-					+ Arrays.toString(this.customHeaders) + ",\n  body=" //$NON-NLS-1$
-					+ Arrays.toString(this.body) + "\n}"; //$NON-NLS-1$
+				+ Arrays.toString(this.contextId) + "\n  scope=" //$NON-NLS-1$
+				+ Arrays.toString(this.scope) + ",\n  spaceID=" //$NON-NLS-1$
+				+ Arrays.toString(this.spaceId) + ",\n  headers=" //$NON-NLS-1$
+				+ Arrays.toString(this.customHeaders) + ",\n  body=" //$NON-NLS-1$
+				+ Arrays.toString(this.body) + "\n}"; //$NON-NLS-1$
 
 	}
 

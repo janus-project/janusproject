@@ -35,8 +35,7 @@ import io.janusproject.services.executor.ChuckNorrisException;
 import io.janusproject.services.executor.JanusScheduledFutureTask;
 
 /**
- * A {@link ScheduledFuture} that is {@link Runnable}. Successful
- * execution of the <tt>run</tt> method causes completion of the
+ * A {@link ScheduledFuture} that is {@link Runnable}. Successful execution of the <tt>run</tt> method causes completion of the
  * <tt>Future</tt> and allows access to its results.
  *
  * @param <V> - type of the values supported by the task.
@@ -68,7 +67,8 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 				+ getThread() + " ]"; //$NON-NLS-1$
 	}
 
-	/** Set the running thread.
+	/**
+	 * Set the running thread.
 	 *
 	 * @param thread - thread which is running this task.
 	 */
@@ -80,7 +80,8 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 		}
 	}
 
-	/** Report the exception if one.
+	/**
+	 * Report the exception if one.
 	 *
 	 * @param thread - thread for which an exception must be reported.
 	 */
@@ -92,8 +93,7 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 			while (ex instanceof ExecutionException) {
 				ex = e.getCause();
 			}
-			if (!(ex instanceof ChuckNorrisException)
-					&& !this.treated.getAndSet(true)) {
+			if (!(ex instanceof ChuckNorrisException) && !this.treated.getAndSet(true)) {
 				JdkExecutorUtil.log(thread, ex);
 			}
 		} catch (InterruptedException | CancellationException e) {
@@ -150,8 +150,7 @@ class JdkJanusScheduledFutureTask<V> implements JanusScheduledFutureTask<V> {
 	}
 
 	@Override
-	public V get(long timeout, TimeUnit unit) throws InterruptedException,
-			ExecutionException, TimeoutException {
+	public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		try {
 			return this.task.get(timeout, unit);
 		} catch (ExecutionException e) {

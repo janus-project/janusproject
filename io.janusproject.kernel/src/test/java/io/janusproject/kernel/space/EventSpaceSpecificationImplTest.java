@@ -22,12 +22,6 @@ package io.janusproject.kernel.space;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.EventSpace;
-import io.sarl.lang.core.EventSpaceSpecification;
-import io.sarl.lang.core.SpaceID;
 
 import java.util.Comparator;
 import java.util.UUID;
@@ -43,6 +37,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.google.inject.Injector;
+
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.lang.core.EventSpace;
+import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.SpaceID;
 
 /**
  * @author $Author: sgalland$
@@ -64,23 +65,20 @@ public class EventSpaceSpecificationImplTest extends AbstractJanusTest {
 
 	@InjectMocks
 	private EventSpaceSpecificationImpl specification;
-	
+
 	@Before
 	public void setUp() {
-		this.spaceId = new SpaceID(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				EventSpaceSpecification.class);
+		this.spaceId = new SpaceID(UUID.randomUUID(), UUID.randomUUID(), EventSpaceSpecification.class);
 		MockitoAnnotations.initMocks(this);
 		Mockito.when(this.injector.getInstance(Matchers.any(Class.class))).thenReturn(this.structureFactory);
 		DMap<Object, Object> mapMock = mock(DMap.class);
 		Mockito.when(this.structureFactory.getMap(Matchers.anyString(), Matchers.any(Comparator.class))).thenReturn(mapMock);
 		Mockito.when(this.structureFactory.getMap(Matchers.anyString())).thenReturn(mapMock);
 	}
-	
+
 	@Test
 	public void create() {
-		EventSpace space = this.specification.create(this.spaceId, "a", "b", "c");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		EventSpace space = this.specification.create(this.spaceId, "a", "b", "c"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		assertNotNull(space);
 		assertSame(this.spaceId, space.getID());
 	}

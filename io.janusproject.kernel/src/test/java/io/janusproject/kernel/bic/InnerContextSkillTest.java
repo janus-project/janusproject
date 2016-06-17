@@ -19,9 +19,32 @@
  */
 package io.janusproject.kernel.bic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.internal.verification.Times;
+
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Address;
@@ -39,25 +62,6 @@ import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
-import static org.mockito.Mockito.*;
-
-import org.mockito.MockitoAnnotations;
-import org.mockito.internal.verification.Times;
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -69,29 +73,29 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 
 	@Nullable
 	private UUID agentId;
-	
+
 	@Mock
 	private EventListener eventListener;
-	
+
 	@Mock
 	private AgentContext innerContext;
 
-	@Mock(name="innerSpace")
+	@Mock(name = "innerSpace")
 	private OpenEventSpace innerSpace;
-	
+
 	@Mock
 	private ContextSpaceService contextService;
-	
+
 	@Mock
 	private InternalEventBusCapacity busCapacity;
 
 	@InjectMocks
 	private InnerContextSkill skill;
-	
+
 	// It is an attribute to avoid to loose the weak references (eg. in AgentTraits).
 	@Nullable
 	private Agent agent;
-	
+
 	@Nullable
 	private UUID innerContextUUID;
 
@@ -104,16 +108,9 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 	@Before
 	public void setUp() throws Exception {
 		this.agentId = UUID.randomUUID();
-		Address address = new Address(
-				new SpaceID(
-						UUID.randomUUID(),
-						UUID.randomUUID(),
-						EventSpaceSpecification.class),
+		Address address = new Address(new SpaceID(UUID.randomUUID(), UUID.randomUUID(), EventSpaceSpecification.class),
 				this.agentId);
-		this.agent = new Agent(
-				Mockito.mock(BuiltinCapacitiesProvider.class),
-				this.agentId,
-				null) {
+		this.agent = new Agent(Mockito.mock(BuiltinCapacitiesProvider.class), this.agentId, null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				return capacity.cast(InnerContextSkillTest.this.busCapacity);
@@ -124,19 +121,14 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 		this.skill = new InnerContextSkill(this.agent, address);
 		MockitoAnnotations.initMocks(this);
 		when(this.agent.getID()).thenReturn(this.agentId);
-		when(this.contextService.createContext(Matchers.any(UUID.class), 
-				Matchers.any(UUID.class))).thenReturn(this.innerContext);
+		when(this.contextService.createContext(Matchers.any(UUID.class), Matchers.any(UUID.class))).thenReturn(this.innerContext);
 		this.innerContextUUID = UUID.randomUUID();
 		when(this.innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
 		when(this.innerContext.getID()).thenReturn(this.innerContextUUID);
 		when(this.busCapacity.asEventListener()).thenReturn(this.eventListener);
-		when(this.innerSpace.getParticipants()).thenReturn(
-				Collections3.<UUID>synchronizedSingleton(this.agentId));
+		when(this.innerSpace.getParticipants()).thenReturn(Collections3.<UUID> synchronizedSingleton(this.agentId));
 		this.innerSpaceUUID = UUID.randomUUID();
-		this.innerSpaceID = new SpaceID(
-				this.innerContextUUID,
-				this.innerSpaceUUID,
-				EventSpaceSpecification.class);
+		this.innerSpaceID = new SpaceID(this.innerContextUUID, this.innerSpaceUUID, EventSpaceSpecification.class);
 		when(this.innerSpace.getID()).thenReturn(this.innerSpaceID);
 	}
 
@@ -173,7 +165,7 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 		verify(this.contextService, new Times(1)).removeContext(argument2.capture());
 		assertSame(this.innerContext, argument2.getValue());
 	}
-	
+
 	@Test
 	public void hasMemberAgent_nomember() {
 		assertFalse(this.skill.hasMemberAgent());
@@ -181,8 +173,8 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 
 	@Test
 	public void hasMemberAgent_member() {
-		when(this.innerSpace.getParticipants()).thenReturn(
-				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())), this));
+		when(this.innerSpace.getParticipants())
+				.thenReturn(Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())), this));
 		assertTrue(this.skill.hasMemberAgent());
 	}
 
@@ -190,14 +182,14 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 	public void getMemberAgentCount_nomember() {
 		assertEquals(0, this.skill.getMemberAgentCount());
 	}
-	
+
 	@Test
 	public void getMemberAgentCount_member() {
-		when(this.innerSpace.getParticipants()).thenReturn(
-				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())), this));
+		when(this.innerSpace.getParticipants())
+				.thenReturn(Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, UUID.randomUUID())), this));
 		assertEquals(1, this.skill.getMemberAgentCount());
 	}
-	
+
 	@Test
 	public void getMemberAgents_nomember() {
 		SynchronizedSet<UUID> set = this.skill.getMemberAgents();
@@ -208,8 +200,8 @@ public class InnerContextSkillTest extends AbstractJanusTest {
 	@Test
 	public void getMemberAgents_member() {
 		UUID otherAgent = UUID.randomUUID();
-		when(this.innerSpace.getParticipants()).thenReturn(
-				Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, otherAgent)), this));
+		when(this.innerSpace.getParticipants())
+				.thenReturn(Collections3.synchronizedSet(new HashSet<>(Arrays.asList(this.agentId, otherAgent)), this));
 		SynchronizedSet<UUID> set = this.skill.getMemberAgents();
 		assertNotNull(set);
 		assertFalse(set.isEmpty());

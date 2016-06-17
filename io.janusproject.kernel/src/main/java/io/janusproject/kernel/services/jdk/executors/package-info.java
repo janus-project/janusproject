@@ -22,4 +22,3 @@
  * Implementation of the execution services based on the Java Development Kit.
  */
 package io.janusproject.kernel.services.jdk.executors;
-

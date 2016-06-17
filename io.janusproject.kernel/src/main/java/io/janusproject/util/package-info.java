@@ -22,4 +22,3 @@
  * General utilities that are included into the Janus platform distribution.
  */
 package io.janusproject.util;
-

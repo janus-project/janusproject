@@ -46,17 +46,14 @@ import io.janusproject.services.network.NetworkConfig;
  */
 public class NetworkEventModule extends AbstractModule {
 
-	/** Replies the default values for the properties supported by Janus config.
+	/**
+	 * Replies the default values for the properties supported by Janus config.
 	 *
 	 * @param defaultValues - filled with the default values supported by the Janus platform.
 	 */
 	public static void getDefaultValues(Properties defaultValues) {
-		defaultValues.put(
-				NetworkConfig.SERIALIZER_CLASSNAME,
-				GsonEventSerializer.class.getName());
-		defaultValues.put(
-				NetworkConfig.ENCRYPTER_CLASSNAME,
-				PlainTextEventEncrypter.class.getName());
+		defaultValues.put(NetworkConfig.SERIALIZER_CLASSNAME, GsonEventSerializer.class.getName());
+		defaultValues.put(NetworkConfig.ENCRYPTER_CLASSNAME, PlainTextEventEncrypter.class.getName());
 	}
 
 	@Override
@@ -66,10 +63,8 @@ public class NetworkEventModule extends AbstractModule {
 
 	@Provides
 	private static Gson createGson() {
-		return new GsonBuilder().registerTypeAdapter(
-				Class.class,
-				new GsonEventSerializer.ClassTypeAdapter())
-			.setPrettyPrinting().create();
+		return new GsonBuilder().registerTypeAdapter(Class.class, new GsonEventSerializer.ClassTypeAdapter()).setPrettyPrinting()
+				.create();
 	}
 
 	@Provides

@@ -22,4 +22,3 @@
  * Injection modules for the "no-network" service.
  */
 package io.janusproject.modules.nonetwork;
-

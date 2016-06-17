@@ -23,7 +23,8 @@ package io.janusproject.kernel.services.guava;
 import com.google.common.collect.Multimap;
 import io.janusproject.util.AbstractDMultiMapView;
 
-/** A view on a Guava multimap that provides the API for the DMultiMap.
+/**
+ * A view on a Guava multimap that provides the API for the DMultiMap.
  *
  * @param <K> - type of the keys.
  * @param <V> - type of the values.

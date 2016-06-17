@@ -22,4 +22,3 @@
  * Injection modules for the ZeroMQ network service.
  */
 package io.janusproject.modules.zeromq;
-

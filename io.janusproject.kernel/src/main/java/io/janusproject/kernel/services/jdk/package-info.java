@@ -19,8 +19,6 @@
  */
 
 /**
- * Implementation of services based on
- * the standard Java Development Kit.
+ * Implementation of services based on the standard Java Development Kit.
  */
 package io.janusproject.kernel.services.jdk;
-

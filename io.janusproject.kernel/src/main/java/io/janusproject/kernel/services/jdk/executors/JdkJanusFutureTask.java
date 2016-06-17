@@ -32,8 +32,7 @@ import io.janusproject.services.executor.ChuckNorrisException;
 import io.janusproject.services.executor.JanusFutureTask;
 
 /**
- * A {@link FutureTask} that is {@link Runnable}. Successful
- * execution of the <tt>run</tt> method causes completion of the
+ * A {@link FutureTask} that is {@link Runnable}. Successful execution of the <tt>run</tt> method causes completion of the
  * <tt>Future</tt> and allows access to its results.
  *
  * @param <V> The type of the return value.
@@ -54,15 +53,12 @@ class JdkJanusFutureTask<V> extends FutureTask<V> implements JanusFutureTask<V> 
 	private final WeakReference<Object> subruntime;
 
 	/**
-	 * Creates a {@code FutureTask} that will, upon running, execute the
-	 * given {@code Runnable}, and arrange that {@code get} will return the
-	 * given result on successful completion.
+	 * Creates a {@code FutureTask} that will, upon running, execute the given {@code Runnable}, and arrange that {@code get} will
+	 * return the given result on successful completion.
 	 *
 	 * @param runnable - the runnable task
-	 * @param result - the result to return on successful completion. If
-	 *     you don't need a particular result, consider using
-	 *     constructions of the form:
-	 * {@code Future<?> f = new FutureTask<Void>(runnable, null)}
+	 * @param result - the result to return on successful completion. If you don't need a particular result, consider using
+	 *        constructions of the form: {@code Future<?> f = new FutureTask<Void>(runnable, null)}
 	 * @throws NullPointerException - if the runnable is <code>null</code>
 	 */
 	JdkJanusFutureTask(Runnable runnable, V result) throws NullPointerException {
@@ -70,7 +66,8 @@ class JdkJanusFutureTask<V> extends FutureTask<V> implements JanusFutureTask<V> 
 		this.subruntime = new WeakReference<>(runnable);
 	}
 
-	/** Creates a FutureTask that will, upon running, execute the given Callable.
+	/**
+	 * Creates a FutureTask that will, upon running, execute the given Callable.
 	 *
 	 * @param callable - the callable task.
 	 * @throws NullPointerException if the callable is null
@@ -119,8 +116,7 @@ class JdkJanusFutureTask<V> extends FutureTask<V> implements JanusFutureTask<V> 
 	}
 
 	@Override
-	public V get(long timeout, TimeUnit unit) throws InterruptedException,
-	ExecutionException, TimeoutException {
+	public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		try {
 			return super.get(timeout, unit);
 		} catch (ExecutionException e) {
@@ -135,7 +131,8 @@ class JdkJanusFutureTask<V> extends FutureTask<V> implements JanusFutureTask<V> 
 		}
 	}
 
-	/** Set the running thread.
+	/**
+	 * Set the running thread.
 	 *
 	 * @param thread - thread that is running the task.
 	 */

@@ -40,11 +40,10 @@ public class JdkThreadFactory implements ThreadFactory {
 
 	private final UncaughtExceptionHandler handler;
 
-	/** Constructs a factory based on the
-	 * {@link Executors#defaultThreadFactory() default thread factory}.
+	/**
+	 * Constructs a factory based on the {@link Executors#defaultThreadFactory() default thread factory}.
 	 *
-	 * @param handler - the uncaught exception handler that must be provided to
-	 *                  the created threads.
+	 * @param handler - the uncaught exception handler that must be provided to the created threads.
 	 */
 	@Inject
 	public JdkThreadFactory(UncaughtExceptionHandler handler) {

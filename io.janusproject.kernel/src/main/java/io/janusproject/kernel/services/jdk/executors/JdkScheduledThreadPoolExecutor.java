@@ -49,13 +49,12 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
 	 */
 	@Inject
 	public JdkScheduledThreadPoolExecutor(ThreadFactory factory) {
-		super(JanusConfig.getSystemPropertyAsInteger(
-				JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
-				JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE),
-				factory);
+		super(JanusConfig.getSystemPropertyAsInteger(JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
+				JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE), factory);
 	}
 
-	/** Add a listener on tasks.
+	/**
+	 * Add a listener on tasks.
 	 *
 	 * @param listener - the listener on task events
 	 */
@@ -66,7 +65,8 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
 		this.listeners.add(JdkTaskListener.class, listener);
 	}
 
-	/** Remove a listener on tasks.
+	/**
+	 * Remove a listener on tasks.
 	 *
 	 * @param listener - the listener on task events
 	 */
@@ -79,7 +79,8 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
 		}
 	}
 
-	/** Notify the listeners about a task termination.
+	/**
+	 * Notify the listeners about a task termination.
 	 *
 	 * @param thread - the thread that was run the finished task.
 	 * @param task - the finished task.
@@ -98,22 +99,18 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
 	}
 
 	@Override
-	protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable,
-			RunnableScheduledFuture<V> task) {
+	protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable, RunnableScheduledFuture<V> task) {
 		return new JdkJanusScheduledFutureTask<>(task);
 	}
 
 	@Override
-	protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable,
-			RunnableScheduledFuture<V> task) {
+	protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable, RunnableScheduledFuture<V> task) {
 		return new JdkJanusScheduledFutureTask<>(task);
 	}
 
 	@Override
 	public <T> Future<T> submit(Runnable task, T result) {
-        return schedule(
-        		new ResultRunnable<>(task, result),
-                0, TimeUnit.NANOSECONDS);
+		return schedule(new ResultRunnable<>(task, result), 0, TimeUnit.NANOSECONDS);
 	}
 
 	@Override
@@ -136,7 +133,8 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
 		}
 	}
 
-	/** Implementation of the result of a runnable.
+	/**
+	 * Implementation of the result of a runnable.
 	 *
 	 * @param <V> type of the result.
 	 * @author $Author: sgalland$
@@ -150,7 +148,8 @@ public class JdkScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor 
 
 		private final V result;
 
-		/** Construct.
+		/**
+		 * Construct.
 		 *
 		 * @param runnable the runnable.
 		 * @param result the result.

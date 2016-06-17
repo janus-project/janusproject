@@ -19,8 +19,6 @@
  */
 
 /**
- * This package contains the implementation of the service for
- * the Janus platform.
+ * This package contains the implementation of the service for the Janus platform.
  */
 package io.janusproject.kernel.services;
-

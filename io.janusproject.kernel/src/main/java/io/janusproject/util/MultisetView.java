@@ -36,7 +36,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import io.janusproject.util.DataViewDelegate.Delegator;
 
-/** A view if the multiset of the keys in a {@link AbstractDMultiMapView}.
+/**
+ * A view if the multiset of the keys in a {@link AbstractDMultiMapView}.
  *
  * @param <K> - the keys.
  * @param <V> - the values.
@@ -78,8 +79,7 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 			// We can't simply check whether the entry sets are equal, since that
 			// approach fails when a TreeMultiset has a comparator that returns 0
 			// when passed unequal elements.
-			if (size() != that.size()
-					|| entrySet().size() != that.entrySet().size()) {
+			if (size() != that.size() || entrySet().size() != that.entrySet().size()) {
 				return false;
 			}
 			for (Entry<?> entry : that.entrySet()) {
@@ -254,7 +254,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		throw new UnsupportedOperationException();
 	}
 
-	/** Set of entries in a Multiset.
+	/**
+	 * Set of entries in a Multiset.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -267,7 +268,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 			//
 		}
 
-		/** Replies the associated multiset.
+		/**
+		 * Replies the associated multiset.
 		 *
 		 * @return the associated multiset.
 		 */
@@ -331,8 +333,7 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 						public boolean equals(Object object) {
 							if (object instanceof Multiset.Entry) {
 								Multiset.Entry<?> that = (Multiset.Entry<?>) object;
-								return this.getCount() == that.getCount()
-										&& Objects.equal(getElement(), that.getElement());
+								return this.getCount() == that.getCount() && Objects.equal(getElement(), that.getElement());
 							}
 							return false;
 						}
@@ -388,7 +389,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		}
 	}
 
-	/** Set of elements in a MultisetView.
+	/**
+	 * Set of elements in a MultisetView.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -401,7 +403,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 			//
 		}
 
-		/** Replies the associated multiset.
+		/**
+		 * Replies the associated multiset.
 		 *
 		 * @return the associated multiset.
 		 */
@@ -456,7 +459,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 
 	}
 
-	/** Iterator on Multiset keys.
+	/**
+	 * Iterator on Multiset keys.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -520,7 +524,8 @@ public class MultisetView<K, V> extends AbstractCollection<K> implements Multise
 		}
 	}
 
-	/** Iterator on transformed MultisetView.
+	/**
+	 * Iterator on transformed MultisetView.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$

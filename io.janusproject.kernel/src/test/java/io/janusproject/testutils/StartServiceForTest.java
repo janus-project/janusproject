@@ -25,11 +25,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
-/** Start the service for the unit test.
+/**
+ * Start the service for the unit test.
  * 
- * See the {@link AvoidServiceStartForTest} for
- * avoiding service start.
+ * See the {@link AvoidServiceStartForTest} for avoiding service start.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -40,24 +39,20 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface StartServiceForTest {
-	
-	/** Replies if the service start is done
-	 * before or after the execution of the
-	 * functions marked with <code>@Before</code<.
+
+	/**
+	 * Replies if the service start is done before or after the execution of the functions marked with <code>@Before</code<.
 	 * 
-	 * @return <code>true</code> if the service should be
-	 * started after the marked functions; <code>false</code>
-	 * if the service should be started after.
+	 * @return <code>true</code> if the service should be started after the marked functions; <code>false</code> if the service
+	 *         should be started after.
 	 */
 	boolean startAfterSetUp() default false;
-	
-	/** Replies if the service is created
-	 * before or after the execution of the
-	 * functions marked with <code>@Before</code<.
+
+	/**
+	 * Replies if the service is created before or after the execution of the functions marked with <code>@Before</code<.
 	 * 
-	 * @return <code>true</code> if the service should be
-	 * created after the marked functions; <code>false</code>
-	 * if the service should be created after.
+	 * @return <code>true</code> if the service should be created after the marked functions; <code>false</code> if the service
+	 *         should be created after.
 	 */
 	boolean createAfterSetUp() default false;
 

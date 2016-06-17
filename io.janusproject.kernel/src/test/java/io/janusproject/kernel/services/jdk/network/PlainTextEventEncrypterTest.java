@@ -20,13 +20,14 @@
 package io.janusproject.kernel.services.jdk.network;
 
 import static org.junit.Assert.assertSame;
-import io.janusproject.services.network.EventEnvelope;
-import io.janusproject.testutils.AbstractJanusTest;
 
 import javax.annotation.Nullable;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import io.janusproject.services.network.EventEnvelope;
+import io.janusproject.testutils.AbstractJanusTest;
 
 /**
  * @author $Author: sgalland$
@@ -57,14 +58,14 @@ public class PlainTextEventEncrypterTest extends AbstractJanusTest {
 
 	@Nullable
 	private PlainTextEventEncrypter encrypter;
-	
+
 	@Before
 	public void setUp() {
 		this.contextId = new byte[] { 1, 2, 3, 4, 5 };
 		this.spaceId = new byte[] { 6, 7, 8, 9, 10 };
 		this.event = new byte[] { 11, 12, 13, 14 };
 		this.scope = new byte[] { 15, 16, 17 };
-		this.headers= new byte[] { 18, 19, 20, 21 };
+		this.headers = new byte[] { 18, 19, 20, 21 };
 		this.envelope = new EventEnvelope(this.contextId, this.spaceId, this.scope, this.headers, this.event);
 		this.encrypter = new PlainTextEventEncrypter();
 	}

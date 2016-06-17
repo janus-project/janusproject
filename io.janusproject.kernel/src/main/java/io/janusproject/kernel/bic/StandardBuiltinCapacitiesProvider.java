@@ -51,7 +51,8 @@ import io.sarl.lang.core.Skill;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpaceSpecification;
 
-/** Provider of the built-in capacities of the Janus platform.
+/**
+ * Provider of the built-in capacities of the Janus platform.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -73,10 +74,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 	@Override
 	public Map<Class<? extends Capacity>, Skill> getBuiltinCapacities(Agent agent) {
 		UUID innerContextID = agent.getID();
-		SpaceID innerSpaceID = new SpaceID(
-				innerContextID,
-				UUID.randomUUID(),
-				OpenEventSpaceSpecification.class);
+		SpaceID innerSpaceID = new SpaceID(innerContextID, UUID.randomUUID(), OpenEventSpaceSpecification.class);
 		Address agentAddressInInnerSpace = new Address(innerSpaceID, agent.getID());
 		Kernel k = this.injector.getInstance(Kernel.class);
 
@@ -85,8 +83,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		BehaviorsSkill behaviorSkill = new BehaviorsSkill(agent, agentAddressInInnerSpace);
 		LifecycleSkill lifecycleSkill = new LifecycleSkill(agent);
 		ExternalContextAccessSkill externalContextSkill = new ExternalContextAccessSkill(agent);
-		DefaultContextInteractionsSkill interactionSkill = new DefaultContextInteractionsSkill(
-				agent,
+		DefaultContextInteractionsSkill interactionSkill = new DefaultContextInteractionsSkill(agent,
 				this.contextRepository.getContext(agent.getParentID()));
 		SchedulesSkill scheduleSkill = new SchedulesSkill(agent);
 		LoggingSkill loggingSkill = new LoggingSkill(agent);
@@ -115,18 +112,8 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		result.put(Logging.class, loggingSkill);
 
 		this.spawnService.addSpawnServiceListener(agent.getID(),
-				new AgentLifeCycleSupport(
-				agent.getID(),
-				this.spawnService,
-				eventBusSkill,
-				microKernelSkill,
-				innerContextSkill,
-				behaviorSkill,
-				lifecycleSkill,
-				externalContextSkill,
-				interactionSkill,
-				scheduleSkill,
-				loggingSkill));
+				new AgentLifeCycleSupport(agent.getID(), this.spawnService, eventBusSkill, microKernelSkill, innerContextSkill,
+						behaviorSkill, lifecycleSkill, externalContextSkill, interactionSkill, scheduleSkill, loggingSkill));
 
 		// Test if all the BICs are installed.
 		assert (result.get(Behaviors.class) != null);
@@ -142,7 +129,8 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		return result;
 	}
 
-	/** Implementation of the agent's cycle.
+	/**
+	 * Implementation of the agent's cycle.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -165,10 +153,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		 * @param eventBusCapacity - the capacity of the agent to manage an internal bus.
 		 * @param skills - the skills for the built-in capacities.
 		 */
-		AgentLifeCycleSupport(
-				UUID agentId,
-				SpawnService spawnService,
-				InternalEventBusCapacity eventBusCapacity,
+		AgentLifeCycleSupport(UUID agentId, SpawnService spawnService, InternalEventBusCapacity eventBusCapacity,
 				Skill... skills) {
 			this.agentID = agentId;
 			this.spawnService = new WeakReference<>(spawnService);
@@ -177,8 +162,7 @@ public class StandardBuiltinCapacitiesProvider implements BuiltinCapacitiesProvi
 		}
 
 		@Override
-		public void agentSpawned(AgentContext parent, Agent agent,
-				Object[] initializationParameters) {
+		public void agentSpawned(AgentContext parent, Agent agent, Object[] initializationParameters) {
 			try {
 				// Use reflection to ignore the "protected" access right.
 				Method method = Skill.class.getDeclaredMethod("install"); //$NON-NLS-1$

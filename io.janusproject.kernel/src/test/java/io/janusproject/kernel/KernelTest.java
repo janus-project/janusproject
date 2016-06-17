@@ -29,21 +29,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import io.janusproject.services.IServiceManager;
-import io.janusproject.services.contextspace.ContextSpaceService;
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.spawn.SpawnService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.janusproject.util.TwoStepConstruction;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.AgentContext;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Method;
 import java.util.UUID;
-
-import javassist.Modifier;
 
 import javax.annotation.Nullable;
 
@@ -56,6 +45,17 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.State;
 
+import io.janusproject.services.IServiceManager;
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.janusproject.util.TwoStepConstruction;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.AgentContext;
+import javassist.Modifier;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -66,7 +66,7 @@ import com.google.common.util.concurrent.Service.State;
 public class KernelTest extends AbstractJanusTest {
 
 	@Nullable
-	private ImmutableMultimap<State,Service> services;
+	private ImmutableMultimap<State, Service> services;
 
 	@Nullable
 	private SpawnService spawnService;
@@ -94,7 +94,7 @@ public class KernelTest extends AbstractJanusTest {
 
 	@Nullable
 	private UUID uuid;
-	
+
 	@Before
 	public void setUp() {
 		this.uuid = UUID.randomUUID();
@@ -102,10 +102,8 @@ public class KernelTest extends AbstractJanusTest {
 		this.executorService = mock(ExecutorService.class);
 		this.loggingService = mock(LogService.class);
 		this.contextService = mock(ContextSpaceService.class);
-		this.services = ImmutableMultimap.<State,Service>of(
-				State.RUNNING, this.spawnService,
-				State.RUNNING, this.executorService,
-				State.RUNNING, this.contextService);
+		this.services = ImmutableMultimap.<State, Service> of(State.RUNNING, this.spawnService, State.RUNNING,
+				this.executorService, State.RUNNING, this.contextService);
 		this.agentContext = mock(AgentContext.class);
 		this.exceptionHandler = mock(UncaughtExceptionHandler.class);
 		this.serviceManager = mock(IServiceManager.class);
@@ -123,7 +121,7 @@ public class KernelTest extends AbstractJanusTest {
 		this.kernel = new Kernel(this.serviceManager, this.spawnService, this.loggingService, this.exceptionHandler);
 		this.kernel = spy(this.kernel);
 	}
-	
+
 	@Test
 	public void getService() {
 		assertSame(this.spawnService, this.kernel.getService(SpawnService.class));
@@ -141,9 +139,7 @@ public class KernelTest extends AbstractJanusTest {
 		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
 		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<String> argument4 = ArgumentCaptor.forClass(String.class);
-		verify(this.spawnService).spawn(
-				argument1.capture(), argument2.capture(), argument3.capture(),
-				argument4.capture());
+		verify(this.spawnService).spawn(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture());
 		assertSame(this.agentContext, argument1.getValue());
 		assertNull(argument2.getValue());
 		assertEquals(Agent.class, argument3.getValue());
@@ -162,9 +158,7 @@ public class KernelTest extends AbstractJanusTest {
 		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
 		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<String> argument4 = ArgumentCaptor.forClass(String.class);
-		verify(this.spawnService).spawn(
-				argument1.capture(), argument2.capture(),
-				argument3.capture(), argument4.capture());
+		verify(this.spawnService).spawn(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture());
 		assertSame(this.agentContext, argument1.getValue());
 		assertSame(aId, argument2.getValue());
 		assertEquals(Agent.class, argument3.getValue());
@@ -175,11 +169,10 @@ public class KernelTest extends AbstractJanusTest {
 	public void twoStepConstruction() throws Exception {
 		TwoStepConstruction annotation = Kernel.class.getAnnotation(TwoStepConstruction.class);
 		assertNotNull(annotation);
-		for(String name : annotation.names()) {
-			for(Method method : Kernel.class.getMethods()) {
+		for (String name : annotation.names()) {
+			for (Method method : Kernel.class.getMethods()) {
 				if (name.equals(method.getName())) {
-					assertTrue(Modifier.isPackage(method.getModifiers())
-							||Modifier.isPublic(method.getModifiers()));
+					assertTrue(Modifier.isPackage(method.getModifiers()) || Modifier.isPublic(method.getModifiers()));
 					break;
 				}
 			}

@@ -20,14 +20,12 @@
 
 package io.janusproject.services.executor;
 
-
 /**
- * This exception is thrown when a function must never
- * return from the point of view of an agent.
- * It permits to never return from functions such as
- * {@code killMe}.
+ * This exception is thrown when a function must never return from the point of view of an agent. It permits to never return from
+ * functions such as {@code killMe}.
  *
- * <p>The executors are supposed to never log this function.
+ * <p>
+ * The executors are supposed to never log this function.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -38,7 +36,8 @@ public class ChuckNorrisException extends RuntimeException {
 
 	private static final long serialVersionUID = -3212775069868589362L;
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public ChuckNorrisException() {
 		//

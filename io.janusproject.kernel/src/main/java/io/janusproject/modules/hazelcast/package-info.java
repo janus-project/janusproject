@@ -22,4 +22,3 @@
  * Injection modules for the Hazelcast library.
  */
 package io.janusproject.modules.hazelcast;
-

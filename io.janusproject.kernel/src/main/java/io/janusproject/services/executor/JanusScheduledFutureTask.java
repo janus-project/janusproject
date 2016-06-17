@@ -25,8 +25,7 @@ import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledFuture;
 
 /**
- * A {@link ScheduledFuture} that is {@link Runnable}. Successful
- * execution of the <tt>run</tt> method causes completion of the
+ * A {@link ScheduledFuture} that is {@link Runnable}. Successful execution of the <tt>run</tt> method causes completion of the
  * <tt>Future</tt> and allows access to its results.
  *
  * @param <V> - type of the values supported by the task.
@@ -38,16 +37,17 @@ import java.util.concurrent.ScheduledFuture;
  */
 public interface JanusScheduledFutureTask<V> extends RunnableScheduledFuture<V> {
 
-	/** Replies the thread that is running the task associated to this future.
+	/**
+	 * Replies the thread that is running the task associated to this future.
 	 *
 	 * @return the thread, never <code>null</code>.
 	 */
 	Thread getThread();
 
-	/** Replies the task associated to this future is running on the calling thread.
+	/**
+	 * Replies the task associated to this future is running on the calling thread.
 	 *
-	 * @return <code>true</code> if the current thread is running the associated
-	 *     task, <code>false</code> otherwie.
+	 * @return <code>true</code> if the current thread is running the associated task, <code>false</code> otherwie.
 	 */
 	boolean isCurrentThread();
 

@@ -23,7 +23,8 @@ package io.janusproject.kernel.services.jdk.infrastructure;
 import com.google.common.util.concurrent.AbstractService;
 import io.janusproject.services.infrastructure.InfrastructureService;
 
-/** This class supports the management of the Janus infrastructure inside a closed environment.
+/**
+ * This class supports the management of the Janus infrastructure inside a closed environment.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -32,7 +33,8 @@ import io.janusproject.services.infrastructure.InfrastructureService;
  */
 public class StandardInfrastructureService extends AbstractService implements InfrastructureService {
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public StandardInfrastructureService() {
 		//

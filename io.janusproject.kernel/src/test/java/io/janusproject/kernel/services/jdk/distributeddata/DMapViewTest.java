@@ -21,27 +21,19 @@ package io.janusproject.kernel.services.jdk.distributeddata;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import io.janusproject.kernel.services.hazelcast.HazelcastDMultiMapView;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.testutils.AbstractJanusTest;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import junit.framework.TestSuite;
-
-import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,10 +48,10 @@ import com.google.common.collect.testing.TestStringMapGenerator;
 import com.google.common.collect.testing.features.CollectionFeature;
 import com.google.common.collect.testing.features.CollectionSize;
 import com.google.common.collect.testing.features.MapFeature;
-import com.hazelcast.config.Config;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.MultiMap;
+
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.testutils.AbstractJanusTest;
+import junit.framework.TestSuite;
 
 /**
  * @author $Author: sgalland$
@@ -68,13 +60,8 @@ import com.hazelcast.core.MultiMap;
  * @mavenartifactid $ArtifactId$
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-	DMapViewTest.BackedCollectionTests.class,
-	DMapViewTest.GuavaMapOperationTests.class,
-	DMapViewTest.ViewTests.class,
-	DMapViewTest.SpecificDMapFunctionTests.class,
-	DMapViewTest.ListeningFeatureTests.class,
-})
+@SuiteClasses({ DMapViewTest.BackedCollectionTests.class, DMapViewTest.GuavaMapOperationTests.class, DMapViewTest.ViewTests.class,
+		DMapViewTest.SpecificDMapFunctionTests.class, DMapViewTest.ListeningFeatureTests.class, })
 @SuppressWarnings("all")
 public class DMapViewTest {
 
@@ -111,8 +98,7 @@ public class DMapViewTest {
 
 		@Test
 		public void changesPropagation() {
-			Assume.assumeTrue(
-					"The collection is not backing the changes to the underlying collection",
+			Assume.assumeTrue("The collection is not backing the changes to the underlying collection",
 					this.view.isBackedCollection());
 			assertTrue(this.view.keySet().remove("b"));
 			assertEquals(1, this.map.size());
@@ -122,8 +108,7 @@ public class DMapViewTest {
 
 		@Test
 		public void noChangesPropagation() {
-			Assume.assumeFalse(
-					"The collection is backing the changes to the underlying collection",
+			Assume.assumeFalse("The collection is backing the changes to the underlying collection",
 					this.view.isBackedCollection());
 			assertTrue(this.view.keySet().remove("b"));
 			assertEquals(2, this.map.size());
@@ -151,25 +136,16 @@ public class DMapViewTest {
 						@Override
 						protected Map<String, String> create(Entry<String, String>[] arg0) {
 							Map<String, String> map = Maps.newHashMap();
-							for(Entry<String, String> entry : arg0) {
+							for (Entry<String, String> entry : arg0) {
 								map.put(entry.getKey(), entry.getValue());
 							}
-							return new DMapView<>(
-									UUID.randomUUID().toString(),
-									map);
+							return new DMapView<>(UUID.randomUUID().toString(), map);
 						}
-					})
-					.named("Guava-based DMap tests")
-					.withFeatures(
-							MapFeature.ALLOWS_NULL_KEYS,
-				            MapFeature.ALLOWS_NULL_VALUES,
-				            MapFeature.ALLOWS_ANY_NULL_QUERIES,
-				            MapFeature.GENERAL_PURPOSE,
-				            MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
-				            CollectionFeature.SUPPORTS_ITERATOR_REMOVE,
-				            CollectionFeature.SERIALIZABLE,
-				            CollectionSize.ANY
-							).createTestSuite();
+					}).named("Guava-based DMap tests")
+					.withFeatures(MapFeature.ALLOWS_NULL_KEYS, MapFeature.ALLOWS_NULL_VALUES, MapFeature.ALLOWS_ANY_NULL_QUERIES,
+							MapFeature.GENERAL_PURPOSE, MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
+							CollectionFeature.SUPPORTS_ITERATOR_REMOVE, CollectionFeature.SERIALIZABLE, CollectionSize.ANY)
+					.createTestSuite();
 		}
 
 	}
@@ -191,9 +167,7 @@ public class DMapViewTest {
 		@Before
 		public void setUp() {
 			this.map = Maps.newHashMap();
-			this.view = new DMapView<>(
-					UUID.randomUUID().toString(),
-					this.map);
+			this.view = new DMapView<>(UUID.randomUUID().toString(), this.map);
 		}
 
 		@Test
@@ -218,16 +192,14 @@ public class DMapViewTest {
 
 		@Nullable
 		private Map<String, String> map;
-		
+
 		@Nullable
 		private DMapView<String, String> view;
 
 		@Before
 		public void setUp() {
 			this.map = Maps.newHashMap();
-			this.view = new DMapView<>(
-					UUID.randomUUID().toString(),
-					this.map);
+			this.view = new DMapView<>(UUID.randomUUID().toString(), this.map);
 		}
 
 		@Test
@@ -267,10 +239,10 @@ public class DMapViewTest {
 
 		@Nullable
 		private DMapListener<String, String> listener;
-		
+
 		@Nullable
 		private Map<String, String> map;
-		
+
 		@Nullable
 		private DMapView<String, String> view;
 
@@ -278,9 +250,7 @@ public class DMapViewTest {
 		public void setUp() {
 			this.listener = mock(DMapListener.class);
 			this.map = Maps.newHashMap();
-			this.view = new DMapView<>(
-					UUID.randomUUID().toString(),
-					this.map);
+			this.view = new DMapView<>(UUID.randomUUID().toString(), this.map);
 		}
 
 		@Test

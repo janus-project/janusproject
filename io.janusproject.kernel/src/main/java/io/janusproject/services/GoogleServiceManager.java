@@ -25,8 +25,8 @@ import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.State;
 import com.google.common.util.concurrent.ServiceManager;
 
-/** Implementation of a service manager based on the Google
- * service manager.
+/**
+ * Implementation of a service manager based on the Google service manager.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$

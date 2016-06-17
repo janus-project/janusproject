@@ -22,4 +22,3 @@
  * Classes for configuring and booting the Janus platform.
  */
 package io.janusproject;
-

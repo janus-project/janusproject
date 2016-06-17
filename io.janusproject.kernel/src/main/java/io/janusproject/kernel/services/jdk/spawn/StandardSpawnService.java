@@ -62,9 +62,7 @@ import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 
 /**
- * Implementation of a spawning service
- * that is based on the other services of
- * the Janus platform.
+ * Implementation of a spawning service that is based on the other services of the Janus platform.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -83,7 +81,8 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 
 	private final Injector injector;
 
-	/** Constructs the service with the given (injected) injector.
+	/**
+	 * Constructs the service with the given (injected) injector.
 	 *
 	 * @param injector the injector that should be used by this service for creating the agents.
 	 */
@@ -119,8 +118,8 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 			try {
 				// Check if the version of the SARL agent class is compatible.
 				ensureSarlSpecificationVersion(agentClazz);
-				JustInTimeAgentInjectionModule agentInjectionModule = new JustInTimeAgentInjectionModule(
-						this.injector, agentClazz, parent.getID(), agentID);
+				JustInTimeAgentInjectionModule agentInjectionModule = new JustInTimeAgentInjectionModule(this.injector,
+						agentClazz, parent.getID(), agentID);
 				Injector agentInjector = this.injector.createChildInjector(agentInjectionModule);
 				Agent agent = agentInjector.getInstance(Agent.class);
 				assert (agent != null);
@@ -155,7 +154,8 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		}
 	}
 
-	/** Replies the registered agents.
+	/**
+	 * Replies the registered agents.
 	 *
 	 * @return the registered agents.
 	 */
@@ -163,7 +163,8 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		return Collections3.synchronizedSet(this.agents.keySet(), this);
 	}
 
-	/** Replies the registered agent.
+	/**
+	 * Replies the registered agent.
 	 *
 	 * @param id is the identifier of the agent.
 	 * @return the registered agent, or <code>null</code>.
@@ -262,17 +263,14 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		Address agentAddress = defSpace.getAddress(agentID);
 		assert (agentAddress != null) : "Cannot find an address in the default space for " + agentID; //$NON-NLS-1$
 
-		defSpace.emit(new AgentSpawned(
-				agentAddress,
-				agentID,
-				agent.getClass().getName()));
+		defSpace.emit(new AgentSpawned(agentAddress, agentID, agent.getClass().getName()));
 	}
 
-	/** Replies if the given agent can be killed.
+	/**
+	 * Replies if the given agent can be killed.
 	 *
 	 * @param agent - agent to test.
-	 * @return <code>true</code> if the given agent can be killed,
-	 *     otherwise <code>false</code>.
+	 * @return <code>true</code> if the given agent can be killed, otherwise <code>false</code>.
 	 */
 	@SuppressWarnings("static-method")
 	public synchronized boolean canKillAgent(Agent agent) {
@@ -281,8 +279,7 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 			if (ac != null) {
 				Set<UUID> participants = ac.getDefaultSpace().getParticipants();
 				if (participants != null
-						&& (participants.size() > 1
-						|| (participants.size() == 1 && !participants.contains(agent.getID())))) {
+						&& (participants.size() > 1 || (participants.size() == 1 && !participants.contains(agent.getID())))) {
 					return false;
 				}
 			}
@@ -312,10 +309,7 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 			synchronized (sc.mutex()) {
 				for (AgentContext context : sc) {
 					EventSpace defSpace = context.getDefaultSpace();
-					defSpace.emit(new AgentKilled(
-							defSpace.getAddress(agent.getID()),
-							agent.getID(),
-							agent.getClass().getName()));
+					defSpace.emit(new AgentKilled(defSpace.getAddress(agent.getID()), agent.getID(), agent.getClass().getName()));
 				}
 			}
 		} catch (RuntimeException e) {
@@ -428,15 +422,14 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		 * @param cause - the cause of the exception.
 		 */
 		public CannotSpawnException(Class<? extends Agent> agentClazz, Throwable cause) {
-			super(Locale.getString(StandardSpawnService.class,
-					"CANNOT_INSTANCIATE_AGENT", agentClazz, //$NON-NLS-1$
-					(cause == null) ? null : cause.getLocalizedMessage()),
-				cause);
+			super(Locale.getString(StandardSpawnService.class, "CANNOT_INSTANCIATE_AGENT", agentClazz, //$NON-NLS-1$
+					(cause == null) ? null : cause.getLocalizedMessage()), cause);
 		}
 
 	}
 
-	/** An injection module that is able to inject the parent ID and agent ID when creating an agent.
+	/**
+	 * An injection module that is able to inject the parent ID and agent ID when creating an agent.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -472,11 +465,11 @@ public class StandardSpawnService extends AbstractDependentService implements Sp
 		public Agent get() {
 			try {
 				BuiltinCapacitiesProvider capacityProvider = this.injector.getInstance(BuiltinCapacitiesProvider.class);
-				Constructor<? extends Agent> constructor = this.agentType.getConstructor(
-						BuiltinCapacitiesProvider.class, UUID.class, UUID.class);
+				Constructor<? extends Agent> constructor = this.agentType.getConstructor(BuiltinCapacitiesProvider.class,
+						UUID.class, UUID.class);
 				return constructor.newInstance(capacityProvider, this.parentID, this.agentID);
-			} catch (NoSuchMethodException | SecurityException | InstantiationException
-					| IllegalAccessException | IllegalArgumentException | InvocationTargetException exception) {
+			} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+					| IllegalArgumentException | InvocationTargetException exception) {
 				throw new CannotSpawnException(this.agentType, exception);
 			}
 		}

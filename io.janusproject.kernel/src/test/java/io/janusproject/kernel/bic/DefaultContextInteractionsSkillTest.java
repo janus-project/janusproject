@@ -29,6 +29,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+import org.mockito.internal.verification.Times;
+
 import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.core.Address;
@@ -43,17 +55,6 @@ import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.Scopes;
-
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-import org.mockito.internal.verification.Times;
 
 /**
  * @author $Author: sgalland$
@@ -93,14 +94,9 @@ public class DefaultContextInteractionsSkillTest extends AbstractJanusTest {
 		this.defaultSpaceUUID = UUID.randomUUID();
 		this.defaultContextUUID = UUID.randomUUID();
 
-		this.defaultSpaceID = new SpaceID(
-				this.defaultContextUUID,
-				this.defaultSpaceUUID,
-				EventSpaceSpecification.class);
+		this.defaultSpaceID = new SpaceID(this.defaultContextUUID, this.defaultSpaceUUID, EventSpaceSpecification.class);
 
-		this.address = new Address(
-				this.defaultSpaceID,
-				UUID.randomUUID());
+		this.address = new Address(this.defaultSpaceID, UUID.randomUUID());
 
 		this.defaultSpace = mock(EventSpace.class);
 		when(this.defaultSpace.getAddress(Matchers.any(UUID.class))).thenReturn(this.address);
@@ -112,10 +108,7 @@ public class DefaultContextInteractionsSkillTest extends AbstractJanusTest {
 
 		this.lifeCapacity = mock(Lifecycle.class);
 
-		Agent agent = new Agent(
-				Mockito.mock(BuiltinCapacitiesProvider.class),
-				UUID.randomUUID(),
-				null) {
+		Agent agent = new Agent(Mockito.mock(BuiltinCapacitiesProvider.class), UUID.randomUUID(), null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				return capacity.cast(DefaultContextInteractionsSkillTest.this.lifeCapacity);
@@ -185,8 +178,7 @@ public class DefaultContextInteractionsSkillTest extends AbstractJanusTest {
 		ArgumentCaptor<Class> argument1 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<AgentContext> argument2 = ArgumentCaptor.forClass(AgentContext.class);
 		ArgumentCaptor<String> argument3 = ArgumentCaptor.forClass(String.class);
-		verify(this.lifeCapacity, times(1)).spawnInContext(argument1.capture(),
-				argument2.capture(), argument3.capture());
+		verify(this.lifeCapacity, times(1)).spawnInContext(argument1.capture(), argument2.capture(), argument3.capture());
 		assertEquals(Agent.class, argument1.getValue());
 		assertSame(this.parentContext, argument2.getValue());
 		assertArrayEquals(new String[] { "a", "b", "c" }, argument3.getAllValues().toArray()); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$

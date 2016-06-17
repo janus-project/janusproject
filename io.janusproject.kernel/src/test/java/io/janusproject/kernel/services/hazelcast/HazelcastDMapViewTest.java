@@ -68,13 +68,9 @@ import junit.framework.TestSuite;
  * @mavenartifactid $ArtifactId$
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-	HazelcastDMapViewTest.BackedCollectionTests.class,
-	HazelcastDMapViewTest.GuavaMapOperationTests.class,
-	HazelcastDMapViewTest.ViewTests.class,
-	HazelcastDMapViewTest.SpecificDMapFunctionTests.class,
-	HazelcastDMapViewTest.ListeningFeatureTests.class,
-})
+@SuiteClasses({ HazelcastDMapViewTest.BackedCollectionTests.class, HazelcastDMapViewTest.GuavaMapOperationTests.class,
+		HazelcastDMapViewTest.ViewTests.class, HazelcastDMapViewTest.SpecificDMapFunctionTests.class,
+		HazelcastDMapViewTest.ListeningFeatureTests.class, })
 @SuppressWarnings("all")
 public class HazelcastDMapViewTest {
 
@@ -114,8 +110,6 @@ public class HazelcastDMapViewTest {
 		public void tearDown() {
 			this.hazelcast.shutdown();
 		}
-		
-		
 
 		@Test
 		public void isBackedCollection() {
@@ -124,8 +118,7 @@ public class HazelcastDMapViewTest {
 
 		@Test
 		public void changesPropagation() {
-			Assume.assumeTrue(
-					"The collection is not backing the changes to the underlying collection",
+			Assume.assumeTrue("The collection is not backing the changes to the underlying collection",
 					this.view.isBackedCollection());
 			Collection<String> values = this.view.get("a");
 			assertNotNull(values);
@@ -138,8 +131,7 @@ public class HazelcastDMapViewTest {
 
 		@Test
 		public void noChangesPropagation() {
-			Assume.assumeFalse(
-					"The collection is backing the changes to the underlying collection",
+			Assume.assumeFalse("The collection is backing the changes to the underlying collection",
 					this.view.isBackedCollection());
 			Collection<String> values = this.view.get("a");
 			assertNotNull(values);
@@ -169,23 +161,16 @@ public class HazelcastDMapViewTest {
 						@Override
 						protected Map<String, String> create(Entry<String, String>[] arg0) {
 							IMap<String, String> map = new HzMapMock<>();
-							for(Entry<String, String> entry : arg0) {
+							for (Entry<String, String> entry : arg0) {
 								map.put(entry.getKey(), entry.getValue());
 							}
 							return new HazelcastDMapView<>(map);
 						}
-					})
-					.named("Guava-based DMap tests")
-					.withFeatures(
-							MapFeature.ALLOWS_NULL_KEYS,
-							MapFeature.ALLOWS_NULL_VALUES,
-							MapFeature.ALLOWS_ANY_NULL_QUERIES,
-							MapFeature.GENERAL_PURPOSE,
-							MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
-							CollectionFeature.SUPPORTS_ITERATOR_REMOVE,
-							CollectionFeature.SERIALIZABLE,
-							CollectionSize.ANY
-							).createTestSuite();
+					}).named("Guava-based DMap tests")
+					.withFeatures(MapFeature.ALLOWS_NULL_KEYS, MapFeature.ALLOWS_NULL_VALUES, MapFeature.ALLOWS_ANY_NULL_QUERIES,
+							MapFeature.GENERAL_PURPOSE, MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
+							CollectionFeature.SUPPORTS_ITERATOR_REMOVE, CollectionFeature.SERIALIZABLE, CollectionSize.ANY)
+					.createTestSuite();
 		}
 
 	}

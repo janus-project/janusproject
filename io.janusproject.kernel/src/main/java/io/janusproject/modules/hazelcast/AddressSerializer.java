@@ -30,7 +30,8 @@ import com.hazelcast.nio.serialization.StreamSerializer;
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.SpaceID;
 
-/** Serializer for Janus addresses.
+/**
+ * Serializer for Janus addresses.
  *
  * @author $Author: srodriguez$
  * @version $FullVersion$
@@ -39,7 +40,8 @@ import io.sarl.lang.core.SpaceID;
  */
 class AddressSerializer implements StreamSerializer<Address> {
 
-	/** Unique identifier for the {@link Address} type.
+	/**
+	 * Unique identifier for the {@link Address} type.
 	 */
 	public static final int ADDRESS_CLASS_TYPE = 19119;
 

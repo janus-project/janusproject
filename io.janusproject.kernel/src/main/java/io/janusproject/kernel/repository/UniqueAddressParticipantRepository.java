@@ -34,16 +34,15 @@ import io.sarl.util.Collections3;
 /**
  * A repository of participants specific to a given space.
  *
- * <p>This repository links the id of an entity to its various addresses in the
- * related space.
+ * <p>
+ * This repository links the id of an entity to its various addresses in the related space.
  *
- * <p>The repository must be distributed and synchronized all over the network by
- * using data-structures that are provided by an injected
- * {@link DistributedDataStructureService}.
+ * <p>
+ * The repository must be distributed and synchronized all over the network by using data-structures that are provided by an
+ * injected {@link DistributedDataStructureService}.
  *
- * @param <ADDRESST> - the generic type representing the address of a participant
- *     in the related space. This type must remains small, less than M in memory and
- *     must be {@link java.io.Serializable}.
+ * @param <ADDRESST> - the generic type representing the address of a participant in the related space. This type must remains
+ *        small, less than M in memory and must be {@link java.io.Serializable}.
  * @author $Author: ngaud$
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -53,22 +52,20 @@ import io.sarl.util.Collections3;
 public final class UniqueAddressParticipantRepository<ADDRESST extends Serializable> extends ParticipantRepository<ADDRESST> {
 
 	/**
-	 * Map linking the id of an entity to its unique address in the related space.
-	 * This map must be distributed and synchronized all over the network
+	 * Map linking the id of an entity to its unique address in the related space. This map must be distributed and synchronized
+	 * all over the network
 	 */
 	private final Map<UUID, ADDRESST> participants;
 
 	private final String distributedParticipantMapName;
 
-
-	/** Constructs a <code>UniqueAddressParticipantRepository</code>.
+	/**
+	 * Constructs a <code>UniqueAddressParticipantRepository</code>.
 	 *
 	 * @param distributedParticipantMapName - name of the multimap over the network.
-	 * @param repositoryImplFactory - factory that will be used to create the internal
-	 *                                data structures.
+	 * @param repositoryImplFactory - factory that will be used to create the internal data structures.
 	 */
-	public UniqueAddressParticipantRepository(
-			String distributedParticipantMapName,
+	public UniqueAddressParticipantRepository(String distributedParticipantMapName,
 			DistributedDataStructureService repositoryImplFactory) {
 		super();
 		this.distributedParticipantMapName = distributedParticipantMapName;
@@ -77,6 +74,7 @@ public final class UniqueAddressParticipantRepository<ADDRESST extends Serializa
 
 	/**
 	 * Registers a new participant in this repository.
+	 * 
 	 * @param address - the address of the participant
 	 * @param entity - the entity associated to the specified address
 	 * @return the address of the participant
@@ -89,7 +87,8 @@ public final class UniqueAddressParticipantRepository<ADDRESST extends Serializa
 		return address;
 	}
 
-	/** Remove a participant from this repository.
+	/**
+	 * Remove a participant from this repository.
 	 *
 	 * @param entity - participant to remove from this repository.
 	 * @return the address that was mapped to the given participant.
@@ -98,7 +97,8 @@ public final class UniqueAddressParticipantRepository<ADDRESST extends Serializa
 		return unregisterParticipant(entity.getID());
 	}
 
-	/** Remove a participant with the given ID from this repository.
+	/**
+	 * Remove a participant with the given ID from this repository.
 	 *
 	 * @param entityID - identifier of the participant to remove from this repository.
 	 * @return the address that was mapped to the given participant.
@@ -110,7 +110,8 @@ public final class UniqueAddressParticipantRepository<ADDRESST extends Serializa
 		}
 	}
 
-	/** Replies the address associated to the given participant.
+	/**
+	 * Replies the address associated to the given participant.
 	 *
 	 * @param entity - instance of a participant.
 	 * @return the address of the participant with the given id.
@@ -119,7 +120,8 @@ public final class UniqueAddressParticipantRepository<ADDRESST extends Serializa
 		return getAddress(entity.getID());
 	}
 
-	/** Replies the address associated to the participant with the given identifier.
+	/**
+	 * Replies the address associated to the participant with the given identifier.
 	 *
 	 * @param id - identifier of the participant to retreive.
 	 * @return the address of the participant with the given id.
@@ -130,7 +132,8 @@ public final class UniqueAddressParticipantRepository<ADDRESST extends Serializa
 		}
 	}
 
-	/** Replies all the addresses of the participants that ar einside this repository.
+	/**
+	 * Replies all the addresses of the participants that ar einside this repository.
 	 *
 	 * @return all the addresses.
 	 */
@@ -141,7 +144,8 @@ public final class UniqueAddressParticipantRepository<ADDRESST extends Serializa
 		}
 	}
 
-	/** Replies the identifiers of all the participants in this repository.
+	/**
+	 * Replies the identifiers of all the participants in this repository.
 	 *
 	 * @return all the identifiers.
 	 */

@@ -24,8 +24,8 @@ import com.google.common.util.concurrent.Service;
 
 import io.sarl.lang.core.Capacity;
 
-/** Capacity that provides an access to the micro kernel,
- * according to the FIPA specs.
+/**
+ * Capacity that provides an access to the micro kernel, according to the FIPA specs.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -34,7 +34,8 @@ import io.sarl.lang.core.Capacity;
  */
 public interface MicroKernelCapacity extends Capacity {
 
-	/** Replies a kernel service that is alive.
+	/**
+	 * Replies a kernel service that is alive.
 	 *
 	 * @param <S> - type of the service to reply.
 	 * @param type - type of the service to reply.

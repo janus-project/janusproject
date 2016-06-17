@@ -32,7 +32,8 @@ import io.janusproject.services.distributeddata.DMap;
 import io.janusproject.services.distributeddata.DMapListener;
 import io.janusproject.util.DataViewDelegate.Delegator;
 
-/** A view on a standard Map that provides the API for DMap.
+/**
+ * A view on a standard Map that provides the API for DMap.
  *
  * @param <K> - type of the keys.
  * @param <V> - type of the values.
@@ -42,7 +43,7 @@ import io.janusproject.util.DataViewDelegate.Delegator;
  * @mavenartifactid $ArtifactId$
  */
 public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
-		implements DMap<K, V>, Serializable, Delegator<Map<K, V>> {
+implements DMap<K, V>, Serializable, Delegator<Map<K, V>> {
 
 	private static final long serialVersionUID = -2836872682477402816L;
 
@@ -166,8 +167,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 		return getDelegatedObject().get(key);
 	}
 
-	/** A view on a Set of entries that is able to fire the events for the
-	 * {@link DMapListener listeners}.
+	/**
+	 * A view on a Set of entries that is able to fire the events for the {@link DMapListener listeners}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -217,7 +218,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 			return this.entries.size();
 		}
 
-		/** Iterator on DMap entries.
+		/**
+		 * Iterator on DMap entries.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -258,8 +260,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 
 	}
 
-	/** A view on a Set of keys that is able to fire the events for the
-	 * {@link DMapListener listeners}.
+	/**
+	 * A view on a Set of keys that is able to fire the events for the {@link DMapListener listeners}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -309,7 +311,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 			return this.entries.size();
 		}
 
-		/** Iterator on DMap keys.
+		/**
+		 * Iterator on DMap keys.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -350,8 +353,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 
 	}
 
-	/** A view on a Collection of keys that is able to fire the events for the
-	 * {@link DMapListener listeners}.
+	/**
+	 * A view on a Collection of keys that is able to fire the events for the {@link DMapListener listeners}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -401,7 +404,8 @@ public abstract class AbstractDMapView<K, V> extends AbstractMapView<K, V>
 			return this.entries.size();
 		}
 
-		/** Iterator on DMap values.
+		/**
+		 * Iterator on DMap values.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$

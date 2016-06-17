@@ -42,7 +42,8 @@ import com.google.common.collect.Sets;
 import io.janusproject.services.distributeddata.DMultiMap;
 import io.janusproject.util.DataViewDelegate.Delegator;
 
-/** A view on a Map that provides the API for the DMultiMap.
+/**
+ * A view on a Map that provides the API for the DMultiMap.
  *
  * @param <K> - type of the keys.
  * @param <V> - type of the values.
@@ -72,10 +73,11 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 		return true;
 	}
 
-	/** Wrap the given values into a dedicated view.
+	/**
+	 * Wrap the given values into a dedicated view.
 	 *
-	 * <p>The replies view may be a {@link SingleKeyValueListView} or
-	 * a {@link SingleKeyValueSetView} according to the type of the
+	 * <p>
+	 * The replies view may be a {@link SingleKeyValueListView} or a {@link SingleKeyValueSetView} according to the type of the
 	 * given values' collection.
 	 *
 	 * @param key - the key of the values.
@@ -93,16 +95,16 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 		throw new IllegalStateException("Unsupported type of the backend multimap: " + values.getClass()); //$NON-NLS-1$
 	}
 
-	/** Copy the given values.
+	/**
+	 * Copy the given values.
 	 *
-	 * <p>The replies collection may be a {@link List} or
-	 * a {@link Set} according to the type of the
-	 * given values' collection.
+	 * <p>
+	 * The replies collection may be a {@link List} or a {@link Set} according to the type of the given values' collection.
 	 *
 	 * @param values - the values.
 	 * @return the copy.
 	 */
-	@SuppressWarnings({"unchecked", "checkstyle:illegaltype"})
+	@SuppressWarnings({ "unchecked", "checkstyle:illegaltype" })
 	Collection<V> copyValues(Collection<V> values) {
 		Object backEnd = DataViewDelegate.undelegate(values);
 		if (backEnd instanceof List<?>) {
@@ -279,7 +281,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 		return this.map;
 	}
 
-	/** A view on the values of specific key in a {@link AbstractDMultiMapView}.
+	/**
+	 * A view on the values of specific key in a {@link AbstractDMultiMapView}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -352,7 +355,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 			AbstractDMultiMapView.this.removeAll(this.key);
 		}
 
-		/** Iterator on the DMulitmap values.
+		/**
+		 * Iterator on the DMulitmap values.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -391,7 +395,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 
 	}
 
-	/** A view on the values of specific key in a {@link AbstractDMultiMapView}.
+	/**
+	 * A view on the values of specific key in a {@link AbstractDMultiMapView}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -459,7 +464,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 			AbstractDMultiMapView.this.removeAll(this.key);
 		}
 
-		/** Iterator on the DMultimap values.
+		/**
+		 * Iterator on the DMultimap values.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -498,7 +504,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 
 	}
 
-	/** A view on the keys in a {@link AbstractDMultiMapView}.
+	/**
+	 * A view on the keys in a {@link AbstractDMultiMapView}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -548,7 +555,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 			return new KeyIterator(this.keys.iterator());
 		}
 
-		/** Iterator on the DMultiMap keys.
+		/**
+		 * Iterator on the DMultiMap keys.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -591,7 +599,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 
 	}
 
-	/** A view on the entries in a {@link AbstractDMultiMapView}.
+	/**
+	 * A view on the entries in a {@link AbstractDMultiMapView}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -651,7 +660,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 			return false;
 		}
 
-		/** Iterator on DMultiMap entries.
+		/**
+		 * Iterator on DMultiMap entries.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -688,7 +698,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 
 	}
 
-	/** A view on all the values in a {@link AbstractDMultiMapView}.
+	/**
+	 * A view on all the values in a {@link AbstractDMultiMapView}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -743,7 +754,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 			return new ValueIterator(this.entries.iterator());
 		}
 
-		/** Iterator on the DMultiMap values.
+		/**
+		 * Iterator on the DMultiMap values.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -781,7 +793,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 
 	}
 
-	/** Map view on a {@link AbstractDMultiMapView}.
+	/**
+	 * Map view on a {@link AbstractDMultiMapView}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -859,7 +872,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 			return AbstractDMultiMapView.this.keySet();
 		}
 
-		/** Set of the DMultiMap entries.
+		/**
+		 * Set of the DMultiMap entries.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -887,7 +901,8 @@ public abstract class AbstractDMultiMapView<K, V> extends AbstractMapView<K, V>
 				return this.backedSet.size();
 			}
 
-			/** Iterator on the DMultiMap entries.
+			/**
+			 * Iterator on the DMultiMap entries.
 			 *
 			 * @author $Author: sgalland$
 			 * @version $FullVersion$

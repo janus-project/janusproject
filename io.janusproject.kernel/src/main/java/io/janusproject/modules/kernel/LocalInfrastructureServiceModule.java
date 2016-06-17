@@ -27,7 +27,8 @@ import com.google.inject.multibindings.Multibinder;
 import io.janusproject.kernel.services.jdk.infrastructure.StandardInfrastructureService;
 import io.janusproject.services.infrastructure.InfrastructureService;
 
-/** Configure the {@link InfrastructureService} for a local usage in the JVM.
+/**
+ * Configure the {@link InfrastructureService} for a local usage in the JVM.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$

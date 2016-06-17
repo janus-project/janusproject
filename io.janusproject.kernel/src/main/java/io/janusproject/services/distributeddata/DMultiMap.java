@@ -22,9 +22,11 @@ package io.janusproject.services.distributeddata;
 
 import com.google.common.collect.Multimap;
 
-/** Interface that represents a distributed multi-map.
+/**
+ * Interface that represents a distributed multi-map.
  *
- * <p>A multi-map is a map that is associating a key to multiple values.
+ * <p>
+ * A multi-map is a map that is associating a key to multiple values.
  *
  * @param <K> the type of the keys.
  * @param <V> the type of the values.
@@ -35,42 +37,45 @@ import com.google.common.collect.Multimap;
  */
 public interface DMultiMap<K, V> extends Multimap<K, V> {
 
-	/** Replies the name of the multimap.
+	/**
+	 * Replies the name of the multimap.
 	 *
 	 * @return the name of the multimap.
 	 */
 	String getName();
 
-	/** Replies if changes to the returned collections will update the underlying map,
-	 * and vice versa. However, changes to the returned collection are not
-	 * possible.
+	/**
+	 * Replies if changes to the returned collections will update the underlying map, and vice versa. However, changes to the
+	 * returned collection are not possible.
 	 *
-	 * @return <code>true</code> if the changes are applied to the
-	 *     underlying map, otherwise <code>false</code>.
+	 * @return <code>true</code> if the changes are applied to the underlying map, otherwise <code>false</code>.
 	 */
 	boolean isBackedCollection();
 
 	/**
 	 * Returns number of values matching to given key in the multimap.
 	 *
-	 * <p><b>Warning:</b>
+	 * <p>
+	 * <b>Warning:</b>
 	 *
-	 * <p>This method uses <tt>hashCode</tt> and <tt>equals</tt> of binary form of
-	 * the <tt>key</tt>, not the actual implementations of <tt>hashCode</tt> and <tt>equals</tt>
-	 * defined in <tt>key</tt>'s class.
+	 * <p>
+	 * This method uses <tt>hashCode</tt> and <tt>equals</tt> of binary form of the <tt>key</tt>, not the actual implementations
+	 * of <tt>hashCode</tt> and <tt>equals</tt> defined in <tt>key</tt>'s class.
 	 *
 	 * @param key the key whose values count are to be returned
 	 * @return number of values matching to given key in the multimap.
 	 */
 	int valueCount(K key);
 
-	/** Add listener on events on the DMultiMap.
+	/**
+	 * Add listener on events on the DMultiMap.
 	 *
 	 * @param listener - the listener
 	 */
 	void addDMapListener(DMapListener<? super K, ? super V> listener);
 
-	/** Remove listener on events on the DMultiMap.
+	/**
+	 * Remove listener on events on the DMultiMap.
 	 *
 	 * @param listener - the listener
 	 */

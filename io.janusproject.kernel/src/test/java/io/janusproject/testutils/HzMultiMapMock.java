@@ -23,14 +23,11 @@ import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Supplier;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
@@ -41,7 +38,8 @@ import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.aggregation.Aggregation;
 import com.hazelcast.monitor.LocalMultiMapStats;
 
-/** A mock of {@link IMap}.
+/**
+ * A mock of {@link IMap}.
  * 
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -51,27 +49,25 @@ import com.hazelcast.monitor.LocalMultiMapStats;
  * @param <V>
  */
 @SuppressWarnings("all")
-public class HzMultiMapMock<K,V> implements MultiMap<K, V> {
+public class HzMultiMapMock<K, V> implements MultiMap<K, V> {
 
 	private final String name;
 	private final SetMultimap<K, V> map;
-	
+
 	/**
 	 * @param name
 	 */
 	public HzMultiMapMock(String name) {
 		this.name = name;
 		Supplier<Set<V>> supplier = new Supplier<Set<V>>() {
-				@Override
-				public Set<V> get() {
-					return Sets.newHashSet();
-				}
-			};
-		this.map = Multimaps.newSetMultimap(
-				new HashMap<K, Collection<V>>(),
-				supplier);
+			@Override
+			public Set<V> get() {
+				return Sets.newHashSet();
+			}
+		};
+		this.map = Multimaps.newSetMultimap(new HashMap<K, Collection<V>>(), supplier);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return this.map.equals(obj);
@@ -81,7 +77,7 @@ public class HzMultiMapMock<K,V> implements MultiMap<K, V> {
 	public int hashCode() {
 		return this.map.hashCode();
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.map.toString();
@@ -218,8 +214,7 @@ public class HzMultiMapMock<K,V> implements MultiMap<K, V> {
 	}
 
 	@Override
-	public boolean tryLock(K key, long time, TimeUnit timeunit)
-			throws InterruptedException {
+	public boolean tryLock(K key, long time, TimeUnit timeunit) throws InterruptedException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -245,17 +240,14 @@ public class HzMultiMapMock<K,V> implements MultiMap<K, V> {
 	}
 
 	@Override
-	public <SuppliedValue, Result> Result aggregate(
-			com.hazelcast.mapreduce.aggregation.Supplier<K, V, SuppliedValue> supplier,
+	public <SuppliedValue, Result> Result aggregate(com.hazelcast.mapreduce.aggregation.Supplier<K, V, SuppliedValue> supplier,
 			Aggregation<K, SuppliedValue, Result> aggregation) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <SuppliedValue, Result> Result aggregate(
-			com.hazelcast.mapreduce.aggregation.Supplier<K, V, SuppliedValue> supplier,
-			Aggregation<K, SuppliedValue, Result> aggregation,
-			JobTracker jobTracker) {
+	public <SuppliedValue, Result> Result aggregate(com.hazelcast.mapreduce.aggregation.Supplier<K, V, SuppliedValue> supplier,
+			Aggregation<K, SuppliedValue, Result> aggregation, JobTracker jobTracker) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -269,21 +261,21 @@ public class HzMultiMapMock<K,V> implements MultiMap<K, V> {
 	private static class CollectionWrapper<E> extends AbstractSet<E> {
 
 		private final Collection<E> collection;
-		
+
 		public CollectionWrapper(Collection<E> collection) {
 			this.collection = collection;
 		}
-		
+
 		@Override
 		public boolean equals(Object o) {
 			return this.collection.equals(o);
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return this.collection.hashCode();
 		}
-		
+
 		@Override
 		public String toString() {
 			return this.collection.toString();
@@ -298,7 +290,7 @@ public class HzMultiMapMock<K,V> implements MultiMap<K, V> {
 		public int size() {
 			return this.collection.size();
 		}
-		
+
 	}
-	
+
 }

@@ -28,7 +28,8 @@ import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
 
-/** Default implementation of the specification of an event space.
+/**
+ * Default implementation of the specification of an event space.
  *
  * @author $Author: srodriguez$
  * @version $FullVersion$
@@ -42,8 +43,7 @@ public class EventSpaceSpecificationImpl implements EventSpaceSpecification {
 
 	@Override
 	public EventSpace create(SpaceID id, Object... params) {
-		EventSpaceImpl space = new EventSpaceImpl(id,
-				this.injector.getInstance(DistributedDataStructureService.class));
+		EventSpaceImpl space = new EventSpaceImpl(id, this.injector.getInstance(DistributedDataStructureService.class));
 		this.injector.injectMembers(space);
 		return space;
 	}

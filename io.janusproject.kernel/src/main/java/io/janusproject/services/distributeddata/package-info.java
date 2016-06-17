@@ -22,4 +22,3 @@
  * Definition of the service for creating data structures over a computer network.
  */
 package io.janusproject.services.distributeddata;
-

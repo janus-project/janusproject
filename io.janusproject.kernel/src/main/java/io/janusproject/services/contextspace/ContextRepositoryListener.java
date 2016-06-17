@@ -24,7 +24,8 @@ import java.util.EventListener;
 
 import io.sarl.lang.core.AgentContext;
 
-/** Listener on events related to the contexts.
+/**
+ * Listener on events related to the contexts.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -33,13 +34,15 @@ import io.sarl.lang.core.AgentContext;
  */
 public interface ContextRepositoryListener extends EventListener {
 
-	/** Invoked when the context is added.
+	/**
+	 * Invoked when the context is added.
 	 *
 	 * @param context - the created context.
 	 */
 	void contextCreated(AgentContext context);
 
-	/** Invoked when the context is destroyed.
+	/**
+	 * Invoked when the context is destroyed.
 	 *
 	 * @param context - the destroyed context.
 	 */

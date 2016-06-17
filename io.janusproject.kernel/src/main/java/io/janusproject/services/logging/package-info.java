@@ -22,4 +22,3 @@
  * Definition of the service for logging messages.
  */
 package io.janusproject.services.logging;
-

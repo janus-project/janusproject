@@ -21,20 +21,9 @@ package io.janusproject.modules;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import io.janusproject.JanusConfig;
-import io.janusproject.modules.eventserial.NetworkEventModule;
-import io.janusproject.modules.hazelcast.HazelcastModule;
-import io.janusproject.modules.kernel.LocalDistributedDataStructureServiceModule;
-import io.janusproject.modules.kernel.LocalInfrastructureServiceModule;
-import io.janusproject.modules.kernel.LocalKernelDiscoveryServiceModule;
-import io.janusproject.modules.nonetwork.NoNetworkModule;
-import io.janusproject.modules.zeromq.ZeroMQNetworkModule;
-import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.Arrays;
 import java.util.Iterator;
-
-import javax.annotation.Nullable;
 
 import org.arakhne.afc.vmutil.OperatingSystem;
 import org.junit.After;
@@ -51,6 +40,16 @@ import org.mockito.MockitoAnnotations;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
+import io.janusproject.JanusConfig;
+import io.janusproject.modules.eventserial.NetworkEventModule;
+import io.janusproject.modules.hazelcast.HazelcastModule;
+import io.janusproject.modules.kernel.LocalDistributedDataStructureServiceModule;
+import io.janusproject.modules.kernel.LocalInfrastructureServiceModule;
+import io.janusproject.modules.kernel.LocalKernelDiscoveryServiceModule;
+import io.janusproject.modules.nonetwork.NoNetworkModule;
+import io.janusproject.modules.zeromq.ZeroMQNetworkModule;
+import io.janusproject.testutils.AbstractJanusTest;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -58,20 +57,16 @@ import com.google.inject.Module;
  * @mavenartifactid $ArtifactId$
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-	StandardJanusPlatformModuleTest.AndroidTests.class,
-	StandardJanusPlatformModuleTest.LinuxTests.class,
-	StandardJanusPlatformModuleTest.WindowsTests.class,
-	StandardJanusPlatformModuleTest.MacOSTests.class,
-})
+@SuiteClasses({ StandardJanusPlatformModuleTest.AndroidTests.class, StandardJanusPlatformModuleTest.LinuxTests.class,
+		StandardJanusPlatformModuleTest.WindowsTests.class, StandardJanusPlatformModuleTest.MacOSTests.class, })
 @SuppressWarnings("all")
 public class StandardJanusPlatformModuleTest {
 
 	public static void assertContainsModules(Iterable<? extends Module> iterable, Class... moduleTypes) {
 		AbstractJanusTest.assertContainsCollection(new ModuleIterable(iterable),
-				new ClassIterable(Arrays.<Class<?>>asList(moduleTypes)));
+				new ClassIterable(Arrays.<Class<?>> asList(moduleTypes)));
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -82,7 +77,7 @@ public class StandardJanusPlatformModuleTest {
 
 		@Mock
 		private Binder binder;
-		
+
 		@InjectMocks
 		private StandardJanusPlatformModule module;
 
@@ -107,13 +102,10 @@ public class StandardJanusPlatformModuleTest {
 			verify(this.binder, times(6)).install(arg.capture());
 			assertContainsModules(arg.getAllValues(),
 					// Mandatory modules
-					BootModule.class,
-					StandardCoreModule.class,
+					BootModule.class, StandardCoreModule.class,
 					// Offline modules
-					LocalInfrastructureServiceModule.class,
-					LocalDistributedDataStructureServiceModule.class,
-					LocalKernelDiscoveryServiceModule.class,
-					NoNetworkModule.class);
+					LocalInfrastructureServiceModule.class, LocalDistributedDataStructureServiceModule.class,
+					LocalKernelDiscoveryServiceModule.class, NoNetworkModule.class);
 		}
 
 		@Test
@@ -126,13 +118,10 @@ public class StandardJanusPlatformModuleTest {
 			verify(this.binder, times(6)).install(arg.capture());
 			assertContainsModules(arg.getAllValues(),
 					// Mandatory modules
-					BootModule.class,
-					StandardCoreModule.class,
+					BootModule.class, StandardCoreModule.class,
 					// Offline modules
-					LocalInfrastructureServiceModule.class,
-					LocalDistributedDataStructureServiceModule.class,
-					LocalKernelDiscoveryServiceModule.class,
-					NoNetworkModule.class);
+					LocalInfrastructureServiceModule.class, LocalDistributedDataStructureServiceModule.class,
+					LocalKernelDiscoveryServiceModule.class, NoNetworkModule.class);
 		}
 
 	}
@@ -147,7 +136,7 @@ public class StandardJanusPlatformModuleTest {
 
 		@Mock
 		private Binder binder;
-		
+
 		@InjectMocks
 		private StandardJanusPlatformModule module;
 
@@ -172,13 +161,10 @@ public class StandardJanusPlatformModuleTest {
 			verify(this.binder, times(6)).install(arg.capture());
 			assertContainsModules(arg.getAllValues(),
 					// Mandatory modules
-					BootModule.class,
-					StandardCoreModule.class,
+					BootModule.class, StandardCoreModule.class,
 					// Offline modules
-					LocalInfrastructureServiceModule.class,
-					LocalDistributedDataStructureServiceModule.class,
-					LocalKernelDiscoveryServiceModule.class,
-					NoNetworkModule.class);
+					LocalInfrastructureServiceModule.class, LocalDistributedDataStructureServiceModule.class,
+					LocalKernelDiscoveryServiceModule.class, NoNetworkModule.class);
 		}
 
 		@Test
@@ -191,12 +177,9 @@ public class StandardJanusPlatformModuleTest {
 			verify(this.binder, times(5)).install(arg.capture());
 			assertContainsModules(arg.getAllValues(),
 					// Mandatory modules
-					BootModule.class,
-					StandardCoreModule.class,
+					BootModule.class, StandardCoreModule.class,
 					// Offline modules
-					HazelcastModule.class,
-					NetworkEventModule.class,
-					ZeroMQNetworkModule.class);
+					HazelcastModule.class, NetworkEventModule.class, ZeroMQNetworkModule.class);
 		}
 
 	}
@@ -211,7 +194,7 @@ public class StandardJanusPlatformModuleTest {
 
 		@Mock
 		private Binder binder;
-		
+
 		@InjectMocks
 		private StandardJanusPlatformModule module;
 
@@ -236,13 +219,10 @@ public class StandardJanusPlatformModuleTest {
 			verify(this.binder, times(6)).install(arg.capture());
 			assertContainsModules(arg.getAllValues(),
 					// Mandatory modules
-					BootModule.class,
-					StandardCoreModule.class,
+					BootModule.class, StandardCoreModule.class,
 					// Offline modules
-					LocalInfrastructureServiceModule.class,
-					LocalDistributedDataStructureServiceModule.class,
-					LocalKernelDiscoveryServiceModule.class,
-					NoNetworkModule.class);
+					LocalInfrastructureServiceModule.class, LocalDistributedDataStructureServiceModule.class,
+					LocalKernelDiscoveryServiceModule.class, NoNetworkModule.class);
 		}
 
 		@Test
@@ -255,12 +235,9 @@ public class StandardJanusPlatformModuleTest {
 			verify(this.binder, times(5)).install(arg.capture());
 			assertContainsModules(arg.getAllValues(),
 					// Mandatory modules
-					BootModule.class,
-					StandardCoreModule.class,
+					BootModule.class, StandardCoreModule.class,
 					// Offline modules
-					HazelcastModule.class,
-					NetworkEventModule.class,
-					ZeroMQNetworkModule.class);
+					HazelcastModule.class, NetworkEventModule.class, ZeroMQNetworkModule.class);
 		}
 
 	}
@@ -275,7 +252,7 @@ public class StandardJanusPlatformModuleTest {
 
 		@Mock
 		private Binder binder;
-		
+
 		@InjectMocks
 		private StandardJanusPlatformModule module;
 
@@ -300,13 +277,10 @@ public class StandardJanusPlatformModuleTest {
 			verify(this.binder, times(6)).install(arg.capture());
 			assertContainsModules(arg.getAllValues(),
 					// Mandatory modules
-					BootModule.class,
-					StandardCoreModule.class,
+					BootModule.class, StandardCoreModule.class,
 					// Offline modules
-					LocalInfrastructureServiceModule.class,
-					LocalDistributedDataStructureServiceModule.class,
-					LocalKernelDiscoveryServiceModule.class,
-					NoNetworkModule.class);
+					LocalInfrastructureServiceModule.class, LocalDistributedDataStructureServiceModule.class,
+					LocalKernelDiscoveryServiceModule.class, NoNetworkModule.class);
 		}
 
 		@Test
@@ -319,16 +293,13 @@ public class StandardJanusPlatformModuleTest {
 			verify(this.binder, times(5)).install(arg.capture());
 			assertContainsModules(arg.getAllValues(),
 					// Mandatory modules
-					BootModule.class,
-					StandardCoreModule.class,
+					BootModule.class, StandardCoreModule.class,
 					// Offline modules
-					HazelcastModule.class,
-					NetworkEventModule.class,
-					ZeroMQNetworkModule.class);
+					HazelcastModule.class, NetworkEventModule.class, ZeroMQNetworkModule.class);
 		}
 
 	}
-	
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -338,7 +309,7 @@ public class StandardJanusPlatformModuleTest {
 	private static class ModuleIterable implements Iterable<String> {
 
 		private final Iterable<? extends Module> iterable;
-		
+
 		public ModuleIterable(Iterable<? extends Module> iterable) {
 			this.iterable = iterable;
 		}
@@ -347,7 +318,7 @@ public class StandardJanusPlatformModuleTest {
 		public Iterator<String> iterator() {
 			return new ModuleIterator(this.iterable.iterator());
 		}
-		
+
 	}
 
 	/**
@@ -359,7 +330,7 @@ public class StandardJanusPlatformModuleTest {
 	private static class ModuleIterator implements Iterator<String> {
 
 		private final Iterator<? extends Module> iterator;
-		
+
 		public ModuleIterator(Iterator<? extends Module> iterator) {
 			this.iterator = iterator;
 		}
@@ -379,7 +350,7 @@ public class StandardJanusPlatformModuleTest {
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
-		
+
 	}
 
 	/**
@@ -391,7 +362,7 @@ public class StandardJanusPlatformModuleTest {
 	private static class ClassIterable implements Iterable<String> {
 
 		private final Iterable<? extends Class<?>> iterable;
-		
+
 		public ClassIterable(Iterable<? extends Class<?>> iterable) {
 			this.iterable = iterable;
 		}
@@ -400,7 +371,7 @@ public class StandardJanusPlatformModuleTest {
 		public Iterator<String> iterator() {
 			return new ClassIterator(this.iterable.iterator());
 		}
-		
+
 	}
 
 	/**
@@ -412,7 +383,7 @@ public class StandardJanusPlatformModuleTest {
 	private static class ClassIterator implements Iterator<String> {
 
 		private final Iterator<? extends Class<?>> iterator;
-		
+
 		public ClassIterator(Iterator<? extends Class<?>> iterator) {
 			this.iterator = iterator;
 		}
@@ -432,7 +403,7 @@ public class StandardJanusPlatformModuleTest {
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
-		
+
 	}
 
 }

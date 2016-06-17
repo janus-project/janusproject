@@ -32,7 +32,8 @@ import java.util.EventListener;
  */
 interface JdkTaskListener extends EventListener {
 
-	/** Invoked when a task is finished.
+	/**
+	 * Invoked when a task is finished.
 	 *
 	 * @param thread - the thread that has run the finished task.
 	 * @param task - the finished task.

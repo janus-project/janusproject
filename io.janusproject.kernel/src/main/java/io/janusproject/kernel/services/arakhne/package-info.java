@@ -19,8 +19,6 @@
  */
 
 /**
- * Implementation of services based on the
- * <a href="http://www.arakhne.org/afc/">Arakhne Foundation Classes</a>.
+ * Implementation of services based on the <a href="http://www.arakhne.org/afc/">Arakhne Foundation Classes</a>.
  */
 package io.janusproject.kernel.services.arakhne;
-

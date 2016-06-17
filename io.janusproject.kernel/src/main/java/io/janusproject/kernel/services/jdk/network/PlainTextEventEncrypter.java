@@ -24,14 +24,11 @@ import io.janusproject.services.network.AbstractEventEncrypter;
 import io.janusproject.services.network.EventEncrypter;
 import io.janusproject.services.network.EventEnvelope;
 
-
-
 /**
- * A utility implementation of the {@link EventEncrypter} that does not
- * apply any encryption algorithm.
+ * A utility implementation of the {@link EventEncrypter} that does not apply any encryption algorithm.
  *
- * <p>The main use of the class should be development to be able to easy see what's
- * being transfered on the wire.
+ * <p>
+ * The main use of the class should be development to be able to easy see what's being transfered on the wire.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$

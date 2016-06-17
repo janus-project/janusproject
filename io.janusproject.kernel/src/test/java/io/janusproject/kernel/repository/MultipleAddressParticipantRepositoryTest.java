@@ -22,10 +22,6 @@ package io.janusproject.kernel.repository;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import io.janusproject.kernel.services.guava.DMultiMapView;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.EventListener;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,51 +38,54 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 
+import io.janusproject.kernel.services.guava.DMultiMapView;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.lang.core.EventListener;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({ "javadoc" })
 public class MultipleAddressParticipantRepositoryTest extends AbstractJanusTest {
-	
+
 	@Nullable
 	private String distributedName;
-	
+
 	@Nullable
 	private MultipleAddressParticipantRepository<String> repository;
-	
+
 	@Nullable
 	private DistributedDataStructureService service;
-	
+
 	@Nullable
 	private UUID id1;
-	
+
 	@Nullable
 	private UUID id2;
-	
+
 	@Nullable
 	private EventListener listener1;
-	
+
 	@Nullable
 	private EventListener listener2;
 
 	@Before
 	public void setUp() {
-		this.distributedName = getClass().getName()+UUID.randomUUID().toString();
+		this.distributedName = getClass().getName() + UUID.randomUUID().toString();
 		//
 		this.service = Mockito.mock(DistributedDataStructureService.class);
 		Map<Object, Collection<Object>> map = new HashMap<>();
-		DMultiMapView<Object, Object> mapMock = new DMultiMapView<>(
-				UUID.randomUUID().toString(),
-				Multimaps.newMultimap(
-				map, new Supplier<Collection<Object>>() {
+		DMultiMapView<Object, Object> mapMock = new DMultiMapView<>(UUID.randomUUID().toString(),
+				Multimaps.newMultimap(map, new Supplier<Collection<Object>>() {
 					@Override
 					public Collection<Object> get() {
 						return Lists.newArrayList();
 					}
-					
+
 				}));
 		Mockito.when(this.service.getMultiMap(this.distributedName, null)).thenReturn(mapMock);
 		Mockito.when(this.service.getMultiMap(this.distributedName)).thenReturn(mapMock);
@@ -125,13 +124,12 @@ public class MultipleAddressParticipantRepositoryTest extends AbstractJanusTest 
 
 	@Test
 	public void unregisterParticipant() {
-		Collection<String> col;
 		this.repository.registerParticipant("a", this.listener1); //$NON-NLS-1$
 		this.repository.registerParticipant("b", this.listener2); //$NON-NLS-1$
 		this.repository.registerParticipant("c", this.listener1); //$NON-NLS-1$
 		//
 		this.repository.unregisterParticipant("c", this.listener1); //$NON-NLS-1$
-		col = this.repository.getAddresses(this.id1);
+		Collection<String> col = this.repository.getAddresses(this.id1);
 		assertFalse(col.isEmpty());
 		assertEquals(1, col.size());
 		assertTrue(col.contains("a")); //$NON-NLS-1$

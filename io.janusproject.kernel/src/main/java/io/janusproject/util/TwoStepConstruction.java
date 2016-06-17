@@ -25,12 +25,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
- * Annotation that permits to mark the classes that
- * must be constructed in two explicit steps.
- *
- * <p>The steps are:<ol>
+ * Annotation that permits to mark the classes that must be constructed in two explicit steps.
+ * <p>
+ * The steps are:
+ * <ol>
  * <li>invoke the constructor (explicit call);</li>
  * <li>injection mechanism (implicit, done during the constructor call);</li>
  * <li>finalization of the construction, eg. <code>postConstruction()</code>.</li>
@@ -45,7 +44,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TwoStepConstruction {
 
-	/** Replies the names of the functions that are used for post construction.
+	/**
+	 * Replies the names of the functions that are used for post construction.
 	 *
 	 * @return the names.
 	 */

@@ -22,4 +22,3 @@
  * Definition of the service for spawning agents in a Janus kernel.
  */
 package io.janusproject.services.spawn;
-

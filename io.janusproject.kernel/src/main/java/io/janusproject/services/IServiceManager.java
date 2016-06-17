@@ -24,7 +24,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.State;
 
-/** Manager of services.
+/**
+ * Manager of services.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -33,17 +34,20 @@ import com.google.common.util.concurrent.Service.State;
  */
 public interface IServiceManager {
 
-	/** Replies the services by state.
+	/**
+	 * Replies the services by state.
 	 *
 	 * @return the services.
 	 */
 	Multimap<State, Service> servicesByState();
 
-	/** Wait for all the services are started.
+	/**
+	 * Wait for all the services are started.
 	 */
 	void awaitHealthy();
 
-	/** Wait for all the services are stopped.
+	/**
+	 * Wait for all the services are stopped.
 	 */
 	void awaitStopped();
 

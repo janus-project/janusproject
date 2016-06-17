@@ -23,8 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.UUID;
 import java.util.logging.Level;
@@ -39,6 +37,9 @@ import org.mockito.Mockito;
 
 import com.hazelcast.logging.ILogger;
 
+import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -50,17 +51,17 @@ public class HazelcastKernelLoggerFactoryTest extends AbstractJanusTest {
 
 	@Nullable
 	private HazelcastKernelLoggerFactory factory;
-	
+
 	@Before
 	public void setUp() {
 		this.factory = new HazelcastKernelLoggerFactory();
 	}
-	
+
 	@Test
 	public void getLogService() {
 		assertNull(HazelcastKernelLoggerFactory.getLogService());
 	}
-	
+
 	@Test
 	public void setLogService() {
 		LogService serv = Mockito.mock(LogService.class);
@@ -77,7 +78,7 @@ public class HazelcastKernelLoggerFactoryTest extends AbstractJanusTest {
 
 		log.severe("Test"); //$NON-NLS-1$
 		Mockito.verifyZeroInteractions(serv);
-				
+
 		HazelcastKernelLoggerFactory.setLogService(serv);
 		log.severe("Test"); //$NON-NLS-1$
 

@@ -21,6 +21,17 @@ package io.janusproject.kernel.bic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+
 import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.InnerContextAccess;
 import io.sarl.lang.core.Address;
@@ -34,16 +45,6 @@ import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.EventSpaceSpecification;
 import io.sarl.lang.core.SpaceID;
-
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 /**
  * @author $Author: sgalland$
@@ -71,31 +72,25 @@ public class BehaviorsSkillTest extends AbstractJanusTest {
 
 	@Nullable
 	private BehaviorsSkill skill;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		this.eventListener = Mockito.mock(EventListener.class);
-		this.address = new Address(
-				new SpaceID(
-						UUID.randomUUID(),
-						UUID.randomUUID(),
-						EventSpaceSpecification.class),
+		this.address = new Address(new SpaceID(UUID.randomUUID(), UUID.randomUUID(), EventSpaceSpecification.class),
 				UUID.randomUUID());
 		this.busCapacity = Mockito.mock(InternalEventBusCapacity.class);
 		Mockito.when(this.busCapacity.asEventListener()).thenReturn(this.eventListener);
-		
+
 		this.innerSpace = Mockito.mock(EventSpace.class);
 		Mockito.when(this.innerSpace.getAddress(Matchers.any(UUID.class))).thenReturn(this.address);
 		AgentContext innerContext = Mockito.mock(AgentContext.class);
 		Mockito.when(innerContext.getDefaultSpace()).thenReturn(this.innerSpace);
 		this.innerCapacity = Mockito.mock(InnerContextAccess.class);
 		Mockito.when(this.innerCapacity.getInnerContext()).thenReturn(innerContext);
-		
-		Agent agent = new Agent(
-				Mockito.mock(BuiltinCapacitiesProvider.class),
-				UUID.randomUUID(),
-				null) {
-			/** {@inheritDoc}
+
+		Agent agent = new Agent(Mockito.mock(BuiltinCapacitiesProvider.class), UUID.randomUUID(), null) {
+			/**
+			 * {@inheritDoc}
 			 */
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
@@ -104,8 +99,8 @@ public class BehaviorsSkillTest extends AbstractJanusTest {
 				return capacity.cast(BehaviorsSkillTest.this.innerCapacity);
 			}
 		};
-		
-		this.skill = new BehaviorsSkill(agent, 	this.address);
+
+		this.skill = new BehaviorsSkill(agent, this.address);
 	}
 
 	@Test
@@ -132,7 +127,7 @@ public class BehaviorsSkillTest extends AbstractJanusTest {
 		Mockito.verify(this.busCapacity).unregisterEventListener(argument.capture());
 		assertSame(b, argument.getValue());
 	}
-	
+
 	@Test
 	public void wake() {
 		Event event = Mockito.mock(Event.class);

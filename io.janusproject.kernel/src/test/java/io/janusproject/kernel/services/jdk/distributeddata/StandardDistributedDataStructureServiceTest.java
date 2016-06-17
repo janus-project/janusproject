@@ -19,25 +19,23 @@
  */
 package io.janusproject.kernel.services.jdk.distributeddata;
 
-import static org.junit.Assert.*;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DMultiMap;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.testutils.AbstractDependentServiceTest;
-import io.janusproject.testutils.StartServiceForTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
 import org.junit.Test;
 
-import com.google.common.hash.HashCode;
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DMultiMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.StartServiceForTest;
 
 /**
  * @author $Author: sgalland$
@@ -48,10 +46,10 @@ import com.google.common.hash.HashCode;
 @StartServiceForTest
 @SuppressWarnings("all")
 public final class StandardDistributedDataStructureServiceTest
-extends AbstractDependentServiceTest<StandardDistributedDataStructureService> {
+		extends AbstractDependentServiceTest<StandardDistributedDataStructureService> {
 
 	private static final int KEY_COUNT = 10;
-	
+
 	public StandardDistributedDataStructureServiceTest() {
 		super(DistributedDataStructureService.class);
 	}
@@ -67,7 +65,7 @@ extends AbstractDependentServiceTest<StandardDistributedDataStructureService> {
 		}
 		return list;
 	}
-	
+
 	protected static void fillMap(DMap<String, String> map, Iterable<String> keys) {
 		for (String key : keys) {
 			map.put(key, UUID.randomUUID().toString());

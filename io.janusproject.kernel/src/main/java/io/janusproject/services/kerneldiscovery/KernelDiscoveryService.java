@@ -25,8 +25,8 @@ import java.util.Collection;
 
 import io.janusproject.services.DependentService;
 
-/** This class enables the Janus kernel to be distributed
- * other a network.
+/**
+ * This class enables the Janus kernel to be distributed other a network.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -35,29 +35,32 @@ import io.janusproject.services.DependentService;
  */
 public interface KernelDiscoveryService extends DependentService {
 
-	/** Replies the URI of the current kernel.
+	/**
+	 * Replies the URI of the current kernel.
 	 *
 	 * @return the uri of the current kernel.
 	 */
 	URI getCurrentKernel();
 
-	/** Replies the URIs of the kernels, including the current kernels.
+	/**
+	 * Replies the URIs of the kernels, including the current kernels.
 	 *
-	 * <p>The replies collection must not be synchronized on the service.
+	 * <p>
+	 * The replies collection must not be synchronized on the service.
 	 *
 	 * @return the uri of the kernels.
 	 */
 	Collection<URI> getKernels();
 
-	/** Add a listener on the events in this service and related
-	 * to the kernel discovery.
+	/**
+	 * Add a listener on the events in this service and related to the kernel discovery.
 	 *
 	 * @param listener - listener on discovery events.
 	 */
 	void addKernelDiscoveryServiceListener(KernelDiscoveryServiceListener listener);
 
-	/** Remove a listener on the events in this service and related
-	 * to the kernel discovery.
+	/**
+	 * Remove a listener on the events in this service and related to the kernel discovery.
 	 *
 	 * @param listener - listener on discovery events.
 	 */

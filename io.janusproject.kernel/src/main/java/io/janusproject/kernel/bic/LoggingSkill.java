@@ -34,7 +34,8 @@ import io.sarl.core.Logging;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Skill;
 
-/** Janus implementation of SARL's {@link Logging} built-in capacity.
+/**
+ * Janus implementation of SARL's {@link Logging} built-in capacity.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -57,7 +58,8 @@ class LoggingSkill extends Skill implements Logging {
 		super(agent);
 	}
 
-	/** Replies the logger.
+	/**
+	 * Replies the logger.
 	 *
 	 * @return the logger.
 	 */
@@ -65,7 +67,8 @@ class LoggingSkill extends Skill implements Logging {
 		return this.logger;
 	}
 
-	/** Set the logger.
+	/**
+	 * Set the logger.
 	 *
 	 * @param logger - the logger.
 	 */

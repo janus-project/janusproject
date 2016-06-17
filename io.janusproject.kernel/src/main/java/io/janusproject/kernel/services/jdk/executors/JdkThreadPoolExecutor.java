@@ -50,11 +50,8 @@ public class JdkThreadPoolExecutor extends ThreadPoolExecutor {
 	 */
 	@Inject
 	public JdkThreadPoolExecutor(ThreadFactory factory) {
-        this(
-        		JanusConfig.getSystemPropertyAsInteger(
-					JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
-					JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE),
-				factory);
+		this(JanusConfig.getSystemPropertyAsInteger(JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME,
+				JanusConfig.MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE), factory);
 	}
 
 	/**
@@ -62,15 +59,11 @@ public class JdkThreadPoolExecutor extends ThreadPoolExecutor {
 	 * @param factory - thread factory.
 	 */
 	public JdkThreadPoolExecutor(int poolSize, ThreadFactory factory) {
-        super(
-        		poolSize,
-				Integer.MAX_VALUE,
-        		TIMEOUT, TimeUnit.SECONDS,
-        		new SynchronousQueue<Runnable>(),
-        		factory);
+		super(poolSize, Integer.MAX_VALUE, TIMEOUT, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), factory);
 	}
 
-	/** Add a listener on tasks.
+	/**
+	 * Add a listener on tasks.
 	 *
 	 * @param listener - the listener on task events.
 	 */
@@ -81,7 +74,8 @@ public class JdkThreadPoolExecutor extends ThreadPoolExecutor {
 		this.listeners.add(JdkTaskListener.class, listener);
 	}
 
-	/** Remove a listener on tasks.
+	/**
+	 * Remove a listener on tasks.
 	 *
 	 * @param listener - the listener on task events.
 	 */
@@ -94,7 +88,8 @@ public class JdkThreadPoolExecutor extends ThreadPoolExecutor {
 		}
 	}
 
-	/** Notify the listeners about a task termination.
+	/**
+	 * Notify the listeners about a task termination.
 	 *
 	 * @param thread - the thread that was run the finished task.
 	 * @param task - the finished task.

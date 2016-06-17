@@ -61,8 +61,7 @@ class LifecycleSkill extends Skill implements Lifecycle {
 	}
 
 	@Override
-	public UUID spawnInContextWithID(Class<? extends Agent> agentClass,
-			UUID agentID, AgentContext context, Object... params) {
+	public UUID spawnInContextWithID(Class<? extends Agent> agentClass, UUID agentID, AgentContext context, Object... params) {
 		return this.spawnService.spawn(context, agentID, agentClass, params);
 	}
 
@@ -75,7 +74,8 @@ class LifecycleSkill extends Skill implements Lifecycle {
 		throw new ChuckNorrisException();
 	}
 
-	/** This runtie exception is thrown when an agent cannot be killed.
+	/**
+	 * This runtie exception is thrown when an agent cannot be killed.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -86,7 +86,8 @@ class LifecycleSkill extends Skill implements Lifecycle {
 
 		private static final long serialVersionUID = 3186824315988212481L;
 
-		/** Construct.
+		/**
+		 * Construct.
 		 *
 		 * @param exception - cause
 		 */
@@ -94,7 +95,8 @@ class LifecycleSkill extends Skill implements Lifecycle {
 			super(exception.getMessage(), exception);
 		}
 
-		/** Replies the agent that cannot be killed.
+		/**
+		 * Replies the agent that cannot be killed.
 		 *
 		 * @return the agent.
 		 */

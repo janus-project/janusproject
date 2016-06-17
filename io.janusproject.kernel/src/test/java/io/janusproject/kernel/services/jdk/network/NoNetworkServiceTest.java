@@ -21,11 +21,6 @@ package io.janusproject.kernel.services.jdk.network;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import io.janusproject.services.network.NetworkService;
-import io.janusproject.services.network.NetworkUtil;
-import io.janusproject.testutils.AbstractDependentServiceTest;
-import io.janusproject.testutils.AvoidServiceStartForTest;
-import io.janusproject.testutils.StartServiceForTest;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -33,7 +28,13 @@ import java.net.URI;
 import org.junit.Assume;
 import org.junit.Test;
 
-/** 
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.AvoidServiceStartForTest;
+import io.janusproject.testutils.StartServiceForTest;
+
+/**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$

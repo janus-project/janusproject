@@ -32,8 +32,8 @@ import java.util.logging.Logger;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
 
-/** This class provides an implementation of the {@link LogService}
- * that throws an exception when logging an error.
+/**
+ * This class provides an implementation of the {@link LogService} that throws an exception when logging an error.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -127,7 +127,7 @@ public class ExceptionLogService extends AbstractService implements LogService {
 	public void error(Class<?> propertyType, String messageKey, Object... message) {
 		this.results.add(new LoggedException(messageKey));
 	}
-	
+
 	@Override
 	public void log(LogRecord record) {
 		if (record.getLevel() == Level.SEVERE) {
@@ -229,5 +229,5 @@ public class ExceptionLogService extends AbstractService implements LogService {
 		}
 
 	}
-	
+
 }

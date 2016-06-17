@@ -22,4 +22,3 @@
  * Injection modules for the Janus micro-kernel.
  */
 package io.janusproject.modules.kernel;
-

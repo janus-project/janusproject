@@ -20,16 +20,17 @@
 package io.janusproject.kernel.space;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.UUID;
+
+import org.junit.Test;
+
 import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.OpenEventSpaceSpecification;
-
-import java.util.UUID;
-
-import org.junit.Test;
 
 /**
  * @author $Author: sgalland$
@@ -42,16 +43,13 @@ public class SpaceBaseTest extends AbstractJanusTest {
 
 	@Test
 	public void getID() {
-		SpaceID spaceId = new SpaceID(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				OpenEventSpaceSpecification.class);
+		SpaceID spaceId = new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class);
 		SpaceBase base = new SpaceBase(spaceId) {
 			@Override
 			public void eventReceived(SpaceID space, Scope<?> scope, Event event) {
 				throw new UnsupportedOperationException();
 			}
-			
+
 			@Override
 			public SynchronizedSet<UUID> getParticipants() {
 				throw new UnsupportedOperationException();

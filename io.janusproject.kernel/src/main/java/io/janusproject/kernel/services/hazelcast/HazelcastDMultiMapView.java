@@ -40,7 +40,8 @@ import io.janusproject.util.DataViewDelegate;
 import io.janusproject.util.DataViewDelegate.Delegator;
 import io.janusproject.util.MultisetView;
 
-/** A view from the Hazelcast multimap to DMultiMap.
+/**
+ * A view from the Hazelcast multimap to DMultiMap.
  *
  * @param <K> - type of the keys.
  * @param <V> - type of the values.
@@ -109,7 +110,8 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 
 	}
 
-	/** Wrapper of a multimap.
+	/**
+	 * Wrapper of a multimap.
 	 *
 	 * @param <K> the keys.
 	 * @param <V> the values.
@@ -302,7 +304,8 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 
 	}
 
-	/** A view on the entries in a {@link AbstractDMultiMapView}.
+	/**
+	 * A view on the entries in a {@link AbstractDMultiMapView}.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -363,7 +366,8 @@ public class HazelcastDMultiMapView<K, V> extends AbstractDMultiMapView<K, V> im
 			return false;
 		}
 
-		/** Iterator on the multimap entries.
+		/**
+		 * Iterator on the multimap entries.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$

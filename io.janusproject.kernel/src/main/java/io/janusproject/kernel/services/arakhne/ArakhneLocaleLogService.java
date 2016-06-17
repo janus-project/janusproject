@@ -32,30 +32,30 @@ import io.janusproject.services.AbstractDependentService;
 import io.janusproject.services.logging.LogService;
 import org.arakhne.afc.vmutil.locale.Locale;
 
-/** This class enables to log information by ensuring
- * that the values of the parameters are not evaluated
- * until the information should be really log, according
- * to the log level.
- * This implementation is based on {@link Locale}, and the logger is injected.
+/**
+ * This class enables to log information by ensuring that the values of the parameters are not evaluated until the information
+ * should be really log, according to the log level. This implementation is based on {@link Locale}, and the logger is injected.
  *
- * <p>The LogService considers the parameters of the functions as:<ul>
+ * <p>
+ * The LogService considers the parameters of the functions as:
+ * <ul>
  * <li>the messageKey is the name of the message in the property file;</li>
- * <li>the message parameters are the values that will replace the
- * strings {0}, {1}, {2}... in the text extracted from the ressource property;</li>
- * <li>the parameter propertyType is the class from which the filename of
- * the property file will be built.</li>
+ * <li>the message parameters are the values that will replace the strings {0}, {1}, {2}... in the text extracted from the
+ * ressource property;</li>
+ * <li>the parameter propertyType is the class from which the filename of the property file will be built.</li>
  * </ul>
  *
- * <p>If a <code>Throwable</code> is passed as parameter, the text of the
- * exception is retreived.
+ * <p>
+ * If a <code>Throwable</code> is passed as parameter, the text of the exception is retreived.
  *
- *<p>If a <code>Callable</code> is passed as parameter, the object is automatically
- * called.
+ * <p>
+ * If a <code>Callable</code> is passed as parameter, the object is automatically called.
  *
- * <p>If a <code>LogParam</code> is passed as parameter, the <code>toString</code>
- * function will be invoked.
+ * <p>
+ * If a <code>LogParam</code> is passed as parameter, the <code>toString</code> function will be invoked.
  *
- * <p>For all the other objects, the {@link #toString()} function is invoked.
+ * <p>
+ * For all the other objects, the {@link #toString()} function is invoked.
  *
  *
  * @author $Author: sgalland$
@@ -69,13 +69,15 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 
 	private LoggerCallerProvider loggerCallerProvider = new StackTraceLoggerCallerProvider();
 
-	/** Construct the service.
+	/**
+	 * Construct the service.
 	 */
 	public ArakhneLocaleLogService() {
 		//
 	}
 
-	/** Replies the object that permits to determine the caller of the logger.
+	/**
+	 * Replies the object that permits to determine the caller of the logger.
 	 *
 	 * @return the object that permits to determine the caller of the logger.
 	 */
@@ -83,7 +85,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 		return this.loggerCallerProvider;
 	}
 
-	/** Change the object that permits to determine the caller of the logger.
+	/**
+	 * Change the object that permits to determine the caller of the logger.
 	 *
 	 * @param provider - the object that permits to determine the caller of the logger.
 	 */
@@ -100,18 +103,16 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 		return LogService.class;
 	}
 
-	/** Replies if this service permits to log the messages.
+	/**
+	 * Replies if this service permits to log the messages.
 	 *
-	 * @return <code>true</code> if the messages are loggeable,
-	 * <code>false</code> otherwise.
+	 * @return <code>true</code> if the messages are loggeable, <code>false</code> otherwise.
 	 */
 	protected boolean isLogEnabled() {
 		return state().ordinal() <= State.RUNNING.ordinal();
 	}
 
-	private static String getLogRecordText(LoggerCaller caller,
-			Class<?> propertyType, String messageKey,
-			Object... message) {
+	private static String getLogRecordText(LoggerCaller caller, Class<?> propertyType, String messageKey, Object... message) {
 		Class<?> propType = propertyType;
 		if (propType == null) {
 			propType = caller.getPropertyType();
@@ -139,11 +140,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 		return record;
 	}
 
-	private synchronized void writeInLog(
-			Level level,
-			boolean exception,
-			Class<?> propertyType,
-			String messageKey,
+	private synchronized void writeInLog(Level level, boolean exception, Class<?> propertyType, String messageKey,
 			Object... message) {
 		if (isLogEnabled() && this.logger.isLoggable(level)) {
 			LoggerCaller caller = this.loggerCallerProvider.getLoggerCaller();
@@ -166,8 +163,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	}
 
 	@Override
-	public void log(Level level, Class<?> propertyType, String messageKey,
-			Object... message) {
+	public void log(Level level, Class<?> propertyType, String messageKey, Object... message) {
 		writeInLog(level, true, propertyType, messageKey, message);
 	}
 
@@ -182,8 +178,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	}
 
 	@Override
-	public void info(Class<?> propertyType, String messageKey,
-			Object... message) {
+	public void info(Class<?> propertyType, String messageKey, Object... message) {
 		writeInLog(Level.INFO, false, propertyType, messageKey, message);
 	}
 
@@ -193,8 +188,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	}
 
 	@Override
-	public void fineInfo(Class<?> propertyType, String messageKey,
-			Object... message) {
+	public void fineInfo(Class<?> propertyType, String messageKey, Object... message) {
 		writeInLog(Level.FINE, false, propertyType, messageKey, message);
 	}
 
@@ -204,8 +198,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	}
 
 	@Override
-	public void finerInfo(Class<?> propertyType, String messageKey,
-			Object... message) {
+	public void finerInfo(Class<?> propertyType, String messageKey, Object... message) {
 		writeInLog(Level.FINER, false, propertyType, messageKey, message);
 	}
 
@@ -215,14 +208,12 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	}
 
 	@Override
-	public void debug(Class<?> propertyType, String messageKey,
-			Object... message) {
+	public void debug(Class<?> propertyType, String messageKey, Object... message) {
 		writeInLog(Level.FINEST, true, propertyType, messageKey, message);
 	}
 
 	@Override
-	public void warning(Class<?> propertyType, String messageKey,
-			Object... message) {
+	public void warning(Class<?> propertyType, String messageKey, Object... message) {
 		writeInLog(Level.WARNING, true, propertyType, messageKey, message);
 	}
 
@@ -237,8 +228,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	}
 
 	@Override
-	public void error(Class<?> propertyType, String messageKey,
-			Object... message) {
+	public void error(Class<?> propertyType, String messageKey, Object... message) {
 		writeInLog(Level.SEVERE, true, propertyType, messageKey, message);
 	}
 
@@ -290,7 +280,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 		notifyStopped();
 	}
 
-	/** Provides the type of the caller of the logger.
+	/**
+	 * Provides the type of the caller of the logger.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -299,7 +290,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	 */
 	public interface LoggerCallerProvider {
 
-		/** Replies the logger caller.
+		/**
+		 * Replies the logger caller.
 		 *
 		 * @return the logger caller.
 		 */
@@ -307,7 +299,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 
 	}
 
-	/** Provides the type of the caller of the logger.
+	/**
+	 * Provides the type of the caller of the logger.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -333,7 +326,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 			this.methodName = methodName;
 		}
 
-		/** Replies the type of the logger caller.
+		/**
+		 * Replies the type of the logger caller.
 		 *
 		 * @return the type of the logger caller.
 		 */
@@ -341,7 +335,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 			return this.type;
 		}
 
-		/** Replies the name of the type of the logger caller.
+		/**
+		 * Replies the name of the type of the logger caller.
 		 *
 		 * @return the name of type of the logger caller.
 		 */
@@ -349,7 +344,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 			return this.className;
 		}
 
-		/** Replies the name of the last method encountered in the stack trace.
+		/**
+		 * Replies the name of the last method encountered in the stack trace.
 		 *
 		 * @return the name of the last invoked method of the logger caller.
 		 */
@@ -359,7 +355,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 
 	}
 
-	/** Provider of calling function on the stack trace.
+	/**
+	 * Provider of calling function on the stack trace.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -368,7 +365,8 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 	 */
 	public static class StackTraceLoggerCallerProvider implements LoggerCallerProvider {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		public StackTraceLoggerCallerProvider() {
 			//
@@ -397,9 +395,7 @@ public class ArakhneLocaleLogService extends AbstractDependentService implements
 			StackTraceElement element = getStackTraceElement();
 			if (element != null) {
 				try {
-					return new LoggerCaller(
-							Class.forName(element.getClassName()),
-							element.getClassName(),
+					return new LoggerCaller(Class.forName(element.getClassName()), element.getClassName(),
 							element.getMethodName());
 				} catch (ClassNotFoundException e1) {
 					//

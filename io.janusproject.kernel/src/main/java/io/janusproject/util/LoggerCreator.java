@@ -37,7 +37,9 @@ public final class LoggerCreator {
 
 	private static final String FORMAT_PROPERTY_KEY = "java.util.logging.SimpleFormatter.format"; //$NON-NLS-1$
 
-	/** The parameters for the format string are: <ul>
+	/**
+	 * The parameters for the format string are:
+	 * <ul>
 	 * <li><code>%1</code>: the date,</li>
 	 * <li><code>%2</code>: the name of the calling function,</li>
 	 * <li><code>%3</code>: the name of the logger,</li>
@@ -54,7 +56,8 @@ public final class LoggerCreator {
 		//
 	}
 
-	/** Change the configuration of the root logger for using the Janus format for the messages.
+	/**
+	 * Change the configuration of the root logger for using the Janus format for the messages.
 	 */
 	public static void useJanusMessageFormat() {
 		String format = System.getProperty(FORMAT_PROPERTY_KEY, null);
@@ -63,9 +66,11 @@ public final class LoggerCreator {
 		}
 	}
 
-	/** Create a logger with the given name.
+	/**
+	 * Create a logger with the given name.
 	 *
-	 * <p>The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
+	 * <p>
+	 * The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
 	 *
 	 * @param name - the name of the new logger.
 	 * @return the logger.
@@ -76,9 +81,11 @@ public final class LoggerCreator {
 		return logger;
 	}
 
-	/** Create a logger with the given name.
+	/**
+	 * Create a logger with the given name.
 	 *
-	 * <p>The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
+	 * <p>
+	 * The level of logging is influence by {@link JanusConfig#VERBOSE_LEVEL_NAME}.
 	 *
 	 * @param name - the name of the new logger.
 	 * @param parent - the parent logger.
@@ -96,25 +103,26 @@ public final class LoggerCreator {
 		return logger;
 	}
 
-	/** Extract the logging level from the system properties.
+	/**
+	 * Extract the logging level from the system properties.
 	 *
 	 * @return the logging level.
 	 */
 	public static Level getLoggingLevelFromProperties() {
 		if (levelFromProperties == null) {
-			String verboseLevel = JanusConfig.getSystemProperty(
-					JanusConfig.VERBOSE_LEVEL_NAME, JanusConfig.VERBOSE_LEVEL_VALUE);
+			String verboseLevel = JanusConfig.getSystemProperty(JanusConfig.VERBOSE_LEVEL_NAME, JanusConfig.VERBOSE_LEVEL_VALUE);
 			levelFromProperties = parseLoggingLevel(verboseLevel);
 		}
 		return levelFromProperties;
 	}
 
-	/** Extract the logging level from the given string.
+	/**
+	 * Extract the logging level from the given string.
 	 *
 	 * @param level - the string representation of the logging level.
 	 * @return the logging level.
 	 */
-	@SuppressWarnings({"checkstyle:returncount", "checkstyle:cyclomaticcomplexity"})
+	@SuppressWarnings({ "checkstyle:returncount", "checkstyle:cyclomaticcomplexity" })
 	public static Level parseLoggingLevel(String level) {
 		if (level == null) {
 			return Level.INFO;
@@ -160,12 +168,13 @@ public final class LoggerCreator {
 		}
 	}
 
-	/** Convert a numerical representation of logging level to the logging level.
+	/**
+	 * Convert a numerical representation of logging level to the logging level.
 	 *
 	 * @param num - the numerical index that corresponds to the given level.
 	 * @return the logging level.
 	 */
-	@SuppressWarnings({"checkstyle:magicnumber", "checkstyle:returncount"})
+	@SuppressWarnings({ "checkstyle:magicnumber", "checkstyle:returncount" })
 	public static Level fromInt(int num) {
 		switch (num) {
 		case 0:
@@ -192,12 +201,13 @@ public final class LoggerCreator {
 		}
 	}
 
-	/** Convert a logging level to its numerical equivalent.
+	/**
+	 * Convert a logging level to its numerical equivalent.
 	 *
 	 * @param level - the logging level.
 	 * @return the numerical index that corresponds to the given level.
 	 */
-	@SuppressWarnings({"checkstyle:magicnumber", "checkstyle:returncount", "checkstyle:npathcomplexity"})
+	@SuppressWarnings({ "checkstyle:magicnumber", "checkstyle:returncount", "checkstyle:npathcomplexity" })
 	public static int toInt(Level level) {
 		if (level == Level.OFF) {
 			return 0;
@@ -229,12 +239,11 @@ public final class LoggerCreator {
 		return 3;
 	}
 
-	/** Convert a string representing a logging level into its
-	 * numerical representation.
+	/**
+	 * Convert a string representing a logging level into its numerical representation.
 	 *
-	 * <p>This is a convinient function that calls
-	 * {@link #parseLoggingLevel(String)} and
-	 * {@link #toInt(Level)}.
+	 * <p>
+	 * This is a convinient function that calls {@link #parseLoggingLevel(String)} and {@link #toInt(Level)}.
 	 *
 	 * @param level - the string representation of the logging level.
 	 * @return the numerical index that corresponds to the given level.
@@ -243,20 +252,20 @@ public final class LoggerCreator {
 		return toInt(parseLoggingLevel(level));
 	}
 
-	/** Replies the string representations for the logging levels.
+	/**
+	 * Replies the string representations for the logging levels.
 	 *
 	 * @return the string representations, indexed by the numerical index of the level.
 	 */
 	public static String[] getLevelStrings() {
-		return new String[] {
-			"none", //$NON-NLS-1$
-			"error", //$NON-NLS-1$
-			"warning", //$NON-NLS-1$
-			"info", //$NON-NLS-1$
-			"fine", //$NON-NLS-1$
-			"finer", //$NON-NLS-1$
-			"finest", //$NON-NLS-1$
-			"all", //$NON-NLS-1$
+		return new String[] {"none", //$NON-NLS-1$
+				"error", //$NON-NLS-1$
+				"warning", //$NON-NLS-1$
+				"info", //$NON-NLS-1$
+				"fine", //$NON-NLS-1$
+				"finer", //$NON-NLS-1$
+				"finest", //$NON-NLS-1$
+				"all", //$NON-NLS-1$
 		};
 	}
 

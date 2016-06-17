@@ -19,25 +19,21 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.services.spawn.SpawnService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.AgentTraitUnitTestAccessor;
-import io.sarl.lang.core.BuiltinCapacitiesProvider;
-import io.sarl.lang.core.Event;
 
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,7 +42,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.*;
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.services.spawn.SpawnService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.AgentTraitUnitTestAccessor;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
+import io.sarl.lang.core.Event;
 
 /**
  * @author $Author: srodriguez$
@@ -60,29 +63,27 @@ public class LifecycleSkillTest extends AbstractJanusTest {
 
 	@Nullable
 	private UUID agentId;
-	
+
 	@Mock
 	private SpawnService spawnService;
-	
+
 	@Mock
 	private InternalEventBusSkill eventBus;
 
 	@InjectMocks
 	private LifecycleSkill skill;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		this.agentId = UUID.randomUUID();
-		Agent agent = new Agent(
-				Mockito.mock(BuiltinCapacitiesProvider.class),
-				UUID.randomUUID(),
-				null) {
+		Agent agent = new Agent(Mockito.mock(BuiltinCapacitiesProvider.class), UUID.randomUUID(), null) {
 			@SuppressWarnings("synthetic-access")
 			@Override
 			protected <S extends io.sarl.lang.core.Capacity> S getSkill(java.lang.Class<S> capacity) {
 				return capacity.cast(LifecycleSkillTest.this.eventBus);
 			}
+
 			@SuppressWarnings("synthetic-access")
 			@Override
 			public UUID getID() {
@@ -101,8 +102,8 @@ public class LifecycleSkillTest extends AbstractJanusTest {
 		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
 		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<Object> argument4 = ArgumentCaptor.forClass(Object.class);
-		verify(this.spawnService, times(1)).spawn(argument1.capture(), argument2.capture(),
-				argument3.capture(), argument4.capture());
+		verify(this.spawnService, times(1)).spawn(argument1.capture(), argument2.capture(), argument3.capture(),
+				argument4.capture());
 		assertSame(context, argument1.getValue());
 		assertNull(argument2.getValue());
 		assertEquals(Agent.class, argument3.getValue());
@@ -118,8 +119,8 @@ public class LifecycleSkillTest extends AbstractJanusTest {
 		ArgumentCaptor<UUID> argument2 = ArgumentCaptor.forClass(UUID.class);
 		ArgumentCaptor<Class> argument3 = ArgumentCaptor.forClass(Class.class);
 		ArgumentCaptor<Object> argument4 = ArgumentCaptor.forClass(Object.class);
-		verify(this.spawnService, times(1)).spawn(argument1.capture(), argument2.capture(),
-				argument3.capture(), argument4.capture());
+		verify(this.spawnService, times(1)).spawn(argument1.capture(), argument2.capture(), argument3.capture(),
+				argument4.capture());
 		assertSame(context, argument1.getValue());
 		assertSame(this.agentId, argument2.getValue());
 		assertEquals(Agent.class, argument3.getValue());
@@ -131,11 +132,9 @@ public class LifecycleSkillTest extends AbstractJanusTest {
 		try {
 			this.skill.killMe();
 			fail("killMe() must never return!"); //$NON-NLS-1$
-		}
-		catch(ChuckNorrisException exception) {
+		} catch (ChuckNorrisException exception) {
 			// Expected exception
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			throw e;
 		}
 		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);

@@ -29,8 +29,8 @@ import org.junit.Test;
 
 import com.google.common.util.concurrent.Service;
 
-/** Abstract class that permits to test the
- * implementation of a service.
+/**
+ * Abstract class that permits to test the implementation of a service.
  *
  * @param <S> - the type of the service.
  * @author $Author: sgalland$
@@ -41,12 +41,13 @@ import com.google.common.util.concurrent.Service;
 @SuppressWarnings("all")
 public abstract class AbstractDependentServiceTest<S extends DependentService> extends AbstractServiceTest<S> {
 
-	/** Type of the testing service.
+	/**
+	 * Type of the testing service.
 	 */
 	protected final Class<? super S> serviceType;
 
 	/**
-	 * @param type - the type of the service to test. 
+	 * @param type - the type of the service to test.
 	 */
 	public AbstractDependentServiceTest(Class<? super S> type) {
 		Assume.assumeNotNull(type);

@@ -52,8 +52,7 @@ import io.janusproject.util.LoggerCreator;
 import org.arakhne.afc.vmutil.FileSystem;
 
 /**
- * The module configures the minimum requirements for
- * the system variables.
+ * The module configures the minimum requirements for the system variables.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -87,7 +86,8 @@ public class BootModule extends AbstractModule {
 		}
 	}
 
-	/** Create a context identifier.
+	/**
+	 * Create a context identifier.
 	 *
 	 * @return the contextID
 	 */
@@ -131,7 +131,8 @@ public class BootModule extends AbstractModule {
 		return UUID.fromString(str);
 	}
 
-	/** Construct a space identifier.
+	/**
+	 * Construct a space identifier.
 	 *
 	 * @return the spaceID
 	 */
@@ -142,7 +143,9 @@ public class BootModule extends AbstractModule {
 		return UUID.fromString(v);
 	}
 
-	/** Inject the PUB_URI as a real {@link URI}.
+	/**
+	 * Inject the PUB_URI as a real {@link URI}.
+	 * 
 	 * @return the PUB_URI
 	 */
 	@Provides
@@ -156,8 +159,8 @@ public class BootModule extends AbstractModule {
 		}
 	}
 
-	/** Extract the current value of the PUB_URI from the system's property or
-	 * form the platform default value.
+	/**
+	 * Extract the current value of the PUB_URI from the system's property or form the platform default value.
 	 *
 	 * @return the current PUB_URI
 	 */
@@ -176,7 +179,8 @@ public class BootModule extends AbstractModule {
 		return pubUri;
 	}
 
-	/** Provider of public URI for the network layer.
+	/**
+	 * Provider of public URI for the network layer.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -193,7 +197,8 @@ public class BootModule extends AbstractModule {
 
 	}
 
-	/** Provider of logger.
+	/**
+	 * Provider of logger.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -204,15 +209,15 @@ public class BootModule extends AbstractModule {
 
 		private final AtomicBoolean isInit = new AtomicBoolean(false);
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		LoggerMemberListener() {
 			//
 		}
 
 		private static void init() {
-			String propertyFileName = JanusConfig.getSystemProperty(
-					JanusConfig.LOGGING_PROPERTY_FILE_NAME,
+			String propertyFileName = JanusConfig.getSystemProperty(JanusConfig.LOGGING_PROPERTY_FILE_NAME,
 					JanusConfig.LOGGING_PROPERTY_FILE_VALUE);
 			if (propertyFileName != null && !propertyFileName.isEmpty()) {
 				URL url = FileSystem.convertStringToURL(propertyFileName, true);
@@ -240,7 +245,8 @@ public class BootModule extends AbstractModule {
 
 	}
 
-	/** Provider of logger.
+	/**
+	 * Provider of logger.
 	 *
 	 * @param <T> the type of the type of the field.
 	 * @author $Author: sgalland$
@@ -252,7 +258,8 @@ public class BootModule extends AbstractModule {
 
 		private final Field field;
 
-		/** Construct.
+		/**
+		 * Construct.
 		 *
 		 * @param field the field to inject.
 		 */

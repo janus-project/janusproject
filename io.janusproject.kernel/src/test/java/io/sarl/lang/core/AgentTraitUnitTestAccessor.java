@@ -19,7 +19,6 @@
  */
 package io.sarl.lang.core;
 
-
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$

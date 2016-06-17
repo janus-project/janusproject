@@ -28,8 +28,8 @@ import org.arakhne.afc.vmutil.locale.Locale;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 
-/** This service provides the tools to manage
- * the life-cycle of the agents.
+/**
+ * This service provides the tools to manage the life-cycle of the agents.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -39,64 +39,71 @@ import io.sarl.lang.core.AgentContext;
  */
 public interface SpawnService extends DependentService {
 
-	/** Spawn an agent of the given type, and pass the parameters to
-	 * its initialization function.
+	/**
+	 * Spawn an agent of the given type, and pass the parameters to its initialization function.
 	 *
 	 * @param parent - the parent entity that is creating the agent.
 	 * @param agentClazz - the type of the agent to spawn.
-	 * @param agentId - the identifier of the agent to spawn. If <code>null</code>
-	 *                  the identifier is randomly selected.
+	 * @param agentId - the identifier of the agent to spawn. If <code>null</code> the identifier is randomly selected.
 	 * @param params - the list of the parameters to pass to the agent initialization function.
 	 * @return the identifier of the agent, never <code>null</code>.
 	 */
 	UUID spawn(AgentContext parent, UUID agentId, Class<? extends Agent> agentClazz, Object... params);
 
-	/** Kill the agent with the given identifier.
+	/**
+	 * Kill the agent with the given identifier.
 	 *
 	 * @param agentID - the identifier of the agent to kill.
 	 * @throws AgentKillException - thrown when the agent cannot be killed.
 	 */
 	void killAgent(UUID agentID) throws AgentKillException;
 
-	/** Add a listener on the changes in the current state of an agent.
+	/**
+	 * Add a listener on the changes in the current state of an agent.
 	 *
 	 * @param id - identifier of the agent.
 	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
 	void addSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
 
-	/** Add a listener on the changes in the current state of an agent.
+	/**
+	 * Add a listener on the changes in the current state of an agent.
 	 *
 	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
 	void addSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
 
-	/** Remove a listener on the changes in the current state of an agent.
+	/**
+	 * Remove a listener on the changes in the current state of an agent.
 	 *
 	 * @param id - identifier of the agent.
 	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
 	void removeSpawnServiceListener(UUID id, SpawnServiceListener agentLifecycleListener);
 
-	/** Remove a listener on the changes in the current state of an agent.
+	/**
+	 * Remove a listener on the changes in the current state of an agent.
 	 *
 	 * @param agentLifecycleListener - the listener on the any change in the life-cycle of the agent.
 	 */
 	void removeSpawnServiceListener(SpawnServiceListener agentLifecycleListener);
 
-	/** Add a listener on the changes related to the kernel agent.
+	/**
+	 * Add a listener on the changes related to the kernel agent.
 	 *
 	 * @param listener - listener on the spawning events in the local kernel.
 	 */
 	void addKernelAgentSpawnListener(KernelAgentSpawnListener listener);
 
-	/** Remove a listener on the changes related to the kernel agent.
+	/**
+	 * Remove a listener on the changes related to the kernel agent.
 	 *
 	 * @param listener - listener on the spawning events in the local kernel.
 	 */
 	void removeKernelAgentSpawnListener(KernelAgentSpawnListener listener);
 
-	/** Exception occurs when an agent cannot be killed.
+	/**
+	 * Exception occurs when an agent cannot be killed.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -113,7 +120,7 @@ public interface SpawnService extends DependentService {
 		 * @param agent - id of the agent that cannot be killed.
 		 */
 		public AgentKillException(UUID agent) {
-			super(Locale.getString(SpawnService.class, "AGENT_KILL_EXCEPTION",  agent)); //$NON-NLS-1$
+			super(Locale.getString(SpawnService.class, "AGENT_KILL_EXCEPTION", agent)); //$NON-NLS-1$
 			this.agent = agent;
 			fillInStackTrace();
 		}
@@ -123,14 +130,13 @@ public interface SpawnService extends DependentService {
 		 * @param cause - the exception that is the cause of the killing discarding.
 		 */
 		public AgentKillException(UUID agent, Throwable cause) {
-			super(Locale.getString(SpawnService.class,
-					"AGENT_KILL_EXCEPTION_WITH_CAUSE", //$NON-NLS-1$
-					agent, cause),
-					cause);
+			super(Locale.getString(SpawnService.class, "AGENT_KILL_EXCEPTION_WITH_CAUSE", //$NON-NLS-1$
+					agent, cause), cause);
 			this.agent = agent;
 		}
 
-		/** Replies the id of the agent that cannot be skilled.
+		/**
+		 * Replies the id of the agent that cannot be skilled.
 		 *
 		 * @return the agent id.
 		 */

@@ -22,8 +22,6 @@ package io.janusproject.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import io.janusproject.JanusConfig;
-import io.janusproject.testutils.AbstractJanusTest;
 
 import java.util.UUID;
 import java.util.logging.Level;
@@ -31,13 +29,16 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
+import io.janusproject.JanusConfig;
+import io.janusproject.testutils.AbstractJanusTest;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc","static-method"})
+@SuppressWarnings({ "javadoc", "static-method" })
 public class LoggerCreatorTest extends AbstractJanusTest {
 
 	@Test
@@ -54,7 +55,7 @@ public class LoggerCreatorTest extends AbstractJanusTest {
 		assertEquals("finest", t[6]); //$NON-NLS-1$
 		assertEquals("all", t[7]); //$NON-NLS-1$
 	}
-	
+
 	@Test
 	public void parseLoggingLevel() {
 		assertSame(Level.ALL, LoggerCreator.parseLoggingLevel("all")); //$NON-NLS-1$
@@ -127,7 +128,7 @@ public class LoggerCreatorTest extends AbstractJanusTest {
 		assertEquals(1, LoggerCreator.toInt(Level.SEVERE));
 		assertEquals(2, LoggerCreator.toInt(Level.WARNING));
 		assertEquals(3, LoggerCreator.toInt(Level.INFO));
-		assertEquals(3, LoggerCreator.toInt((Level)null));
+		assertEquals(3, LoggerCreator.toInt((Level) null));
 		assertEquals(4, LoggerCreator.toInt(Level.FINE));
 		assertEquals(4, LoggerCreator.toInt(Level.CONFIG));
 		assertEquals(5, LoggerCreator.toInt(Level.FINER));
@@ -150,7 +151,7 @@ public class LoggerCreatorTest extends AbstractJanusTest {
 		Logger logger = LoggerCreator.createLogger(name);
 		assertEquals(expectedLevel, logger.getLevel());
 	}
-	
+
 	@Test
 	public void createLoggerWithParent() {
 		Logger parent = LoggerCreator.createLogger("parent"); //$NON-NLS-1$

@@ -25,7 +25,8 @@ import java.util.EventListener;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AgentContext;
 
-/** Listener on events related to the life-cycle of an agent.
+/**
+ * Listener on events related to the life-cycle of an agent.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -35,7 +36,8 @@ import io.sarl.lang.core.AgentContext;
  */
 public interface SpawnServiceListener extends EventListener {
 
-	/** Invoked when the agent is spawned.
+	/**
+	 * Invoked when the agent is spawned.
 	 *
 	 * @param parent - the context in which the agent was created.
 	 * @param agentID - the agent.
@@ -43,7 +45,9 @@ public interface SpawnServiceListener extends EventListener {
 	 */
 	void agentSpawned(AgentContext parent, Agent agentID, Object[] initializationParameters);
 
-	/** Invoked when the agent is destroyed.
+	/**
+	 * Invoked when the agent is destroyed.
+	 * 
 	 * @param agent - the agent.
 	 */
 	void agentDestroy(Agent agent);

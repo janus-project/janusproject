@@ -22,8 +22,6 @@ package io.janusproject.kernel.space;
 
 import java.util.UUID;
 
-import com.google.common.eventbus.DeadEvent;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import io.janusproject.kernel.repository.UniqueAddressParticipantRepository;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
@@ -52,22 +50,25 @@ import io.sarl.util.Scopes;
  */
 public abstract class AbstractEventSpace extends SpaceBase {
 
-	/** List of participants in this space.
-	 * DO MISS TO BE SYNCHRONIZED ON THE PARTICIPANT REPOSITORY.
+	/**
+	 * List of participants in this space. DO MISS TO BE SYNCHRONIZED ON THE PARTICIPANT REPOSITORY.
 	 */
 	protected final UniqueAddressParticipantRepository<Address> participants;
 
-	/** Logging service.
+	/**
+	 * Logging service.
 	 */
 	@Inject
 	protected LogService logger;
 
-	/** Executor service.
+	/**
+	 * Executor service.
 	 */
 	@Inject
 	protected ExecutorService executorService;
 
-	/** Network service.
+	/**
+	 * Network service.
 	 */
 	@Inject
 	private NetworkService network;
@@ -80,8 +81,7 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	 */
 	public AbstractEventSpace(SpaceID id, DistributedDataStructureService factory) {
 		super(id);
-		this.participants = new UniqueAddressParticipantRepository<>(
-				getID().getID().toString() + "-participants", //$NON-NLS-1$
+		this.participants = new UniqueAddressParticipantRepository<>(getID().getID().toString() + "-participants", //$NON-NLS-1$
 				factory);
 	}
 
@@ -95,7 +95,8 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		return getAddress(entity.getID());
 	}
 
-	/** Replies the address associated with the given id.
+	/**
+	 * Replies the address associated with the given id.
 	 *
 	 * @param id - the identifier of the participant.
 	 * @return the address.
@@ -106,10 +107,11 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		}
 	}
 
-	/** Emit the given event in the given scope.
+	/**
+	 * Emit the given event in the given scope.
 	 *
-	 * <p>This function emits on the internal event bus of the agent
-	 * (call to {@link #doEmit(Event, Scope)}), and on the network.
+	 * <p>
+	 * This function emits on the internal event bus of the agent (call to {@link #doEmit(Event, Scope)}), and on the network.
 	 *
 	 * @param event - the event to emit.
 	 * @param scope - description of the scope of the event, i.e. the receivers of the event.
@@ -118,23 +120,22 @@ public abstract class AbstractEventSpace extends SpaceBase {
 	public final void emit(Event event, Scope<Address> scope) {
 		assert (event != null);
 		assert (event.getSource() != null) : "Every event must have a source"; //$NON-NLS-1$
-		assert this.getID().equals(event.getSource().getSpaceId())
-			: "The source address must belong to this space"; //$NON-NLS-1$
+		assert this.getID().equals(event.getSource().getSpaceId()) : "The source address must belong to this space"; //$NON-NLS-1$
 
 		try {
 			this.network.publish(scope, event);
 			doEmit(event, scope);
 		} catch (Throwable e) {
-			this.logger.error(AbstractEventSpace.class,
-					"CANNOT_EMIT_EVENT", event, scope, e); //$NON-NLS-1$
+			this.logger.error(AbstractEventSpace.class, "CANNOT_EMIT_EVENT", event, scope, e); //$NON-NLS-1$
 		}
 
 	}
 
-	/** Emit the given event.
+	/**
+	 * Emit the given event.
 	 *
-	 * <p>This function emits on the internal event bus of the agent
-	 * (call to {@link #doEmit(Event, Scope)}), and on the network.
+	 * <p>
+	 * This function emits on the internal event bus of the agent (call to {@link #doEmit(Event, Scope)}), and on the network.
 	 *
 	 * @param event - the event to emit.
 	 * @see #emit(Event, Scope)
@@ -143,10 +144,11 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		emit(event, Scopes.<Address>allParticipants());
 	}
 
-	/** Do the emission of the event.
+	/**
+	 * Do the emission of the event.
 	 *
-	 * <p>This function emits the event <strong>only on the internal
-	 * event bus</strong> of the agents.
+	 * <p>
+	 * This function emits the event <strong>only on the internal event bus</strong> of the agents.
 	 *
 	 * @param event - the event to emit.
 	 * @param scope - description of the scope of the event, i.e. the receivers of the event.
@@ -169,17 +171,6 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		}
 	}
 
-	/**
-	 * Invoked when an event was not handled by a listener.
-	 *
-	 * @param event - dead event
-	 */
-	@Subscribe
-	public void unhandledEvent(DeadEvent event) {
-		this.logger.debug("UNHANDLED_EVENT", //$NON-NLS-1$
-				getID(), ((Event) event.getEvent()).getSource(), event.getEvent());
-	}
-
 	@Override
 	public String toString() {
 		return getID().toString();
@@ -191,11 +182,12 @@ public abstract class AbstractEventSpace extends SpaceBase {
 		try {
 			AbstractEventSpace.this.doEmit(event, (Scope<Address>) scope);
 		} catch (Exception e) {
-			this.logger.error(AbstractEventSpace.class,  "INVALID_EMIT", e); //$NON-NLS-1$
+			this.logger.error(AbstractEventSpace.class, "INVALID_EMIT", e); //$NON-NLS-1$
 		}
 	}
 
-	/** Asynchronous runner.
+	/**
+	 * Asynchronous runner.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -208,7 +200,9 @@ public abstract class AbstractEventSpace extends SpaceBase {
 
 		private final Event event;
 
-		/** Construct.
+		/**
+		 * Construct.
+		 * 
 		 * @param agent the agent listener.
 		 * @param event the event.
 		 */

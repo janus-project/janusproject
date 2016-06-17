@@ -19,6 +19,14 @@
  */
 package io.janusproject.kernel.services.zeromq;
 
+import java.net.InetAddress;
+import java.net.URI;
+
+import javax.annotation.Nullable;
+
+import org.junit.Before;
+import org.mockito.Mock;
+
 import io.janusproject.services.contextspace.ContextSpaceService;
 import io.janusproject.services.executor.ExecutorService;
 import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
@@ -30,20 +38,7 @@ import io.janusproject.testutils.AbstractDependentServiceTest;
 import io.janusproject.testutils.AvoidServiceStartForTest;
 import io.janusproject.testutils.StartServiceForTest;
 
-import java.net.InetAddress;
-import java.net.URI;
-
-import javax.annotation.Nullable;
-
-import org.junit.After;
-import org.junit.Before;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import com.google.inject.Inject;
-
-/** 
+/**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -55,10 +50,10 @@ public class ZeroMQNetworkServiceTest extends AbstractDependentServiceTest<ZeroM
 
 	@Nullable
 	private URI uri;
-	
+
 	@Mock
 	private LogService logService;
-	
+
 	@Mock
 	private LogService logger;
 
@@ -90,20 +85,17 @@ public class ZeroMQNetworkServiceTest extends AbstractDependentServiceTest<ZeroM
 	public ZeroMQNetworkService newService() {
 		return new ZeroMQNetworkService(this.uri);
 	}
-	
+
 	@AvoidServiceStartForTest
 	@Override
 	public void getServiceDependencies() {
-		assertContains(this.service.getServiceDependencies(),
-				LogService.class,
-				ExecutorService.class);
+		assertContains(this.service.getServiceDependencies(), LogService.class, ExecutorService.class);
 	}
-	
+
 	@AvoidServiceStartForTest
 	@Override
 	public void getServiceWeakDependencies() {
-		assertContains(this.service.getServiceWeakDependencies(),
-				KernelDiscoveryService.class);
+		assertContains(this.service.getServiceWeakDependencies(), KernelDiscoveryService.class);
 	}
 
 }

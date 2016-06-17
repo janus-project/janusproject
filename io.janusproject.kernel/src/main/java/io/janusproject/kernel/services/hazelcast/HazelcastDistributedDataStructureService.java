@@ -48,8 +48,7 @@ import io.janusproject.services.distributeddata.DMultiMap;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
 
 /**
- * Service based on Hazelcast that permits to manage data structures
- * that are shared over a network.
+ * Service based on Hazelcast that permits to manage data structures that are shared over a network.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -69,7 +68,8 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 		return DistributedDataStructureService.class;
 	}
 
-	/** Change the hazelcast instance used by this factory.
+	/**
+	 * Change the hazelcast instance used by this factory.
 	 *
 	 * @param hazelcastInstance - reference to the Hazelcast engine.
 	 */
@@ -400,7 +400,8 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 			return Multimaps.asMap(this);
 		}
 
-		/** Internal implementation of a multiset.
+		/**
+		 * Internal implementation of a multiset.
 		 *
 		 * @author $Author: sgalland$
 		 * @version $FullVersion$
@@ -409,7 +410,8 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 		 */
 		private class SetMultiset implements Multiset<K> {
 
-			/** Construct.
+			/**
+			 * Construct.
 			 */
 			SetMultiset() {
 				//
@@ -613,7 +615,8 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 
 	}
 
-	/** Listener on the Hazelcast map events.
+	/**
+	 * Listener on the Hazelcast map events.
 	 *
 	 * @param <K> type of the keys.
 	 * @param <V> type of the values.
@@ -632,7 +635,8 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 			this.dmapListener = listener;
 		}
 
-		/** Replies the Hazelcast listener associated to this object.
+		/**
+		 * Replies the Hazelcast listener associated to this object.
 		 *
 		 * @return the hazelcast listener.
 		 */
@@ -640,7 +644,8 @@ public class HazelcastDistributedDataStructureService extends AbstractDependentS
 			return this.key;
 		}
 
-		/** Replies the Hazelcast listener associated to this object.
+		/**
+		 * Replies the Hazelcast listener associated to this object.
 		 *
 		 * @param hazelcastListener - the hazelcast listener.
 		 */

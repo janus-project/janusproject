@@ -35,15 +35,15 @@ import io.sarl.lang.core.Space;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.Scopes;
 
-/** Skill to access to the default interaction context.
+/**
+ * Skill to access to the default interaction context.
  *
  * @author $Author: srodriguez$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-class DefaultContextInteractionsSkill extends Skill
-		implements DefaultContextInteractions {
+class DefaultContextInteractionsSkill extends Skill implements DefaultContextInteractions {
 
 	private AgentContext parentContext;
 
@@ -51,8 +51,8 @@ class DefaultContextInteractionsSkill extends Skill
 
 	private Address addressInParentDefaultSpace;
 
-
-	/** Constructs a <code>DefaultContextInteractionsImpl</code>.
+	/**
+	 * Constructs a <code>DefaultContextInteractionsImpl</code>.
 	 *
 	 * @param agent - owner of the skill.
 	 * @param parentContext - reference to the parent context.
@@ -64,8 +64,7 @@ class DefaultContextInteractionsSkill extends Skill
 
 	@Override
 	protected String attributesToString() {
-		return super.attributesToString()
-				+ ", parentContext = " + this.parentContext //$NON-NLS-1$
+		return super.attributesToString() + ", parentContext = " + this.parentContext //$NON-NLS-1$
 				+ ", defaultSpace = " + this.defaultSpace //$NON-NLS-1$
 				+ ", addressInDefaultspace = " + this.addressInParentDefaultSpace; //$NON-NLS-1$
 	}

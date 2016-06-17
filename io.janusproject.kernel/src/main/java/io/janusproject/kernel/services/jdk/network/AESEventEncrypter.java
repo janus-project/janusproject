@@ -37,7 +37,8 @@ import org.arakhne.afc.vmutil.locale.Locale;
 /**
  * Encrypts the {@link EventEnvelope} content using the AES algorithm.
  *
- * <p>To define the key you need to specify the binding {@link NetworkConfig}.
+ * <p>
+ * To define the key you need to specify the binding {@link NetworkConfig}.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$

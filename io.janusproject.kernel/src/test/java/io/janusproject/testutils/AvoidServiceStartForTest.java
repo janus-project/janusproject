@@ -25,8 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
-/** Avoid to start the service for tests.
+/**
+ * Avoid to start the service for tests.
  *
  * This annotation overrides the {@link StartServiceForTest} annotation.
  *

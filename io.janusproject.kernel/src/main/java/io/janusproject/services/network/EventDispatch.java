@@ -28,11 +28,11 @@ import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.SpaceID;
 
-/** Description of the required information for dispatching
- * an event over the network.
+/**
+ * Description of the required information for dispatching an event over the network.
  *
- * <p>A {@link EventDispatch} can be transformed into/from a {@link EventEnvelope}
- * with a {@link EventSerializer}.
+ * <p>
+ * A {@link EventDispatch} can be transformed into/from a {@link EventEnvelope} with a {@link EventSerializer}.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -54,7 +54,8 @@ public class EventDispatch implements Serializable {
 
 	private Map<String, String> headers;
 
-	/** Construct a <code>EventDispatch</code>.
+	/**
+	 * Construct a <code>EventDispatch</code>.
 	 *
 	 * @param sid - identifier of the space in which the event occurs.
 	 * @param event - event to dispatch.
@@ -71,7 +72,8 @@ public class EventDispatch implements Serializable {
 		this.headers = (headers == null) ? new HashMap<>() : headers;
 	}
 
-	/** Construct a <code>EventDispatch</code>.
+	/**
+	 * Construct a <code>EventDispatch</code>.
 	 *
 	 * @param sid - identifier of the space in which the event occurs.
 	 * @param event - event to dispatch.
@@ -86,12 +88,11 @@ public class EventDispatch implements Serializable {
 		return "EventDispatch [scope=" + this.scope //$NON-NLS-1$
 				+ ", event=" + this.event //$NON-NLS-1$
 				+ ", spaceID=" + this.spaceID + ", headers=" //$NON-NLS-1$//$NON-NLS-2$
-				+ this.headers + "]";  //$NON-NLS-1$
+				+ this.headers + "]"; //$NON-NLS-1$
 	}
 
-
-
-	/** Replies the event to dispatch.
+	/**
+	 * Replies the event to dispatch.
 	 *
 	 * @return the event.
 	 */
@@ -99,7 +100,8 @@ public class EventDispatch implements Serializable {
 		return this.event;
 	}
 
-	/** Replies the scope of the event.
+	/**
+	 * Replies the scope of the event.
 	 *
 	 * @return the scope.
 	 */
@@ -107,7 +109,8 @@ public class EventDispatch implements Serializable {
 		return this.scope;
 	}
 
-	/** Replies the custom headers associated to the event.
+	/**
+	 * Replies the custom headers associated to the event.
 	 *
 	 * @return the custom headers.
 	 */
@@ -115,7 +118,8 @@ public class EventDispatch implements Serializable {
 		return this.headers;
 	}
 
-	/** Replies the identifier of the space in which the event occurs.
+	/**
+	 * Replies the identifier of the space in which the event occurs.
 	 *
 	 * @return the space identifier.
 	 */

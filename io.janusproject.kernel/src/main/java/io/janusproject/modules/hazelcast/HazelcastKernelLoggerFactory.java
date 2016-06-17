@@ -29,7 +29,8 @@ import com.hazelcast.logging.LogEvent;
 import com.hazelcast.logging.LoggerFactorySupport;
 import io.janusproject.services.logging.LogService;
 
-/** Factory of logger for the Hazelcast API.
+/**
+ * Factory of logger for the Hazelcast API.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -40,13 +41,15 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 
 	private static LogService logger;
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public HazelcastKernelLoggerFactory() {
 		//
 	}
 
-	/** Replies the log service using by Hazelcast.
+	/**
+	 * Replies the log service using by Hazelcast.
 	 *
 	 * @return the log service.
 	 */
@@ -56,7 +59,8 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 		}
 	}
 
-	/** Set the log service used by Hazelcast.
+	/**
+	 * Set the log service used by Hazelcast.
 	 *
 	 * @param service - the log service.
 	 */
@@ -71,7 +75,8 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 		return new HzKernelLogger();
 	}
 
-	/** Logger for Hazelcast.
+	/**
+	 * Logger for Hazelcast.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -80,11 +85,12 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 	 */
 	private static final class HzKernelLogger extends AbstractLogger {
 
-        /** Construct.
-         */
-        HzKernelLogger() {
-        	//
-        }
+		/**
+		 * Construct.
+		 */
+		HzKernelLogger() {
+			//
+		}
 
 		@Override
 		public void log(Level level, String message) {
@@ -153,6 +159,6 @@ public class HazelcastKernelLoggerFactory extends LoggerFactorySupport {
 			return null;
 		}
 
-    }
+	}
 
 }

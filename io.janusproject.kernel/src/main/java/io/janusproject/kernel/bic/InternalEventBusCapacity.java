@@ -27,9 +27,11 @@ import io.sarl.lang.core.Capacity;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 
-/** Capacity that provides an event bus to notify the different components of an agent.
+/**
+ * Capacity that provides an event bus to notify the different components of an agent.
  *
- * <p><strong>This capacity is provided by the Janus kernel, not SARL.</strong>
+ * <p>
+ * <strong>This capacity is provided by the Janus kernel, not SARL.</strong>
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -38,30 +40,30 @@ import io.sarl.lang.core.EventListener;
  */
 public interface InternalEventBusCapacity extends Capacity {
 
-	/** Replies the state of the owner of the event bus.
+	/**
+	 * Replies the state of the owner of the event bus.
 	 *
 	 * @return the state of the agent.
 	 */
 	OwnerState getOwnerState();
 
-	/** Register the given object on the event bus for receiving
-	 * any event.
+	/**
+	 * Register the given object on the event bus for receiving any event.
 	 *
 	 * @param listener - the listener on the SARL events.
 	 */
 	void registerEventListener(Object listener);
 
-	/** Unregister the given object on the event bus for receiving
-	 * any event.
+	/**
+	 * Unregister the given object on the event bus for receiving any event.
 	 *
 	 * @param listener - the listener on the SARL events.
 	 */
 	void unregisterEventListener(Object listener);
 
 	/**
-	 * Sends an event to itself using its defaultInnerAddress as source. Used
-	 * for platform level event dispatching (i.e. {@link Initialize} and
-	 * {@link Destroy})
+	 * Sends an event to itself using its defaultInnerAddress as source. Used for platform level event dispatching (i.e.
+	 * {@link Initialize} and {@link Destroy})
 	 *
 	 * @param event - event to propagate into the agent.
 	 */
@@ -74,13 +76,15 @@ public interface InternalEventBusCapacity extends Capacity {
 	 */
 	EventListener asEventListener();
 
-	/** Replies the address of the agent in its inner default space.
+	/**
+	 * Replies the address of the agent in its inner default space.
 	 *
 	 * @return the address of the agent in its inner default space.
 	 */
 	Address getInnerDefaultSpaceAddress();
 
-	/** Describe the states of the owner of an event bus.
+	/**
+	 * Describe the states of the owner of an event bus.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -88,13 +92,16 @@ public interface InternalEventBusCapacity extends Capacity {
 	 * @mavenartifactid $ArtifactId$
 	 */
 	enum OwnerState {
-		/** The owner of the event bus is under creation.
+		/**
+		 * The owner of the event bus is under creation.
 		 */
 		NEW,
-		/** The owner of the event bus is running.
+		/**
+		 * The owner of the event bus is running.
 		 */
 		RUNNING,
-		/** The owner of the event bus was destroyed.
+		/**
+		 * The owner of the event bus was destroyed.
 		 */
 		DESTROYED,
 	}

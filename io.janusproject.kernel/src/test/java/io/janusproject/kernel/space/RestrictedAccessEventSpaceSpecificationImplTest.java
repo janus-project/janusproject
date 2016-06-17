@@ -22,12 +22,6 @@ package io.janusproject.kernel.space;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.EventSpaceSpecification;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.util.RestrictedAccessEventSpace;
 
 import java.security.acl.Acl;
 import java.security.acl.Permission;
@@ -45,6 +39,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.google.inject.Injector;
+
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.util.RestrictedAccessEventSpace;
 
 /**
  * @author $Author: sgalland$
@@ -66,13 +67,10 @@ public class RestrictedAccessEventSpaceSpecificationImplTest extends AbstractJan
 
 	@InjectMocks
 	private RestrictedAccessEventSpaceSpecificationImpl specification;
-	
+
 	@Before
 	public void setUp() {
-		this.spaceId = new SpaceID(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				EventSpaceSpecification.class);
+		this.spaceId = new SpaceID(UUID.randomUUID(), UUID.randomUUID(), EventSpaceSpecification.class);
 		MockitoAnnotations.initMocks(this);
 		Mockito.when(this.injector.getInstance(Matchers.any(Class.class))).thenReturn(this.structureFactory);
 		DMap<Object, Object> mapMock = mock(DMap.class);
@@ -84,7 +82,7 @@ public class RestrictedAccessEventSpaceSpecificationImplTest extends AbstractJan
 	public void create() {
 		Acl acl = Mockito.mock(Acl.class);
 		Permission permission = Mockito.mock(Permission.class);
-		RestrictedAccessEventSpace space = this.specification.create(this.spaceId, "a", acl, "b", permission, "c");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		RestrictedAccessEventSpace space = this.specification.create(this.spaceId, "a", acl, "b", permission, "c"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		assertNotNull(space);
 		assertSame(this.spaceId, space.getID());
 	}

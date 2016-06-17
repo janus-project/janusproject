@@ -24,8 +24,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 
 /**
- * A {@link FutureTask} that is {@link Runnable}. Successful
- * execution of the <tt>run</tt> method causes completion of the
+ * A {@link FutureTask} that is {@link Runnable}. Successful execution of the <tt>run</tt> method causes completion of the
  * <tt>Future</tt> and allows access to its results.
  *
  * @param <V> the type of the returned value.
@@ -37,16 +36,17 @@ import java.util.concurrent.RunnableFuture;
  */
 public interface JanusFutureTask<V> extends RunnableFuture<V> {
 
-	/** Replies the thread that is running the task associated to this future.
+	/**
+	 * Replies the thread that is running the task associated to this future.
 	 *
 	 * @return the thread, never <code>null</code>.
 	 */
 	Thread getThread();
 
-	/** Replies the task associated to this future is running on the calling thread.
+	/**
+	 * Replies the task associated to this future is running on the calling thread.
 	 *
-	 * @return <code>true</code> if the current thread is running the associated
-	 *     task, <code>false</code> otherwie.
+	 * @return <code>true</code> if the current thread is running the associated task, <code>false</code> otherwie.
 	 */
 	boolean isCurrentThread();
 

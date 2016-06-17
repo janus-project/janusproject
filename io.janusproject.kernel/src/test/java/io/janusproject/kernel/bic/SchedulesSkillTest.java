@@ -25,11 +25,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.core.AgentTask;
-import io.sarl.lang.core.Agent;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -51,6 +46,12 @@ import org.mockito.internal.verification.Times;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.core.AgentTask;
+import io.sarl.lang.core.Agent;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -62,10 +63,10 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 
 	@Nullable
 	private UUID agentId;
-	
+
 	@Mock
 	private ExecutorService executorService;
-	
+
 	@Mock
 	private Agent agent;
 
@@ -74,19 +75,16 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 
 	@InjectMocks
 	private SchedulesSkill skill;
-		
+
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		this.agentId = UUID.randomUUID();
 		Mockito.when(this.agent.getID()).thenReturn(this.agentId);
-		Mockito.when(this.executorService.schedule(
-				Matchers.any(Runnable.class),
-				Matchers.any(long.class),
+		Mockito.when(this.executorService.schedule(Matchers.any(Runnable.class), Matchers.any(long.class),
 				Matchers.any(TimeUnit.class))).thenAnswer(new Answer<ScheduledFuture>() {
 					@Override
-					public ScheduledFuture answer(InvocationOnMock invocation)
-							throws Throwable {
+					public ScheduledFuture answer(InvocationOnMock invocation) throws Throwable {
 						ScheduledFuture f = Mockito.mock(ScheduledFuture.class);
 						Mockito.when(f.isDone()).thenReturn(false);
 						Mockito.when(f.isCancelled()).thenReturn(false);
@@ -94,14 +92,10 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 						return f;
 					}
 				});
-		Mockito.when(this.executorService.scheduleAtFixedRate(
-				Matchers.any(Runnable.class),
-				Matchers.any(long.class),
-				Matchers.any(long.class),
-				Matchers.any(TimeUnit.class))).thenAnswer(new Answer<ScheduledFuture>() {
+		Mockito.when(this.executorService.scheduleAtFixedRate(Matchers.any(Runnable.class), Matchers.any(long.class),
+				Matchers.any(long.class), Matchers.any(TimeUnit.class))).thenAnswer(new Answer<ScheduledFuture>() {
 					@Override
-					public ScheduledFuture answer(InvocationOnMock invocation)
-							throws Throwable {
+					public ScheduledFuture answer(InvocationOnMock invocation) throws Throwable {
 						ScheduledFuture f = Mockito.mock(ScheduledFuture.class);
 						Mockito.when(f.isDone()).thenReturn(false);
 						Mockito.when(f.isCancelled()).thenReturn(false);
@@ -135,7 +129,8 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 		ArgumentCaptor<Runnable> argument1 = ArgumentCaptor.forClass(Runnable.class);
 		ArgumentCaptor<Long> argument2 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<TimeUnit> argument3 = ArgumentCaptor.forClass(TimeUnit.class);
-		Mockito.verify(this.executorService, new Times(1)).schedule(argument1.capture(), argument2.capture(), argument3.capture());
+		Mockito.verify(this.executorService, new Times(1)).schedule(argument1.capture(), argument2.capture(),
+				argument3.capture());
 		assertNotNull(argument1.getValue());
 		assertEquals(new Long(5), argument2.getValue());
 		assertSame(TimeUnit.MILLISECONDS, argument3.getValue());
@@ -154,7 +149,8 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 		ArgumentCaptor<Runnable> argument1 = ArgumentCaptor.forClass(Runnable.class);
 		ArgumentCaptor<Long> argument2 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<TimeUnit> argument3 = ArgumentCaptor.forClass(TimeUnit.class);
-		Mockito.verify(this.executorService, new Times(1)).schedule(argument1.capture(), argument2.capture(), argument3.capture());
+		Mockito.verify(this.executorService, new Times(1)).schedule(argument1.capture(), argument2.capture(),
+				argument3.capture());
 		assertNotNull(argument1.getValue());
 		assertEquals(new Long(5), argument2.getValue());
 		assertSame(TimeUnit.MILLISECONDS, argument3.getValue());
@@ -170,7 +166,8 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 		ArgumentCaptor<Long> argument2 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<Long> argument3 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<TimeUnit> argument4 = ArgumentCaptor.forClass(TimeUnit.class);
-		Mockito.verify(this.executorService, new Times(1)).scheduleAtFixedRate(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture());
+		Mockito.verify(this.executorService, new Times(1)).scheduleAtFixedRate(argument1.capture(), argument2.capture(),
+				argument3.capture(), argument4.capture());
 		assertNotNull(argument1.getValue());
 		assertEquals(new Long(0), argument2.getValue());
 		assertEquals(new Long(5), argument3.getValue());
@@ -191,7 +188,8 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 		ArgumentCaptor<Long> argument2 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<Long> argument3 = ArgumentCaptor.forClass(Long.class);
 		ArgumentCaptor<TimeUnit> argument4 = ArgumentCaptor.forClass(TimeUnit.class);
-		Mockito.verify(this.executorService, new Times(1)).scheduleAtFixedRate(argument1.capture(), argument2.capture(), argument3.capture(), argument4.capture());
+		Mockito.verify(this.executorService, new Times(1)).scheduleAtFixedRate(argument1.capture(), argument2.capture(),
+				argument3.capture(), argument4.capture());
 		assertNotNull(argument1.getValue());
 		assertEquals(new Long(0), argument2.getValue());
 		assertEquals(new Long(5), argument3.getValue());
@@ -211,7 +209,7 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 		//
 		Collection<String> activeTasks = this.skill.getActiveTasks();
 		assertTrue(activeTasks.isEmpty());
-		for(ScheduledFuture<?> f : futures) {
+		for (ScheduledFuture<?> f : futures) {
 			Mockito.verify(f, new Times(1)).cancel(Matchers.anyBoolean());
 		}
 	}
@@ -230,7 +228,7 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 		//
 		Collection<String> activeTasks = this.skill.getActiveTasks();
 		assertTrue(activeTasks.isEmpty());
-		for(ScheduledFuture<?> f : futures) {
+		for (ScheduledFuture<?> f : futures) {
 			Mockito.verify(f, new Times(1)).cancel(Matchers.anyBoolean());
 		}
 	}
@@ -244,12 +242,12 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 		Collection<ScheduledFuture<?>> futures = this.skill.getActiveFutures();
 		assertEquals(2, futures.size());
 		//
-		this.skill.cancel(t2,true);
-		this.skill.cancel(t1,true);
+		this.skill.cancel(t2, true);
+		this.skill.cancel(t1, true);
 		//
 		Collection<String> activeTasks = this.skill.getActiveTasks();
 		assertTrue(activeTasks.isEmpty());
-		for(ScheduledFuture<?> f : futures) {
+		for (ScheduledFuture<?> f : futures) {
 			Mockito.verify(f, new Times(1)).cancel(Matchers.anyBoolean());
 		}
 	}
@@ -263,12 +261,12 @@ public class SchedulesSkillTest extends AbstractJanusTest {
 		Collection<ScheduledFuture<?>> futures = this.skill.getActiveFutures();
 		assertEquals(2, futures.size());
 		//
-		this.skill.cancel(t2,false);
-		this.skill.cancel(t1,false);
+		this.skill.cancel(t2, false);
+		this.skill.cancel(t1, false);
 		//
 		Collection<String> activeTasks = this.skill.getActiveTasks();
 		assertTrue(activeTasks.isEmpty());
-		for(ScheduledFuture<?> f : futures) {
+		for (ScheduledFuture<?> f : futures) {
 			Mockito.verify(f, new Times(1)).cancel(Matchers.anyBoolean());
 		}
 	}

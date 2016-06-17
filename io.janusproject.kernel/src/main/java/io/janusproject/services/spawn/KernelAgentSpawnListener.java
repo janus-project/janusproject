@@ -22,7 +22,8 @@ package io.janusproject.services.spawn;
 
 import java.util.EventListener;
 
-/** Listener on events related to the kernel agent.
+/**
+ * Listener on events related to the kernel agent.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -31,11 +32,13 @@ import java.util.EventListener;
  */
 public interface KernelAgentSpawnListener extends EventListener {
 
-	/** Invoked when the kernel agent is spawned.
+	/**
+	 * Invoked when the kernel agent is spawned.
 	 */
 	void kernelAgentSpawn();
 
-	/** Invoked when the kernel agent is destroyed.
+	/**
+	 * Invoked when the kernel agent is destroyed.
 	 */
 	void kernelAgentDestroy();
 

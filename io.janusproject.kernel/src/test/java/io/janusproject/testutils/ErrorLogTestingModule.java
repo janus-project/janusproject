@@ -38,20 +38,21 @@ import com.google.inject.Singleton;
 public class ErrorLogTestingModule extends AbstractModule {
 
 	private final List<Object> results;
-	
+
 	/**
 	 * @param results - the results to fill.
 	 */
 	public ErrorLogTestingModule(List<Object> results) {
 		this.results = results;
 	}
-	
+
 	@Override
 	protected void configure() {
 		//
 	}
-	
-	/** Replies the log service.
+
+	/**
+	 * Replies the log service.
 	 * 
 	 * @return the log service.
 	 */

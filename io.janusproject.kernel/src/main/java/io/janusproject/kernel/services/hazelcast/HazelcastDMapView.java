@@ -23,7 +23,8 @@ package io.janusproject.kernel.services.hazelcast;
 import com.hazelcast.core.IMap;
 import io.janusproject.util.AbstractDMapView;
 
-/** View from a Hazelcast map to DMap.
+/**
+ * View from a Hazelcast map to DMap.
  *
  * @param <K> - type of the keys.
  * @param <V> - type of the values.

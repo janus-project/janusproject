@@ -28,10 +28,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import io.janusproject.services.distributeddata.DMapListener;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.janusproject.util.DataViewDelegate;
-import io.janusproject.util.DataViewDelegate.Delegator;
 
 import java.io.Serializable;
 import java.util.AbstractSet;
@@ -45,11 +41,8 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import junit.framework.TestSuite;
-
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -70,6 +63,12 @@ import com.google.common.collect.testing.features.MapFeature;
 import com.google.common.collect.testing.google.MultimapTestSuiteBuilder;
 import com.google.common.collect.testing.google.TestStringSetMultimapGenerator;
 
+import io.janusproject.services.distributeddata.DMapListener;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.janusproject.util.DataViewDelegate;
+import io.janusproject.util.DataViewDelegate.Delegator;
+import junit.framework.TestSuite;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -77,13 +76,9 @@ import com.google.common.collect.testing.google.TestStringSetMultimapGenerator;
  * @mavenartifactid $ArtifactId$
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-	DMultiMapViewTest.BackedCollectionTests.class,
-	DMultiMapViewTest.GuavaMultiMapOperationTests.class,
-	DMultiMapViewTest.ViewTests.class,
-	DMultiMapViewTest.SpecificDMultiMapFunctionTests.class,
-	DMultiMapViewTest.ListeningFeatureTests.class
-})
+@SuiteClasses({ DMultiMapViewTest.BackedCollectionTests.class, DMultiMapViewTest.GuavaMultiMapOperationTests.class,
+		DMultiMapViewTest.ViewTests.class, DMultiMapViewTest.SpecificDMultiMapFunctionTests.class,
+		DMultiMapViewTest.ListeningFeatureTests.class })
 @SuppressWarnings("all")
 public class DMultiMapViewTest {
 
@@ -108,12 +103,12 @@ public class DMultiMapViewTest {
 		public void setUp() {
 			this.name = UUID.randomUUID().toString();
 			Supplier<List<String>> supplier = new Supplier<List<String>>() {
-					@Override
-					public List<String> get() {
-						return Lists.newArrayList();
-					}
-				};
-			this.map = Multimaps.newListMultimap(Maps.<String, Collection<String>>newHashMap(), supplier);
+				@Override
+				public List<String> get() {
+					return Lists.newArrayList();
+				}
+			};
+			this.map = Multimaps.newListMultimap(Maps.<String, Collection<String>> newHashMap(), supplier);
 			this.view = new DMultiMapView<>(this.name, this.map);
 			this.view.put("a", "va");
 			this.view.put("b", "vb");
@@ -126,8 +121,7 @@ public class DMultiMapViewTest {
 
 		@Test
 		public void changesPropagation() {
-			Assume.assumeTrue(
-					"The collection is not backing the changes to the underlying collection",
+			Assume.assumeTrue("The collection is not backing the changes to the underlying collection",
 					this.view.isBackedCollection());
 			assertTrue(this.view.keySet().remove("b"));
 			assertEquals(1, this.map.size());
@@ -137,8 +131,7 @@ public class DMultiMapViewTest {
 
 		@Test
 		public void noChangesPropagation() {
-			Assume.assumeFalse(
-					"The collection is backing the changes to the underlying collection",
+			Assume.assumeFalse("The collection is backing the changes to the underlying collection",
 					this.view.isBackedCollection());
 			assertTrue(this.view.keySet().remove("b"));
 			assertEquals(2, this.map.size());
@@ -166,32 +159,23 @@ public class DMultiMapViewTest {
 						@Override
 						protected SetMultimap<String, String> create(Entry<String, String>[] entries) {
 							Map<String, Collection<String>> jvmMap = Maps.newHashMap();
-							Multimap<String, String> map = Multimaps.newSetMultimap(
-									jvmMap, new Supplier<Set<String>>() {
-										@Override
-										public Set<String> get() {
-											return Sets.newHashSet();
-										}
-									});
-							for(Entry<String, String> entry : entries) {
+							Multimap<String, String> map = Multimaps.newSetMultimap(jvmMap, new Supplier<Set<String>>() {
+								@Override
+								public Set<String> get() {
+									return Sets.newHashSet();
+								}
+							});
+							for (Entry<String, String> entry : entries) {
 								map.put(entry.getKey(), entry.getValue());
 							}
-							DMultiMapView<String, String> view = new DMultiMapView<>(
-									UUID.randomUUID().toString(),
-									map);
+							DMultiMapView<String, String> view = new DMultiMapView<>(UUID.randomUUID().toString(), map);
 							return new GuavaTestFakeView(view);
 						}
-					})
-					.named("Guava-based DMultiMap tests")
-					.withFeatures(
-							MapFeature.ALLOWS_NULL_KEYS,
-							MapFeature.ALLOWS_NULL_VALUES,
-							MapFeature.ALLOWS_ANY_NULL_QUERIES,
-							MapFeature.GENERAL_PURPOSE,
-							MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
-							CollectionFeature.SUPPORTS_ITERATOR_REMOVE,
-							CollectionSize.ANY
-							).createTestSuite();
+					}).named("Guava-based DMultiMap tests")
+					.withFeatures(MapFeature.ALLOWS_NULL_KEYS, MapFeature.ALLOWS_NULL_VALUES, MapFeature.ALLOWS_ANY_NULL_QUERIES,
+							MapFeature.GENERAL_PURPOSE, MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
+							CollectionFeature.SUPPORTS_ITERATOR_REMOVE, CollectionSize.ANY)
+					.createTestSuite();
 		}
 
 	}
@@ -222,9 +206,7 @@ public class DMultiMapViewTest {
 					return Lists.newArrayList();
 				}
 			});
-			this.view = new DMultiMapView<>(
-					UUID.randomUUID().toString(),
-					this.map);
+			this.view = new DMultiMapView<>(UUID.randomUUID().toString(), this.map);
 		}
 
 		@Test
@@ -268,16 +250,14 @@ public class DMultiMapViewTest {
 					return Lists.newArrayList();
 				}
 			});
-			this.view = new DMultiMapView<>(
-					UUID.randomUUID().toString(),
-					this.map);
+			this.view = new DMultiMapView<>(UUID.randomUUID().toString(), this.map);
 		}
 
 		@Test
 		public void isBackedCollection() {
 			assertTrue(this.view.isBackedCollection());
 		}
-		
+
 		@Test
 		public void valueCount_empty() {
 			assertEquals(0, this.view.valueCount("abc"));
@@ -341,8 +321,7 @@ public class DMultiMapViewTest {
 	 */
 	public static class ListeningFeatureTests extends AbstractJanusTest {
 
-		
-		private DMapListener<String, String> listener; 
+		private DMapListener<String, String> listener;
 		private Map<String, Collection<String>> jvmMap;
 		private Multimap<String, String> map;
 		private DMultiMapView<String, String> view;
@@ -357,9 +336,7 @@ public class DMultiMapViewTest {
 					return Lists.newArrayList();
 				}
 			});
-			this.view = new DMultiMapView<>(
-					UUID.randomUUID().toString(),
-					this.map);
+			this.view = new DMultiMapView<>(UUID.randomUUID().toString(), this.map);
 		}
 
 		@Test
@@ -479,8 +456,8 @@ public class DMultiMapViewTest {
 	 * @param <K>
 	 * @param <V>
 	 */
-	private static class GuavaTestFakeView implements SetMultimap<String, String>,
-			Serializable, Delegator<DMultiMapView<String, String>> {
+	private static class GuavaTestFakeView
+			implements SetMultimap<String, String>, Serializable, Delegator<DMultiMapView<String, String>> {
 
 		private static final long serialVersionUID = -6970650402150118406L;
 
@@ -493,7 +470,8 @@ public class DMultiMapViewTest {
 			this.dmultimap = dmultimap;
 		}
 
-		/** {@inheritDoc}
+		/**
+		 * {@inheritDoc}
 		 */
 		@Override
 		public DMultiMapView<String, String> getDelegatedObject() {
@@ -596,8 +574,7 @@ public class DMultiMapViewTest {
 		}
 
 		@Override
-		public Set<String> replaceValues(String key,
-				Iterable<? extends String> values) {
+		public Set<String> replaceValues(String key, Iterable<? extends String> values) {
 			return new SetView<>(this.dmultimap.replaceValues(key, values));
 		}
 

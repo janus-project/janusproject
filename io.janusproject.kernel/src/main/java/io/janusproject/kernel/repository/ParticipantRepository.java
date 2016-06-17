@@ -32,12 +32,10 @@ import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 
 /**
- * An abstract repository providing the basic support of storage a
- * collection a participant's address and its related listener.
+ * An abstract repository providing the basic support of storage a collection a participant's address and its related listener.
  *
- * @param <ADDRESST> - the generic type representing the address of a
- *     participant in the related space. This type must remains small, less than M
- *     in memory and must be {@link java.io.Serializable}
+ * @param <ADDRESST> - the generic type representing the address of a participant in the related space. This type must remains
+ *        small, less than M in memory and must be {@link java.io.Serializable}
  * @author $Author: ngaud$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
@@ -46,18 +44,19 @@ import io.sarl.util.Collections3;
 public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 
 	/**
-	 * Map linking the unique address of an entity in the related space to the entity itself.
-	 * This is local non-distributed map.
+	 * Map linking the unique address of an entity in the related space to the entity itself. This is local non-distributed map.
 	 */
 	private final Map<ADDRESST, EventListener> listeners;
 
-	/** Construct a <code>ParticipantRepository</code>.
+	/**
+	 * Construct a <code>ParticipantRepository</code>.
 	 */
 	protected ParticipantRepository() {
 		this.listeners = new TreeMap<>();
 	}
 
-	/** Replies the numbers of participants registered in this repository.
+	/**
+	 * Replies the numbers of participants registered in this repository.
 	 *
 	 * @return the number of listeners.
 	 */
@@ -67,10 +66,10 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Replies if there is no participant registered in this repository.
+	/**
+	 * Replies if there is no participant registered in this repository.
 	 *
-	 * @return <code>true</code> if the repository is empty, <code>false</code>
-	 *     if there is a least one participant.
+	 * @return <code>true</code> if the repository is empty, <code>false</code> if there is a least one participant.
 	 */
 	protected boolean isListenerEmpty() {
 		synchronized (mutex()) {
@@ -78,11 +77,12 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Replies if the given address is present inside this repository.
+	/**
+	 * Replies if the given address is present inside this repository.
 	 *
 	 * @param key - key to search in the repository.
-	 * @return <code>true</code> if the given key is found in the repository,
-	 * <code>false</code> if the key is not present or <code>null</code>.
+	 * @return <code>true</code> if the given key is found in the repository, <code>false</code> if the key is not present or
+	 *         <code>null</code>.
 	 */
 	protected boolean containsAddress(ADDRESST key) {
 		synchronized (mutex()) {
@@ -90,11 +90,12 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Replies if the given participant is present inside this repository.
+	/**
+	 * Replies if the given participant is present inside this repository.
 	 *
 	 * @param value - participant to search in the repository.
-	 * @return <code>true</code> if the given participant is found in the repository,
-	 * <code>false</code> if the participant is not present or <code>null</code>.
+	 * @return <code>true</code> if the given participant is found in the repository, <code>false</code> if the participant is not
+	 *         present or <code>null</code>.
 	 */
 	protected boolean containsListener(EventListener value) {
 		synchronized (mutex()) {
@@ -102,11 +103,11 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Replies the participant with the given address.
+	/**
+	 * Replies the participant with the given address.
 	 *
 	 * @param key - the address of the participant to retreive.
-	 * @return the participant with the given address, or <code>null</code>
-	 *     if there is no participant with the given address.
+	 * @return the participant with the given address, or <code>null</code> if there is no participant with the given address.
 	 */
 	protected EventListener getListener(ADDRESST key) {
 		synchronized (mutex()) {
@@ -114,7 +115,8 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Add a participant with the given address in this repository.
+	/**
+	 * Add a participant with the given address in this repository.
 	 *
 	 * @param key - address of the participant.
 	 * @param value - is the participant to map to the address.
@@ -126,11 +128,11 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Remove the mapping from the given address to the associated participant.
+	/**
+	 * Remove the mapping from the given address to the associated participant.
 	 *
 	 * @param key - address of the participant to remove.
-	 * @return the participant for which the address was removed, <code>null</code>
-	 *     if the given address was not found.
+	 * @return the participant for which the address was removed, <code>null</code> if the given address was not found.
 	 */
 	protected EventListener removeListener(ADDRESST key) {
 		synchronized (mutex()) {
@@ -138,7 +140,8 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Remove all the participants in this repository.
+	/**
+	 * Remove all the participants in this repository.
 	 */
 	protected void clearListeners() {
 		synchronized (mutex()) {
@@ -146,7 +149,8 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Replies all the addresses from the inside of this repository.
+	/**
+	 * Replies all the addresses from the inside of this repository.
 	 *
 	 * @return the addresses in this repository.
 	 */
@@ -157,7 +161,8 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Replies all the participants from the inside of this repository.
+	/**
+	 * Replies all the participants from the inside of this repository.
 	 *
 	 * @return the participants.
 	 */
@@ -168,7 +173,8 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Replies the pairs of addresses and participants in this repository.
+	/**
+	 * Replies the pairs of addresses and participants in this repository.
 	 *
 	 * @return the pairs of addresses and participants
 	 */
@@ -179,7 +185,8 @@ public abstract class ParticipantRepository<ADDRESST extends Serializable> {
 		}
 	}
 
-	/** Replies the mutex to synchronize on this repository.
+	/**
+	 * Replies the mutex to synchronize on this repository.
 	 *
 	 * @return the mutex.
 	 */

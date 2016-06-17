@@ -31,7 +31,8 @@ import org.arakhne.afc.vmutil.locale.Locale;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
 
-/** Serializer of identifiers of spaces.
+/**
+ * Serializer of identifiers of spaces.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -41,7 +42,8 @@ import io.sarl.lang.core.SpaceSpecification;
  */
 class SpaceIDSerializer implements StreamSerializer<SpaceID> {
 
-	/** Unique identifier for the {@link SpaceID} type.
+	/**
+	 * Unique identifier for the {@link SpaceID} type.
 	 */
 	public static final int SPACE_ID_CLASS_TYPE = 19118;
 

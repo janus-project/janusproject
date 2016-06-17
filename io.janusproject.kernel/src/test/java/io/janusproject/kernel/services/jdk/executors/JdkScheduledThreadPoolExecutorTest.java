@@ -25,9 +25,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import io.janusproject.services.executor.ChuckNorrisException;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.janusproject.testutils.FutureExceptionMatcher;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Callable;
@@ -46,13 +43,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.exceptions.base.MockitoException;
 
+import io.janusproject.services.executor.ChuckNorrisException;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.janusproject.testutils.FutureExceptionMatcher;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({ "javadoc" })
 public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 
 	static final Object VALUE = new Object();
@@ -144,7 +145,7 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		Future<?> f = this.executor.scheduleAtFixedRate(mock, 1, 1, TimeUnit.SECONDS);
 		mock.setFuture(f);
 		waitTaskTermination();
-		
+
 		assertNotNull(f);
 		assertThat(f, new FutureExceptionMatcher(CancellationException.class));
 
@@ -160,7 +161,7 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		Future<?> f = this.executor.scheduleWithFixedDelay(mock, 1, 1, TimeUnit.SECONDS);
 		mock.setFuture(f);
 		waitTaskTermination();
-		
+
 		assertNotNull(f);
 		assertThat(f, new FutureExceptionMatcher(CancellationException.class));
 
@@ -234,7 +235,7 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		Future<?> f = this.executor.scheduleAtFixedRate(mock, 1, 1, TimeUnit.SECONDS);
 		mock.setFuture(f);
 		waitTaskTermination();
-		
+
 		assertNotNull(f);
 		assertNull(f.get());
 		Mockito.verifyZeroInteractions(this.handler);
@@ -246,7 +247,7 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		Future<?> f = this.executor.scheduleWithFixedDelay(mock, 1, 1, TimeUnit.SECONDS);
 		mock.setFuture(f);
 		waitTaskTermination();
-		
+
 		assertNotNull(f);
 		assertNull(f.get());
 		Mockito.verifyZeroInteractions(this.handler);
@@ -345,7 +346,7 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		Future<?> f = this.executor.scheduleAtFixedRate(mock, 1, 1, TimeUnit.SECONDS);
 		mock.setFuture(f);
 		waitTaskTermination();
-		
+
 		assertNotNull(f);
 		assertThat(f, new FutureExceptionMatcher(MockitoException.class));
 
@@ -361,7 +362,7 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		Future<?> f = this.executor.scheduleWithFixedDelay(mock, 1, 1, TimeUnit.SECONDS);
 		mock.setFuture(f);
 		waitTaskTermination();
-		
+
 		assertNotNull(f);
 		assertThat(f, new FutureExceptionMatcher(MockitoException.class));
 
@@ -370,19 +371,20 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		Mockito.verify(this.handler).uncaughtException(argument1.capture(), argument2.capture());
 		assertThrowable(MockitoException.class, argument2.getValue());
 	}
-	
+
 	private static void assertThrowable(Class<? extends Throwable> expectedType, Object actual) {
 		if (!expectedType.isInstance(actual)) {
-			fail("An exception of type '"+expectedType //$NON-NLS-1$
-					+"' is expected; but the actual value is of type: "+actual); //$NON-NLS-1$
+			fail("An exception of type '" + expectedType //$NON-NLS-1$
+					+ "' is expected; but the actual value is of type: " + actual); //$NON-NLS-1$
 		}
 	}
 
-	private static void assertThrowables(Class<? extends Throwable> expectedType1, Class<? extends Throwable> expectedType2, Object actual) {
+	private static void assertThrowables(Class<? extends Throwable> expectedType1, Class<? extends Throwable> expectedType2,
+			Object actual) {
 		if (!expectedType1.isInstance(actual) && !expectedType2.isInstance(actual)) {
-			fail("An exception of type '"+expectedType1 //$NON-NLS-1$
-					+"' or of type '"+expectedType2 //$NON-NLS-1$
-					+"' is expected; but the actual value is of type: "+actual); //$NON-NLS-1$
+			fail("An exception of type '" + expectedType1 //$NON-NLS-1$
+					+ "' or of type '" + expectedType2 //$NON-NLS-1$
+					+ "' is expected; but the actual value is of type: " + actual); //$NON-NLS-1$
 		}
 	}
 
@@ -407,15 +409,16 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		/**
 		 * @param state
 		 */
-		public RunnableMock(int state) {
+		RunnableMock(int state) {
 			this.state = state;
 		}
 
-		/** {@inheritDoc}
+		/**
+		 * {@inheritDoc}
 		 */
 		@Override
 		public void run() {
-			switch(this.state) {
+			switch (this.state) {
 			case 1:
 				throw new MockitoException(""); //$NON-NLS-1$
 			case 2:
@@ -424,11 +427,12 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 			}
 		}
 
-		/** {@inheritDoc}
+		/**
+		 * {@inheritDoc}
 		 */
 		@Override
 		public Object call() {
-			switch(this.state) {
+			switch (this.state) {
 			case 1:
 				throw new MockitoException(""); //$NON-NLS-1$
 			case 2:
@@ -451,15 +455,16 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 		private final int state;
 		private final AtomicInteger count = new AtomicInteger(2);
 		private Future<?> future = null;
-		
+
 		/**
 		 * @param state
 		 */
-		public CountDownRunnableMock(int state) {
+		CountDownRunnableMock(int state) {
 			this.state = state;
 		}
-		
-		/** The task knows its future.
+
+		/**
+		 * The task knows its future.
 		 * 
 		 * @param future
 		 */
@@ -467,20 +472,22 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 			this.future = future;
 		}
 
-		/** {@inheritDoc}
+		/**
+		 * {@inheritDoc}
 		 */
 		@Override
 		public void run() {
 			int c = this.count.decrementAndGet();
-			if (c<=0) {
-				switch(this.state) {
+			if (c <= 0) {
+				switch (this.state) {
 				case 1:
 					throw new MockitoException(""); //$NON-NLS-1$
 				case 2:
 					throw new ChuckNorrisException();
 				default:
-					if (this.future!=null)
+					if (this.future != null) {
 						this.future.cancel(true);
+					}
 				}
 			}
 		}
@@ -499,11 +506,12 @@ public class JdkScheduledThreadPoolExecutorTest extends AbstractJanusTest {
 
 		/**
 		 */
-		public TerminationListener() {
+		TerminationListener() {
 			//
 		}
 
-		/** {@inheritDoc}
+		/**
+		 * {@inheritDoc}
 		 */
 		@Override
 		public void taskFinished(Thread thread, Runnable task) {

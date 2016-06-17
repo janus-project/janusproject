@@ -19,16 +19,8 @@
  */
 package io.janusproject.kernel.services.jdk.infrastructure;
 
-import io.janusproject.services.infrastructure.InfrastructureService;
 import io.janusproject.testutils.AbstractServiceTest;
 import io.janusproject.testutils.StartServiceForTest;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
-
 
 /**
  * @author $Author: sgalland$
@@ -44,5 +36,5 @@ public final class StandardInfrastructureServiceTest extends AbstractServiceTest
 	public StandardInfrastructureService newService() {
 		return new StandardInfrastructureService();
 	}
-	
+
 }

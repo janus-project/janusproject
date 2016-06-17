@@ -34,7 +34,8 @@ import com.google.inject.Singleton;
 import io.janusproject.JanusConfig;
 import io.janusproject.services.AbstractDependentService;
 
-/** Platform service that supports the execution resources.
+/**
+ * Platform service that supports the execution resources.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -52,13 +53,15 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 
 	private ScheduledFuture<?> purgeTask;
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public JdkExecutorService() {
 		//
 	}
 
-	/** Change the JRE service for scheduled tasks.
+	/**
+	 * Change the JRE service for scheduled tasks.
 	 *
 	 * @param service - the JRE service.
 	 */
@@ -67,7 +70,8 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 		this.schedules = service;
 	}
 
-	/** Change the JRE service for scheduled tasks.
+	/**
+	 * Change the JRE service for scheduled tasks.
 	 *
 	 * @param service - the JRE service.
 	 */
@@ -86,14 +90,10 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 		assert (this.schedules != null);
 		assert (this.exec != null);
 		// Launch a periodic task that is purging the executor pools.
-		if ((this.schedules instanceof ThreadPoolExecutor)
-				|| (this.exec instanceof ThreadPoolExecutor)) {
-			int delay = JanusConfig.getSystemPropertyAsInteger(
-					JanusConfig.KERNEL_THREAD_PURGE_DELAY_NAME,
+		if ((this.schedules instanceof ThreadPoolExecutor) || (this.exec instanceof ThreadPoolExecutor)) {
+			int delay = JanusConfig.getSystemPropertyAsInteger(JanusConfig.KERNEL_THREAD_PURGE_DELAY_NAME,
 					JanusConfig.KERNEL_THREAD_PURGE_DELAY_VALUE);
-			this.purgeTask = this.schedules.scheduleWithFixedDelay(
-					new Purger(),
-					delay, delay, TimeUnit.SECONDS);
+			this.purgeTask = this.schedules.scheduleWithFixedDelay(new Purger(), delay, delay, TimeUnit.SECONDS);
 		}
 		notifyStarted();
 	}
@@ -107,8 +107,7 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 		this.exec.shutdown();
 		this.schedules.shutdown();
 		try {
-			int timeout = JanusConfig.getSystemPropertyAsInteger(
-					JanusConfig.KERNEL_THREAD_TIMEOUT_NAME,
+			int timeout = JanusConfig.getSystemPropertyAsInteger(JanusConfig.KERNEL_THREAD_TIMEOUT_NAME,
 					JanusConfig.KERNEL_THREAD_TIMEOUT_VALUE);
 			this.schedules.awaitTermination(timeout, TimeUnit.SECONDS);
 			this.exec.awaitTermination(timeout, TimeUnit.SECONDS);
@@ -139,26 +138,22 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 	}
 
 	@Override
-	public ScheduledFuture<?> schedule(Runnable command, long delay,
-			TimeUnit unit) {
+	public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
 		return this.schedules.schedule(command, delay, unit);
 	}
 
 	@Override
-	public <T> ScheduledFuture<T> schedule(Callable<T> command, long delay,
-			TimeUnit unit) {
+	public <T> ScheduledFuture<T> schedule(Callable<T> command, long delay, TimeUnit unit) {
 		return this.schedules.schedule(command, delay, unit);
 	}
 
 	@Override
-	public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
-			long initialDelay, long period, TimeUnit unit) {
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
 		return this.schedules.scheduleAtFixedRate(command, initialDelay, period, unit);
 	}
 
 	@Override
-	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
-			long initialDelay, long delay, TimeUnit unit) {
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
 		return this.schedules.scheduleWithFixedDelay(command, initialDelay, delay, unit);
 	}
 
@@ -177,7 +172,8 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 		}
 	}
 
-	/** Task that is purging the thread pools.
+	/**
+	 * Task that is purging the thread pools.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -188,7 +184,8 @@ public class JdkExecutorService extends AbstractDependentService implements io.j
 
 		private String oldThreadName;
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		Purger() {
 			//

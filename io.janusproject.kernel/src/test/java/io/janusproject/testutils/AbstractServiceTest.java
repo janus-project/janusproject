@@ -20,26 +20,18 @@
 package io.janusproject.testutils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import javax.annotation.Nullable;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,17 +42,15 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Service.Listener;
 import com.google.common.util.concurrent.Service.State;
 
-/** Abstract class that permits to test the
- * implementation of a service.
+/**
+ * Abstract class that permits to test the implementation of a service.
  *
  * @param <S> - the type of the service.
  * @author $Author: sgalland$
@@ -74,8 +64,8 @@ public abstract class AbstractServiceTest<S extends Service> extends AbstractJan
 	@InjectMocks
 	protected S service;
 
-	/** This rule permits to start the service according to the annotation
-	 * {@link StartServiceForTest}.
+	/**
+	 * This rule permits to start the service according to the annotation {@link StartServiceForTest}.
 	 * 
 	 */
 	@Rule
@@ -141,9 +131,8 @@ public abstract class AbstractServiceTest<S extends Service> extends AbstractJan
 								tmp = Lists.newArrayList(befores);
 								tmp.add(fm);
 							}
-							if (!foundStart && avoidAnnot == null
-								&& startAnnot != null
-								&& (tmp != null || startAnnot.startAfterSetUp())) {
+							if (!foundStart && avoidAnnot == null && startAnnot != null
+									&& (tmp != null || startAnnot.startAfterSetUp())) {
 								Method startServiceMethod = AbstractServiceTest.class.getMethod("startService");
 								FrameworkMethod fm = new FrameworkMethod(startServiceMethod);
 								if (tmp == null) {
@@ -164,7 +153,7 @@ public abstract class AbstractServiceTest<S extends Service> extends AbstractJan
 			}
 			return super.apply(base, description);
 		}
-		
+
 		@Override
 		protected void starting(Description description) {
 			// Create the instance of the service
@@ -190,11 +179,10 @@ public abstract class AbstractServiceTest<S extends Service> extends AbstractJan
 		}
 	};
 
-	/** Start the tested service.
+	/**
+	 * Start the tested service.
 	 * 
-	 * This function should not be called directly.
-	 * It is invoked by the watcher implemented in the
-	 * {@link AbstractServiceTest}.
+	 * This function should not be called directly. It is invoked by the watcher implemented in the {@link AbstractServiceTest}.
 	 */
 	public void startService() {
 		AbstractServiceTest.this.service.startAsync();
@@ -204,19 +192,19 @@ public abstract class AbstractServiceTest<S extends Service> extends AbstractJan
 			throw new Error(e);
 		}
 	}
-	
-	/** Create and initialize the service
+
+	/**
+	 * Create and initialize the service
 	 * 
-	 * This function should not be called directly.
-	 * It is invoked by the watcher implemented in the
-	 * {@link AbstractServiceTest}.
+	 * This function should not be called directly. It is invoked by the watcher implemented in the {@link AbstractServiceTest}.
 	 */
 	public void createAndInitService() {
 		AbstractServiceTest.this.service = newService();
 		MockitoAnnotations.initMocks(AbstractServiceTest.this);
 	}
 
-	/** Replies the instance of the service under test.
+	/**
+	 * Replies the instance of the service under test.
 	 *
 	 * @return the tested service.
 	 */
@@ -230,7 +218,7 @@ public abstract class AbstractServiceTest<S extends Service> extends AbstractJan
 		this.service.startAsync();
 		this.service.awaitRunning(10, TimeUnit.SECONDS);
 		verify(listener, times(1)).starting();
-		//verify(listener, times(1)).running();
+		// verify(listener, times(1)).running();
 	}
 
 	@Test

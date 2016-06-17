@@ -25,12 +25,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.janusproject.util.LoggerCreator;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.BuiltinCapacitiesProvider;
-import io.sarl.lang.core.Capacity;
 
 import java.util.UUID;
 import java.util.logging.Handler;
@@ -49,6 +43,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
 
+import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.janusproject.util.LoggerCreator;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
+import io.sarl.lang.core.Capacity;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -60,28 +61,25 @@ public class LoggingSkillTest extends AbstractJanusTest {
 
 	@Mock
 	protected Handler handler;
-	
+
 	@Nullable
 	protected Agent owner;
-	
+
 	@Mock
 	protected LogService logService;
 
 	@InjectMocks
 	protected LoggingSkill skill;
-	
+
 	@Nullable
 	protected Logger logger;
-	
+
 	protected Logger parentLogger;
 
 	@Before
 	public void setUp() throws Exception {
 		UUID agentId = UUID.randomUUID();
-		this.owner = new Agent(
-				Mockito.mock(BuiltinCapacitiesProvider.class),
-				agentId,
-				null) {
+		this.owner = new Agent(Mockito.mock(BuiltinCapacitiesProvider.class), agentId, null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				return capacity.cast(LoggingSkillTest.this.skill);
@@ -93,7 +91,7 @@ public class LoggingSkillTest extends AbstractJanusTest {
 		this.skill = Mockito.spy(this.skill);
 		//
 		this.parentLogger = Mockito.spy(Logger.getLogger("ROOT"));
-		Mockito.when(this.parentLogger.getHandlers()).thenReturn(new Handler[] {this.handler});
+		Mockito.when(this.parentLogger.getHandlers()).thenReturn(new Handler[] { this.handler });
 		//
 		Mockito.when(this.logService.getLogger()).thenReturn(this.parentLogger);
 		//
@@ -357,7 +355,7 @@ public class LoggingSkillTest extends AbstractJanusTest {
 
 	@Test
 	public void setLogLevel() {
-		for(int i = 0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			this.skill.setLogLevel(i);
 			assertEquals(Math.max(0, Math.min(7, i)), this.skill.getLogLevel());
 		}

@@ -25,7 +25,8 @@ import com.google.inject.Singleton;
 import io.janusproject.kernel.services.jdk.distributeddata.StandardDistributedDataStructureService;
 import io.janusproject.services.distributeddata.DistributedDataStructureService;
 
-/** Configure the {@link DistributedDataStructureService} for a local usage in the JVM.
+/**
+ * Configure the {@link DistributedDataStructureService} for a local usage in the JVM.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -37,8 +38,7 @@ public class LocalDistributedDataStructureServiceModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(DistributedDataStructureService.class).to(StandardDistributedDataStructureService.class)
-				.in(Singleton.class);
+		bind(DistributedDataStructureService.class).to(StandardDistributedDataStructureService.class).in(Singleton.class);
 	}
 
 }

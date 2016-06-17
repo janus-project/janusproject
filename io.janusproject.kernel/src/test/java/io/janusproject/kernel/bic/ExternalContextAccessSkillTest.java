@@ -29,24 +29,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import io.janusproject.services.contextspace.ContextSpaceService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.core.Behaviors;
-import io.sarl.core.ContextJoined;
-import io.sarl.core.ContextLeft;
-import io.sarl.core.MemberJoined;
-import io.sarl.core.MemberLeft;
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.AgentContext;
-import io.sarl.lang.core.BuiltinCapacitiesProvider;
-import io.sarl.lang.core.Capacity;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.EventListener;
-import io.sarl.lang.core.EventSpaceSpecification;
-import io.sarl.lang.core.Space;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.util.OpenEventSpace;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,6 +48,25 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import io.janusproject.services.contextspace.ContextSpaceService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.core.Behaviors;
+import io.sarl.core.ContextJoined;
+import io.sarl.core.ContextLeft;
+import io.sarl.core.MemberJoined;
+import io.sarl.core.MemberLeft;
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
+import io.sarl.lang.core.Capacity;
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.EventListener;
+import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.util.OpenEventSpace;
 
 /**
  * @author $Author: sgalland$
@@ -113,23 +114,19 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 		when(this.busCapacity.asEventListener()).thenReturn(this.eventListener);
 
 		this.contexts = new ArrayList<>();
-		for(int i=0; i<10; ++i) {
-			UUID contextId = i==0 ? parentId : UUID.randomUUID();
+		for (int i = 0; i < 10; ++i) {
+			UUID contextId = i == 0 ? parentId : UUID.randomUUID();
 			OpenEventSpace defaultSpace = mock(OpenEventSpace.class);
-			if (i==0) {
+			if (i == 0) {
 				this.defaultSpace = defaultSpace;
 			}
-			when(defaultSpace.getID()).thenReturn(
-					new SpaceID(contextId, UUID.randomUUID(), EventSpaceSpecification.class));
+			when(defaultSpace.getID()).thenReturn(new SpaceID(contextId, UUID.randomUUID(), EventSpaceSpecification.class));
 			AgentContext c = mock(AgentContext.class);
 			when(c.getID()).thenReturn(contextId);
 			when(c.getDefaultSpace()).thenReturn(defaultSpace);
 			this.contexts.add(c);
 		}
-		this.agent = new Agent(
-				Mockito.mock(BuiltinCapacitiesProvider.class),
-				UUID.randomUUID(),
-				null) {
+		this.agent = new Agent(Mockito.mock(BuiltinCapacitiesProvider.class), UUID.randomUUID(), null) {
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
 				if (Behaviors.class.equals(capacity))
@@ -148,11 +145,10 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 		when(this.contextRepository.getContexts()).thenReturn(this.contexts);
 		when(this.contextRepository.getContexts(Matchers.anyCollection())).then(new Answer<Collection>() {
 			@Override
-			public Collection answer(InvocationOnMock invocation)
-					throws Throwable {
-				Collection<UUID> ids = (Collection<UUID>)invocation.getArguments()[0];
+			public Collection answer(InvocationOnMock invocation) throws Throwable {
+				Collection<UUID> ids = (Collection<UUID>) invocation.getArguments()[0];
 				List<AgentContext> l = new ArrayList<>();
-				for(AgentContext ctx: ExternalContextAccessSkillTest.this.contexts) {
+				for (AgentContext ctx : ExternalContextAccessSkillTest.this.contexts) {
 					if (ids.contains(ctx.getID())) {
 						l.add(ctx);
 					}
@@ -162,10 +158,9 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 		});
 		when(this.contextRepository.getContext(Matchers.any(UUID.class))).then(new Answer<AgentContext>() {
 			@Override
-			public AgentContext answer(InvocationOnMock invocation)
-					throws Throwable {
-				UUID id = (UUID)invocation.getArguments()[0];
-				for(AgentContext ctx: ExternalContextAccessSkillTest.this.contexts) {
+			public AgentContext answer(InvocationOnMock invocation) throws Throwable {
+				UUID id = (UUID) invocation.getArguments()[0];
+				for (AgentContext ctx : ExternalContextAccessSkillTest.this.contexts) {
 					if (id.equals(ctx.getID())) {
 						return ctx;
 					}
@@ -181,9 +176,9 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 		assertTrue(c.isEmpty());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void getContext() {
-		for(AgentContext c : this.contexts) {
+		for (AgentContext c : this.contexts) {
 			this.skill.getContext(c.getID());
 		}
 	}
@@ -191,7 +186,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 	@Test
 	public void join() {
 		int nb = 0;
-		for(AgentContext c : this.contexts) {
+		for (AgentContext c : this.contexts) {
 			this.skill.join(c.getID(), c.getDefaultSpace().getID().getID());
 			//
 			AgentContext ctx = this.skill.getContext(c.getID());
@@ -202,8 +197,8 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			Event evt = argument1.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof MemberJoined);
-			assertEquals(c.getID(), ((MemberJoined)evt).parentContextID);
-			assertEquals(this.agent.getID(), ((MemberJoined)evt).agentID);
+			assertEquals(c.getID(), ((MemberJoined) evt).parentContextID);
+			assertEquals(this.agent.getID(), ((MemberJoined) evt).agentID);
 			//
 			ArgumentCaptor<Event> argument2 = ArgumentCaptor.forClass(Event.class);
 			++nb;
@@ -211,12 +206,12 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			evt = argument2.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof ContextJoined);
-			assertEquals(c.getID(), ((ContextJoined)evt).holonContextID);
-			assertEquals(c.getDefaultSpace().getID().getID(), ((ContextJoined)evt).defaultSpaceID);
+			assertEquals(c.getID(), ((ContextJoined) evt).holonContextID);
+			assertEquals(c.getDefaultSpace().getID().getID(), ((ContextJoined) evt).defaultSpaceID);
 		}
 		Collection<AgentContext> c = this.skill.getAllContexts();
 		assertEquals(this.contexts.size(), c.size());
-		for(AgentContext ctx : c) {
+		for (AgentContext ctx : c) {
 			assertTrue(this.contexts.contains(ctx));
 		}
 	}
@@ -224,19 +219,19 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 	@Test
 	public void leave() {
 		int nb = 0;
-		for(AgentContext c : this.contexts) {
+		for (AgentContext c : this.contexts) {
 			this.skill.join(c.getID(), c.getDefaultSpace().getID().getID());
 			++nb;
 		}
 		//
 		List<AgentContext> remaining = new ArrayList<>(this.contexts);
-		for(AgentContext c : this.contexts) {
+		for (AgentContext c : this.contexts) {
 			this.skill.leave(c.getID());
 			//
 			remaining.remove(c);
 			Collection<AgentContext> in = this.skill.getAllContexts();
 			assertEquals(remaining.size(), in.size());
-			for(AgentContext ctx : in) {
+			for (AgentContext ctx : in) {
 				assertTrue(remaining.contains(ctx));
 			}
 			//
@@ -246,7 +241,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			Event evt = argument1.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof MemberLeft);
-			assertEquals(this.agent.getID(), ((MemberLeft)evt).agentID);
+			assertEquals(this.agent.getID(), ((MemberLeft) evt).agentID);
 			//
 			ArgumentCaptor<Event> argument2 = ArgumentCaptor.forClass(Event.class);
 			++nb;
@@ -255,7 +250,7 @@ public class ExternalContextAccessSkillTest extends AbstractJanusTest {
 			evt = argument2.getValue();
 			assertNotNull(evt);
 			assertTrue(evt instanceof ContextLeft);
-			assertEquals(c.getID(), ((ContextLeft)evt).holonContextID);
+			assertEquals(c.getID(), ((ContextLeft) evt).holonContextID);
 		}
 		assertTrue(remaining.isEmpty());
 	}

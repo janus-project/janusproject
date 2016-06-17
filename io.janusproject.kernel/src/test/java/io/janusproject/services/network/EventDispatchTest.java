@@ -21,20 +21,20 @@ package io.janusproject.services.network;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.Scope;
-import io.sarl.lang.core.SpaceID;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.Scope;
+import io.sarl.lang.core.SpaceID;
 
 /**
  * @author $Author: sgalland$
@@ -55,20 +55,20 @@ public class EventDispatchTest extends AbstractJanusTest {
 	private Scope<?> scope;
 
 	@Nullable
-	private Map<String,String> headers;
+	private Map<String, String> headers;
 
 	@Nullable
 	private EventDispatch dispatch;
-	
+
 	@Before
 	public void setUp() {
 		this.spaceId = Mockito.mock(SpaceID.class);
 		this.event = Mockito.mock(Event.class);
 		this.scope = Mockito.mock(Scope.class);
-		this.headers= new HashMap<>();
+		this.headers = new HashMap<>();
 		this.dispatch = new EventDispatch(this.spaceId, this.event, this.scope, this.headers);
 	}
-	
+
 	@Test
 	public void getEvent() {
 		assertSame(this.event, this.dispatch.getEvent());
@@ -95,5 +95,5 @@ public class EventDispatchTest extends AbstractJanusTest {
 	public void getSpaceID() {
 		assertSame(this.spaceId, this.dispatch.getSpaceID());
 	}
-	
+
 }

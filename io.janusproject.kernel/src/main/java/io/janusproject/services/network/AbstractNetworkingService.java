@@ -23,7 +23,8 @@ package io.janusproject.services.network;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
 
-/** This service has a priority to be launch/stop.
+/**
+ * This service has a priority to be launch/stop.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -32,7 +33,8 @@ import com.google.common.util.concurrent.Service;
  */
 public abstract class AbstractNetworkingService extends AbstractService implements NetworkService {
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public AbstractNetworkingService() {
 		//

@@ -19,8 +19,6 @@
  */
 
 /**
- * Interfaces and abstract implementations that are the base of the service
- * management of the Janus platform.
+ * Interfaces and abstract implementations that are the base of the service management of the Janus platform.
  */
 package io.janusproject.services;
-

@@ -25,7 +25,8 @@ import com.google.inject.Singleton;
 import io.janusproject.kernel.services.jdk.kerneldiscovery.StandardKernelDiscoveryService;
 import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
 
-/** Configure the {@link KernelDiscoveryService} for a local usage in the JVM.
+/**
+ * Configure the {@link KernelDiscoveryService} for a local usage in the JVM.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -37,8 +38,7 @@ public class LocalKernelDiscoveryServiceModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(KernelDiscoveryService.class).to(StandardKernelDiscoveryService.class)
-				.in(Singleton.class);
+		bind(KernelDiscoveryService.class).to(StandardKernelDiscoveryService.class).in(Singleton.class);
 	}
 
 }

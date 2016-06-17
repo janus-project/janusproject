@@ -22,12 +22,12 @@ package io.janusproject.kernel.bic;
 
 import io.sarl.lang.core.Event;
 
-/** Janus event that permits to kill an agent
- * asynchronously.
+/**
+ * Janus event that permits to kill an agent asynchronously.
  *
- * <p>This event is defined for ensure that the
- * killing function provided by the spawn service
- * is not invoked during the initilization state.
+ * <p>
+ * This event is defined for ensure that the killing function provided by the spawn service is not invoked during the
+ * initilization state.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -38,7 +38,8 @@ class AsynchronousAgentKillingEvent extends Event {
 
 	private static final long serialVersionUID = 1195716429229202560L;
 
-	/** Construct the event.
+	/**
+	 * Construct the event.
 	 */
 	AsynchronousAgentKillingEvent() {
 		//

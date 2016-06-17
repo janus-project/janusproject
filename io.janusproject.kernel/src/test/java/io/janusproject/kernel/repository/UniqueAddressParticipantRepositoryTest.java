@@ -19,11 +19,10 @@
  */
 package io.janusproject.kernel.repository;
 
-import io.janusproject.kernel.services.jdk.distributeddata.DMapView;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.lang.core.EventListener;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,13 +30,15 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
+import io.janusproject.kernel.services.jdk.distributeddata.DMapView;
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.lang.core.EventListener;
 
 /**
  * @author $Author: sgalland$
@@ -71,11 +72,9 @@ public class UniqueAddressParticipantRepositoryTest extends AbstractJanusTest {
 
 	@Before
 	public void setUp() {
-		this.distributedName = getClass().getName()+UUID.randomUUID().toString();
+		this.distributedName = getClass().getName() + UUID.randomUUID().toString();
 		this.service = Mockito.mock(DistributedDataStructureService.class);
-		DMap<Object, Object> mapMock = new DMapView<>(
-				UUID.randomUUID().toString(),
-				new HashMap<>());
+		DMap<Object, Object> mapMock = new DMapView<>(UUID.randomUUID().toString(), new HashMap<>());
 		Mockito.when(this.service.getMap(this.distributedName, null)).thenReturn(mapMock);
 		Mockito.when(this.service.getMap(this.distributedName)).thenReturn(mapMock);
 		this.repository = new UniqueAddressParticipantRepository<>(this.distributedName, this.service);
@@ -88,7 +87,7 @@ public class UniqueAddressParticipantRepositoryTest extends AbstractJanusTest {
 	}
 
 	@Test
-	public void registerParticipant() {	
+	public void registerParticipant() {
 		assertNull(this.repository.getAddress(this.listener1));
 		assertNull(this.repository.getAddress(this.listener2));
 		assertEquals("a", this.repository.registerParticipant("a", this.listener1)); //$NON-NLS-1$ //$NON-NLS-2$
@@ -98,7 +97,7 @@ public class UniqueAddressParticipantRepositoryTest extends AbstractJanusTest {
 	}
 
 	@Test
-	public void unregisterParticipantEventListener() {	
+	public void unregisterParticipantEventListener() {
 		assertEquals("a", this.repository.registerParticipant("a", this.listener1)); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("b", this.repository.registerParticipant("b", this.listener2)); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("a", this.repository.getAddress(this.listener1)); //$NON-NLS-1$
@@ -109,7 +108,7 @@ public class UniqueAddressParticipantRepositoryTest extends AbstractJanusTest {
 	}
 
 	@Test
-	public void unregisterParticipantUUID() {	
+	public void unregisterParticipantUUID() {
 		assertEquals("a", this.repository.registerParticipant("a", this.listener1)); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("b", this.repository.registerParticipant("b", this.listener2)); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("a", this.repository.getAddress(this.listener1)); //$NON-NLS-1$
@@ -120,7 +119,7 @@ public class UniqueAddressParticipantRepositoryTest extends AbstractJanusTest {
 	}
 
 	@Test
-	public void getAddress() {	
+	public void getAddress() {
 		assertNull(this.repository.getAddress(this.listener1));
 		assertNull(this.repository.getAddress(this.listener2));
 		assertEquals("a", this.repository.registerParticipant("a", this.listener1)); //$NON-NLS-1$ //$NON-NLS-2$
@@ -140,7 +139,7 @@ public class UniqueAddressParticipantRepositoryTest extends AbstractJanusTest {
 	}
 
 	@Test
-	public void getParticipantAddresses() {	
+	public void getParticipantAddresses() {
 		assertNull(this.repository.getAddress(this.listener1));
 		assertNull(this.repository.getAddress(this.listener2));
 		assertEquals("a", this.repository.registerParticipant("a", this.listener1)); //$NON-NLS-1$ //$NON-NLS-2$
@@ -153,7 +152,7 @@ public class UniqueAddressParticipantRepositoryTest extends AbstractJanusTest {
 	}
 
 	@Test
-	public void getParticipantIDs() {	
+	public void getParticipantIDs() {
 		assertNull(this.repository.getAddress(this.listener1));
 		assertNull(this.repository.getAddress(this.listener2));
 		assertEquals("a", this.repository.registerParticipant("a", this.listener1)); //$NON-NLS-1$ //$NON-NLS-2$

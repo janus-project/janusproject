@@ -22,7 +22,8 @@ package io.janusproject.services.distributeddata;
 
 import java.util.EventListener;
 
-/** Listener on changes in a {@link DMap}.
+/**
+ * Listener on changes in a {@link DMap}.
  *
  * @param <K> - type of the keys.
  * @param <V> - type of the values.
@@ -33,31 +34,35 @@ import java.util.EventListener;
  */
 public interface DMapListener<K, V> extends EventListener {
 
-	/** Invoked when an entry is added in the map.
+	/**
+	 * Invoked when an entry is added in the map.
 	 *
 	 * @param key - the added key.
 	 * @param value - the added value.
 	 */
 	void entryAdded(K key, V value);
 
-	/** Invoked when the value of an entry has changed.
+	/**
+	 * Invoked when the value of an entry has changed.
 	 *
 	 * @param key - the removed key.
 	 * @param value - the removed value.
 	 */
 	void entryUpdated(K key, V value);
 
-	/** Invoked when an entry was removed the map.
+	/**
+	 * Invoked when an entry was removed the map.
 	 *
 	 * @param key - the removed key.
 	 * @param value - the removed value.
 	 */
 	void entryRemoved(K key, V value);
 
-	/** Invoked when the map was cleared.
+	/**
+	 * Invoked when the map was cleared.
 	 *
-	 * @param localClearing - indicates if the clear in local (<code>true</code>)
-	 *     or for all the nodes on the network (<code>false</code>).
+	 * @param localClearing - indicates if the clear in local (<code>true</code>) or for all the nodes on the network (
+	 *        <code>false</code>).
 	 */
 	void mapCleared(boolean localClearing);
 

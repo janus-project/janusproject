@@ -23,7 +23,8 @@ package io.janusproject.services.kerneldiscovery;
 import java.net.URI;
 import java.util.EventListener;
 
-/** Listener on events related to the kernel discovery service.
+/**
+ * Listener on events related to the kernel discovery service.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -32,13 +33,15 @@ import java.util.EventListener;
  */
 public interface KernelDiscoveryServiceListener extends EventListener {
 
-	/** Invoked when a remote kernel has been discovered.
+	/**
+	 * Invoked when a remote kernel has been discovered.
 	 *
 	 * @param peerURI - URI of the kernel was was discovered.
 	 */
 	void kernelDiscovered(URI peerURI);
 
-	/** Invoked when a remote kernel has been disconnected.
+	/**
+	 * Invoked when a remote kernel has been disconnected.
 	 *
 	 * @param peerURI - URI of the kernel that was disconnected.
 	 */

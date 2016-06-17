@@ -55,8 +55,7 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.util.Collections3;
 
 /**
- * A repository of Agent's context and spaces that
- * is based on the other Janus platform services.
+ * A repository of Agent's context and spaces that is based on the other Janus platform services.
  *
  * @author $Author: ngaud$
  * @author $Author: srodriguez$
@@ -71,33 +70,36 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 
 	private final ListenerCollection<?> listeners = new ListenerCollection<>();
 
-	/** Factory of contexts.
+	/**
+	 * Factory of contexts.
 	 */
 	private ContextFactory contextFactory;
 
-	/** Factory of space repositories.
+	/**
+	 * Factory of space repositories.
 	 */
 	private SpaceRepositoryFactory spaceRepositoryFactory;
 
 	/**
-	 * Map linking a context id to its associated default space id.
-	 * This map must be distributed and synchronized all over the network
+	 * Map linking a context id to its associated default space id. This map must be distributed and synchronized all over the
+	 * network
 	 */
 	private DMap<UUID, SpaceID> defaultSpaces;
 
 	/**
-	 * Map linking a context id to its related Context object This is local
-	 * non-distributed map.
+	 * Map linking a context id to its related Context object This is local non-distributed map.
 	 */
 	private Map<UUID, AgentContext> contexts = new TreeMap<>();
 
-	/** Internal listener on the space repository changes.
+	/**
+	 * Internal listener on the space repository changes.
 	 */
 	private ContextDMapListener dmapListener;
 
 	private LogService logger;
 
-	/** Constructs <code>ContextRepository</code>.
+	/**
+	 * Constructs <code>ContextRepository</code>.
 	 */
 	public StandardContextSpaceService() {
 		//
@@ -110,13 +112,12 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 
 	@Override
 	public Collection<java.lang.Class<? extends Service>> getServiceDependencies() {
-		return Arrays.<Class<? extends Service>>asList(
-				DistributedDataStructureService.class,
-				NetworkService.class,
+		return Arrays.<Class<? extends Service>>asList(DistributedDataStructureService.class, NetworkService.class,
 				KernelDiscoveryService.class);
 	}
 
-	/** Replies the factory used to create contexts.
+	/**
+	 * Replies the factory used to create contexts.
 	 *
 	 * @return the context factory.
 	 */
@@ -124,7 +125,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		return this.contextFactory;
 	}
 
-	/** Change the factory used to create contexts.
+	/**
+	 * Change the factory used to create contexts.
 	 *
 	 * @param factory - the context factory.
 	 */
@@ -134,7 +136,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		}
 	}
 
-	/** Replies the factory used to create space repositories.
+	/**
+	 * Replies the factory used to create space repositories.
 	 *
 	 * @return the context factory.
 	 */
@@ -142,7 +145,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		return this.spaceRepositoryFactory;
 	}
 
-	/** Change the factory used to create space repositories.
+	/**
+	 * Change the factory used to create space repositories.
 	 *
 	 * @param factory - the space repository factory.
 	 */
@@ -157,7 +161,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		return this;
 	}
 
-	/** Initialize this service with injected objects.
+	/**
+	 * Initialize this service with injected objects.
 	 *
 	 * @param janusID - injected identifier.
 	 * @param dataStructureService - service that permits to obtain distributed data structure.
@@ -165,11 +170,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 	 * @param injector - the injector to use.
 	 */
 	@Inject
-	synchronized void postConstruction(
-			@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusID,
-			DistributedDataStructureService dataStructureService,
-			LogService logService,
-			Injector injector) {
+	synchronized void postConstruction(@Named(JanusConfig.DEFAULT_CONTEXT_ID_NAME) UUID janusID,
+			DistributedDataStructureService dataStructureService, LogService logService, Injector injector) {
 		this.logger = logService;
 		this.contextFactory = new DefaultContextFactory();
 		this.spaceRepositoryFactory = new Context.DefaultSpaceRepositoryFactory(injector, dataStructureService, logService);
@@ -198,10 +200,7 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		assert (this.contexts != null) : "Internal Error: the context container must not be null"; //$NON-NLS-1$
 		AgentContext context = this.contexts.get(contextID);
 		if (context == null) {
-			Context ctx = this.contextFactory.newInstance(
-					contextID,
-					defaultSpaceUUID,
-					this.spaceRepositoryFactory,
+			Context ctx = this.contextFactory.newInstance(contextID, defaultSpaceUUID, this.spaceRepositoryFactory,
 					new SpaceEventProxy());
 			assert (ctx != null) : "The internal Context cannot be null"; //$NON-NLS-1$
 			assert (this.contexts != null) : "Internal Error: the context container must not be null"; //$NON-NLS-1$
@@ -266,7 +265,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		this.listeners.remove(ContextRepositoryListener.class, listener);
 	}
 
-	/** Notifies the listeners about a context creation.
+	/**
+	 * Notifies the listeners about a context creation.
 	 *
 	 * @param context - reference to the created context.
 	 */
@@ -278,7 +278,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		}
 	}
 
-	/** Notifies the listeners about a context destruction.
+	/**
+	 * Notifies the listeners about a context destruction.
 	 *
 	 * @param context - reference to the destroyed context.
 	 */
@@ -300,11 +301,11 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		this.listeners.remove(SpaceRepositoryListener.class, listener);
 	}
 
-	/** Notifies the listeners on the space creation.
+	/**
+	 * Notifies the listeners on the space creation.
 	 *
 	 * @param space - reference to the created space.
-	 * @param isLocalCreation - indicates if the space was initially created on the
-	 *                          current kernel.
+	 * @param isLocalCreation - indicates if the space was initially created on the current kernel.
 	 */
 	protected void fireSpaceCreated(Space space, boolean isLocalCreation) {
 		for (SpaceRepositoryListener listener : this.listeners.getListeners(SpaceRepositoryListener.class)) {
@@ -312,7 +313,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		}
 	}
 
-	/** Notifies the listeners on the space destruction.
+	/**
+	 * Notifies the listeners on the space destruction.
 	 *
 	 * @param space - reference to the destroyed space.
 	 * @param isLocalDestruction - indicates if the space was destroyed in the current kernel.
@@ -323,8 +325,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		}
 	}
 
-	/** Update the internal data structure when a default
-	 * space was discovered.
+	/**
+	 * Update the internal data structure when a default space was discovered.
 	 *
 	 * @param spaceID - identifier of the space to initialize.
 	 */
@@ -333,8 +335,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		createContext(contextID, spaceID.getID());
 	}
 
-	/** Update the internal data structure when a default
-	 * space was removed.
+	/**
+	 * Update the internal data structure when a default space was removed.
 	 *
 	 * @param spaceID - identifier of the space to remove.
 	 */
@@ -372,7 +374,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 		notifyStopped();
 	}
 
-	/** Listener on map events from Hazelcast.
+	/**
+	 * Listener on map events from Hazelcast.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -381,7 +384,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 	 */
 	private class ContextDMapListener implements DMapListener<UUID, SpaceID> {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		ContextDMapListener() {
 			//
@@ -411,7 +415,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 
 	}
 
-	/** Proxy for space events.
+	/**
+	 * Proxy for space events.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -420,7 +425,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 	 */
 	private class SpaceEventProxy implements SpaceRepositoryListener {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		SpaceEventProxy() {
 			//
@@ -438,7 +444,8 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 
 	}
 
-	/** Factory of contexts.
+	/**
+	 * Factory of contexts.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -447,23 +454,17 @@ public class StandardContextSpaceService extends AbstractDependentService implem
 	 */
 	private static class DefaultContextFactory implements ContextFactory {
 
-		/** Create an instance of context.
+		/**
+		 * Create an instance of context.
 		 */
 		DefaultContextFactory() {
 			//
 		}
 
 		@Override
-		public Context newInstance(
-				UUID contextId,
-				UUID defaultSpaceId,
-				SpaceRepositoryFactory factory,
+		public Context newInstance(UUID contextId, UUID defaultSpaceId, SpaceRepositoryFactory factory,
 				SpaceRepositoryListener listener) {
-			return new Context(
-					contextId,
-					defaultSpaceId,
-					factory,
-					listener);
+			return new Context(contextId, defaultSpaceId, factory, listener);
 		}
 
 	}

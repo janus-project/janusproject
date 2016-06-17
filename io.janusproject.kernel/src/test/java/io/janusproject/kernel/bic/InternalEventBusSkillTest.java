@@ -21,14 +21,6 @@ package io.janusproject.kernel.bic;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.sarl.core.Destroy;
-import io.sarl.core.Initialize;
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.Event;
-import io.sarl.lang.core.EventListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +31,16 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.verification.Times;
 
-import com.google.common.eventbus.AsyncSyncEventBus;
+import io.janusproject.kernel.bic.internaleventdispatching.AgentInternalEventsDispatcher;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.sarl.core.Destroy;
+import io.sarl.core.Initialize;
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.Event;
+import io.sarl.lang.core.EventListener;
+
 
 /**
  * @author $Author: sgalland$
@@ -47,12 +48,12 @@ import com.google.common.eventbus.AsyncSyncEventBus;
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({ "javadoc" })
 public class InternalEventBusSkillTest extends AbstractJanusTest {
 
 	@Mock
-	private AsyncSyncEventBus eventBus;
-	
+	private AgentInternalEventsDispatcher eventBus;
+
 	@Mock
 	private LogService logger;
 
@@ -64,12 +65,12 @@ public class InternalEventBusSkillTest extends AbstractJanusTest {
 
 	@InjectMocks
 	private InternalEventBusSkill skill;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 	}
-	
+
 	@Test
 	public void asEventListener() {
 		assertNotNull(this.skill.asEventListener());
@@ -79,7 +80,7 @@ public class InternalEventBusSkillTest extends AbstractJanusTest {
 	public void getInnerDefaultSpaceAddress() {
 		assertSame(this.innerAddress, this.skill.getInnerDefaultSpaceAddress());
 	}
-		
+
 	@Test
 	public void registerEventListener() {
 		EventListener eventListener = Mockito.mock(EventListener.class);
@@ -107,7 +108,7 @@ public class InternalEventBusSkillTest extends AbstractJanusTest {
 		Mockito.verify(this.eventBus, new Times(1)).register(argument.capture());
 		assertSame(this.agent, argument.getValue());
 	}
-	
+
 	@Test
 	public void uninstall() {
 		this.skill.install();
@@ -135,8 +136,8 @@ public class InternalEventBusSkillTest extends AbstractJanusTest {
 		//
 		Event event = Mockito.mock(Event.class);
 		this.skill.selfEvent(event);
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(this.eventBus, new Times(1)).post(argument.capture());
+		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
+		Mockito.verify(this.eventBus, new Times(1)).asyncDispatch(argument.capture());
 		assertSame(event, argument.getValue());
 	}
 
@@ -144,8 +145,8 @@ public class InternalEventBusSkillTest extends AbstractJanusTest {
 	public void selfEvent_initialize() {
 		Initialize event = Mockito.mock(Initialize.class);
 		this.skill.selfEvent(event);
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(this.eventBus, new Times(1)).fire(argument.capture());
+		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
+		Mockito.verify(this.eventBus, new Times(1)).immediateDispatch(argument.capture());
 		assertSame(event, argument.getValue());
 	}
 
@@ -153,8 +154,8 @@ public class InternalEventBusSkillTest extends AbstractJanusTest {
 	public void selfEvent_destroy() {
 		Destroy event = Mockito.mock(Destroy.class);
 		this.skill.selfEvent(event);
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(this.eventBus, new Times(1)).fire(argument.capture());
+		ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
+		Mockito.verify(this.eventBus, new Times(1)).immediateDispatch(argument.capture());
 		assertSame(event, argument.getValue());
 	}
 

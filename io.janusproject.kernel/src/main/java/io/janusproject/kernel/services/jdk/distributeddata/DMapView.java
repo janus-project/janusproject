@@ -24,7 +24,8 @@ import java.util.Map;
 
 import io.janusproject.util.AbstractDMapView;
 
-/** A view on a standard Map that provides the API for DMap.
+/**
+ * A view on a standard Map that provides the API for DMap.
  *
  * @param <K> - type of the keys.
  * @param <V> - type of the values.

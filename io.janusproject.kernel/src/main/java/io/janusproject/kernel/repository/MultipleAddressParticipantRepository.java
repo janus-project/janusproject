@@ -31,18 +31,18 @@ import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 
-/** Repository that maps participants to multiple addresses.
+/**
+ * Repository that maps participants to multiple addresses.
  *
- * <p>This repository links the id of an entity to its various addresses in the
- * related space.
+ * <p>
+ * This repository links the id of an entity to its various addresses in the related space.
  *
- * <p>The repository must be distributed and synchronized all over the network by
- * using data-structures that are provided by an injected
- * {@link DistributedDataStructureService}.
+ * <p>
+ * The repository must be distributed and synchronized all over the network by using data-structures that are provided by an
+ * injected {@link DistributedDataStructureService}.
  *
- * @param <ADDRESST> - the generic type representing the address of a participant
- *     in the related space. This type must remains small, less than M in memory and
- *     must be {@link java.io.Serializable}
+ * @param <ADDRESST> - the generic type representing the address of a participant in the related space. This type must remains
+ *        small, less than M in memory and must be {@link java.io.Serializable}
  * @author $Author: ngaud$
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -52,28 +52,28 @@ import io.sarl.util.Collections3;
 public final class MultipleAddressParticipantRepository<ADDRESST extends Serializable> extends ParticipantRepository<ADDRESST> {
 
 	/**
-	 * Map linking the id of an entity to its various addresses in the related space.
-	 * This map must be distributed and synchronized all over the network.
+	 * Map linking the id of an entity to its various addresses in the related space. This map must be distributed and
+	 * synchronized all over the network.
 	 */
 	private final DMultiMap<UUID, ADDRESST> participants;
 
 	private final String distributedParticipantMapName;
 
-	/** Constructs a <code>MultipleAddressParticipantRepository</code>.
+	/**
+	 * Constructs a <code>MultipleAddressParticipantRepository</code>.
 	 *
 	 * @param distributedParticipantMapName - name of the multimap over the network.
-	 * @param repositoryImplFactory - factory that will be used to create the
-	 *                                internal data structures.
+	 * @param repositoryImplFactory - factory that will be used to create the internal data structures.
 	 */
-	public MultipleAddressParticipantRepository(
-			String distributedParticipantMapName,
+	public MultipleAddressParticipantRepository(String distributedParticipantMapName,
 			DistributedDataStructureService repositoryImplFactory) {
 		super();
 		this.distributedParticipantMapName = distributedParticipantMapName;
 		this.participants = repositoryImplFactory.getMultiMap(this.distributedParticipantMapName, null);
 	}
 
-	/** Add a participant in this repository.
+	/**
+	 * Add a participant in this repository.
 	 *
 	 * @param address - address of a participant to insert in this repository.
 	 * @param entity - participant to map to the given address.
@@ -87,7 +87,8 @@ public final class MultipleAddressParticipantRepository<ADDRESST extends Seriali
 		return address;
 	}
 
-	/** Remove a participant from this repository.
+	/**
+	 * Remove a participant from this repository.
 	 *
 	 * @param address - address of a participant to remove from this repository.
 	 * @param entity - participant to unmap to the given address.
@@ -101,11 +102,11 @@ public final class MultipleAddressParticipantRepository<ADDRESST extends Seriali
 		return address;
 	}
 
-	/** Replies all the addresses of the participant with the given identifier.
+	/**
+	 * Replies all the addresses of the participant with the given identifier.
 	 *
 	 * @param participant - the identifier of the participant.
-	 * @return the collection of addresses. It may be <code>null</code> if
-	 *     the participant is unknown.
+	 * @return the collection of addresses. It may be <code>null</code> if the participant is unknown.
 	 */
 	public SynchronizedCollection<ADDRESST> getAddresses(UUID participant) {
 		Object mutex = mutex();
@@ -114,8 +115,8 @@ public final class MultipleAddressParticipantRepository<ADDRESST extends Seriali
 		}
 	}
 
-
-	/** Replies all the addresses in this repository.
+	/**
+	 * Replies all the addresses in this repository.
 	 *
 	 * @return the collection of addresses.
 	 */
@@ -126,7 +127,8 @@ public final class MultipleAddressParticipantRepository<ADDRESST extends Seriali
 		}
 	}
 
-	/** Replies all the participants in this repository.
+	/**
+	 * Replies all the participants in this repository.
 	 *
 	 * @return the collection of identifiers.
 	 */

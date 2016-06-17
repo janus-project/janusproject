@@ -42,7 +42,8 @@ public final class BuiltinCapacityUtil {
 		//
 	}
 
-	/** Replies the contexts in which the agent is located.
+	/**
+	 * Replies the contexts in which the agent is located.
 	 *
 	 * @param agent - the agent for which the contexts must be retreived.
 	 * @return the contexts of the agents.
@@ -62,7 +63,8 @@ public final class BuiltinCapacityUtil {
 		return skill.getAllContexts();
 	}
 
-	/** Replies the inner context of the agent, if it was created.
+	/**
+	 * Replies the inner context of the agent, if it was created.
 	 *
 	 * @param agent - the agent for which the inner context must be retreived.
 	 * @return the inner context, or <code>null</code>.

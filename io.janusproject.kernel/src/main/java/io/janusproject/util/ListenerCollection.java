@@ -30,12 +30,14 @@ import java.util.EventListener;
 /**
  * A collection of listeners.
  *
- * <p>This collection is thread-safe.
+ * <p>
+ * This collection is thread-safe.
  *
- * <p>This class is inspirated by <code>EventListenerList</code>.
+ * <p>
+ * This class is inspirated by <code>EventListenerList</code>.
  *
- * <p>This class is copied from the
- * <a href="http://www.arakhne.org/afc">Arakhn&ecirc; Foundation Classes</a>.
+ * <p>
+ * This class is copied from the <a href="http://www.arakhne.org/afc">Arakhn&ecirc; Foundation Classes</a>.
  *
  * @param <L> is the type of listeners.
  * @author $Author: galland$
@@ -47,47 +49,43 @@ public class ListenerCollection<L extends EventListener> {
 
 	private static final Object[] NULL = new Object[0];
 
-	/** Listeners.
+	/**
+	 * Listeners.
 	 */
 	protected transient Object[] listeners = NULL;
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public ListenerCollection() {
 		//
 	}
 
-	/** Replies if this collection is empty.
+	/**
+	 * Replies if this collection is empty.
 	 *
-	 * @return <code>true</code> if this collection does not
-	 *     contains any listener, otherwise <code>false</code>
+	 * @return <code>true</code> if this collection does not contains any listener, otherwise <code>false</code>
 	 */
 	public boolean isEmpty() {
 		return this.listeners == NULL;
 	}
 
-	/** Clear this collection.
+	/**
+	 * Clear this collection.
 	 */
 	public void clear() {
 		this.listeners = NULL;
 	}
 
 	/**
-	 * Passes back the event listener list as an array
-	 * of ListenerType-listener pairs.  Note that for
-	 * performance reasons, this implementation passes back
-	 * the actual data structure in which the listener data
-	 * is stored internally!
-	 * This method is guaranteed to pass back a non-null
-	 * array, so that no null-checking is required in
-	 * fire methods.  A zero-length array of Object should
-	 * be returned if there are currently no listeners.
+	 * Passes back the event listener list as an array of ListenerType-listener pairs. Note that for performance reasons, this
+	 * implementation passes back the actual data structure in which the listener data is stored internally! This method is
+	 * guaranteed to pass back a non-null array, so that no null-checking is required in fire methods. A zero-length array of
+	 * Object should be returned if there are currently no listeners.
 	 *
-	 * <p>WARNING!!! Absolutely NO modification of
-	 * the data contained in this array should be made -- if
-	 * any such manipulation is necessary, it should be done
-	 * on a copy of the array returned rather than the array
-	 * itself.
+	 * <p>
+	 * WARNING!!! Absolutely NO modification of the data contained in this array should be made -- if any such manipulation is
+	 * necessary, it should be done on a copy of the array returned rather than the array itself.
 	 *
 	 * @return the listeners.
 	 */
@@ -126,12 +124,10 @@ public class ListenerCollection<L extends EventListener> {
 	}
 
 	/**
-	 * Returns the total number of listeners of the supplied type
-	 * for this listener list.
+	 * Returns the total number of listeners of the supplied type for this listener list.
 	 *
 	 * @param type - type of the listeners to consider.
-	 * @return the total number of listeners of the supplied type
-	 *     for this listener list.
+	 * @return the total number of listeners of the supplied type for this listener list.
 	 */
 	public int getListenerCount(Class<?> type) {
 		return getListenerCount(this.listeners, type);
@@ -159,9 +155,7 @@ public class ListenerCollection<L extends EventListener> {
 		if (this.listeners == NULL) {
 			// if this is the first listener added,
 			// initialize the lists
-			this.listeners = new Object[] {
-				type, listener,
-			};
+			this.listeners = new Object[] {type, listener, };
 		} else {
 			// Otherwise copy the array and add the new listener
 			int i = this.listeners.length;
@@ -193,7 +187,7 @@ public class ListenerCollection<L extends EventListener> {
 			}
 		}
 
-		// If so,  remove it
+		// If so, remove it
 		if (index != -1) {
 			Object[] tmp = new Object[this.listeners.length - 2];
 			// Copy the list up to index
@@ -202,8 +196,7 @@ public class ListenerCollection<L extends EventListener> {
 			// the end of tmp (which is two elements
 			// shorter than the old list)
 			if (index < tmp.length) {
-				System.arraycopy(this.listeners, index + 2, tmp, index,
-						tmp.length - index);
+				System.arraycopy(this.listeners, index + 2, tmp, index, tmp.length - index);
 			}
 			// set the listener array to the new array or null
 			this.listeners = (tmp.length == 0) ? NULL : tmp;
@@ -229,8 +222,7 @@ public class ListenerCollection<L extends EventListener> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void readObject(ObjectInputStream stream)
-	throws IOException, ClassNotFoundException {
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 		this.listeners = NULL;
 		stream.defaultReadObject();
 		Object listenerTypeOrNull;
@@ -238,11 +230,7 @@ public class ListenerCollection<L extends EventListener> {
 		while (null != (listenerTypeOrNull = stream.readObject())) {
 			ClassLoader cl = Thread.currentThread().getContextClassLoader();
 			EventListener listener = (EventListener) stream.readObject();
-			add((Class<EventListener>) Class.forName(
-					(String) listenerTypeOrNull,
-					true,
-					cl),
-					listener);
+			add((Class<EventListener>) Class.forName((String) listenerTypeOrNull, true, cl), listener);
 		}
 	}
 

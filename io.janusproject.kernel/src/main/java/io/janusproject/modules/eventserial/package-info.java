@@ -19,8 +19,6 @@
  */
 
 /**
- * Injection modules for SARL event serialization
- * and encryption.
+ * Injection modules for SARL event serialization and encryption.
  */
 package io.janusproject.modules.eventserial;
-

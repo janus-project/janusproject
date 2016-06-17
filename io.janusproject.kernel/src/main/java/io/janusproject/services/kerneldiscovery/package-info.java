@@ -22,4 +22,3 @@
  * Definition of the service for discovering remote Janus kernels.
  */
 package io.janusproject.services.kerneldiscovery;
-

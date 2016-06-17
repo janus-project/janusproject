@@ -24,7 +24,8 @@ import java.util.UUID;
 
 import io.janusproject.services.contextspace.SpaceRepositoryListener;
 
-/** Factory of contexts.
+/**
+ * Factory of contexts.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -33,7 +34,8 @@ import io.janusproject.services.contextspace.SpaceRepositoryListener;
  */
 interface ContextFactory {
 
-	/** Create an instance of context.
+	/**
+	 * Create an instance of context.
 	 *
 	 * @param contextId - id of the context.
 	 * @param defaultSpaceId - id of the default space.
@@ -41,10 +43,6 @@ interface ContextFactory {
 	 * @param listener - listener on the space repository that must be given to the created context at startup.
 	 * @return the context
 	 */
-	Context newInstance(
-			UUID contextId,
-			UUID defaultSpaceId,
-			SpaceRepositoryFactory factory,
-			SpaceRepositoryListener listener);
+	Context newInstance(UUID contextId, UUID defaultSpaceId, SpaceRepositoryFactory factory, SpaceRepositoryListener listener);
 
 }

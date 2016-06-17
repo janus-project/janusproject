@@ -27,20 +27,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import io.janusproject.services.contextspace.SpaceRepositoryListener;
-import io.janusproject.services.distributeddata.DMap;
-import io.janusproject.services.distributeddata.DistributedDataStructureService;
-import io.janusproject.testutils.AbstractJanusTest;
-import io.janusproject.util.TwoStepConstruction;
-import io.sarl.lang.core.EventSpace;
-import io.sarl.lang.core.EventSpaceSpecification;
-import io.sarl.lang.core.Space;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.util.Collections3;
-import io.sarl.util.OpenEventSpace;
-import io.sarl.util.OpenEventSpaceSpecification;
-import io.sarl.util.RestrictedAccessEventSpace;
-import io.sarl.util.RestrictedAccessEventSpaceSpecification;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -48,8 +34,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.UUID;
-
-import javassist.Modifier;
 
 import javax.annotation.Nullable;
 
@@ -64,6 +48,22 @@ import org.mockito.stubbing.Answer;
 
 import com.google.inject.Injector;
 
+import io.janusproject.services.contextspace.SpaceRepositoryListener;
+import io.janusproject.services.distributeddata.DMap;
+import io.janusproject.services.distributeddata.DistributedDataStructureService;
+import io.janusproject.testutils.AbstractJanusTest;
+import io.janusproject.util.TwoStepConstruction;
+import io.sarl.lang.core.EventSpace;
+import io.sarl.lang.core.EventSpaceSpecification;
+import io.sarl.lang.core.Space;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.util.Collections3;
+import io.sarl.util.OpenEventSpace;
+import io.sarl.util.OpenEventSpaceSpecification;
+import io.sarl.util.RestrictedAccessEventSpace;
+import io.sarl.util.RestrictedAccessEventSpaceSpecification;
+import javassist.Modifier;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -74,7 +74,7 @@ import com.google.inject.Injector;
 public class SpaceRepositoryTest extends AbstractJanusTest {
 
 	@Nullable
-	private DMap<SpaceID,Object[]> spaceIDs;
+	private DMap<SpaceID, Object[]> spaceIDs;
 
 	@Nullable
 	private DistributedDataStructureService dds;
@@ -99,7 +99,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 
 	@Nullable
 	private OpenEventSpace space;
-	
+
 	@Before
 	public void setUp() {
 		this.spaceIDs = Mockito.mock(DMap.class);
@@ -107,18 +107,16 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 		this.injector = Mockito.mock(Injector.class);
 		this.listener = Mockito.mock(SpaceRepositoryListener.class);
 		this.spaceID = new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class);
-		this.params = new Object[]{"PARAM"}; //$NON-NLS-1$
+		this.params = new Object[] { "PARAM" }; //$NON-NLS-1$
 		//
-		Mockito.when(this.dds.<SpaceID,Object[]>getMap(Matchers.anyString(), Matchers.any(Comparator.class))).thenReturn(this.spaceIDs);
-		Mockito.when(this.dds.<SpaceID,Object[]>getMap(Matchers.anyString())).thenReturn(this.spaceIDs);
+		Mockito.when(this.dds.<SpaceID, Object[]> getMap(Matchers.anyString(), Matchers.any(Comparator.class)))
+				.thenReturn(this.spaceIDs);
+		Mockito.when(this.dds.<SpaceID, Object[]> getMap(Matchers.anyString())).thenReturn(this.spaceIDs);
 		//
-		this.repository = new SpaceRepository(
-				"thename", //$NON-NLS-1$
-				this.dds,
-				this.injector,
-				this.listener);		
+		this.repository = new SpaceRepository("thename", //$NON-NLS-1$
+				this.dds, this.injector, this.listener);
 	}
-	
+
 	private void initMocks() {
 		Mockito.when(this.spaceIDs.containsKey(this.spaceID)).thenReturn(true);
 		Mockito.when(this.spaceIDs.keySet()).thenReturn(new HashSet<>(Collections.singleton(this.spaceID)));
@@ -128,7 +126,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 		Mockito.when(this.spaceSpecification.create(this.spaceID, this.params)).thenReturn(this.space);
 		Mockito.when(this.space.getID()).thenReturn(this.spaceID);
 	}
-	
+
 	private void baseInit() {
 		this.spaceSpecification = Mockito.mock(OpenEventSpaceSpecification.class);
 		Mockito.when(this.injector.getInstance(OpenEventSpaceSpecification.class)).thenReturn(this.spaceSpecification);
@@ -166,11 +164,10 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 	public void twoStepConstruction() throws Exception {
 		TwoStepConstruction annotation = SpaceRepository.class.getAnnotation(TwoStepConstruction.class);
 		assertNotNull(annotation);
-		for(String name : annotation.names()) {
-			for(Method method : SpaceRepository.class.getMethods()) {
+		for (String name : annotation.names()) {
+			for (Method method : SpaceRepository.class.getMethods()) {
 				if (name.equals(method.getName())) {
-					assertTrue(Modifier.isPackage(method.getModifiers())
-							||Modifier.isPublic(method.getModifiers()));
+					assertTrue(Modifier.isPackage(method.getModifiers()) || Modifier.isPublic(method.getModifiers()));
 					break;
 				}
 			}
@@ -202,7 +199,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 	@Test
 	public void removeSpaceDefinition() {
 		initRepository();
-		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.<UUID>emptySynchronizedSet());
+		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.<UUID> emptySynchronizedSet());
 		Mockito.when(this.spaceIDs.containsKey(this.spaceID)).thenReturn(false);
 		//
 		this.repository.removeLocalSpaceDefinition(this.spaceID, true);
@@ -215,7 +212,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 		assertSame(this.space, argument3.getValue());
 		assertTrue(argument4.getValue());
 	}
-	
+
 	@Test
 	public void getSpaces() {
 		initRepository();
@@ -313,9 +310,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 	public void getOrCreateSpaceWithSpec_singlecreation() {
 		baseInit();
 		//
-		OpenEventSpace space = this.repository.getOrCreateSpaceWithSpec(
-				this.spaceID,
-				OpenEventSpaceSpecification.class,
+		OpenEventSpace space = this.repository.getOrCreateSpaceWithSpec(this.spaceID, OpenEventSpaceSpecification.class,
 				this.params);
 		//
 		assertSame(this.space, space);
@@ -337,10 +332,10 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 	public void getOrCreateSpaceWithSpec_doublecreation() {
 		baseInit();
 		//
-		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithSpec(
-				this.spaceID, OpenEventSpaceSpecification.class, this.params);
-		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithSpec(
-				this.spaceID, OpenEventSpaceSpecification.class, this.params);
+		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithSpec(this.spaceID, OpenEventSpaceSpecification.class,
+				this.params);
+		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithSpec(this.spaceID, OpenEventSpaceSpecification.class,
+				this.params);
 		//
 		assertSame(this.space, space1);
 		assertSame(this.space, space2);
@@ -362,9 +357,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 	public void getOrCreateSpaceWithID_singlecreation() {
 		baseInit();
 		//
-		OpenEventSpace space = this.repository.getOrCreateSpaceWithID(
-				this.spaceID,
-				OpenEventSpaceSpecification.class,
+		OpenEventSpace space = this.repository.getOrCreateSpaceWithID(this.spaceID, OpenEventSpaceSpecification.class,
 				this.params);
 		//
 		assertSame(this.space, space);
@@ -386,10 +379,10 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 	public void getOrCreateSpaceWithID_doublecreation() {
 		baseInit();
 		//
-		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithID(
-				this.spaceID, OpenEventSpaceSpecification.class, this.params);
-		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithID(
-				this.spaceID, OpenEventSpaceSpecification.class, this.params);
+		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithID(this.spaceID, OpenEventSpaceSpecification.class,
+				this.params);
+		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithID(this.spaceID, OpenEventSpaceSpecification.class,
+				this.params);
 		//
 		assertSame(this.space, space1);
 		assertSame(this.space, space2);
@@ -412,7 +405,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 		this.repository.destroy();
 		Mockito.verifyZeroInteractions(this.listener);
 	}
-	
+
 	@Test
 	public void destroy_baseinit() {
 		baseInit();
@@ -430,7 +423,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 	@Test
 	public void destroy_initrepository() {
 		initRepository();
-		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.<UUID>emptySynchronizedSet());
+		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.<UUID> emptySynchronizedSet());
 		this.repository.destroy();
 		ArgumentCaptor<Space> argument = ArgumentCaptor.forClass(Space.class);
 		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
@@ -442,8 +435,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 	@Test
 	public void destroy_hasparticipant() {
 		initRepository();
-		Mockito.when(this.space.getParticipants()).thenReturn(
-				Collections3.synchronizedSingleton(UUID.randomUUID()));
+		Mockito.when(this.space.getParticipants()).thenReturn(Collections3.synchronizedSingleton(UUID.randomUUID()));
 		this.repository.destroy();
 		ArgumentCaptor<Space> argument = ArgumentCaptor.forClass(Space.class);
 		ArgumentCaptor<Boolean> argument4 = ArgumentCaptor.forClass(Boolean.class);
@@ -468,21 +460,15 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 			}
 		});
 		//
-		OpenEventSpace space1 = this.repository.createSpace(
-				new SpaceID(contextID,
-						UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
-		OpenEventSpace space2 = this.repository.createSpace(
-				new SpaceID(contextID,
-						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
-		OpenEventSpace space3 = this.repository.createSpace(
-				new SpaceID(contextID,
-						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
+		OpenEventSpace space1 = this.repository
+				.createSpace(new SpaceID(contextID, UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
+		OpenEventSpace space2 = this.repository
+				.createSpace(new SpaceID(contextID, UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
+		OpenEventSpace space3 = this.repository
+				.createSpace(new SpaceID(contextID, UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
 		//
 		assertNotNull(space1);
 		assertNotNull(space2);
@@ -490,7 +476,7 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 		assertNotSame(space1, space2);
 		assertNotEquals(space1.getID(), space2.getID());
 	}
-	
+
 	@Test
 	public void getOrCreateSpaceWithSpec_bug92() {
 		initMocks();
@@ -507,21 +493,15 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 			}
 		});
 		//
-		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithSpec(
-				new SpaceID(contextID,
-						UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
-		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithSpec(
-				new SpaceID(contextID,
-						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
-		OpenEventSpace space3 = this.repository.getOrCreateSpaceWithSpec(
-				new SpaceID(contextID,
-						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
+		OpenEventSpace space1 = this.repository
+				.getOrCreateSpaceWithSpec(new SpaceID(contextID, UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
+		OpenEventSpace space2 = this.repository
+				.getOrCreateSpaceWithSpec(new SpaceID(contextID, UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
+		OpenEventSpace space3 = this.repository
+				.getOrCreateSpaceWithSpec(new SpaceID(contextID, UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
 		//
 		assertNotNull(space1);
 		assertNotNull(space2);
@@ -546,21 +526,15 @@ public class SpaceRepositoryTest extends AbstractJanusTest {
 			}
 		});
 		//
-		OpenEventSpace space1 = this.repository.getOrCreateSpaceWithID(
-				new SpaceID(contextID,
-						UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
-		OpenEventSpace space2 = this.repository.getOrCreateSpaceWithID(
-				new SpaceID(contextID,
-						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
-		OpenEventSpace space3 = this.repository.getOrCreateSpaceWithID(
-				new SpaceID(contextID,
-						UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
-						OpenEventSpaceSpecification.class),
-				OpenEventSpaceSpecification.class);
+		OpenEventSpace space1 = this.repository
+				.getOrCreateSpaceWithID(new SpaceID(contextID, UUID.fromString("22222222-2222-2222-2222-222222222222"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
+		OpenEventSpace space2 = this.repository
+				.getOrCreateSpaceWithID(new SpaceID(contextID, UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
+		OpenEventSpace space3 = this.repository
+				.getOrCreateSpaceWithID(new SpaceID(contextID, UUID.fromString("77777777-7777-7777-7777-777777777777"), //$NON-NLS-1$
+						OpenEventSpaceSpecification.class), OpenEventSpaceSpecification.class);
 		//
 		assertNotNull(space1);
 		assertNotNull(space2);

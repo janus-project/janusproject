@@ -22,4 +22,3 @@
  * Definition of the service for managing contexts and spaces.
  */
 package io.janusproject.services.contextspace;
-

@@ -20,9 +20,6 @@
 package io.janusproject.modules.hazelcast;
 
 import static org.junit.Assert.assertEquals;
-import io.sarl.lang.core.Address;
-import io.sarl.lang.core.SpaceID;
-import io.sarl.util.OpenEventSpaceSpecification;
 
 import java.util.UUID;
 
@@ -31,23 +28,27 @@ import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.SpaceID;
+import io.sarl.util.OpenEventSpaceSpecification;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({ "javadoc" })
 public class AddressSerializerTest extends AbstractSerializerTest {
 
 	@Nullable
 	private AddressSerializer serializer;
-	
+
 	@Before
 	public void setUp() {
 		this.serializer = new AddressSerializer();
 	}
-	
+
 	@Test
 	public void getTypeId() {
 		assertEquals(AddressSerializer.ADDRESS_CLASS_TYPE, this.serializer.getTypeId());
@@ -55,14 +56,8 @@ public class AddressSerializerTest extends AbstractSerializerTest {
 
 	@Test
 	public void writeRead() throws Exception {
-		assertWriteRead(
-				new Address(
-					new SpaceID(
-							UUID.randomUUID(),
-							UUID.randomUUID(),
-							OpenEventSpaceSpecification.class),
-					UUID.randomUUID()),
-				this.serializer);
+		assertWriteRead(new Address(new SpaceID(UUID.randomUUID(), UUID.randomUUID(), OpenEventSpaceSpecification.class),
+				UUID.randomUUID()), this.serializer);
 	}
-	
+
 }

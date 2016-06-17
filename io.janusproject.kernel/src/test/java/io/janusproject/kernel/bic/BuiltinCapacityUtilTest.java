@@ -19,6 +19,23 @@
  */
 package io.janusproject.kernel.bic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import io.janusproject.testutils.AbstractJanusTest;
 import io.sarl.core.ExternalContextAccess;
 import io.sarl.core.InnerContextAccess;
@@ -28,20 +45,6 @@ import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.Capacity;
 import io.sarl.lang.util.SynchronizedCollection;
 import io.sarl.util.Collections3;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import static org.junit.Assert.*;
 
 /**
  * @author $Author: sgalland$
@@ -60,16 +63,14 @@ public class BuiltinCapacityUtilTest extends AbstractJanusTest {
 
 	@Nullable
 	private Agent agent;
-	
+
 	@Before
 	public void setUp() {
 		this.innerSkill = Mockito.mock(InnerContextAccess.class);
 		this.contextSkill = Mockito.mock(ExternalContextAccess.class);
-		this.agent = new Agent(
-				Mockito.mock(BuiltinCapacitiesProvider.class),
-				UUID.randomUUID(),
-				null) {
-			/** {@inheritDoc}
+		this.agent = new Agent(Mockito.mock(BuiltinCapacitiesProvider.class), UUID.randomUUID(), null) {
+			/**
+			 * {@inheritDoc}
 			 */
 			@Override
 			protected <S extends Capacity> S getSkill(Class<S> capacity) {
@@ -83,8 +84,8 @@ public class BuiltinCapacityUtilTest extends AbstractJanusTest {
 
 	@Test
 	public void getContextsOf_emptycontextlist() throws Exception {
-		Mockito.when(this.contextSkill.getAllContexts()).thenReturn(
-				Collections3.synchronizedCollection(Collections.<AgentContext>emptyList(), this));
+		Mockito.when(this.contextSkill.getAllContexts())
+				.thenReturn(Collections3.synchronizedCollection(Collections.<AgentContext> emptyList(), this));
 		SynchronizedCollection<AgentContext> c = BuiltinCapacityUtil.getContextsOf(this.agent);
 		assertNotNull(c);
 		assertTrue(c.isEmpty());
@@ -93,8 +94,8 @@ public class BuiltinCapacityUtilTest extends AbstractJanusTest {
 	@Test
 	public void getContextsOf_onecontext() throws Exception {
 		AgentContext context = Mockito.mock(AgentContext.class);
-		Mockito.when(this.contextSkill.getAllContexts()).thenReturn(
-				Collections3.synchronizedCollection(Collections.singletonList(context), this));
+		Mockito.when(this.contextSkill.getAllContexts())
+				.thenReturn(Collections3.synchronizedCollection(Collections.singletonList(context), this));
 		SynchronizedCollection<AgentContext> c = BuiltinCapacityUtil.getContextsOf(this.agent);
 		assertNotNull(c);
 		assertFalse(c.isEmpty());
@@ -106,8 +107,8 @@ public class BuiltinCapacityUtilTest extends AbstractJanusTest {
 	public void getContextsOf_twocontexts() throws Exception {
 		AgentContext context1 = Mockito.mock(AgentContext.class);
 		AgentContext context2 = Mockito.mock(AgentContext.class);
-		Mockito.when(this.contextSkill.getAllContexts()).thenReturn(
-				Collections3.synchronizedCollection(Arrays.asList(context1,context2), this));
+		Mockito.when(this.contextSkill.getAllContexts())
+				.thenReturn(Collections3.synchronizedCollection(Arrays.asList(context1, context2), this));
 		SynchronizedCollection<AgentContext> c = BuiltinCapacityUtil.getContextsOf(this.agent);
 		assertNotNull(c);
 		assertFalse(c.isEmpty());
@@ -122,7 +123,7 @@ public class BuiltinCapacityUtilTest extends AbstractJanusTest {
 		AgentContext context = BuiltinCapacityUtil.getContextIn(this.agent);
 		assertNull(context);
 	}
-		
+
 	@Test
 	public void getContextIn_genericbic_innercontext() throws Exception {
 		AgentContext innerContext = Mockito.mock(AgentContext.class);
@@ -135,17 +136,17 @@ public class BuiltinCapacityUtilTest extends AbstractJanusTest {
 	public void getContextIn_janusbic_noinnercontext() throws Exception {
 		this.innerSkill = Mockito.mock(InnerContextSkill.class);
 		Mockito.when(this.innerSkill.getInnerContext()).thenReturn(null);
-		Mockito.when(((InnerContextSkill)this.innerSkill).hasInnerContext()).thenReturn(false);
+		Mockito.when(((InnerContextSkill) this.innerSkill).hasInnerContext()).thenReturn(false);
 		AgentContext context = BuiltinCapacityUtil.getContextIn(this.agent);
 		assertNull(context);
 	}
-		
+
 	@Test
 	public void getContextIn_janusgeneric_innercontext() throws Exception {
 		this.innerSkill = Mockito.mock(InnerContextSkill.class);
 		AgentContext innerContext = Mockito.mock(AgentContext.class);
 		Mockito.when(this.innerSkill.getInnerContext()).thenReturn(innerContext);
-		Mockito.when(((InnerContextSkill)this.innerSkill).hasInnerContext()).thenReturn(true);
+		Mockito.when(((InnerContextSkill) this.innerSkill).hasInnerContext()).thenReturn(true);
 		AgentContext context = BuiltinCapacityUtil.getContextIn(this.agent);
 		assertSame(innerContext, context);
 	}

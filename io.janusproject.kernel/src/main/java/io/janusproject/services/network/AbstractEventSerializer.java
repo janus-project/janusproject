@@ -33,11 +33,13 @@ import java.util.UUID;
  */
 public abstract class AbstractEventSerializer implements EventSerializer {
 
-	/** Encrypter for events.
+	/**
+	 * Encrypter for events.
 	 */
 	protected final EventEncrypter encrypter;
 
-	/** Constructs an AbstractEventSerializer.
+	/**
+	 * Constructs an AbstractEventSerializer.
 	 *
 	 * @param encrypter - the object that permits to encrypt the events.
 	 */

@@ -22,4 +22,3 @@
  * Implementation of the spawn service based on the Java Development Kit.
  */
 package io.janusproject.kernel.services.jdk.spawn;
-

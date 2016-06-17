@@ -22,8 +22,8 @@ package io.janusproject.services.network;
 
 import java.util.UUID;
 
-
-/** An encrypter of events to be published over the network.
+/**
+ * An encrypter of events to be published over the network.
  *
  * @author $Author: srodriguez$
  * @version $FullVersion$
@@ -32,21 +32,24 @@ import java.util.UUID;
  */
 public interface EventEncrypter {
 
-	/** Encrypt the given envelope.
+	/**
+	 * Encrypt the given envelope.
 	 *
 	 * @param envelope - the envelope to encrypt.
 	 * @throws Exception - if error when encrypting.
 	 */
 	void encrypt(EventEnvelope envelope) throws Exception;
 
-	/** Decrypt the given envelope.
+	/**
+	 * Decrypt the given envelope.
 	 *
 	 * @param envelope - the envelope to decrypt.
 	 * @throws Exception - if error when decrypting.
 	 */
 	void decrypt(EventEnvelope envelope) throws Exception;
 
-	/** Encrypt the given UUID.
+	/**
+	 * Encrypt the given UUID.
 	 *
 	 * @param uuid - the UUID to encrypt.
 	 * @return the encrypted UUID.

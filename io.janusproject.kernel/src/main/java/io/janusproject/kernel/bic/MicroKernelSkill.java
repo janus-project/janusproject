@@ -28,8 +28,8 @@ import io.janusproject.kernel.Kernel;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Skill;
 
-/** Janus implementation of an internal skill that provides
- * access to the micro kernel.
+/**
+ * Janus implementation of an internal skill that provides access to the micro kernel.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -54,7 +54,8 @@ class MicroKernelSkill extends Skill implements MicroKernelCapacity {
 		this.kernel = null;
 	}
 
-	/** Replies the kernel.
+	/**
+	 * Replies the kernel.
 	 *
 	 * @return the kernel, or <code>null</code>.
 	 */

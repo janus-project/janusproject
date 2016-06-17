@@ -50,12 +50,15 @@ import io.sarl.lang.core.AgentContext;
 /**
  * This class represents the Kernel of the Janus platform.
  *
- * <p><strong>The Kernel is a singleton.</strong>
+ * <p>
+ * <strong>The Kernel is a singleton.</strong>
  *
- * <p>The Kernel is assimilated to an agent that is omniscient and
- * distributed other the network. It is containing all the other agents.
+ * <p>
+ * The Kernel is assimilated to an agent that is omniscient and distributed other the network. It is containing all the other
+ * agents.
  *
- * <p>To create a Kernel, you should use the function {@link #create(Module...)}.
+ * <p>
+ * To create a Kernel, you should use the function {@link #create(Module...)}.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -76,7 +79,8 @@ public class Kernel {
 
 	private final LogService loggingService;
 
-	/** Logger used by the kernel, but not linked to the logging kernel's service.
+	/**
+	 * Logger used by the kernel, but not linked to the logging kernel's service.
 	 */
 	private Logger rawLogger;
 
@@ -91,9 +95,7 @@ public class Kernel {
 	 * @param exceptionHandler is the handler of the uncaught exceptions.
 	 */
 	@Inject
-	Kernel(IServiceManager serviceManager,
-			SpawnService spawnService,
-			LogService loggingService,
+	Kernel(IServiceManager serviceManager, SpawnService spawnService, LogService loggingService,
 			UncaughtExceptionHandler exceptionHandler) {
 		// Initialize the fields
 		this.serviceManager = serviceManager;
@@ -111,7 +113,8 @@ public class Kernel {
 		Services.startServices(this.serviceManager);
 	}
 
-	/** Create an instance of {@link Kernel}.
+	/**
+	 * Create an instance of {@link Kernel}.
 	 *
 	 * @param modules - modules to link to the new kernel.
 	 * @return the new kernel.
@@ -122,10 +125,10 @@ public class Kernel {
 		return k;
 	}
 
-	/** Replies if the kernel is running or not.
+	/**
+	 * Replies if the kernel is running or not.
 	 *
-	 * @return <code>true</code> if the kernel is running; <code>false</code>
-	 *     otherwise.
+	 * @return <code>true</code> if the kernel is running; <code>false</code> otherwise.
 	 */
 	public boolean isRunning() {
 		return this.isRunning.get();
@@ -145,8 +148,7 @@ public class Kernel {
 	/**
 	 * Spawn an agent of the given type, and pass the parameters to its initialization function.
 	 *
-	 * @param agentID - the identifier of the agent to spawn. If <code>null</code>
-	 *                  the identifier is randomly selected.
+	 * @param agentID - the identifier of the agent to spawn. If <code>null</code> the identifier is randomly selected.
 	 * @param agent - the type of the agent to spawn.
 	 * @param params - the list of the parameters to pass to the agent initialization function.
 	 * @return the identifier of the agent, never <code>null</code>.
@@ -155,7 +157,8 @@ public class Kernel {
 		return this.spawnService.spawn(this.janusContext, agentID, agent, params);
 	}
 
-	/** Replies a kernel service that is alive.
+	/**
+	 * Replies a kernel service that is alive.
 	 *
 	 * @param <S> - type of the type to reply.
 	 * @param type - type of the type to reply.
@@ -170,7 +173,8 @@ public class Kernel {
 		return null;
 	}
 
-	/** Replies the logger used by the kernel.
+	/**
+	 * Replies the logger used by the kernel.
 	 *
 	 * @return the logger of the kernel.
 	 */
@@ -196,7 +200,8 @@ public class Kernel {
 		this.janusContext = janusContext;
 	}
 
-	/** Listener on platform events.
+	/**
+	 * Listener on platform events.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -205,7 +210,8 @@ public class Kernel {
 	 */
 	private class KernelStoppingListener implements KernelAgentSpawnListener {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		KernelStoppingListener() {
 			//
@@ -228,7 +234,8 @@ public class Kernel {
 		}
 	}
 
-	/** Runner for stopping the kernel.
+	/**
+	 * Runner for stopping the kernel.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -237,13 +244,15 @@ public class Kernel {
 	 */
 	private class StopTheKernel implements ThreadFactory, Runnable, UncaughtExceptionHandler {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		StopTheKernel() {
 			//
 		}
 
-		/** Start the thread.
+		/**
+		 * Start the thread.
 		 */
 		public void start() {
 			Thread t = newThread(this);
@@ -286,4 +295,3 @@ public class Kernel {
 	}
 
 }
-

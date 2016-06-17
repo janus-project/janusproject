@@ -22,14 +22,14 @@ package io.janusproject.services.network;
 
 import java.util.UUID;
 
-/** A serializer of events to be published over the network.
+/**
+ * A serializer of events to be published over the network.
  *
- * <p>A serializer convert an {@link EventDispatch} into/from
- * an {@link EventEnvelope}.
+ * <p>
+ * A serializer convert an {@link EventDispatch} into/from an {@link EventEnvelope}.
  *
- * <p>The implementation of a serializer may use an
- * {@link EventEncrypter} for encrypting/decrypting the
- * envelope.
+ * <p>
+ * The implementation of a serializer may use an {@link EventEncrypter} for encrypting/decrypting the envelope.
  *
  * @author $Author: srodriguez$
  * @version $FullVersion$
@@ -40,7 +40,8 @@ import java.util.UUID;
  */
 public interface EventSerializer {
 
-	/** Serialize the given event.
+	/**
+	 * Serialize the given event.
 	 *
 	 * @param dispatch - event to serialize.
 	 * @return the envelope with the serialized event.
@@ -48,7 +49,8 @@ public interface EventSerializer {
 	 */
 	EventEnvelope serialize(EventDispatch dispatch) throws Exception;
 
-	/** Deserialize the given envelope to obtain an event.
+	/**
+	 * Deserialize the given envelope to obtain an event.
 	 *
 	 * @param envelope - envelope to deserialize.
 	 * @return the dispatched event.
@@ -56,7 +58,8 @@ public interface EventSerializer {
 	 */
 	EventDispatch deserialize(EventEnvelope envelope) throws Exception;
 
-	/** Serialize the given identifier of context.
+	/**
+	 * Serialize the given identifier of context.
 	 *
 	 * @param id - identifier ti serialize.
 	 * @return the byte-representation of the given identifier.

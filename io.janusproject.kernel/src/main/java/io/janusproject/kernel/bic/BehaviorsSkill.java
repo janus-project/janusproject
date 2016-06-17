@@ -30,7 +30,8 @@ import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Skill;
 
-/** Janus implementation of SARL's {@link Behaviors} built-in capacity.
+/**
+ * Janus implementation of SARL's {@link Behaviors} built-in capacity.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$

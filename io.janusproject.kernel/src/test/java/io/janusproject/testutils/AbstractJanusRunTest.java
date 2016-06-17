@@ -21,15 +21,6 @@ package io.janusproject.testutils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import io.janusproject.Boot;
-import io.janusproject.kernel.Kernel;
-import io.janusproject.modules.StandardJanusPlatformModule;
-import io.sarl.core.Initialize;
-import io.sarl.core.Lifecycle;
-import io.sarl.core.Schedules;
-import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.BuiltinCapacitiesProvider;
-import io.sarl.lang.core.Percept;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,13 +41,21 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.mockito.Mockito;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-/** Abstract class for creating unit tests that needs
- * to launch a Janus instance.
+import io.janusproject.Boot;
+import io.janusproject.kernel.Kernel;
+import io.janusproject.modules.StandardJanusPlatformModule;
+import io.sarl.core.Initialize;
+import io.sarl.core.Lifecycle;
+import io.sarl.core.Schedules;
+import io.sarl.lang.core.Agent;
+import io.sarl.lang.core.BuiltinCapacitiesProvider;
+
+/**
+ * Abstract class for creating unit tests that needs to launch a Janus instance.
  *
  * @param <S> - the type of the service.
  * @author $Author: sgalland$
@@ -67,7 +66,8 @@ import com.google.inject.util.Modules;
 @SuppressWarnings("all")
 public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 
-	/** Reference to the instance of the Janus kernel.
+	/**
+	 * Reference to the instance of the Janus kernel.
 	 */
 	protected Kernel janusKernel;
 
@@ -95,16 +95,18 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 			}
 		}
 	};
-	
-	/** Replies the number of results provided by the ran platform.
+
+	/**
+	 * Replies the number of results provided by the ran platform.
 	 *
 	 * @return the number of results.
 	 */
 	protected int getNumberOfResults() {
 		return this.results.size();
 	}
-	
-	/** Test if the number of results provided by the Janus platform is equal to the given number.
+
+	/**
+	 * Test if the number of results provided by the Janus platform is equal to the given number.
 	 *
 	 * @param expected - the expected number of results.
 	 */
@@ -112,7 +114,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		assertEquals("Invalid number of results provided by the platform.", expected, this.results.size());
 	}
 
-	/** Replies result at the given index of the run of the agent.
+	/**
+	 * Replies result at the given index of the run of the agent.
 	 * 
 	 * @param type - the type of the result.
 	 * @param index - the index of the result.
@@ -129,7 +132,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		return null;
 	}
 
-	/** Replies the index of the first result of the given type.
+	/**
+	 * Replies the index of the first result of the given type.
 	 * 
 	 * @param type - the type of the result.
 	 * @return the index; or <code>-1</code> if not found.
@@ -138,8 +142,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		return indexOfResult(type, 0);
 	}
 
-	/** Replies the index of the first result of the given type starting
-	 * at the given index.
+	/**
+	 * Replies the index of the first result of the given type starting at the given index.
 	 * 
 	 * @param type - the type of the result.
 	 * @param fromIndex - the start index.
@@ -161,7 +165,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		return -1;
 	}
 
-	/** Start the Janus platform offline.
+	/**
+	 * Start the Janus platform offline.
 	 *
 	 * This function has no timeout for the end of the run.
 	 * 
@@ -173,7 +178,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		runJanus(type, enableLogging, true, -1);
 	}
 
-	/** Start the Janus platform offline with logging enabled.
+	/**
+	 * Start the Janus platform offline with logging enabled.
 	 *
 	 * This function enables logging and has no timeout for the end of the run.
 	 * 
@@ -185,7 +191,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		runJanus(type, true, true, -1);
 	}
 
-	/** Start the Janus platform.
+	/**
+	 * Start the Janus platform.
 	 * 
 	 * @param type - the type of the agent to launch at start-up.
 	 * @param enableLogging - indicates if the logging is enable or not.
@@ -193,7 +200,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 	 * @param timeout - the maximum waiting time in seconds, or <code>-1</code> to ignore the timeout.
 	 * @throws Exception - if the kernel cannot be launched.
 	 */
-	protected void runJanus(Class<? extends TestingAgent> type, boolean enableLogging, boolean offline, int timeout) throws Exception {
+	protected void runJanus(Class<? extends TestingAgent> type, boolean enableLogging, boolean offline, int timeout)
+			throws Exception {
 		assertNull("Janus already launched.", this.janusKernel);
 		Module module = new StandardJanusPlatformModule();
 		Boot.setConsoleLogger(new PrintStream(new OutputStream() {
@@ -209,10 +217,7 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 			module = Modules.override(new StandardJanusPlatformModule()).with(new ErrorLogTestingModule(this.results));
 		}
 		Boot.setOffline(offline);
-		this.janusKernel = Boot.startJanus(
-				module,
-				type,
-				results);
+		this.janusKernel = Boot.startJanus(module, type, results);
 		long endTime;
 		if (timeout >= 0) {
 			endTime = System.currentTimeMillis() + timeout * 1000;
@@ -229,7 +234,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		}
 	}
 
-	/** Interface that permits to mark a method that is manually launching the Janus.
+	/**
+	 * Interface that permits to mark a method that is manually launching the Janus.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -241,22 +247,24 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 	@Target(ElementType.TYPE)
 	protected @interface JanusRun {
 
-		/** The type of the agent to launch.
+		/**
+		 * The type of the agent to launch.
 		 *
 		 * @return the type of the agent to launch.
 		 */
 		Class<? extends TestingAgent> agent();
 
-		/** Indicates if the logging is enabled.
+		/**
+		 * Indicates if the logging is enabled.
 		 *
-		 * @return <code>true</code> if the logging is enabled;
-		 * <code>false</code> otherwise.
+		 * @return <code>true</code> if the logging is enabled; <code>false</code> otherwise.
 		 */
 		boolean enableLogging() default false;
 
 	}
 
-	/** Abstract implementation of an agent that is used for testing Janus
+	/**
+	 * Abstract implementation of an agent that is used for testing Janus
 	 * 
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -273,12 +281,11 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		 * @param agentID - the identifier of the agent.
 		 */
 		public TestingAgent(BuiltinCapacitiesProvider provider, UUID parentID, UUID agentID) {
-			super(
-					provider,
-					parentID, agentID);
+			super(provider, parentID, agentID);
 		}
 
-		/** Add a result.
+		/**
+		 * Add a result.
 		 * 
 		 * @param result - the result.
 		 */
@@ -286,7 +293,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 			this.results.add(result);
 		}
 
-		/** Invoked at the start of the agent.
+		/**
+		 * Invoked at the start of the agent.
 		 * 
 		 * @param event - the initialization event.
 		 */
@@ -303,7 +311,8 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 			}
 		}
 
-		/** Invoked to run the unit test.
+		/**
+		 * Invoked to run the unit test.
 		 *
 		 * @return <code>true</code> for killing the agent 1 second after its initialization.
 		 */

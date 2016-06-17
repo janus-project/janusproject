@@ -26,22 +26,19 @@ import static org.junit.Assume.assumeTrue;
 import java.net.InetAddress;
 import java.util.UUID;
 
-import javax.inject.Inject;
-
-import com.google.inject.name.Named;
-import io.janusproject.Boot;
-import io.janusproject.services.network.NetworkUtil;
-import io.janusproject.testutils.AbstractJanusRunTest;
 import org.junit.Before;
 import org.junit.Test;
 
+import io.janusproject.Boot;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractJanusRunTest;
 import io.sarl.core.Lifecycle;
 import io.sarl.lang.SARLVersion;
 import io.sarl.lang.annotation.SarlSpecification;
-import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 
-/** Unit test for the issue #84: Problem with calling killMe in Initialize behavior of an agent.
+/**
+ * Unit test for the issue #84: Problem with calling killMe in Initialize behavior of an agent.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -56,12 +53,11 @@ public class Bug84 extends AbstractJanusRunTest {
 	public void setUp() {
 		Boot.setOffline(false);
 	}
-	
+
 	@Test
 	public void killMeInInit() throws Exception {
 		InetAddress adr = NetworkUtil.getPrimaryAddress();
-		assumeTrue("Cannot unit test the Bug84 when the network is down.",
-				adr != null && !adr.isLoopbackAddress());
+		assumeTrue("Cannot unit test the Bug84 when the network is down.", adr != null && !adr.isLoopbackAddress());
 		//
 		runJanus(KilledInInitAgent.class, true);
 		assertEquals(-1, indexOfResult(Throwable.class));
@@ -76,10 +72,7 @@ public class Bug84 extends AbstractJanusRunTest {
 	@SarlSpecification(SARLVersion.SPECIFICATION_RELEASE_VERSION_STRING)
 	public static class KilledInInitAgent extends TestingAgent {
 
-		public KilledInInitAgent(
-				BuiltinCapacitiesProvider provider,
-				UUID parentID,
-				UUID agentID) {
+		public KilledInInitAgent(BuiltinCapacitiesProvider provider, UUID parentID, UUID agentID) {
 			super(provider, parentID, agentID);
 		}
 

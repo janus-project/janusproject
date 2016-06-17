@@ -49,8 +49,8 @@ import io.sarl.lang.core.Address;
 import io.sarl.lang.core.SpaceID;
 
 /**
- * The Core Janus Module configures the minimum requirements for Janus to
- * run properly. If you need a standard configuration use {@link StandardJanusPlatformModule}.
+ * The Core Janus Module configures the minimum requirements for Janus to run properly. If you need a standard configuration use
+ * {@link StandardJanusPlatformModule}.
  *
  * @author $Author: srodriguez$
  * @version $FullVersion$
@@ -76,8 +76,7 @@ public class HazelcastModule extends AbstractModule {
 		bind(Config.class).toInstance(hazelcastConfig);
 
 		// Ensure the system property for the hazelcast logger factory
-		String factory = JanusConfig.getSystemProperty(
-				JanusConfig.HAZELCAST_LOGGER_FACTORY_NAME,
+		String factory = JanusConfig.getSystemProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY_NAME,
 				JanusConfig.HAZELCAST_LOGGER_FACTORY_VALUE);
 		assert (factory != null && !factory.isEmpty());
 		System.setProperty(JanusConfig.HAZELCAST_LOGGER_FACTORY_NAME, factory);
@@ -87,17 +86,13 @@ public class HazelcastModule extends AbstractModule {
 		serviceSetBinder.addBinding().to(HazelcastInfrastructureService.class).in(Singleton.class);
 
 		// Bind the services based on Hazelcast
-		bind(DistributedDataStructureService.class).to(HazelcastDistributedDataStructureService.class)
-		.in(Singleton.class);
-		bind(KernelDiscoveryService.class).to(HazelcastKernelDiscoveryService.class)
-		.in(Singleton.class);
+		bind(DistributedDataStructureService.class).to(HazelcastDistributedDataStructureService.class).in(Singleton.class);
+		bind(KernelDiscoveryService.class).to(HazelcastKernelDiscoveryService.class).in(Singleton.class);
 	}
 
 	@Provides
 	@Singleton
-	private static HazelcastInstance createHazelcastInstance(
-			Config config,
-			LogService logService,
+	private static HazelcastInstance createHazelcastInstance(Config config, LogService logService,
 			@Named(JanusConfig.PUB_URI) URI uri) {
 		assert (uri != null);
 		boolean enableMulticast = true;

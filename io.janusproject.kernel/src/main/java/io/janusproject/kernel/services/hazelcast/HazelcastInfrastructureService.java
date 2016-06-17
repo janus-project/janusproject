@@ -26,7 +26,8 @@ import com.hazelcast.core.HazelcastInstance;
 import io.janusproject.services.AbstractDependentService;
 import io.janusproject.services.infrastructure.InfrastructureService;
 
-/** This class supports the management of the hazelcast infrastructure.
+/**
+ * This class supports the management of the hazelcast infrastructure.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -38,7 +39,8 @@ public class HazelcastInfrastructureService extends AbstractDependentService imp
 	@Inject
 	private HazelcastInstance hazelcastInstance;
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public HazelcastInfrastructureService() {
 		//

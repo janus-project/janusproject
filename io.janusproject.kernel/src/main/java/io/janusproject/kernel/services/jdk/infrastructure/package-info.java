@@ -22,4 +22,3 @@
  * Implementation of the infrastructure services based on the Java Development Kit.
  */
 package io.janusproject.kernel.services.jdk.infrastructure;
-

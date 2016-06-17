@@ -22,4 +22,3 @@
  * Definition of the service for executing tasks asynchronously.
  */
 package io.janusproject.services.executor;
-

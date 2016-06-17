@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 
 import io.janusproject.services.executor.ChuckNorrisException;
 
-
 /**
  * Utilities for executors.
  *
@@ -40,7 +39,8 @@ final class JdkExecutorUtil {
 		//
 	}
 
-	/** Log the exception.
+	/**
+	 * Log the exception.
 	 *
 	 * @param thread - the thread in which the exception occurs.
 	 * @param exception - the exception to log, or <code>null</code> if none.

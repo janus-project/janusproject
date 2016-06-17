@@ -40,16 +40,15 @@ import io.janusproject.services.distributeddata.DistributedDataStructureService;
 /**
  * Service providing tools for creating distributed data structures.
  *
- * <p>This implementation creates standard Java collections that cannot be
- * distributed other several JVM.
+ * <p>
+ * This implementation creates standard Java collections that cannot be distributed other several JVM.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
  * @mavengroupid $GroupId$
  * @mavenartifactid $ArtifactId$
  */
-public class StandardDistributedDataStructureService extends AbstractDependentService
-		implements DistributedDataStructureService {
+public class StandardDistributedDataStructureService extends AbstractDependentService implements DistributedDataStructureService {
 
 	@Override
 	public final Class<? extends Service> getServiceType() {
@@ -103,7 +102,8 @@ public class StandardDistributedDataStructureService extends AbstractDependentSe
 		return new DMultiMapView<>(name, multimap);
 	}
 
-	/** Suplier of list for Hazelcast.
+	/**
+	 * Suplier of list for Hazelcast.
 	 *
 	 * @param <K> type of the list elements.
 	 * @author $Author: sgalland$
@@ -113,7 +113,8 @@ public class StandardDistributedDataStructureService extends AbstractDependentSe
 	 */
 	private static class ArrayListSupplier<K> implements Supplier<List<K>> {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		ArrayListSupplier() {
 			//

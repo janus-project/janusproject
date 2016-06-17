@@ -22,4 +22,3 @@
  * Implementation of repositories.
  */
 package io.janusproject.kernel.repository;
-

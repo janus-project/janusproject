@@ -40,7 +40,8 @@ import io.sarl.lang.util.SynchronizedSet;
 import io.sarl.util.Collections3;
 import io.sarl.util.OpenEventSpace;
 
-/** Janus implementation of SARL's {@link InnerContextSkill} built-in capacity.
+/**
+ * Janus implementation of SARL's {@link InnerContextSkill} built-in capacity.
  *
  * @author $Author: srodriguez$
  * @author $Author: ngaud$
@@ -63,30 +64,28 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 
 	/**
 	 * @param agent - owner of this skill.
-	 * @param agentAddressInInnerDefaultSpace - address of the owner of this skill in
-	 *                                          its default space.
+	 * @param agentAddressInInnerDefaultSpace - address of the owner of this skill in its default space.
 	 */
 	InnerContextSkill(Agent agent, Address agentAddressInInnerDefaultSpace) {
 		super(agent);
 		this.agentAddressInInnerDefaultSpace = agentAddressInInnerDefaultSpace;
 	}
 
-	/** Replies if the inner context was instanciated.
-	 * To create the inner context, call {@link #getInnerContext()}
+	/**
+	 * Replies if the inner context was instanciated. To create the inner context, call {@link #getInnerContext()}
 	 *
-	 * @return <code>true</code> if an instance of inner context exists,
-	 *     otherwise <code>false</code>.
+	 * @return <code>true</code> if an instance of inner context exists, otherwise <code>false</code>.
 	 */
 	synchronized boolean hasInnerContext() {
 		return this.innerContext != null;
 	}
 
-	/** Force to reset the inner context.
-	 * This function does not update the context repository.
+	/**
+	 * Force to reset the inner context. This function does not update the context repository.
 	 *
-	 * <p>Do not call this function, exception if you are sure
-	 * that the setting of the inner context to <code>null</code>
-	 * only does not introduce problems.
+	 * <p>
+	 * Do not call this function, exception if you are sure that the setting of the inner context to <code>null</code> only does
+	 * not introduce problems.
 	 */
 	synchronized void resetInnerContext() {
 		this.innerContext = null;
@@ -94,8 +93,7 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 
 	@Override
 	protected String attributesToString() {
-		return super.attributesToString()
-				+ ", addressInDefaultspace = " + this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
+		return super.attributesToString() + ", addressInDefaultspace = " + this.agentAddressInInnerDefaultSpace; //$NON-NLS-1$
 	}
 
 	@Override
@@ -131,9 +129,7 @@ class InnerContextSkill extends Skill implements InnerContextAccess {
 		if (this.innerContext != null) {
 			Set<UUID> participants = this.innerContext.getDefaultSpace().getParticipants();
 			assert (participants != null);
-			return ((participants.size() > 1)
-					 || ((participants.size() == 1)
-					  && (!participants.contains(getOwner().getID()))));
+			return ((participants.size() > 1) || ((participants.size() == 1) && (!participants.contains(getOwner().getID()))));
 		}
 		return false;
 	}

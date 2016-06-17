@@ -36,11 +36,11 @@ import io.janusproject.services.kerneldiscovery.KernelDiscoveryServiceListener;
 import io.janusproject.services.network.NetworkService;
 import io.janusproject.util.TwoStepConstruction;
 
-/** Service that is providing the access to
- * the repository of the Janus kernels.
+/**
+ * Service that is providing the access to the repository of the Janus kernels.
  *
- * <p>This implementation is not able to discovered other
- * kernels.
+ * <p>
+ * This implementation is not able to discovered other kernels.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -58,29 +58,28 @@ public class StandardKernelDiscoveryService extends AbstractDependentService
 
 	private NetworkService network;
 
-	/** Constructs a <code>KernelRepositoryService</code>.
+	/**
+	 * Constructs a <code>KernelRepositoryService</code>.
 	 */
 	public StandardKernelDiscoveryService() {
 		//
 	}
 
-	/** Do the post initialization.
+	/**
+	 * Do the post initialization.
 	 *
 	 * @param networkService - network service to be linked to.
 	 * @param executorService - execution service to use.
 	 */
 	@Inject
-	void postConstruction(
-			NetworkService networkService,
-			ExecutorService executorService) {
+	void postConstruction(NetworkService networkService, ExecutorService executorService) {
 		this.network = networkService;
 		this.network.addListener(new NetworkStartListener(), executorService.getExecutorService());
 	}
 
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
-		return Arrays.<Class<? extends Service>>asList(
-				ExecutorService.class);
+		return Arrays.<Class<? extends Service>>asList(ExecutorService.class);
 	}
 
 	@Override
@@ -126,7 +125,8 @@ public class StandardKernelDiscoveryService extends AbstractDependentService
 		notifyStopped();
 	}
 
-	/** Listener on network events.
+	/**
+	 * Listener on network events.
 	 *
 	 * @author $Author: srodriguez$
 	 * @author $Author: sgalland$
@@ -136,7 +136,8 @@ public class StandardKernelDiscoveryService extends AbstractDependentService
 	 */
 	private class NetworkStartListener extends Listener {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		NetworkStartListener() {
 			//

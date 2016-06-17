@@ -26,6 +26,28 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.internal.verification.Times;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import com.google.inject.Injector;
+
 import io.janusproject.kernel.services.jdk.distributeddata.DMapView;
 import io.janusproject.services.contextspace.ContextRepositoryListener;
 import io.janusproject.services.contextspace.ContextSpaceService;
@@ -44,30 +66,7 @@ import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.SpaceID;
 import io.sarl.util.OpenEventSpace;
 import io.sarl.util.OpenEventSpaceSpecification;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
 import javassist.Modifier;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.internal.verification.Times;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import com.google.inject.Injector;
 
 /**
  * @author $Author: sgalland$
@@ -77,25 +76,24 @@ import com.google.inject.Injector;
  */
 @SuppressWarnings("all")
 @StartServiceForTest(startAfterSetUp = true)
-public class StandardContextSpaceServiceTest
-extends AbstractDependentServiceTest<StandardContextSpaceService> {
+public class StandardContextSpaceServiceTest extends AbstractDependentServiceTest<StandardContextSpaceService> {
 
 	@Nullable
 	private UUID contextId;
 	@Nullable
 	private SpaceID spaceId;
 	@Nullable
-	private DMap<Object,Object> innerData; 
-	
+	private DMap<Object, Object> innerData;
+
 	@Mock
 	private DistributedDataStructureService dds;
-	
+
 	@Mock
 	private LogService logger;
-	
+
 	@Mock
 	private Injector injector;
-	
+
 	@Mock
 	private EventSpace defaultSpace;
 
@@ -104,7 +102,7 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 
 	@Mock
 	private ContextFactory contextFactory;
-	
+
 	@Mock
 	private ContextRepositoryListener contextListener;
 
@@ -113,7 +111,7 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 	public StandardContextSpaceServiceTest() {
 		super(ContextSpaceService.class);
 	}
-	
+
 	@Override
 	public StandardContextSpaceService newService() {
 		return new StandardContextSpaceService();
@@ -121,9 +119,7 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 
 	@Override
 	public void getServiceDependencies() {
-		assertContains(this.service.getServiceDependencies(),
-				DistributedDataStructureService.class,
-				NetworkService.class,
+		assertContains(this.service.getServiceDependencies(), DistributedDataStructureService.class, NetworkService.class,
 				KernelDiscoveryService.class);
 	}
 
@@ -135,24 +131,19 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 	@Before
 	public void setUp() {
 		this.contextId = UUID.randomUUID();
-		this.innerData = new DMapView<>(
-				UUID.randomUUID().toString(),
-				new HashMap<>());
+		this.innerData = new DMapView<>(UUID.randomUUID().toString(), new HashMap<>());
 		this.spaceId = new SpaceID(this.contextId, UUID.randomUUID(), OpenEventSpaceSpecification.class);
 		Mockito.when(this.context.postConstruction()).thenReturn(this.defaultSpace);
 		Mockito.when(this.context.getID()).thenReturn(this.contextId);
 		Mockito.when(this.defaultSpace.getID()).thenReturn(this.spaceId);
-		Mockito.when(this.contextFactory.newInstance(
-				Matchers.any(UUID.class),
-				Matchers.any(UUID.class),
-				Matchers.any(SpaceRepositoryFactory.class),
-				Matchers.any(SpaceRepositoryListener.class))).thenAnswer(new Answer<Context>(){
+		Mockito.when(this.contextFactory.newInstance(Matchers.any(UUID.class), Matchers.any(UUID.class),
+				Matchers.any(SpaceRepositoryFactory.class), Matchers.any(SpaceRepositoryListener.class)))
+				.thenAnswer(new Answer<Context>() {
 					@Override
 					public Context answer(InvocationOnMock invocation) throws Throwable {
 						Context ctx = Mockito.mock(Context.class);
 						OpenEventSpace mock = Mockito.mock(OpenEventSpace.class);
-						SpaceID spaceId = new SpaceID((UUID)invocation.getArguments()[0],
-								(UUID)invocation.getArguments()[1],
+						SpaceID spaceId = new SpaceID((UUID) invocation.getArguments()[0], (UUID) invocation.getArguments()[1],
 								OpenEventSpaceSpecification.class);
 						Mockito.when(ctx.getID()).thenReturn(spaceId.getContextID());
 						Mockito.when(ctx.postConstruction()).thenReturn(mock);
@@ -167,7 +158,7 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 		this.service.setContextFactory(this.contextFactory);
 		this.service.addContextRepositoryListener(this.contextListener);
 	}
-	
+
 	private AgentContext createOneTestingContext(UUID id) {
 		return createOneTestingContext(id, UUID.randomUUID());
 	}
@@ -180,11 +171,10 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 	public void twoStepConstruction() throws Exception {
 		TwoStepConstruction annotation = StandardContextSpaceService.class.getAnnotation(TwoStepConstruction.class);
 		assertNotNull(annotation);
-		for(String name : annotation.names()) {
-			for(Method method : StandardContextSpaceService.class.getMethods()) {
+		for (String name : annotation.names()) {
+			for (Method method : StandardContextSpaceService.class.getMethods()) {
 				if (name.equals(method.getName())) {
-					assertTrue(Modifier.isPackage(method.getModifiers())
-							||Modifier.isPublic(method.getModifiers()));
+					assertTrue(Modifier.isPackage(method.getModifiers()) || Modifier.isPublic(method.getModifiers()));
 					break;
 				}
 			}
@@ -210,7 +200,7 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 		this.service.setContextFactory(mock);
 		assertSame(mock, this.service.getContextFactory());
 	}
-	
+
 	@Test
 	public void containsContext() {
 		UUID id = UUID.randomUUID();
@@ -218,7 +208,7 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 		createOneTestingContext(id);
 		assertTrue(this.service.containsContext(id));
 	}
-	
+
 	@Test
 	public void createContext() {
 		UUID cid = UUID.randomUUID();
@@ -438,8 +428,7 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 		try {
 			this.service.doStop();
 			fail("Expecting IllegalStateException"); //$NON-NLS-1$
-		}
-		catch(IllegalStateException exception) {
+		} catch (IllegalStateException exception) {
 			// Expected excpetion fired by notifyStopped()
 		}
 		Mockito.verifyNoMoreInteractions(this.contextListener);
@@ -453,11 +442,10 @@ extends AbstractDependentServiceTest<StandardContextSpaceService> {
 		this.service.doStop();
 		ArgumentCaptor<AgentContext> argument = ArgumentCaptor.forClass(AgentContext.class);
 		Mockito.verify(this.contextListener, new Times(2)).contextDestroyed(argument.capture());
-		if (ctx1.getID().compareTo(ctx2.getID())<=0) {
+		if (ctx1.getID().compareTo(ctx2.getID()) <= 0) {
 			assertSame(ctx1, argument.getAllValues().get(0));
 			assertSame(ctx2, argument.getAllValues().get(1));
-		}
-		else {
+		} else {
 			assertSame(ctx1, argument.getAllValues().get(1));
 			assertSame(ctx2, argument.getAllValues().get(0));
 		}

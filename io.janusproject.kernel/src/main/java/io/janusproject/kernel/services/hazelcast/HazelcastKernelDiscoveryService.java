@@ -52,11 +52,11 @@ import io.janusproject.services.network.NetworkUtil;
 import io.janusproject.util.ListenerCollection;
 import io.janusproject.util.TwoStepConstruction;
 
-/** Service that is providing the access to
- * the repository of the Janus kernels.
+/**
+ * Service that is providing the access to the repository of the Janus kernels.
  *
- * <p>It uses the Hazelcast library for discovering the
- * nodes over the network.
+ * <p>
+ * It uses the Hazelcast library for discovering the nodes over the network.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -97,7 +97,8 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 
 	private NetworkStartListener networkStartListener = new NetworkStartListener();
 
-	/** Constructs a <code>KernelRepositoryService</code>.
+	/**
+	 * Constructs a <code>KernelRepositoryService</code>.
 	 *
 	 * @param janusID - injected identifier of the Janus context.
 	 */
@@ -118,24 +119,19 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
-		return Arrays.<Class<? extends Service>>asList(
-				LogService.class,
-				ExecutorService.class);
+		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
 	}
 
-	/** Do the post initialization.
+	/**
+	 * Do the post initialization.
 	 *
-	 * @param hazelcastInstance - instance of the Hazelcast service that permits
-	 *                   to shared data among the network.
+	 * @param hazelcastInstance - instance of the Hazelcast service that permits to shared data among the network.
 	 * @param networkService - network service to be linked to.
 	 * @param executorService - execution service to use.
 	 * @param logger - logging service to use.
 	 */
 	@Inject
-	void postConstruction(
-			HazelcastInstance hazelcastInstance,
-			NetworkService networkService,
-			ExecutorService executorService,
+	void postConstruction(HazelcastInstance hazelcastInstance, NetworkService networkService, ExecutorService executorService,
 			LogService logger) {
 		this.executorService = executorService;
 		this.hazelcastInstance = hazelcastInstance;
@@ -165,30 +161,26 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 		this.listeners.remove(KernelDiscoveryServiceListener.class, listener);
 	}
 
-	/** Notifies the listeners about the discovering of a kernel.
+	/**
+	 * Notifies the listeners about the discovering of a kernel.
 	 *
 	 * @param uri - URI of the discovered kernel.
 	 */
 	protected void fireKernelDiscovered(URI uri) {
-		this.logger.info(
-				HazelcastKernelDiscoveryService.class,
-				"KERNEL_DISCOVERY", uri, getCurrentKernel()); //$NON-NLS-1$
-		for (KernelDiscoveryServiceListener listener
-				: this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
+		this.logger.info(HazelcastKernelDiscoveryService.class, "KERNEL_DISCOVERY", uri, getCurrentKernel()); //$NON-NLS-1$
+		for (KernelDiscoveryServiceListener listener : this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
 			listener.kernelDiscovered(uri);
 		}
 	}
 
-	/** Notifies the listeners about the killing of a kernel.
+	/**
+	 * Notifies the listeners about the killing of a kernel.
 	 *
 	 * @param uri - URI of the disconnected kernel.
 	 */
 	protected void fireKernelDisconnected(URI uri) {
-		this.logger.info(
-				HazelcastKernelDiscoveryService.class,
-				"KERNEL_DISCONNECTION", uri, getCurrentKernel()); //$NON-NLS-1$
-		for (KernelDiscoveryServiceListener listener
-				: this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
+		this.logger.info(HazelcastKernelDiscoveryService.class, "KERNEL_DISCONNECTION", uri, getCurrentKernel()); //$NON-NLS-1$
+		for (KernelDiscoveryServiceListener listener : this.listeners.getListeners(KernelDiscoveryServiceListener.class)) {
 			listener.kernelDisconnected(uri);
 		}
 	}
@@ -218,7 +210,8 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 		notifyStopped();
 	}
 
-	/** Listener on Hazelcast events.
+	/**
+	 * Listener on Hazelcast events.
 	 *
 	 * @author $Author: srodriguez$
 	 * @author $Author: sgalland$
@@ -226,10 +219,11 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	private class HazelcastListener implements MembershipListener, EntryAddedListener<URI, URI>,
-			EntryRemovedListener<URI, URI>, EntryEvictedListener<URI, URI> {
+	private class HazelcastListener implements MembershipListener, EntryAddedListener<URI, URI>, EntryRemovedListener<URI, URI>,
+			EntryEvictedListener<URI, URI> {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		HazelcastListener() {
 			//
@@ -288,7 +282,8 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 
 	}
 
-	/** Listener on network events.
+	/**
+	 * Listener on network events.
 	 *
 	 * @author $Author: srodriguez$
 	 * @author $Author: sgalland$
@@ -298,7 +293,8 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 	 */
 	private class NetworkStartListener extends Listener {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		NetworkStartListener() {
 			//
@@ -312,9 +308,9 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 			if (HazelcastKernelDiscoveryService.this.currentPubURI == null) {
 				synchronized (HazelcastKernelDiscoveryService.this) {
 					HazelcastKernelDiscoveryService.this.currentPubURI = uri;
-					HazelcastKernelDiscoveryService.this.currentHzURI = NetworkUtil.toURI(
-							HazelcastKernelDiscoveryService.this.hazelcastInstance.getCluster()
-							.getLocalMember().getSocketAddress());
+					HazelcastKernelDiscoveryService.this.currentHzURI = NetworkUtil
+							.toURI(HazelcastKernelDiscoveryService.this.hazelcastInstance.getCluster().getLocalMember()
+									.getSocketAddress());
 				}
 
 				// Notify about the discovery of the already launched kernels
@@ -324,8 +320,7 @@ public class HazelcastKernelDiscoveryService extends AbstractDependentService
 
 				synchronized (HazelcastKernelDiscoveryService.this) {
 					HazelcastKernelDiscoveryService.this.isReady = true;
-					HazelcastKernelDiscoveryService.this.kernels.putIfAbsent(
-							HazelcastKernelDiscoveryService.this.currentHzURI,
+					HazelcastKernelDiscoveryService.this.kernels.putIfAbsent(HazelcastKernelDiscoveryService.this.currentHzURI,
 							HazelcastKernelDiscoveryService.this.currentPubURI);
 				}
 			}

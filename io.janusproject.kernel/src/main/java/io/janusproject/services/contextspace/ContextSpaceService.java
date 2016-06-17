@@ -29,8 +29,7 @@ import io.janusproject.services.DependentService;
 import io.sarl.lang.core.AgentContext;
 
 /**
- * This service enables to store the contexts and to
- * manage the spaces in the janus platform.
+ * This service enables to store the contexts and to manage the spaces in the janus platform.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -102,8 +101,8 @@ public interface ContextSpaceService extends DependentService {
 	/**
 	 * Returns the collection of {@link AgentContext} with the given IDs.
 	 *
-	 * <p>The replies collection is synchronized and any iteration on it must
-	 * be synchronized on the mutex replies by {@link #mutex}.
+	 * <p>
+	 * The replies collection is synchronized and any iteration on it must be synchronized on the mutex replies by {@link #mutex}.
 	 *
 	 * @param contextIDs - the identifiers of the contexts to retreive.
 	 * @return the collection of {@link AgentContext} with the given IDs
@@ -113,8 +112,8 @@ public interface ContextSpaceService extends DependentService {
 	/**
 	 * Returns the set of all agent context IDs stored in this repository.
 	 *
-	 * <p>The replies collection is synchronized and any iteration on it must be
-	 * synchronized on the mutex replies by {@link #mutex}.
+	 * <p>
+	 * The replies collection is synchronized and any iteration on it must be synchronized on the mutex replies by {@link #mutex}.
 	 *
 	 * @return the set of all agent context IDs stored in this repository
 	 */
@@ -142,13 +141,15 @@ public interface ContextSpaceService extends DependentService {
 	 */
 	void removeContextRepositoryListener(ContextRepositoryListener listener);
 
-	/** Add a listener on the space repository events.
+	/**
+	 * Add a listener on the space repository events.
 	 *
 	 * @param listener - the listener on the space repository events.
 	 */
 	void addSpaceRepositoryListener(SpaceRepositoryListener listener);
 
-	/** Remove a listener on the space repository events.
+	/**
+	 * Remove a listener on the space repository events.
 	 *
 	 * @param listener - the listener on the space repository events.
 	 */

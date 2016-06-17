@@ -20,8 +20,8 @@
 
 package io.janusproject.util;
 
-
-/** An object that is delegate to a collection object.
+/**
+ * An object that is delegate to a collection object.
  *
  * @author $Author: galland$
  * @version $FullVersion$
@@ -34,7 +34,8 @@ public final class DataViewDelegate {
 		//
 	}
 
-	/** Find the delegated object.
+	/**
+	 * Find the delegated object.
 	 *
 	 * @param object - the object.
 	 * @return the delegator object.
@@ -47,7 +48,8 @@ public final class DataViewDelegate {
 		return obj;
 	}
 
-	/** An object that is delegate to a collection object.
+	/**
+	 * An object that is delegate to a collection object.
 	 *
 	 * @param <E> - the type of the delegated object.
 	 * @author $Author: sgalland$
@@ -57,7 +59,8 @@ public final class DataViewDelegate {
 	 */
 	public interface Delegator<E> {
 
-		/** Replies the delegated object.
+		/**
+		 * Replies the delegated object.
 		 *
 		 * @return the delegated object.
 		 */

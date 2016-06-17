@@ -23,23 +23,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import io.janusproject.services.executor.ExecutorService;
-import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
-import io.janusproject.services.logging.LogService;
-import io.janusproject.services.network.NetworkService;
-import io.janusproject.services.network.NetworkUtil;
-import io.janusproject.testutils.AbstractDependentServiceTest;
-import io.janusproject.testutils.HzMapMock;
-import io.janusproject.testutils.StartServiceForTest;
-import io.janusproject.util.TwoStepConstruction;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collection;
 import java.util.UUID;
-
-import javassist.Modifier;
 
 import javax.annotation.Nullable;
 
@@ -56,6 +45,17 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 
+import io.janusproject.services.executor.ExecutorService;
+import io.janusproject.services.kerneldiscovery.KernelDiscoveryService;
+import io.janusproject.services.logging.LogService;
+import io.janusproject.services.network.NetworkService;
+import io.janusproject.services.network.NetworkUtil;
+import io.janusproject.testutils.AbstractDependentServiceTest;
+import io.janusproject.testutils.HzMapMock;
+import io.janusproject.testutils.StartServiceForTest;
+import io.janusproject.util.TwoStepConstruction;
+import javassist.Modifier;
+
 /**
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -64,8 +64,7 @@ import com.hazelcast.core.Member;
  */
 @StartServiceForTest(createAfterSetUp = true)
 @SuppressWarnings("all")
-public class HazelcastKernelDiscoveryServiceTest
-extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
+public class HazelcastKernelDiscoveryServiceTest extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 
 	@Nullable
 	private URI kernelURI;
@@ -77,7 +76,7 @@ extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 	private UUID contextId;
 
 	@Nullable
-	private IMap<Object,Object> kernels;
+	private IMap<Object, Object> kernels;
 
 	@Nullable
 	private HazelcastInstance hzInstance;
@@ -100,11 +99,10 @@ extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 	@Override
 	public HazelcastKernelDiscoveryService newService() {
 		HazelcastKernelDiscoveryService serv = new HazelcastKernelDiscoveryService(this.contextId);
-		serv.postConstruction(this.hzInstance, this.networkService,
-				this.executorService, this.logger);
+		serv.postConstruction(this.hzInstance, this.networkService, this.executorService, this.logger);
 		return serv;
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		this.hazelcastURI = NetworkUtil.toURI("tcp://123.124.125.126:5023"); //$NON-NLS-1$
@@ -126,12 +124,10 @@ extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 		this.executorService = Mockito.mock(ExecutorService.class);
 		this.logger = Mockito.mock(LogService.class);
 	}
-	
+
 	@Override
 	public void getServiceDependencies() {
-		assertContains(this.service.getServiceDependencies(),
-				LogService.class,
-				ExecutorService.class);
+		assertContains(this.service.getServiceDependencies(), LogService.class, ExecutorService.class);
 	}
 
 	@Override
@@ -142,7 +138,8 @@ extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 	@Test
 	public void postConstruction() {
 		ArgumentCaptor<Listener> argument1 = ArgumentCaptor.forClass(Listener.class);
-		ArgumentCaptor<java.util.concurrent.ExecutorService> argument2 = ArgumentCaptor.forClass(java.util.concurrent.ExecutorService.class);
+		ArgumentCaptor<java.util.concurrent.ExecutorService> argument2 = ArgumentCaptor
+				.forClass(java.util.concurrent.ExecutorService.class);
 		Mockito.verify(this.networkService, new Times(1)).addListener(argument1.capture(), argument2.capture());
 	}
 
@@ -155,11 +152,12 @@ extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 	public void getKernels_nonetworknotification() {
 		assertTrue(this.service.getKernels().isEmpty());
 	}
-	
+
 	@Test
 	public void getCurrentKernel_networknotification() {
 		ArgumentCaptor<Listener> argument1 = ArgumentCaptor.forClass(Listener.class);
-		ArgumentCaptor<java.util.concurrent.ExecutorService> argument2 = ArgumentCaptor.forClass(java.util.concurrent.ExecutorService.class);
+		ArgumentCaptor<java.util.concurrent.ExecutorService> argument2 = ArgumentCaptor
+				.forClass(java.util.concurrent.ExecutorService.class);
 		Mockito.verify(this.networkService, new Times(1)).addListener(argument1.capture(), argument2.capture());
 		Listener listener = argument1.getValue();
 		listener.running();
@@ -170,7 +168,8 @@ extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 	@Test
 	public void getKernels_networknotification() {
 		ArgumentCaptor<Listener> argument1 = ArgumentCaptor.forClass(Listener.class);
-		ArgumentCaptor<java.util.concurrent.ExecutorService> argument2 = ArgumentCaptor.forClass(java.util.concurrent.ExecutorService.class);
+		ArgumentCaptor<java.util.concurrent.ExecutorService> argument2 = ArgumentCaptor
+				.forClass(java.util.concurrent.ExecutorService.class);
 		Mockito.verify(this.networkService, new Times(1)).addListener(argument1.capture(), argument2.capture());
 		Listener listener = argument1.getValue();
 		listener.running();
@@ -185,11 +184,10 @@ extends AbstractDependentServiceTest<HazelcastKernelDiscoveryService> {
 	public void twoStepConstruction() throws Exception {
 		TwoStepConstruction annotation = HazelcastKernelDiscoveryService.class.getAnnotation(TwoStepConstruction.class);
 		assertNotNull(annotation);
-		for(String name : annotation.names()) {
-			for(Method method : HazelcastKernelDiscoveryService.class.getMethods()) {
+		for (String name : annotation.names()) {
+			for (Method method : HazelcastKernelDiscoveryService.class.getMethods()) {
 				if (name.equals(method.getName())) {
-					assertTrue(Modifier.isPackage(method.getModifiers())
-							||Modifier.isPublic(method.getModifiers()));
+					assertTrue(Modifier.isPackage(method.getModifiers()) || Modifier.isPublic(method.getModifiers()));
 					break;
 				}
 			}

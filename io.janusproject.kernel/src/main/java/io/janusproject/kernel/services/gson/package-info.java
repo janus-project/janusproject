@@ -19,8 +19,6 @@
  */
 
 /**
- * Implementation of services based on
- * <a href="https://code.google.com/p/google-gson/">Gson</a>.
+ * Implementation of services based on <a href="https://code.google.com/p/google-gson/">Gson</a>.
  */
 package io.janusproject.kernel.services.gson;
-

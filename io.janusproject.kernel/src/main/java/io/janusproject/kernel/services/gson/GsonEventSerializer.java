@@ -48,10 +48,10 @@ import io.sarl.lang.core.SpaceID;
 import io.sarl.lang.core.SpaceSpecification;
 
 /**
- * Serialize the {@link EventDispatch} content using GSON to generate the
- * corresponding {@link EventEnvelope}.
+ * Serialize the {@link EventDispatch} content using GSON to generate the corresponding {@link EventEnvelope}.
  *
- * <p>This implementation assumes that an {@link EventEncrypter} and {@link Gson} are injected.
+ * <p>
+ * This implementation assumes that an {@link EventEncrypter} and {@link Gson} are injected.
  *
  * @author $Author: srodriguez$
  * @author $Author: sgalland$
@@ -62,13 +62,13 @@ import io.sarl.lang.core.SpaceSpecification;
  */
 public class GsonEventSerializer extends AbstractEventSerializer {
 
-	/** Gson serializer.
+	/**
+	 * Gson serializer.
 	 */
 	protected final Gson gson;
 
-	/** Constructs an GsonEventSerializer.
-	 * The {@link Gson} is injected.
-	 * The {@link EventEncrypter} is injected.
+	/**
+	 * Constructs an GsonEventSerializer. The {@link Gson} is injected. The {@link EventEncrypter} is injected.
 	 *
 	 * @param gson - the instance of the Gson engine to use.
 	 * @param encrypter - the object that permits to encrypter the events.
@@ -102,8 +102,7 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 		headers.put("x-java-spacespec-class", //$NON-NLS-1$
 				spaceID.getSpaceSpecification().getName());
 
-		EventEnvelope envelope = new EventEnvelope(
-				NetworkUtil.toByteArray(spaceID.getContextID()),
+		EventEnvelope envelope = new EventEnvelope(NetworkUtil.toByteArray(spaceID.getContextID()),
 				NetworkUtil.toByteArray(spaceID.getID()),
 				this.gson.toJson(scope).getBytes(NetworkConfig.getStringEncodingCharset()),
 				this.gson.toJson(dispatch.getCustomHeaders()).getBytes(NetworkConfig.getStringEncodingCharset()),
@@ -119,7 +118,7 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 		Gson gson = new Gson();
 		Type headersType = new TypeToken<Map<String, String>>() {
 			//
-		} .getType();
+		}.getType();
 		return gson.fromJson(src, headersType);
 
 	}
@@ -136,30 +135,17 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 		UUID spaceId = NetworkUtil.fromByteArray(envelope.getSpaceId());
 
 		Map<String, String> headers = getHeadersFromString(
-				new String(
-				envelope.getCustomHeaders(),
-				NetworkConfig.getStringEncodingCharset()));
+				new String(envelope.getCustomHeaders(), NetworkConfig.getStringEncodingCharset()));
 
-		Class<? extends SpaceSpecification> spaceSpec = extractClass(
-				"x-java-spacespec-class", headers, SpaceSpecification.class); //$NON-NLS-1$
-		Class<? extends Event> eventClazz = extractClass(
-				"x-java-event-class", headers, Event.class); //$NON-NLS-1$
-		Class<? extends Scope> scopeClazz = extractClass(
-				"x-java-scope-class", headers, Scope.class); //$NON-NLS-1$
+		Class<? extends SpaceSpecification> spaceSpec = extractClass("x-java-spacespec-class", headers, SpaceSpecification.class); //$NON-NLS-1$
+		Class<? extends Event> eventClazz = extractClass("x-java-event-class", headers, Event.class); //$NON-NLS-1$
+		Class<? extends Scope> scopeClazz = extractClass("x-java-scope-class", headers, Scope.class); //$NON-NLS-1$
 
-		SpaceID spaceID = new SpaceID(
-				contextId, spaceId,
-				(Class<? extends SpaceSpecification<?>>) spaceSpec);
+		SpaceID spaceID = new SpaceID(contextId, spaceId, (Class<? extends SpaceSpecification<?>>) spaceSpec);
 
-		Event event = this.gson.fromJson(
-				new String(envelope.getBody(),
-				NetworkConfig.getStringEncodingCharset()),
-				eventClazz);
+		Event event = this.gson.fromJson(new String(envelope.getBody(), NetworkConfig.getStringEncodingCharset()), eventClazz);
 		assert (event != null);
-		Scope scope = this.gson.fromJson(
-				new String(envelope.getScope(),
-				NetworkConfig.getStringEncodingCharset()),
-				scopeClazz);
+		Scope scope = this.gson.fromJson(new String(envelope.getScope(), NetworkConfig.getStringEncodingCharset()), scopeClazz);
 		assert (scope != null);
 
 		return new EventDispatch(spaceID, event, scope, headers);
@@ -184,29 +170,30 @@ public class GsonEventSerializer extends AbstractEventSerializer {
 		return type.asSubclass(expectedType);
 	}
 
-	/** Json adapter for supporting the {@link Class} type.
+	/**
+	 * Json adapter for supporting the {@link Class} type.
 	 *
 	 * @author $Author: ngaud$
 	 * @version $FullVersion$
 	 * @mavengroupid $GroupId$
 	 * @mavenartifactid $ArtifactId$
 	 */
-	public static class ClassTypeAdapter  implements JsonSerializer<Class<?>>, JsonDeserializer<Class<?>> {
+	public static class ClassTypeAdapter implements JsonSerializer<Class<?>>, JsonDeserializer<Class<?>> {
 
-	    @Override
-	    public JsonElement serialize(Class<?> src, Type typeOfSrc, JsonSerializationContext context) {
-	        return new JsonPrimitive(src.getName());
-	    }
+		@Override
+		public JsonElement serialize(Class<?> src, Type typeOfSrc, JsonSerializationContext context) {
+			return new JsonPrimitive(src.getName());
+		}
 
-	    @Override
-	    public Class<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-	            throws JsonParseException {
-	        try {
-	            return Class.forName(json.getAsString());
-	        } catch (ClassNotFoundException e) {
-	            throw new JsonParseException(e);
-	        }
-	    }
+		@Override
+		public Class<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+				throws JsonParseException {
+			try {
+				return Class.forName(json.getAsString());
+			} catch (ClassNotFoundException e) {
+				throw new JsonParseException(e);
+			}
+		}
 
 	}
 

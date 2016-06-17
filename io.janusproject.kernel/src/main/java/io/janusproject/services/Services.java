@@ -38,8 +38,8 @@ import com.google.common.util.concurrent.ServiceManager;
 import io.janusproject.services.infrastructure.InfrastructureService;
 import org.arakhne.afc.vmutil.ClassComparator;
 
-
-/** Tools for launching and stopping services.
+/**
+ * Tools for launching and stopping services.
  *
  * @author $Author: sgalland$
  * @version $FullVersion$
@@ -52,9 +52,11 @@ public final class Services {
 		//
 	}
 
-	/** Start the services associated to the given service manager.
+	/**
+	 * Start the services associated to the given service manager.
 	 *
-	 * <p>This starting function supports the {@link DependentService prioritized services}.
+	 * <p>
+	 * This starting function supports the {@link DependentService prioritized services}.
 	 *
 	 * @param manager - the manager of the services to start.
 	 */
@@ -62,9 +64,11 @@ public final class Services {
 		startServices(new GoogleServiceManager(manager));
 	}
 
-	/** Start the services associated to the given service manager.
+	/**
+	 * Start the services associated to the given service manager.
 	 *
-	 * <p>This starting function supports the {@link DependentService prioritized services}.
+	 * <p>
+	 * This starting function supports the {@link DependentService prioritized services}.
 	 *
 	 * @param manager - the manager of the services to start.
 	 */
@@ -83,9 +87,11 @@ public final class Services {
 		manager.awaitHealthy();
 	}
 
-	/** Stop the services associated to the given service manager.
+	/**
+	 * Stop the services associated to the given service manager.
 	 *
-	 * <p>This stopping function supports the {@link DependentService prioritized services}.
+	 * <p>
+	 * This stopping function supports the {@link DependentService prioritized services}.
 	 *
 	 * @param manager - the manager of the services to stop.
 	 */
@@ -93,9 +99,11 @@ public final class Services {
 		stopServices(new GoogleServiceManager(manager));
 	}
 
-	/** Stop the services associated to the given service manager.
+	/**
+	 * Stop the services associated to the given service manager.
 	 *
-	 * <p>This stopping function supports the {@link DependentService prioritized services}.
+	 * <p>
+	 * This stopping function supports the {@link DependentService prioritized services}.
 	 *
 	 * @param manager - the manager of the services to stop.
 	 */
@@ -114,10 +122,8 @@ public final class Services {
 		manager.awaitStopped();
 	}
 
-	private static void addNodeIntoDependencyGraph(
-			DependentService depServ,
-			Map<Class<? extends Service>, DependencyNode> dependentServices,
-			List<DependencyNode> roots) {
+	private static void addNodeIntoDependencyGraph(DependentService depServ,
+			Map<Class<? extends Service>, DependencyNode> dependentServices, List<DependencyNode> roots) {
 		Class<? extends Service> type = depServ.getServiceType();
 		assert (type != null);
 		assert (type.isInterface()) : type.getName();
@@ -158,7 +164,8 @@ public final class Services {
 		}
 	}
 
-	/** Build the dependency graph for the services.
+	/**
+	 * Build the dependency graph for the services.
 	 *
 	 * @param manager - lsit of the services.
 	 * @param roots - filled with the services that have no dependency.
@@ -166,12 +173,8 @@ public final class Services {
 	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
 	 * @param accessors - permits to retreive information on the services.
 	 */
-	private static void buildDependencyGraph(
-			IServiceManager manager,
-			List<DependencyNode> roots,
-			List<Service> infraServices,
-			List<Service> freeServices,
-			Accessors accessors) {
+	private static void buildDependencyGraph(IServiceManager manager, List<DependencyNode> roots, List<Service> infraServices,
+			List<Service> freeServices, Accessors accessors) {
 		Map<Class<? extends Service>, DependencyNode> dependentServices = new TreeMap<>(ClassComparator.SINGLETON);
 
 		Service service;
@@ -200,7 +203,8 @@ public final class Services {
 		}
 	}
 
-	/** Build the dependency graph for the services.
+	/**
+	 * Build the dependency graph for the services.
 	 *
 	 * @param manager - lsit of the services.
 	 * @param roots - filled with the services that have no dependency.
@@ -208,12 +212,8 @@ public final class Services {
 	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
 	 * @param accessors - permits to retreive information on the services.
 	 */
-	private static void buildInvertedDependencyGraph(
-			IServiceManager manager,
-			List<DependencyNode> roots,
-			List<Service> infraServices,
-			List<Service> freeServices,
-			Accessors accessors) {
+	private static void buildInvertedDependencyGraph(IServiceManager manager, List<DependencyNode> roots,
+			List<Service> infraServices, List<Service> freeServices, Accessors accessors) {
 		Map<Class<? extends Service>, DependencyNode> dependentServices = new TreeMap<>(ClassComparator.SINGLETON);
 		Map<Class<? extends Service>, DependencyNode> rootServices = new TreeMap<>(ClassComparator.SINGLETON);
 
@@ -271,17 +271,15 @@ public final class Services {
 		roots.addAll(rootServices.values());
 	}
 
-	/** Run the dependency graph for the services.
+	/**
+	 * Run the dependency graph for the services.
 	 *
 	 * @param roots - filled with the services that have no dependency.
 	 * @param infraServices - filled with the infrastructure services.
 	 * @param freeServices - filled with the services that are executed before/after all the dependent services.
 	 * @param accessors - permits to retreive information on the services.
 	 */
-	private static void runDependencyGraph(
-			Queue<DependencyNode> roots,
-			List<Service> infraServices,
-			List<Service> freeServices,
+	private static void runDependencyGraph(Queue<DependencyNode> roots, List<Service> infraServices, List<Service> freeServices,
 			Accessors accessors) {
 		final boolean async = accessors.isAsyncStateWaitingEnabled();
 		Set<Class<? extends Service>> executed = new TreeSet<>(ClassComparator.SINGLETON);
@@ -311,7 +309,8 @@ public final class Services {
 		accessors.runInfrastructureServicesAfter(infraServices);
 	}
 
-	/** Node that describes a service dependency.
+	/**
+	 * Node that describes a service dependency.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -375,7 +374,8 @@ public final class Services {
 
 	}
 
-	/** Accessors for running services.
+	/**
+	 * Accessors for running services.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -400,7 +400,8 @@ public final class Services {
 
 	}
 
-	/** Accessors for running services at start-up.
+	/**
+	 * Accessors for running services at start-up.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -409,7 +410,8 @@ public final class Services {
 	 */
 	private static class StartingPhaseAccessors implements Accessors {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		StartingPhaseAccessors() {
 			//
@@ -456,7 +458,8 @@ public final class Services {
 
 	}
 
-	/** Accessors for running agents at end.
+	/**
+	 * Accessors for running agents at end.
 	 *
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$
@@ -465,7 +468,8 @@ public final class Services {
 	 */
 	private static class StoppingPhaseAccessors implements Accessors {
 
-		/** Construct.
+		/**
+		 * Construct.
 		 */
 		StoppingPhaseAccessors() {
 			//

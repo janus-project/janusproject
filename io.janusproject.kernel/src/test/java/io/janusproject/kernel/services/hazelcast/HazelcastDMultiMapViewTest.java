@@ -75,13 +75,9 @@ import io.janusproject.util.DataViewDelegate.Delegator;
  * @mavenartifactid $ArtifactId$
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-	HazelcastDMultiMapViewTest.BackedCollectionTests.class,
-	HazelcastDMultiMapViewTest.SimplifiedMultiMapOperationTests.class,
-	HazelcastDMultiMapViewTest.ViewTests.class,
-	HazelcastDMultiMapViewTest.SpecificDMultiMapFunctionTests.class,
-	HazelcastDMultiMapViewTest.ListeningFeatureTests.class
-})
+@SuiteClasses({ HazelcastDMultiMapViewTest.BackedCollectionTests.class,
+		HazelcastDMultiMapViewTest.SimplifiedMultiMapOperationTests.class, HazelcastDMultiMapViewTest.ViewTests.class,
+		HazelcastDMultiMapViewTest.SpecificDMultiMapFunctionTests.class, HazelcastDMultiMapViewTest.ListeningFeatureTests.class })
 @SuppressWarnings("all")
 public class HazelcastDMultiMapViewTest {
 
@@ -152,8 +148,7 @@ public class HazelcastDMultiMapViewTest {
 
 		@Test
 		public void changesPropagation() {
-			Assume.assumeTrue(
-					"The collection is not backing the changes to the underlying collection",
+			Assume.assumeTrue("The collection is not backing the changes to the underlying collection",
 					this.view.isBackedCollection());
 			assertTrue(this.view.keySet().remove("b"));
 			assertEquals(1, this.multimap.size());
@@ -163,8 +158,7 @@ public class HazelcastDMultiMapViewTest {
 
 		@Test
 		public void noChangesPropagation() {
-			Assume.assumeFalse(
-					"The collection is backing the changes to the underlying collection",
+			Assume.assumeFalse("The collection is backing the changes to the underlying collection",
 					this.view.isBackedCollection());
 			assertTrue(this.view.keySet().remove("b"));
 			assertEquals(2, this.multimap.size());
@@ -176,10 +170,9 @@ public class HazelcastDMultiMapViewTest {
 
 	}
 
-	/** This unit test is partly inspired by {@link MultimapTestSuiteBuilder},
-	 * but this last builder is not used since it assumes that the 
-	 * replied collections are backed up to the source map.
-	 * But this is not the case for the Hazelcast collection, see
+	/**
+	 * This unit test is partly inspired by {@link MultimapTestSuiteBuilder}, but this last builder is not used since it assumes
+	 * that the replied collections are backed up to the source map. But this is not the case for the Hazelcast collection, see
 	 * {@link BackedCollectionTests}.
 	 * 
 	 * @author $Author: sgalland$
@@ -282,8 +275,7 @@ public class HazelcastDMultiMapViewTest {
 					return Lists.newArrayList();
 				}
 			};
-			Multimap<String , String> m = Multimaps.newListMultimap(
-					new HashMap<String, Collection<String>>(), supplier);
+			Multimap<String, String> m = Multimaps.newListMultimap(new HashMap<String, Collection<String>>(), supplier);
 			m.put("c", "vc1");
 			m.put("c", "vc2");
 			this.view.putAll(m);
@@ -353,9 +345,7 @@ public class HazelcastDMultiMapViewTest {
 		@Test
 		public void entries() {
 			Collection<Entry<String, String>> entries = this.view.entries();
-			assertContains(entries,
-					Maps.immutableEntry("a", "va1"),
-					Maps.immutableEntry("a", "va2"),
+			assertContains(entries, Maps.immutableEntry("a", "va1"), Maps.immutableEntry("a", "va2"),
 					Maps.immutableEntry("b", "vb"));
 		}
 
@@ -495,7 +485,7 @@ public class HazelcastDMultiMapViewTest {
 	public static class ListeningFeatureTests extends AbstractJanusTest {
 
 		@Nullable
-		private DMapListener<String, String> listener; 
+		private DMapListener<String, String> listener;
 
 		@Nullable
 		private MultiMap<String, String> map;

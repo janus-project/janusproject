@@ -22,7 +22,8 @@ package io.janusproject.util;
 
 import io.janusproject.services.distributeddata.DMapListener;
 
-/** Abstract implementation of a view on a Map for a distributed map.
+/**
+ * Abstract implementation of a view on a Map for a distributed map.
  *
  * @param <K> - type of the keys.
  * @param <V> - type of the values.
@@ -33,17 +34,20 @@ import io.janusproject.services.distributeddata.DMapListener;
  */
 public abstract class AbstractMapView<K, V> {
 
-	/** The listeners.
+	/**
+	 * The listeners.
 	 */
 	protected final ListenerCollection<DMapListener<? super K, ? super V>> listeners = new ListenerCollection<>();
 
-	/** Construct.
+	/**
+	 * Construct.
 	 */
 	public AbstractMapView() {
 		//
 	}
 
-	/** Fire the addition event.
+	/**
+	 * Fire the addition event.
 	 *
 	 * @param key - the added key.
 	 * @param value - the added value.
@@ -57,7 +61,8 @@ public abstract class AbstractMapView<K, V> {
 		}
 	}
 
-	/** Fire the removal event.
+	/**
+	 * Fire the removal event.
 	 *
 	 * @param key - the removed key.
 	 * @param value - the removed value.
@@ -71,7 +76,8 @@ public abstract class AbstractMapView<K, V> {
 		}
 	}
 
-	/** Fire the update event.
+	/**
+	 * Fire the update event.
 	 *
 	 * @param key - the updated key.
 	 * @param value - the new value.
@@ -83,10 +89,11 @@ public abstract class AbstractMapView<K, V> {
 		}
 	}
 
-	/** Fire the clearing event.
+	/**
+	 * Fire the clearing event.
 	 *
-	 * @param localClearing - indicates if the clearing is done on the local node (if
-	 * <code>true</code>), or on all the nodes (if <code>false</code>).
+	 * @param localClearing - indicates if the clearing is done on the local node (if <code>true</code>), or on all the nodes (if
+	 *        <code>false</code>).
 	 */
 	@SuppressWarnings("unchecked")
 	protected void fireCleared(boolean localClearing) {
@@ -95,7 +102,8 @@ public abstract class AbstractMapView<K, V> {
 		}
 	}
 
-	/** Add a listener.
+	/**
+	 * Add a listener.
 	 *
 	 * @param listener - the listener.
 	 */
@@ -103,7 +111,8 @@ public abstract class AbstractMapView<K, V> {
 		this.listeners.add(DMapListener.class, listener);
 	}
 
-	/** Remove a listener.
+	/**
+	 * Remove a listener.
 	 *
 	 * @param listener - the listener.
 	 */

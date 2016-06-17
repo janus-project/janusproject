@@ -25,17 +25,15 @@ import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import com.google.common.eventbus.SubscriberExceptionContext;
-import com.google.common.eventbus.SubscriberExceptionHandler;
+import org.arakhne.afc.vmutil.locale.Locale;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import io.janusproject.services.executor.ChuckNorrisException;
 import io.janusproject.services.logging.LogService;
 import io.janusproject.services.spawn.SpawnService;
-import org.arakhne.afc.vmutil.locale.Locale;
-
 import io.sarl.core.Initialize;
-import io.sarl.lang.core.Agent;
 
 /**
  * A factory of threads for the Janus platform.
@@ -46,7 +44,7 @@ import io.sarl.lang.core.Agent;
  * @mavenartifactid $ArtifactId$
  */
 @Singleton
-public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler, SubscriberExceptionHandler {
+public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler {
 
 	private final LogService logger;
 
@@ -78,26 +76,20 @@ public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler, Su
 			if (!this.logger.isLoggeable(Level.FINEST)) {
 				return;
 			}
-			record = new LogRecord(Level.FINEST,
-					Locale.getString("CANCEL_TASK", taskId, taskName)); //$NON-NLS-1$
+			record = new LogRecord(Level.FINEST, Locale.getString("CANCEL_TASK", taskId, taskName)); //$NON-NLS-1$
 		} else if (cause instanceof InterruptedException || exception instanceof InterruptedException) {
 			// Avoid too much processing if the error is not loggeable
 			if (!this.logger.isLoggeable(Level.FINEST)) {
 				return;
 			}
-			record = new LogRecord(Level.FINEST,
-					Locale.getString("INTERRUPT_TASK", taskId, taskName)); //$NON-NLS-1$
+			record = new LogRecord(Level.FINEST, Locale.getString("INTERRUPT_TASK", taskId, taskName)); //$NON-NLS-1$
 		} else {
 			// Avoid too much processing if the error is not loggeable
 			if (!this.logger.isLoggeable(Level.SEVERE)) {
 				return;
 			}
-			record = new LogRecord(
-					Level.SEVERE,
-					Locale.getString("UNCAUGHT_EXCEPTION", //$NON-NLS-1$
-							cause.getLocalizedMessage(),
-							taskId,
-							taskName));
+			record = new LogRecord(Level.SEVERE, Locale.getString("UNCAUGHT_EXCEPTION", //$NON-NLS-1$
+					cause.getLocalizedMessage(), taskId, taskName));
 		}
 
 		record.setThrown(cause);
@@ -116,7 +108,8 @@ public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler, Su
 		log(exception, Long.toString(thread.getId()), thread.getName());
 	}
 
-	/** Replies if the given object is an event that may cause agent stop when an error occured in the event's handler.
+	/**
+	 * Replies if the given object is an event that may cause agent stop when an error occured in the event's handler.
 	 *
 	 * @param object - the event to test.
 	 * @return <code>true</code> if the agent must stop if an error occured in the handler for the given event.
@@ -126,22 +119,4 @@ public class JdkUncaughtExceptionHandler implements UncaughtExceptionHandler, Su
 		return object instanceof Initialize;
 	}
 
-	@Override
-	public void handleException(Throwable exception,
-			SubscriberExceptionContext context) {
-		log(exception, context.getEventBus().toString(), context.getEvent().toString());
-
-		// #91: Special case: when the agent cannot be initialized, it must be destroyed
-		if (isAutoKillEvent(context.getEvent())) {
-			Agent caller = (Agent) context.getSubscriber();
-			try {
-				// Do not call the equivalent of the agent's killMe since the agent was never initialized.
-				this.spawnService.killAgent(caller.getID());
-			} catch (Exception e) {
-				log(e, context.getEventBus().toString(), context.getEvent().toString());
-			}
-		}
-	}
-
 }
-
