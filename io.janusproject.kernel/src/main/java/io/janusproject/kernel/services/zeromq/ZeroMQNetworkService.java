@@ -57,7 +57,6 @@ import io.janusproject.services.network.EventDispatch;
 import io.janusproject.services.network.EventEnvelope;
 import io.janusproject.services.network.EventSerializer;
 import io.janusproject.services.network.NetworkServiceListener;
-import io.janusproject.services.network.NetworkUtil;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Space;
@@ -443,7 +442,7 @@ public class ZeroMQNetworkService extends AbstractNetworkingExecutionThreadServi
 			super.startUp();
 			this.context = new ZContext();
 			this.sendingSocket = this.context.createSocket(ZMQ.PUB);
-			String strUri = NetworkUtil.toString(this.uriCandidate);
+			String strUri = this.uriCandidate.toString();
 			int port = this.sendingSocket.bindToRandomPort(strUri);
 			if (port != -1 && this.uriCandidate.getPort() == -1) {
 				this.validatedURI = new URI(this.uriCandidate.getScheme(), this.uriCandidate.getUserInfo(),
