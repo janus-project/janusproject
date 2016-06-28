@@ -24,17 +24,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.Executor;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+
+import org.eclipse.xtext.xbase.lib.Pair;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
-
-import org.eclipse.xtext.xbase.lib.Pair;
 
 import io.sarl.lang.core.DeadEvent;
 import io.sarl.lang.core.Event;
@@ -61,17 +60,16 @@ public class AgentInternalEventsDispatcher {
 	/**
 	 * The executor used to execute behavior methods in dedicated thread.
 	 */
-	private final Executor executor;
+	private final ExecutorService executor;
 
 	/**
 	 * Per-thread queue of events to dispatch.
 	 */
-	private final ThreadLocal<Queue<Pair<Object, Collection<Method>>>> queue =
-	  new ThreadLocal<Queue<Pair<Object, Collection<Method>>>>() {
-			@Override
-			protected Queue<Pair<Object, Collection<Method>>> initialValue() {
-				return Queues.newArrayDeque();
-			}
+	private final ThreadLocal<Queue<Pair<Event, Collection<Runnable>>>> queue = new ThreadLocal<Queue<Pair<Event, Collection<Runnable>>>>() {
+		@Override
+		protected Queue<Pair<Event, Collection<Runnable>>> initialValue() {
+			return Queues.newArrayDeque();
+		}
 	};
 
 	/**
@@ -92,7 +90,7 @@ public class AgentInternalEventsDispatcher {
 	 *        of a given behavior (on clause in SARL behavior) If class has a such method, it is considered as a
 	 *        {@code BehaviorGuardEvaluator}.
 	 */
-	public AgentInternalEventsDispatcher(Executor executor, Class<? extends Annotation> perceptGuardEvaluatorAnnotation) {
+	public AgentInternalEventsDispatcher(ExecutorService executor, Class<? extends Annotation> perceptGuardEvaluatorAnnotation) {
 		this.executor = checkNotNull(executor);
 		this.behaviorGuardEvaluatorRegistry = new BehaviorGuardEvaluatorRegistry(perceptGuardEvaluatorAnnotation);
 	}
@@ -103,7 +101,9 @@ public class AgentInternalEventsDispatcher {
 	 * @param object object whose {@code PerceptGuardEvaluator} methods should be registered.
 	 */
 	public void register(Object object) {
-		this.behaviorGuardEvaluatorRegistry.register(object);
+		synchronized (this.behaviorGuardEvaluatorRegistry) {
+			this.behaviorGuardEvaluatorRegistry.register(object);
+		}
 	}
 
 	/**
@@ -113,7 +113,9 @@ public class AgentInternalEventsDispatcher {
 	 * @throws IllegalArgumentException if the object was not previously registered.
 	 */
 	public void unregister(Object object) {
-		this.behaviorGuardEvaluatorRegistry.unregister(object);
+		synchronized (this.behaviorGuardEvaluatorRegistry) {
+			this.behaviorGuardEvaluatorRegistry.unregister(object);
+		}
 	}
 
 	/**
@@ -130,27 +132,25 @@ public class AgentInternalEventsDispatcher {
 	 */
 	public void immediateDispatch(Event event) {
 		checkNotNull(event);
-
-		this.executor.execute(new Runnable() {
-			@Override
-			public void run() {
-				Iterator<BehaviorGuardEvaluator> behaviorGuardEvaluators = AgentInternalEventsDispatcher.this.behaviorGuardEvaluatorRegistry
-				  .getBehaviorGuardEvaluators(event);
-				if (behaviorGuardEvaluators.hasNext()) {
-					Collection<Pair<Object, Collection<Method>>> behaviorsMethodsToExecute;
-					try {
-						behaviorsMethodsToExecute = evaluateGuards(event, behaviorGuardEvaluators);
-						executeImmmediatlyBehaviorMethods(event, behaviorsMethodsToExecute);
-					} catch (InvocationTargetException e) {
-						throw new RuntimeException(e);
-					}
-
-				} else if (!(event instanceof DeadEvent)) {
-					// the event had no subscribers and was not itself a DeadEvent
-					immediateDispatch(new DeadEvent(event));
-				}
+		Collection<BehaviorGuardEvaluator> behaviorGuardEvaluators = null;
+		synchronized (this.behaviorGuardEvaluatorRegistry) {
+			behaviorGuardEvaluators = AgentInternalEventsDispatcher.this.behaviorGuardEvaluatorRegistry
+					.getBehaviorGuardEvaluators(event);
+		}
+		if (behaviorGuardEvaluators != null && !behaviorGuardEvaluators.isEmpty()) {
+			Collection<Runnable> behaviorsMethodsToExecute;
+			try {
+				behaviorsMethodsToExecute = evaluateGuards(event, behaviorGuardEvaluators);
+				executeBehaviorMethodsInParalellWithSynchroAtTheEnd(event, behaviorsMethodsToExecute);
+			} catch (InterruptedException | ExecutionException | InvocationTargetException e) {
+				throw new RuntimeException(e);
 			}
-		});
+
+		} else if (!(event instanceof DeadEvent)) {
+			// the event had no subscribers and was not itself a DeadEvent
+			immediateDispatch(new DeadEvent(event));
+		}
+
 	}
 
 	/**
@@ -165,16 +165,20 @@ public class AgentInternalEventsDispatcher {
 	 * 
 	 * @param event - an event to dispatch asynchronously.
 	 */
+	@SuppressWarnings("synthetic-access")
 	public void asyncDispatch(Event event) {
 		checkNotNull(event);
 		this.executor.execute(new Runnable() {
 			@Override
 			public void run() {
-				Iterator<BehaviorGuardEvaluator> behaviorGuardEvaluators = AgentInternalEventsDispatcher.this.behaviorGuardEvaluatorRegistry
-				  .getBehaviorGuardEvaluators(event);
-				if (behaviorGuardEvaluators.hasNext()) {
+				Collection<BehaviorGuardEvaluator> behaviorGuardEvaluators = null;
+				synchronized (AgentInternalEventsDispatcher.this.behaviorGuardEvaluatorRegistry) {
+					behaviorGuardEvaluators = AgentInternalEventsDispatcher.this.behaviorGuardEvaluatorRegistry
+							.getBehaviorGuardEvaluators(event);
+				}
+				if (behaviorGuardEvaluators != null && !behaviorGuardEvaluators.isEmpty()) {
 
-					Collection<Pair<Object, Collection<Method>>> behaviorsMethodsToExecute;
+					Collection<Runnable> behaviorsMethodsToExecute;
 					try {
 						behaviorsMethodsToExecute = evaluateGuards(event, behaviorGuardEvaluators);
 					} catch (InvocationTargetException e) {
@@ -199,105 +203,114 @@ public class AgentInternalEventsDispatcher {
 	 * @return the collection of couple associating a object and its collection of behavior methods that must be executed
 	 * @throws InvocationTargetException - exception when you try to execute a method by reflection and this method doesn't exist.
 	 */
-	private static Collection<Pair<Object, Collection<Method>>> evaluateGuards(final Object event,
-			final Iterator<BehaviorGuardEvaluator> behaviorGuardEvaluators) throws InvocationTargetException {
+	private static Collection<Runnable> evaluateGuards(final Object event,
+			final Collection<BehaviorGuardEvaluator> behaviorGuardEvaluators) throws InvocationTargetException {
 
-		Collection<Pair<Object, Collection<Method>>> behaviorsMethodsToExecute = new LinkedList<>();
+		Collection<Runnable> behaviorsMethodsToExecute = Lists.newLinkedList();
 
-		Collection<Method> behaviorsMethodsToExecutePerTarget = null;
-		BehaviorGuardEvaluator evaluator = null;
-		while (behaviorGuardEvaluators.hasNext()) {
-			// TODO Maybe we can parallelize this loop, could be interesting when the number of guardEvlauators increase
-			evaluator = behaviorGuardEvaluators.next();
+		Collection<Runnable> behaviorsMethodsToExecutePerTarget = null;
+		for (BehaviorGuardEvaluator evaluator : behaviorGuardEvaluators) {
+			// TODO Maybe we can parallelize this loop, could be interesting when the number of guardEvaluators increase
 			behaviorsMethodsToExecutePerTarget = Lists.newLinkedList();
 			evaluator.evaluateGuard(event, behaviorsMethodsToExecutePerTarget);
-			behaviorsMethodsToExecute.add(new Pair<>(evaluator.getTarget(), behaviorsMethodsToExecutePerTarget));
+			behaviorsMethodsToExecute.addAll(behaviorsMethodsToExecutePerTarget);
 		}
 
 		return behaviorsMethodsToExecute;
 	}
 
 	/**
-	 * Execute the specified Behavior method of the specified target with the specified event occurrence as parameter.
-	 *
-	 * @param target - the object containing the method to execute.
-	 * @param method - the method to execute.
-	 * @param event - the event that must process by the specified method.
-	 * @throws InvocationTargetException - exception when you try to execute a method by reflection and this method doesn't exist.
+	 * Execute every single Behaviors runnable, a dedicated thread will created by the executor local to this class and be used to
+	 * execute each runnable in parallel, and this method waits until its future has been completed before leaving.
+	 * 
+	 * @param event - the event occurrence that has activated the specified behaviors, used just for indexing purpose but not
+	 *        passed to runnable here, they were created according to this occurrence
+	 * @param behaviorsMethodsToExecute - the collection of Behaviors runnable that must be executed.
+	 * @throws InterruptedException
+	 * @throws ExecutionException
 	 */
-	private static void invokeBehaviorMethod(Object target, Method method, Object event) throws InvocationTargetException {
-		try {
-			method.invoke(target, event);
-		} catch (IllegalArgumentException e) {
-			throw new Error("Behavior method (on clause) rejected target/argument: " + event, e);
-		} catch (IllegalAccessException e) {
-			throw new Error("Behavior method (on clause) became inaccessible: " + event, e);
-		} catch (InvocationTargetException e) {
-			if (e.getCause() instanceof Error) {
-				throw (Error) e.getCause();
-			}
-			throw e;
+	private void executeBehaviorMethodsInParalellWithSynchroAtTheEnd(Event event, Collection<Runnable> behaviorsMethodsToExecute)
+			throws InterruptedException, ExecutionException {
+
+		final CountDownLatch doneSignal = new CountDownLatch(behaviorsMethodsToExecute.size());
+
+		for (Runnable runnable : behaviorsMethodsToExecute) {
+			this.executor.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						runnable.run();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					} finally {
+						doneSignal.countDown();
+					}
+				}
+
+			});
 		}
+
+		/*Queue<Pair<Event, Collection<Runnable>>> queueForThread = this.queue.get();
+		queueForThread.offer(new Pair<>(event, behaviorsMethodsToExecute));
+
+		if (!this.dispatching.get().booleanValue()) {
+			this.dispatching.set(Boolean.TRUE);
+			try {
+				Pair<Event, Collection<Runnable>> nextEvent;
+				while ((nextEvent = queueForThread.poll()) != null) {
+					for (Runnable runnable : nextEvent.getValue()) {
+						this.executor.execute(new Runnable() {
+
+							@Override
+							public void run() {
+								runnable.run();
+								doneSignal.countDown();
+							}
+
+						});
+					}
+				}
+
+			} finally {
+				this.dispatching.remove();
+				this.queue.remove();
+			}
+		}*/
+
+		// Wait for all Behaviors runnable to complete before continuing
+		doneSignal.await();
 	}
 
 	/**
+	 * Execute every single Behaviors runnable, a dedicated thread will created by the executor local to this class and be used to
+	 * execute each runnable in parallel.
 	 * 
-	 * @param event
-	 * @param behaviorsMethodsToExecute
-	 * @throws InvocationTargetException
+	 * @param event - the event occurrence that has activated the specified behaviors, used just for indexing purpose but not
+	 *        passed to runnable here, they were created according to this occurrence
+	 * @param behaviorsMethodsToExecute - the collection of Behaviors runnable that must be executed.
 	 */
-	private static void executeImmmediatlyBehaviorMethods(Object event,
-			Collection<Pair<Object, Collection<Method>>> behaviorsMethodsToExecute) throws InvocationTargetException {
+	private void executeAsynchronouslyBehaviorMethods(Event event, Collection<Runnable> behaviorsMethodsToExecute) {
 
-		Object target = null;
-		for (Pair<Object, Collection<Method>> pair : behaviorsMethodsToExecute) {
-			target = pair.getKey();
-			for (Method method : pair.getValue()) {
-				invokeBehaviorMethod(target, method, event);
-			}
-		}
-	}
+		Queue<Pair<Event, Collection<Runnable>>> queueForThread = this.queue.get();
+		queueForThread.offer(new Pair<>(event, behaviorsMethodsToExecute));
 
-	private void executeAsynchronouslyBehaviorMethods(Object event,
-			Collection<Pair<Object, Collection<Method>>> behaviorsMethodsToExecute) {
-
-		for (Pair<Object, Collection<Method>> pair : behaviorsMethodsToExecute) {
-			final Object target = pair.getKey();
-
-			Queue<Pair<Object, Collection<Method>>> queueForThread = this.queue.get();
-			queueForThread.offer(new Pair<>(event, pair.getValue()));
-
-			if (!this.dispatching.get().booleanValue()) {
-				this.dispatching.set(Boolean.TRUE);
-				try {
-					while (true) {
-						Pair<Object, Collection<Method>> nextEvent = queueForThread.poll();
-						if (nextEvent == null) {
-							break;
-						}
-
-						for (Method m : nextEvent.getValue()) {
-							this.executor.execute(new Runnable() {
-								@Override
-								public void run() {
-									try {
-										invokeBehaviorMethod(target, m, nextEvent.getKey());
-
-									} catch (InvocationTargetException e) {
-										throw new RuntimeException(e);
-									}
-								}
-							});
-						}
+		if (!this.dispatching.get().booleanValue()) {
+			this.dispatching.set(Boolean.TRUE);
+			try {
+				Pair<Event, Collection<Runnable>> nextEvent;
+				while ((nextEvent = queueForThread.poll()) != null) {
+					for (Runnable runnable : nextEvent.getValue()) {
+						this.executor.execute(runnable);
 					}
-
-				} finally {
-					this.dispatching.remove();
-					this.queue.remove();
 				}
-			}
 
+			} finally {
+				this.dispatching.remove();
+				this.queue.remove();
+			}
 		}
+
 	}
 
 }

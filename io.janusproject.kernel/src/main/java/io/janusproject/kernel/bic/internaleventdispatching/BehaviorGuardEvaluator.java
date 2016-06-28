@@ -27,7 +27,9 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
- * 
+ * Describes each class having one of its methods annotated with {@code PerceptGuardEvaluator} annotation corresponding to the
+ * method in charge of evaluating the guard associated to a given event and returns the list of behaviors runnable that must be
+ * executed according to the result of the guard evaluation.
  * 
  * 
  * @author $Author: ngaud$
@@ -58,7 +60,6 @@ public class BehaviorGuardEvaluator {
 	private BehaviorGuardEvaluator(Object target, Method method) {
 		this.target = checkNotNull(target);
 		this.method = method;
-		method.setAccessible(true);
 	}
 
 	/**
@@ -71,7 +72,8 @@ public class BehaviorGuardEvaluator {
 	 *        {@code PerceptGuardEvaluator} method is declared
 	 * @throws InvocationTargetException
 	 */
-	final void evaluateGuard(final Object event, Collection<Method> behaviorsMethodsToExecute) throws InvocationTargetException {
+	final void evaluateGuard(final Object event, Collection<Runnable> behaviorsMethodsToExecute)
+			throws InvocationTargetException {
 		invokeBehaviorGuardEvaluatorMethod(event, behaviorsMethodsToExecute);
 	}
 
@@ -82,10 +84,12 @@ public class BehaviorGuardEvaluator {
 	 * @param behaviorsMethodsToExecute
 	 * @throws InvocationTargetException
 	 */
-	private void invokeBehaviorGuardEvaluatorMethod(Object event, Collection<Method> behaviorsMethodsToExecute)
+	private void invokeBehaviorGuardEvaluatorMethod(Object event, Collection<Runnable> behaviorsMethodsToExecute)
 			throws InvocationTargetException {
 		try {
+			this.method.setAccessible(true);
 			this.method.invoke(this.target, event, behaviorsMethodsToExecute);
+			this.method.setAccessible(false);
 		} catch (IllegalArgumentException e) {
 			throw new Error("PerceptGuardEvaluator method rejected target/argument: " + event, e);
 		} catch (IllegalAccessException e) {
@@ -105,6 +109,23 @@ public class BehaviorGuardEvaluator {
 	 */
 	public Object getTarget() {
 		return this.target;
+	}
+
+	@Override
+	public int hashCode() {
+		return (31 + this.method.hashCode()) * 31 + System.identityHashCode(this.target);
+	}
+
+	@Override
+	public final boolean equals(Object obj) {
+		if (obj instanceof BehaviorGuardEvaluator) {
+			BehaviorGuardEvaluator that = (BehaviorGuardEvaluator) obj;
+			// Use == so that different equal instances will still receive events.
+			// We only guard against the case that the same object is registered
+			// multiple times
+			return this.target == that.target && this.method.equals(that.method);
+		}
+		return false;
 	}
 
 }

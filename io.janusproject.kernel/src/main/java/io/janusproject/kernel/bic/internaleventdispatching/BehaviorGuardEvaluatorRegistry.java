@@ -26,7 +26,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,12 +41,13 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+
+import io.sarl.lang.core.Event;
 
 /**
  * Registry of all {@code BehaviorGuardEvaluator} classes containing a method to evaluate the guard of a given behavior (on clause
@@ -77,11 +77,12 @@ public class BehaviorGuardEvaluatorRegistry {
 	 * {@code BehaviorGuardEvaluator}s to an event without any locking.
 	 * </p>
 	 */
-	private final ConcurrentMap<Class<?>, CopyOnWriteArraySet<BehaviorGuardEvaluator>> behaviorGuardEvaluators = Maps
-	  .newConcurrentMap();
+	private final ConcurrentMap<Class<? extends Event>, CopyOnWriteArraySet<BehaviorGuardEvaluator>> behaviorGuardEvaluators = Maps
+			.newConcurrentMap();
 
 	/**
 	 * Instanciates a new registry
+	 * 
 	 * @param annotation - The annotation used to identify methods considered as the evaluator of the guard of a given behavior
 	 *        (on clause in SARL behavior) If class has a such method, it is considered as a {@code BehaviorGuardEvaluator}.
 	 */
@@ -96,10 +97,10 @@ public class BehaviorGuardEvaluatorRegistry {
 	 * @param listener - the new {@code BehaviorGuardEvaluator} to add
 	 */
 	void register(Object listener) {
-		Multimap<Class<?>, BehaviorGuardEvaluator> listenerMethods = findAllBehaviorGuardEvaluators(listener);
+		Multimap<Class<? extends Event>, BehaviorGuardEvaluator> listenerMethods = findAllBehaviorGuardEvaluators(listener);
 
-		for (Map.Entry<Class<?>, Collection<BehaviorGuardEvaluator>> entry : listenerMethods.asMap().entrySet()) {
-			Class<?> eventType = entry.getKey();
+		for (Map.Entry<Class<? extends Event>, Collection<BehaviorGuardEvaluator>> entry : listenerMethods.asMap().entrySet()) {
+			Class<? extends Event> eventType = entry.getKey();
 			Collection<BehaviorGuardEvaluator> eventMethodsInListener = entry.getValue();
 
 			CopyOnWriteArraySet<BehaviorGuardEvaluator> eventSubscribers = this.behaviorGuardEvaluators.get(eventType);
@@ -119,20 +120,25 @@ public class BehaviorGuardEvaluatorRegistry {
 	 * @param listener - the new {@code BehaviorGuardEvaluator} to add
 	 */
 	void unregister(Object listener) {
-		Multimap<Class<?>, BehaviorGuardEvaluator> listenerMethods = findAllBehaviorGuardEvaluators(listener);
+		Multimap<Class<? extends Event>, BehaviorGuardEvaluator> listenerMethods = findAllBehaviorGuardEvaluators(listener);
 
-		for (Map.Entry<Class<?>, Collection<BehaviorGuardEvaluator>> entry : listenerMethods.asMap().entrySet()) {
-			Class<?> eventType = entry.getKey();
+		for (Map.Entry<Class<? extends Event>, Collection<BehaviorGuardEvaluator>> entry : listenerMethods.asMap().entrySet()) {
+			Class<? extends Event> eventType = entry.getKey();
 			Collection<BehaviorGuardEvaluator> listenerMethodsForType = entry.getValue();
 
 			CopyOnWriteArraySet<BehaviorGuardEvaluator> currentSubscribers = this.behaviorGuardEvaluators.get(eventType);
 			if (currentSubscribers == null || !currentSubscribers.removeAll(listenerMethodsForType)) {
+
+				if (currentSubscribers != null) {
+					currentSubscribers.removeAll(listenerMethodsForType);
+				}
 				// if removeAll returns true, all we really know is that at least one subscriber was
 				// removed... however, barring something very strange we can assume that if at least one
 				// subscriber was removed, all subscribers on listener for that event type were... after
 				// all, the definition of subscribers on a particular class is totally static
 				throw new IllegalArgumentException(
-						"missing event subscriber for an annotated method. Is " + listener + " registered?");
+						"missing BehaviorGuardEvaluator for a method annotated with @PerceptGuardEvaluator. Is " + listener
+								+ " registered?");
 			}
 
 			// don't try to remove the set if it's empty; that can't be done safely without a lock
@@ -147,21 +153,19 @@ public class BehaviorGuardEvaluatorRegistry {
 	 * @param event
 	 * @return
 	 */
-	Iterator<BehaviorGuardEvaluator> getBehaviorGuardEvaluators(Object event) {
+	Collection<BehaviorGuardEvaluator> getBehaviorGuardEvaluators(Object event) {
 		ImmutableSet<Class<?>> eventTypes = flattenHierarchy(event.getClass());
 
-		List<Iterator<BehaviorGuardEvaluator>> behaviorGuardEvaluatorIterators = Lists
-				.newArrayListWithCapacity(eventTypes.size());
+		List<BehaviorGuardEvaluator> iBehaviorGuardEvaluators = Lists.newArrayListWithCapacity(eventTypes.size());
 
 		for (Class<?> eventType : eventTypes) {
 			CopyOnWriteArraySet<BehaviorGuardEvaluator> eventSubscribers = this.behaviorGuardEvaluators.get(eventType);
 			if (eventSubscribers != null) {
-				// eager no-copy snapshot
-				behaviorGuardEvaluatorIterators.add(eventSubscribers.iterator());
+				iBehaviorGuardEvaluators.addAll(eventSubscribers);
 			}
 		}
 
-		return Iterators.concat(behaviorGuardEvaluatorIterators.iterator());
+		return iBehaviorGuardEvaluators;
 	}
 
 	/**
@@ -169,6 +173,7 @@ public class BehaviorGuardEvaluatorRegistry {
 	 * annotated with {@code @Subscribe}. The cache is shared across all instances of this class; this greatly improves
 	 * performance if multiple EventBus instances are created and objects of the same class are registered on all of them.
 	 */
+	@SuppressWarnings("synthetic-access")
 	private final LoadingCache<Class<?>, ImmutableList<Method>> perceptGuardEvaluatorMethodsCache = CacheBuilder.newBuilder()
 			.weakKeys().build(new CacheLoader<Class<?>, ImmutableList<Method>>() {
 				@Override
@@ -183,12 +188,13 @@ public class BehaviorGuardEvaluatorRegistry {
 	 * @param listener
 	 * @return
 	 */
-	private Multimap<Class<?>, BehaviorGuardEvaluator> findAllBehaviorGuardEvaluators(Object listener) {
-		Multimap<Class<?>, BehaviorGuardEvaluator> methodsInListener = HashMultimap.create();
+	@SuppressWarnings("unchecked")
+	private Multimap<Class<? extends Event>, BehaviorGuardEvaluator> findAllBehaviorGuardEvaluators(Object listener) {
+		Multimap<Class<? extends Event>, BehaviorGuardEvaluator> methodsInListener = HashMultimap.create();
 		Class<?> clazz = listener.getClass();
 		for (Method method : getAnnotatedMethods(clazz)) {
 			Class<?>[] parameterTypes = method.getParameterTypes();
-			Class<?> eventType = parameterTypes[0];
+			Class<? extends Event> eventType = (Class<? extends Event>) parameterTypes[0];
 			methodsInListener.put(eventType, BehaviorGuardEvaluator.create(listener, method));
 		}
 		return methodsInListener;
@@ -204,7 +210,7 @@ public class BehaviorGuardEvaluatorRegistry {
 
 		Map<MethodIdentifier, Method> identifiers = Maps.newHashMap();
 
-		for (Class<?> supertype : supertypes) {
+		for (Class<?> supertype : supertypes) {// Traverse all methods of the whole inheritance hierarchy
 			for (Method method : supertype.getDeclaredMethods()) {
 				if (method.isAnnotationPresent(this.perceptGuardEvaluatorAnnotation) && !method.isSynthetic()) {
 					// FIXME: Should check for a generic parameter type and error out
@@ -212,16 +218,11 @@ public class BehaviorGuardEvaluatorRegistry {
 					checkArgument(parameterTypes.length == 2,
 							"Method %s has @" + this.perceptGuardEvaluatorAnnotation.toString()
 									+ " annotation but has %s parameters."
-									+ "PerceptGuardEvaluator methods must have exactly 2 parameter (the event occurence to dispatch and the collection of Behavior methods to execute).",
+									+ "PerceptGuardEvaluator methods must have exactly 2 parameters (the event occurence to dispatch and the collection of Behavior methods to execute).",
 							method, parameterTypes.length);
 
 					MethodIdentifier ident = new MethodIdentifier(method, parameterTypes);
-					if (!identifiers.containsKey(ident)) {
-						// TODO maybe remove the previous condition to obtain both the methods of the current class and the ones
-						// of its
-						// parents
-						identifiers.put(ident, method);
-					}
+					identifiers.put(ident, method);
 				}
 			}
 		}
@@ -234,8 +235,6 @@ public class BehaviorGuardEvaluatorRegistry {
 	 */
 	private static final LoadingCache<Class<?>, ImmutableSet<Class<?>>> flattenHierarchyCache = CacheBuilder.newBuilder()
 			.weakKeys().build(new CacheLoader<Class<?>, ImmutableSet<Class<?>>>() {
-				// <Class<?>> is actually needed to compile
-				@SuppressWarnings("RedundantTypeArguments")
 				@Override
 				public ImmutableSet<Class<?>> load(Class<?> concreteClass) {
 					return ImmutableSet.<Class<?>> copyOf(TypeToken.of(concreteClass).getTypes().rawTypes());
@@ -243,8 +242,8 @@ public class BehaviorGuardEvaluatorRegistry {
 			});
 
 	/**
-	 * Flattens a class's type hierarchy into a set of {@code Class} objects including all superclasses (transitively) and all
-	 * interfaces implemented by these superclasses.
+	 * Flattens a class's type hierarchy into a set of {@code Class} objects including all super-classes (transitively) and all
+	 * interfaces implemented by these super-classes.
 	 * 
 	 * @param concreteClass
 	 * @return
@@ -258,7 +257,7 @@ public class BehaviorGuardEvaluatorRegistry {
 	}
 
 	/**
-	 * It stores the information related to a given method especaiily its prototype
+	 * It stores the information related to a given method especially its prototype.
 	 *
 	 * @author $Author: ngaud$
 	 * @version $FullVersion$
@@ -268,19 +267,39 @@ public class BehaviorGuardEvaluatorRegistry {
 	 */
 	private static final class MethodIdentifier {
 
+		/**
+		 * the name of the considered method.
+		 */
 		private final String name;
+
+		/**
+		 * The list of the type of the various parameters of the considered method.
+		 */
 		private final List<Class<?>> parameterTypes;
 
+		/**
+		 * Creates a new method identifier according to the name and the list of parameter types of the considered method.
+		 * 
+		 * @param method - the name of the considered method.
+		 * @param parameterTypes - The list of the type of the various parameters of the considered method.
+		 */
 		MethodIdentifier(Method method, Class<?>[] parameterTypes) {
-			this.name = method.getName();
+			this.name = method.getDeclaringClass() + method.getName();// Useful to maintain the getDeclaringClass to obtain method
+																		// of all classes with the inheritance hierarchy
 			this.parameterTypes = Arrays.asList(parameterTypes);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public int hashCode() {
 			return Objects.hashCode(this.name, this.parameterTypes);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public boolean equals(Object o) {
 			if (o instanceof MethodIdentifier) {
