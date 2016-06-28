@@ -128,12 +128,12 @@ public class ZeroMQNetworkService extends AbstractNetworkingExecutionThreadServi
 
 	@Override
 	public Collection<Class<? extends Service>> getServiceDependencies() {
-		return Arrays.<Class<? extends Service>>asList(LogService.class, ExecutorService.class);
+		return Arrays.<Class<? extends Service>> asList(LogService.class, ExecutorService.class);
 	}
 
 	@Override
 	public Collection<Class<? extends Service>> getServiceWeakDependencies() {
-		return Arrays.<Class<? extends Service>>asList(KernelDiscoveryService.class);
+		return Arrays.<Class<? extends Service>> asList(KernelDiscoveryService.class);
 	}
 
 	@Override
@@ -443,14 +443,22 @@ public class ZeroMQNetworkService extends AbstractNetworkingExecutionThreadServi
 			this.context = new ZContext();
 			this.sendingSocket = this.context.createSocket(ZMQ.PUB);
 			String strUri = this.uriCandidate.toString();
-			int port = this.sendingSocket.bindToRandomPort(strUri);
-			if (port != -1 && this.uriCandidate.getPort() == -1) {
-				this.validatedURI = new URI(this.uriCandidate.getScheme(), this.uriCandidate.getUserInfo(),
-						this.uriCandidate.getHost(), port, this.uriCandidate.getPath(), this.uriCandidate.getQuery(),
-						this.uriCandidate.getFragment());
-			} else {
+			if (this.uriCandidate.getPort() == -1) {// Useful when the user do not manually specify a port
+
+				int port = this.sendingSocket.bindToRandomPort(strUri);
+				if (port != -1 && this.uriCandidate.getPort() == -1) {
+					this.validatedURI = new URI(this.uriCandidate.getScheme(), this.uriCandidate.getUserInfo(),
+							this.uriCandidate.getHost(), port, this.uriCandidate.getPath(), this.uriCandidate.getQuery(),
+							this.uriCandidate.getFragment());
+				} else {
+					this.validatedURI = this.uriCandidate;
+				}
+			} else { // Useful when the user manually specifies the PUB_URI with -Dnetwork.pub.uri=tcp://XX.XX.XX.XX:port at
+						// startup, in this case we do not let ZeroMQ randomly assigns a port but it must use the specified one
+				this.sendingSocket.bind(strUri);
 				this.validatedURI = this.uriCandidate;
 			}
+
 			System.setProperty(JanusConfig.PUB_URI, this.validatedURI.toString());
 			this.logger.debug("ZEROMQ_BINDED", this.validatedURI); //$NON-NLS-1$
 			this.uriCandidate = null;
