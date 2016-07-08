@@ -31,6 +31,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -53,6 +54,7 @@ import io.sarl.core.Lifecycle;
 import io.sarl.core.Schedules;
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
+import io.sarl.lang.annotation.PerceptGuardEvaluator;
 
 /**
  * Abstract class for creating unit tests that needs to launch a Janus instance.
@@ -292,15 +294,21 @@ public abstract class AbstractJanusRunTest extends AbstractJanusTest {
 		protected void addResult(Object result) {
 			this.results.add(result);
 		}
-
+		
+		@PerceptGuardEvaluator
+		private void $guardEvaluator$Initialize(final Initialize occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
+			assert occurrence != null;
+			assert ___SARLlocal_runnableCollection != null;
+			___SARLlocal_runnableCollection.add(() -> $behaviorUnit$Initialize$0(occurrence));
+		}
+		
 		/**
 		 * Invoked at the start of the agent.
 		 * 
-		 * @param event - the initialization event.
+		 * @param occurrence - the initialization event.
 		 */
-		@Percept
-		protected void _handler_Initialize_0(Initialize event) {
-			this.results = (List<Object>) event.parameters[0];
+		private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
+			this.results = (List<Object>) occurrence.parameters[0];
 			if (runAgentTest()) {
 				getSkill(Schedules.class).in(1000, new Procedure1<Agent>() {
 					@Override
