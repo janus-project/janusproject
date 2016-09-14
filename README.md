@@ -1,5 +1,11 @@
 
-Janus Project
+JANUS PROJECT HAS MOVED
+==============
+
+**Janus is now included into the SARL project as the default SARL runtime environment.**
+See https://github.com/sarl/sarl/tree/master/sre/io.janusproject/io.janusproject.plugin/.
+
+What is Janus?
 ==============
 
 Janus is an open-source multi-agent platform fully implemented in Java 1.7. 
